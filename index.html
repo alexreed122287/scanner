@@ -31,9 +31,9 @@ body{
 }
 a{color:var(--blu);text-decoration:none;}
 #hdr{display:flex;align-items:center;justify-content:space-between;background:var(--bg1);border-bottom:2px solid var(--amb);padding:0 12px;height:32px;flex-wrap:wrap;gap:4px;}
-#hdr-logo{color:var(--amb);font-weight:700;font-size:16px;letter-spacing:3px;white-space:nowrap;font-family:var(--ff-brand);text-shadow:0 0 12px rgba(0,212,255,.7);display:flex;align-items:center;gap:12px;position:relative;z-index:10;overflow:visible;}
-#hdr-logo .panda-icon{height:56px;width:auto;object-fit:contain;filter:drop-shadow(0 0 10px rgba(0,212,255,.6)) drop-shadow(0 0 4px rgba(0,212,255,.4));margin:-4px 0 -2px 0;position:relative;z-index:11;}
-#hdr{overflow:visible !important;position:relative;z-index:5;border-bottom:none !important;box-shadow:none !important;}
+#hdr-logo{color:var(--amb);font-weight:700;font-size:16px;letter-spacing:3px;white-space:nowrap;font-family:var(--ff-brand);text-shadow:0 0 12px rgba(0,212,255,.7);display:flex;align-items:center;gap:14px;position:relative;z-index:10;}
+#hdr-logo .panda-icon{height:36px;width:auto;object-fit:contain;filter:drop-shadow(0 0 8px rgba(0,212,255,.55)) drop-shadow(0 0 3px rgba(0,212,255,.4));flex-shrink:0;}
+#hdr{border-bottom:none !important;box-shadow:none !important;}
 #hdr-tickers{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;flex:1;}
 .htick{font-size:12px;white-space:nowrap;}
 .htick .ts{color:var(--gry);}
@@ -470,9 +470,9 @@ tr.sel-row td{background:var(--blu3);}
       <div id="sc-prog-bar" style="background:var(--amb);height:4px;border-radius:2px;width:0%;transition:width 0.2s;"></div>
     </div>
   </div>
-  <div class="split">
-    <div class="split-l"><div class="tbl-wrap" id="sc-tbl-wrap"><div class="empty-det" id="sc-empty" style="min-height:200px;"><div class="ei">&#9632;</div><p>Run a scan to see results</p></div></div></div>
-    <div class="split-r"><div class="det-wrap"><div class="empty-det" id="sc-det-empty"><div class="ei">&#9632;</div><p>Select a row to view details</p></div><div id="sc-detail" style="display:none;flex-direction:column;height:100%;overflow:hidden;"></div></div></div>
+  <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
+    <div class="tbl-wrap" id="sc-tbl-wrap" style="flex:1;overflow:auto;"><div class="empty-det" id="sc-empty" style="min-height:200px;"><div class="ei">&#9632;</div><p>Run a scan to see results</p></div></div>
+    <div id="sc-det-empty" style="display:none;"></div><div id="sc-detail" style="display:none;"></div>
   </div>
 </div>
 <div class="tab-pane" id="tab-gx">
