@@ -416,8 +416,8 @@ tr.sel-row td{background:var(--blu3);}
   </div>
   <div class="flt-bar" style="flex-wrap:wrap;gap:8px;">
     <label>Sector <select id="sc-sect"><option value="">All</option></select></label>
-    <label>Signal <select id="sc-sig"><option value="">All</option><option value="GO">GO</option><option value="NO-GO">NO-GO</option></select></label>
-    <label>Min Score <input type="number" id="sc-minscore" value="0" style="width:60px;"></label>
+    <label>Signal <select id="sc-sig"><option value="">All</option><option value="GO" selected>GO</option><option value="NO-GO">NO-GO</option></select></label>
+    <label>Min Score <input type="number" id="sc-minscore" value="120" style="width:60px;"></label>
     <button class="btn" onclick="applyFilters()">FILTER</button>
     <button class="btn" onclick="clearFilters()" style="border-color:var(--gry2);color:var(--gry);">CLEAR</button>
   </div>
@@ -466,9 +466,9 @@ tr.sel-row td{background:var(--blu3);}
       <div id="sc-prog-bar" style="background:var(--amb);height:4px;border-radius:2px;width:0%;transition:width 0.2s;"></div>
     </div>
   </div>
-  <div class="split">
-    <div class="split-l"><div class="tbl-wrap" id="sc-tbl-wrap"><div class="empty-det" id="sc-empty" style="min-height:200px;"><div class="ei">&#9632;</div><p>Run a scan to see results</p></div></div></div>
-    <div class="split-r"><div class="det-wrap"><div class="empty-det" id="sc-det-empty"><div class="ei">&#9632;</div><p>Select a row to view details</p></div><div id="sc-detail" style="display:none;flex-direction:column;height:100%;overflow:hidden;"></div></div></div>
+  <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
+    <div class="tbl-wrap" id="sc-tbl-wrap" style="flex:1;overflow:auto;"><div class="empty-det" id="sc-empty" style="min-height:200px;"><div class="ei">&#9632;</div><p>Run a scan to see results</p></div></div>
+    <div id="sc-det-empty" style="display:none;"></div><div id="sc-detail" style="display:none;"></div>
   </div>
 </div>
 <div class="tab-pane" id="tab-gx">
@@ -1130,87 +1130,7 @@ tr.sel-row td{background:var(--blu3);}
       </div>
     </div></div>
 
-    <!-- ── TV CHART SETTINGS ── -->
-    <div class="card"><div class="card-hdr">&#9654; TRADINGVIEW CHART SETTINGS</div>
-    <div class="card-body api-form">
-      <div class="api-row">
-        <label>DEFAULT TIMEFRAME</label>
-        <select id="tv-interval" style="background:var(--bg2);border:var(--bdr);color:var(--wht);font-family:var(--ff);font-size:12px;padding:5px 8px;border-radius:3px;width:100%;" onchange="saveTvSettings()">
-          <option value="1">1 Minute</option>
-          <option value="3">3 Minute</option>
-          <option value="5" selected>5 Minute</option>
-          <option value="15">15 Minute</option>
-          <option value="30">30 Minute</option>
-          <option value="60">1 Hour</option>
-          <option value="120">2 Hour</option>
-          <option value="240">4 Hour</option>
-          <option value="D">Daily</option>
-          <option value="W">Weekly</option>
-        </select>
-      </div>
-      <div class="api-row">
-        <label>CHART STYLE</label>
-        <select id="tv-style" style="background:var(--bg2);border:var(--bdr);color:var(--wht);font-family:var(--ff);font-size:12px;padding:5px 8px;border-radius:3px;width:100%;" onchange="saveTvSettings()">
-          <option value="1" selected>Candlesticks</option>
-          <option value="0">Bars</option>
-          <option value="2">Line</option>
-          <option value="3">Area</option>
-          <option value="8">Heiken Ashi</option>
-          <option value="9">Hollow Candles</option>
-        </select>
-      </div>
-      <div class="api-row">
-        <label>TIMEZONE</label>
-        <select id="tv-timezone" style="background:var(--bg2);border:var(--bdr);color:var(--wht);font-family:var(--ff);font-size:12px;padding:5px 8px;border-radius:3px;width:100%;" onchange="saveTvSettings()">
-          <option value="America/New_York" selected>Eastern (New York)</option>
-          <option value="America/Chicago">Central (Chicago)</option>
-          <option value="America/Denver">Mountain (Denver)</option>
-          <option value="America/Los_Angeles">Pacific (Los Angeles)</option>
-          <option value="UTC">UTC</option>
-        </select>
-      </div>
-      <div class="api-row">
-        <label>INDICATORS (check all to show)</label>
-        <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px;">
-          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-            <input type="checkbox" id="tv-ind-macd" checked onchange="saveTvSettings()" style="width:auto;accent-color:var(--amb);">
-            <span style="color:var(--wht);font-size:12px;">MACD</span>
-          </label>
-          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-            <input type="checkbox" id="tv-ind-rsi" checked onchange="saveTvSettings()" style="width:auto;accent-color:var(--amb);">
-            <span style="color:var(--wht);font-size:12px;">RSI</span>
-          </label>
-          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-            <input type="checkbox" id="tv-ind-adx" checked onchange="saveTvSettings()" style="width:auto;accent-color:var(--amb);">
-            <span style="color:var(--wht);font-size:12px;">ADX</span>
-          </label>
-          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-            <input type="checkbox" id="tv-ind-vol" onchange="saveTvSettings()" style="width:auto;accent-color:var(--amb);">
-            <span style="color:var(--wht);font-size:12px;">Volume</span>
-          </label>
-          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-            <input type="checkbox" id="tv-ind-bb" onchange="saveTvSettings()" style="width:auto;accent-color:var(--amb);">
-            <span style="color:var(--wht);font-size:12px;">Bollinger Bands</span>
-          </label>
-          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-            <input type="checkbox" id="tv-ind-vwap" onchange="saveTvSettings()" style="width:auto;accent-color:var(--amb);">
-            <span style="color:var(--wht);font-size:12px;">VWAP</span>
-          </label>
-          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-            <input type="checkbox" id="tv-ind-ema" onchange="saveTvSettings()" style="width:auto;accent-color:var(--amb);">
-            <span style="color:var(--wht);font-size:12px;">EMA (20/50/200)</span>
-          </label>
-        </div>
-      </div>
-      <div class="api-row">
-        <label>HIDE TOP TOOLBAR</label>
-        <select id="tv-hidetoolbar" style="background:var(--bg2);border:var(--bdr);color:var(--wht);font-family:var(--ff);font-size:12px;padding:5px 8px;border-radius:3px;width:100%;" onchange="saveTvSettings()">
-          <option value="false" selected>Show toolbar</option>
-          <option value="true">Hide toolbar (more chart space)</option>
-        </select>
-      </div>
-      <div class="api-note" style="margin-top:8px;">Settings saved to your browser and applied to all charts automatically. Changes take effect on next ticker click.</div>
-    </div></div>
+    
 
   </div>
 </div>
@@ -1254,14 +1174,14 @@ tr.sel-row td{background:var(--blu3);}
       <table style="width:100%;border-collapse:collapse;font-size:12px;">
         <thead>
           <tr style="background:var(--bg2);">
-            <th style="padding:8px 14px;text-align:left;color:var(--amb);font-size:10px;letter-spacing:1.5px;border-bottom:var(--bdr);">EXPIRY</th>
-            <th style="padding:8px 14px;text-align:left;color:var(--amb);font-size:10px;letter-spacing:1.5px;border-bottom:var(--bdr);">DTE</th>
-            <th style="padding:8px 14px;text-align:left;color:var(--amb);font-size:10px;letter-spacing:1.5px;border-bottom:var(--bdr);">STRIKE</th>
-            <th style="padding:8px 14px;text-align:left;color:var(--amb);font-size:10px;letter-spacing:1.5px;border-bottom:var(--bdr);">PREMIUM</th>
-            <th style="padding:8px 14px;text-align:left;color:var(--amb);font-size:10px;letter-spacing:1.5px;border-bottom:var(--bdr);">DELTA</th>
+            <th id="cp-h-expDate" onclick="cpSortBy('expDate')" style="padding:8px 14px;text-align:left;color:var(--amb);font-size:10px;letter-spacing:1.5px;border-bottom:var(--bdr);cursor:pointer;user-select:none;">EXPIRY</th>
+            <th id="cp-h-dte" onclick="cpSortBy('dte')" style="padding:8px 14px;text-align:left;color:var(--amb);font-size:10px;letter-spacing:1.5px;border-bottom:var(--bdr);cursor:pointer;user-select:none;">DTE</th>
+            <th id="cp-h-strike" onclick="cpSortBy('strike')" style="padding:8px 14px;text-align:left;color:var(--amb);font-size:10px;letter-spacing:1.5px;border-bottom:var(--bdr);cursor:pointer;user-select:none;">STRIKE</th>
+            <th id="cp-h-mid" onclick="cpSortBy('mid')" style="padding:8px 14px;text-align:left;color:var(--amb);font-size:10px;letter-spacing:1.5px;border-bottom:var(--bdr);cursor:pointer;user-select:none;">PREMIUM</th>
+            <th id="cp-h-delta" onclick="cpSortBy('delta')" style="padding:8px 14px;text-align:left;color:var(--amb);font-size:10px;letter-spacing:1.5px;border-bottom:var(--bdr);cursor:pointer;user-select:none;">DELTA</th>
             <th style="padding:8px 14px;text-align:left;color:var(--amb);font-size:10px;letter-spacing:1.5px;border-bottom:var(--bdr);">BID/ASK</th>
-            <th style="padding:8px 14px;text-align:left;color:var(--amb);font-size:10px;letter-spacing:1.5px;border-bottom:var(--bdr);">OI</th>
-            <th style="padding:8px 14px;text-align:left;color:var(--amb);font-size:10px;letter-spacing:1.5px;border-bottom:var(--bdr);">SCORE</th>
+            <th id="cp-h-oi" onclick="cpSortBy('oi')" style="padding:8px 14px;text-align:left;color:var(--amb);font-size:10px;letter-spacing:1.5px;border-bottom:var(--bdr);cursor:pointer;user-select:none;">OI</th>
+            <th id="cp-h-totalScore" onclick="cpSortBy('totalScore')" style="padding:8px 14px;text-align:left;color:var(--amb);font-size:10px;letter-spacing:1.5px;border-bottom:var(--bdr);cursor:pointer;user-select:none;">SCORE</th>
             <th style="padding:8px 14px;text-align:center;color:var(--amb);font-size:10px;letter-spacing:1.5px;border-bottom:var(--bdr);">ACTIONS</th>
           </tr>
         </thead>
@@ -3357,41 +3277,9 @@ function getTvSettings(){
     indicators:{macd:true,rsi:true,adx:true,vol:false,bb:false,vwap:false,ema:false}};
 }
 
-function saveTvSettings(){
-  var settings={
-    interval:    eid('tv-interval')     ? eid('tv-interval').value     : '5',
-    style:       eid('tv-style')        ? eid('tv-style').value        : '1',
-    timezone:    eid('tv-timezone')     ? eid('tv-timezone').value     : 'America/New_York',
-    hideToolbar: eid('tv-hidetoolbar')  ? eid('tv-hidetoolbar').value==='true' : false,
-    indicators:{
-      macd: eid('tv-ind-macd') ? eid('tv-ind-macd').checked : true,
-      rsi:  eid('tv-ind-rsi')  ? eid('tv-ind-rsi').checked  : true,
-      adx:  eid('tv-ind-adx')  ? eid('tv-ind-adx').checked  : true,
-      vol:  eid('tv-ind-vol')  ? eid('tv-ind-vol').checked   : false,
-      bb:   eid('tv-ind-bb')   ? eid('tv-ind-bb').checked    : false,
-      vwap: eid('tv-ind-vwap') ? eid('tv-ind-vwap').checked  : false,
-      ema:  eid('tv-ind-ema')  ? eid('tv-ind-ema').checked   : false,
-    }
-  };
-  try{ localStorage.setItem('rrjcar_tv_settings', JSON.stringify(settings)); }catch(e){}
-  toast('Chart settings saved');
-}
 
-function loadTvSettings(){
-  var s=getTvSettings();
-  if(eid('tv-interval'))    eid('tv-interval').value    = s.interval    || '5';
-  if(eid('tv-style'))       eid('tv-style').value       = s.style       || '1';
-  if(eid('tv-timezone'))    eid('tv-timezone').value    = s.timezone    || 'America/New_York';
-  if(eid('tv-hidetoolbar')) eid('tv-hidetoolbar').value = s.hideToolbar ? 'true' : 'false';
-  var ind=s.indicators||{};
-  if(eid('tv-ind-macd')) eid('tv-ind-macd').checked = ind.macd!==false;
-  if(eid('tv-ind-rsi'))  eid('tv-ind-rsi').checked  = ind.rsi !==false;
-  if(eid('tv-ind-adx'))  eid('tv-ind-adx').checked  = ind.adx !==false;
-  if(eid('tv-ind-vol'))  eid('tv-ind-vol').checked   = !!ind.vol;
-  if(eid('tv-ind-bb'))   eid('tv-ind-bb').checked    = !!ind.bb;
-  if(eid('tv-ind-vwap')) eid('tv-ind-vwap').checked  = !!ind.vwap;
-  if(eid('tv-ind-ema'))  eid('tv-ind-ema').checked   = !!ind.ema;
-}
+
+
 
 function renderTV(cid,ticker){
   var c=eid(cid);if(!c)return;
@@ -3443,7 +3331,7 @@ function buildDetail(r,detId,emptyId){
     '<div class="det-hdr"><span class="det-tk">'+r.ticker+'</span>'
     +'<span class="det-pr">$'+fmt2(r.price)+'</span>'
     +'<span class="det-sig '+sigCls+'">'+sigLbl+'</span>'
-    +'<span class="det-meta">'+r.sector+' | Score: <b>'+r.score+'</b>/150 | Tech: '+techScore+' Fund: '+fundScore+' | Passes: '+r.passes+'/14</span>'
+    +'<span class="det-meta">'+r.sector+' | Score: <b>'+Math.round(r.score)+'</b>/150 | Tech: '+techScore+' Fund: '+fundScore+' | Passes: '+r.passes+'/14</span>'
     +'</div>'
     +'<div class="chain-tabs">'
     +'<div class="chain-tab active" id="dtab-signals" onclick="switchDetTab(\''+r.ticker+'\',\'signals\')">SIGNALS</div>'
@@ -4267,8 +4155,8 @@ function applyFilters(){
 function clearFilters(){
   // Reset dropdowns
   if(eid('sc-sect'))        eid('sc-sect').value = '';
-  if(eid('sc-sig'))         eid('sc-sig').value  = '';
-  if(eid('sc-minscore'))    eid('sc-minscore').value = '0';
+  if(eid('sc-sig'))         eid('sc-sig').value  = 'GO';
+  if(eid('sc-minscore'))    eid('sc-minscore').value = '120';
   if(eid('sc-maxoptprice')) eid('sc-maxoptprice').value = '';
   // Uncheck all indicator filters
   ['filt-analyst','filt-insider','filt-gex','filt-proven',
@@ -4346,7 +4234,7 @@ function renderScan(){
     // Score bar \u2014 visual fill showing score out of 122
     var scorePct=Math.round((r.score/150)*100);
     var scoreBar='<div style="display:inline-flex;align-items:center;gap:5px;">'
-      +'<b>'+r.score+'</b>'
+      +'<b>'+Math.round(r.score)+'</b>'
       +'<div style="width:36px;height:4px;background:var(--bg3);border-radius:2px;display:inline-block;vertical-align:middle;">'
       +'<div style="width:'+scorePct+'%;height:100%;background:'+(r.isGo?'var(--grn)':'var(--gry)')+';border-radius:2px;"></div>'
       +'</div></div>';
@@ -7367,8 +7255,49 @@ function renderContractPanel(ticker, contracts){
     return;
   }
 
+  // Sort state: default best-to-worst by totalScore
+  if(!window.CP_DATA || window.CP_DATA.ticker !== ticker){
+    window.CP_DATA = {ticker:ticker, contracts:contracts, sortCol:'totalScore', sortDir:-1};
+  } else {
+    window.CP_DATA.contracts = contracts;
+  }
+  var sc = window.CP_DATA.sortCol, sd = window.CP_DATA.sortDir;
+
+  // Update header arrows
+  ['expDate','dte','strike','mid','delta','oi','totalScore'].forEach(function(k){
+    var el = document.getElementById('cp-h-'+k);
+    if(!el) return;
+    var lbl = {expDate:'EXPIRY',dte:'DTE',strike:'STRIKE',mid:'PREMIUM',delta:'DELTA',oi:'OI',totalScore:'SCORE'}[k];
+    el.innerHTML = lbl + (k===sc ? (sd<0?' \u25bc':' \u25b2') : '');
+  });
+
+  // Sort
+  var sorted = contracts.slice().sort(function(a,b){
+    var av,bv;
+    switch(sc){
+      case 'expDate': av=a.expDate; bv=b.expDate; break;
+      case 'dte': av=a.dte; bv=b.dte; break;
+      case 'strike': av=a.opt.strike; bv=b.opt.strike; break;
+      case 'mid': av=a.mid; bv=b.mid; break;
+      case 'delta': av=a.delta; bv=b.delta; break;
+      case 'oi': av=(a.opt.open_interest||0); bv=(b.opt.open_interest||0); break;
+      default: av=a.totalScore; bv=b.totalScore;
+    }
+    if(av<bv) return -1*sd;
+    if(av>bv) return 1*sd;
+    return 0;
+  });
+
+  // Monthly exp detector — 3rd Friday of the month
+  function isMonthlyExp(dStr){
+    var d = new Date(dStr+'T00:00:00');
+    if(d.getDay() !== 5) return false;
+    var dy = d.getDate();
+    return dy>=15 && dy<=21;
+  }
+
   var watched = cwGetAll();
-  tbody.innerHTML = contracts.map(function(c){
+  tbody.innerHTML = sorted.map(function(c){
     var o = c.opt;
     var watchKey = ticker+'_'+o.strike+'_'+c.expDate+'_C';
     var isWatched = !!watched[watchKey];
@@ -7376,25 +7305,40 @@ function renderContractPanel(ticker, contracts){
     var deltaCls = (c.delta>=0.70&&c.delta<=0.90) ? 'color:var(--amb)' : 'color:var(--gry)';
     var scoreColor = c.totalScore>=65?'var(--amb)':c.totalScore>=45?'var(--wrn)':'var(--ngo)';
 
-    return '<tr style="border-bottom:var(--bdr);transition:background .15s;">'+
-      '<td style="padding:8px 14px;'+dteCls+'">'+c.expDate+'</td>'+
+    var monthly = isMonthlyExp(c.expDate);
+    var rowStyle = 'border-bottom:var(--bdr);transition:background .15s;' + (monthly ? 'background:rgba(0,212,255,0.07);box-shadow:inset 3px 0 0 var(--amb),inset 0 0 25px rgba(0,212,255,0.1);' : '');
+    var expCell = monthly ? '<span style="color:var(--amb);text-shadow:0 0 10px var(--amb);font-weight:700;">\u25c6 '+c.expDate+'</span>' : c.expDate;
+    return '<tr style="'+rowStyle+'">'+
+      '<td style="padding:8px 14px;'+dteCls+'">'+expCell+'</td>'+
       '<td style="padding:8px 14px;'+dteCls+'">'+c.dte+'d</td>'+
       '<td style="padding:8px 14px;color:var(--wht);font-weight:600;">'+DS+fmt2(o.strike)+'</td>'+
       '<td style="padding:8px 14px;color:var(--ambb);font-weight:700;">'+DS+fmt2(c.mid)+'</td>'+
       '<td style="padding:8px 14px;'+deltaCls+'">'+fmt2(c.delta)+'</td>'+
       '<td style="padding:8px 14px;color:var(--gry);">'+DS+fmt2(o.bid)+'/'+DS+fmt2(o.ask)+'</td>'+
       '<td style="padding:8px 14px;color:var(--gry);">'+fmtK(o.open_interest||0)+'</td>'+
-      '<td style="padding:8px 14px;font-weight:700;color:'+scoreColor+'">'+c.totalScore+'</td>'+
+      '<td style="padding:8px 14px;font-weight:700;color:'+scoreColor+'">'+Math.round(c.totalScore)+'</td>'+
       '<td style="padding:8px 14px;text-align:center;white-space:nowrap;">'+
         '<button class="btn" style="font-size:10px;padding:3px 10px;margin-right:6px;background:var(--amb3);border-color:var(--amb);color:var(--amb);" '+
           'onclick="cpBuyNow(\''+ticker+'\','+o.strike+',\''+c.expDate+'\','+c.mid+')">&#9650; BUY NOW</button>'+
         '<button class="btn" style="font-size:10px;padding:3px 10px;'+(isWatched?'background:rgba(0,212,255,.2);border-color:var(--amb);color:var(--amb);':'border-color:var(--gry2);color:var(--gry);"')+'" '+
           'id="watch-btn-'+watchKey+'" '+
-          'onclick="cwToggleWatch(\''+ticker+'\','+o.strike+',\''+c.expDate+'\','+c.mid+','+c.delta+','+c.totalScore+')">'+
+          'onclick="cwToggleWatch(\''+ticker+'\','+o.strike+',\''+c.expDate+'\','+c.mid+','+c.delta+','+Math.round(c.totalScore)+')">'+
           (isWatched?'&#9733; WATCHING':'&#9734; WATCH')+'</button>'+
       '</td>'+
     '</tr>';
   }).join('');
+}
+
+function cpSortBy(col){
+  var d = window.CP_DATA;
+  if(!d) return;
+  if(d.sortCol === col){
+    d.sortDir = -d.sortDir;
+  } else {
+    d.sortCol = col;
+    d.sortDir = (col==='totalScore'||col==='oi'||col==='delta'||col==='strike'||col==='mid') ? -1 : 1;
+  }
+  renderContractPanel(d.ticker, d.contracts);
 }
 
 function cpBuyNow(ticker, strike, expDate, mid){
@@ -7657,7 +7601,7 @@ function init(){
   loadKeys();
   loadWL();
   loadAppSettings();
-  loadTvSettings();
+  /* removed */;
   loadNotifSettings();
   loadAutoTraderSettings();
   loadAutoTraderState();
