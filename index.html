@@ -351,19 +351,34 @@ tr.sel-row td{background:var(--blu3);}
 .chain-hdr-puts{color:var(--red) !important;text-align:center !important;background:rgba(239,68,68,0.06) !important;}
 .chain-loading{display:flex;align-items:center;justify-content:center;height:200px;color:var(--gry);font-family:var(--ff-mono);font-size:12px;}
 
-/* Data table readability + alignment */
-.tbl-wrap table{font-size:12.5px;}
-.tbl-wrap thead th{font-size:11px;padding:8px 10px;}
-.tbl-wrap tbody td{padding:7px 10px;font-size:12.5px;}
-/* Right-align numeric columns, left-align text, center badges/buttons */
-.tbl-wrap tbody td{text-align:right;}
-.tbl-wrap tbody td:first-child{text-align:left;}
-.tbl-wrap thead th{text-align:right;}
-.tbl-wrap thead th:first-child{text-align:left;}
-.tbl-wrap tbody td:has(> .badge),
-.tbl-wrap tbody td:has(> button){text-align:center;}
-.tbl-wrap thead th[data-col="signal"],
-.tbl-wrap thead th[data-col="buy"]{text-align:center;}
+/* Unified table aesthetic — left-aligned, larger, breathing room */
+.tbl-wrap table{font-size:14px;border-collapse:collapse;width:100%;}
+.tbl-wrap thead th{
+  font-size:11px;
+  padding:11px 14px;
+  text-align:left;
+  vertical-align:middle;
+  letter-spacing:1px;
+  white-space:nowrap;
+}
+.tbl-wrap tbody td{
+  font-size:14px;
+  padding:10px 14px;
+  text-align:left;
+  vertical-align:middle;
+  line-height:1.4;
+}
+/* Badges and buttons — inline-flex keeps them visually aligned with text baseline */
+.tbl-wrap tbody td .badge,
+.tbl-wrap tbody td button{
+  vertical-align:middle;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+/* Row hover for readability */
+.tbl-wrap tbody tr{transition:background .12s;}
+.tbl-wrap tbody tr:hover{background:rgba(0,212,255,0.04);}
 
 </style>
 </head>
