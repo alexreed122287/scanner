@@ -1965,9 +1965,13 @@ function switchTab(id){
 
 // Returns {key, mode, host} or null if no key
 function getTradierCreds(){
-  var key='';try{key=localStorage.getItem('rrjcar_tradier')||'';}catch(e){}
-  if(!key)return null;
   var mode='sandbox';try{mode=localStorage.getItem('rrjcar_mode')||'sandbox';}catch(e){}
+  var key='';
+  try{
+    var modeKey = mode==='live' ? 'rrjcar_tradier_live' : 'rrjcar_tradier_sandbox';
+    key = localStorage.getItem(modeKey) || localStorage.getItem('rrjcar_tradier') || '';
+  }catch(e){}
+  if(!key)return null;
   var host=mode==='live'?'https://api.tradier.com':'https://sandbox.tradier.com';
   return{key:key,mode:mode,host:host};
 }
@@ -3819,12 +3823,19 @@ function renderBuySig(){
     var card=document.createElement('div');
     card.className='sig-card'+(r.isGo?'':' nogo-card');card.dataset.ticker=r.ticker;
     var tk=r.ticker;
-    card.innerHTML='<div class="sc-l"><div class="tk">'+tk+'</div>'
+    card.innerHTML='<div class="sc-l"><div class="tk">'+tk+'<button class="bs-buy-btn" data-ticker="'+tk+'" title="View all call contracts" style="font-size:9px;padding:2px 7px;margin-left:8px;border:1px solid var(--amb);color:var(--amb);background:var(--amb3);border-radius:3px;cursor:pointer;vertical-align:middle;font-family:var(--ff);">▲ BUY</button></div>'
       +'<div class="sc '+(r.isGo?'go':'nogo')+'">'+r.score+'</div>'
       +'<div class="sect">'+r.sector+'</div></div>'
       +'<div class="sc-r"><div class="pr">$'+fmt2(r.price)+'</div>'
       +'<div class="ind">RSI '+r.ind.rsi+' | ADX '+r.ind.adx+'</div></div>';
-    card.onclick=function(){viewDetail(tk,'bs-detail','bs-empty');};
+    card.onclick=function(e){
+      if(e.target && e.target.classList && e.target.classList.contains('bs-buy-btn')){
+        e.stopPropagation();
+        openContractPanel(e.target.dataset.ticker);
+        return;
+      }
+      viewDetail(tk,'bs-detail','bs-empty');
+    };
     if(r.isGo) goList.appendChild(card); else noList.appendChild(card);
   });
 
@@ -4318,6 +4329,10 @@ function renderScan(){
   cols.forEach(function(c){
     var arr=G.sortCol===c.k?(G.sortDir>0?' \u25b2':' \u25bc'):'';
     th+='<th data-col="'+c.k+'" onclick="sortTable(this.dataset.col)">'+c.l+arr+'</th>';
+    var lbl=(c.l||'').toUpperCase();
+    if(lbl==='SIG'||lbl==='SIGNAL'||lbl==='GO/NO-GO'||lbl==='GO'){
+      th+='<th style="cursor:default;color:var(--amb);font-size:10px;letter-spacing:1px;">BUY</th>';
+    }
   });
 
   var rows='';
@@ -4344,6 +4359,7 @@ function renderScan(){
       +'<td><b>'+tk+'</b></td>'
       +'<td>'+scoreBar+'</td>'
       +'<td>'+sigBadge+'</td>'
+      +'<td><button class="btn" style="font-size:10px;padding:3px 10px;white-space:nowrap;border-color:var(--amb);color:var(--amb);background:var(--amb3);" onclick="event.stopPropagation();openContractPanel(\''+tk+'\')" title="View all call contracts">▲ BUY</button></td>'
       +'<td style="font-size:11px;color:var(--gry);">'+r.sector+'</td>'
       +'<td>$'+fmt2(r.price)+'</td>'
       +'<td class="'+chgCls+'">'+(r.changePct>=0?'+':'')+fmtP(r.changePct)+'</td>'
@@ -4363,13 +4379,9 @@ function renderScan(){
         rows+='<td style="color:var(--gry);font-size:10px;">--</td><td style="color:var(--gry);font-size:10px;">--</td>';
       }
     }
-    // Buy button — shown for all tickers regardless of GO/NO-GO
-    rows += '<td><button class="btn" style="font-size:10px;padding:3px 10px;white-space:nowrap;border-color:var(--amb);color:var(--amb);background:var(--amb3);" onclick="event.stopPropagation();openContractPanel(\''+tk+'\')" title="View all call contracts">&#9650; BUY</button></td>';
     rows+='</tr>';
   });
 
-  // Add buy column header
-  th += '<th style="cursor:default;color:var(--amb);font-size:10px;letter-spacing:1px;">CONTRACTS</th>';
   wrap.innerHTML='<table><thead><tr>'+th+'</tr></thead><tbody>'+rows+'</tbody></table>';
 }
 </script>
@@ -6933,9 +6945,15 @@ function calcEx(){
 
 function saveKeys(){
   var fmp=eid('api-fmp').value.trim(),tr=eid('api-tr').value.trim(),mode=eid('api-mode').value,acct=eid('api-acct').value.trim();
-  if(fmp)localStorage.setItem('rrjcar_fmp',fmp);if(tr)localStorage.setItem('rrjcar_tradier',tr);
+  if(fmp)localStorage.setItem('rrjcar_fmp',fmp);
+  // Mode-specific Tradier key + account (live/sandbox use different tokens)
+  var trKey = mode==='live' ? 'rrjcar_tradier_live' : 'rrjcar_tradier_sandbox';
+  var acKey = mode==='live' ? 'rrjcar_acct_live' : 'rrjcar_acct_sandbox';
+  if(tr){ localStorage.setItem(trKey,tr); localStorage.setItem('rrjcar_tradier',tr); }
+  else { var sk=localStorage.getItem(trKey); if(sk) localStorage.setItem('rrjcar_tradier',sk); }
   localStorage.setItem('rrjcar_mode',mode);
-  if(acct){localStorage.setItem('rrjcar_acct',acct);G.acctId=acct;eid('ord-acct').value=acct;}
+  if(acct){ localStorage.setItem(acKey,acct); localStorage.setItem('rrjcar_acct',acct); G.acctId=acct; eid('ord-acct').value=acct; }
+  else { var sa=localStorage.getItem(acKey); if(sa){ localStorage.setItem('rrjcar_acct',sa); G.acctId=sa; eid('ord-acct').value=sa; } }
   eid('fmp-status').textContent=fmp?'Key saved':'(unchanged)';eid('fmp-status').className='api-status '+(fmp?'ok':'miss');
   eid('tr-status').textContent=tr?'Key saved':'(unchanged)';eid('tr-status').className='api-status '+(tr?'ok':'miss');
   eid('acct-status').textContent=acct?'Account saved':'(unchanged)';eid('acct-status').className='api-status '+(acct?'ok':'miss');
