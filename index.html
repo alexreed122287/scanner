@@ -378,6 +378,7 @@ tr.sel-row td{background:var(--blu3);}
   <button class="ntab" onclick="switchTab('ex')">EXPECTANCY</button>
   <button class="ntab" onclick="switchTab('closed')">CLOSED POSITIONS</button>
   <button class="ntab" onclick="switchTab('api')">&#9881; API</button>
+  <button class="ntab" onclick="switchTab('cw')">&#9734; WATCHLIST</button>
 </div>
 <div id="app">
 <div class="tab-pane active" id="tab-bs">
@@ -1214,7 +1215,61 @@ tr.sel-row td{background:var(--blu3);}
   </div>
 </div>
 </div>
+<div class="tab-pane" id="tab-cw">
+  <div class="flt-bar" style="justify-content:space-between;align-items:center;">
+    <span style="font-family:var(--ff-brand);font-size:12px;color:var(--amb);letter-spacing:2px;">CONTRACT WATCHLIST</span>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <span style="color:var(--gry);font-size:10px;" id="cw-last-update"></span>
+      <button class="btn" style="font-size:10px;padding:3px 10px;" onclick="cwRefreshAll()">&#8635; REFRESH ALL</button>
+      <button class="btn" style="font-size:10px;padding:3px 10px;border-color:var(--ngo);color:var(--ngo);" onclick="cwClearExpired()">CLEAR EXPIRED</button>
+    </div>
+  </div>
+  <div class="tbl-wrap" id="cw-tbl-wrap">
+    <div class="empty-det" style="min-height:200px;">
+      <div class="ei">&#9734;</div>
+      <p>No contracts watched yet — click WATCH next to any contract in the scanner</p>
+    </div>
+  </div>
+</div>
 <div id="toast"></div>
+
+<!-- ── CONTRACT PANEL MODAL ── -->
+<div id="contract-panel" style="display:none;position:fixed;inset:0;z-index:8000;background:rgba(0,0,0,.8);backdrop-filter:blur(4px);align-items:flex-start;justify-content:center;padding-top:40px;overflow-y:auto;">
+  <div style="background:var(--bg1);border:1px solid var(--amb);border-radius:8px;padding:0;max-width:780px;width:95%;margin:0 auto 40px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:var(--bdr);background:var(--bg2);">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span id="cp-ticker" style="font-family:var(--ff-brand);font-size:20px;font-weight:700;color:var(--amb);text-shadow:var(--glow-cyan);"></span>
+        <span id="cp-price" style="font-size:15px;color:var(--wht);font-weight:600;"></span>
+        <span style="font-size:11px;color:var(--gry);letter-spacing:1px;">CALL CONTRACTS — NEXT 365 DAYS</span>
+      </div>
+      <button onclick="closeContractPanel()" style="background:none;border:none;color:var(--gry);font-size:20px;cursor:pointer;padding:4px 8px;">&#10005;</button>
+    </div>
+    <div id="cp-loading" style="padding:40px;text-align:center;color:var(--gry);font-family:var(--ff-brand);letter-spacing:2px;font-size:12px;">
+      FETCHING CONTRACTS...
+    </div>
+    <div id="cp-content" style="display:none;">
+      <div style="padding:10px 18px;background:var(--bg2);border-bottom:var(--bdr);display:flex;gap:16px;font-size:11px;color:var(--gry);">
+        <span>&#9650; Best contract per expiry &nbsp;|&nbsp; Delta 0.70-0.90 preferred &nbsp;|&nbsp; Sorted by expiry date</span>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead>
+          <tr style="background:var(--bg2);">
+            <th style="padding:8px 14px;text-align:left;color:var(--amb);font-size:10px;letter-spacing:1.5px;border-bottom:var(--bdr);">EXPIRY</th>
+            <th style="padding:8px 14px;text-align:left;color:var(--amb);font-size:10px;letter-spacing:1.5px;border-bottom:var(--bdr);">DTE</th>
+            <th style="padding:8px 14px;text-align:left;color:var(--amb);font-size:10px;letter-spacing:1.5px;border-bottom:var(--bdr);">STRIKE</th>
+            <th style="padding:8px 14px;text-align:left;color:var(--amb);font-size:10px;letter-spacing:1.5px;border-bottom:var(--bdr);">PREMIUM</th>
+            <th style="padding:8px 14px;text-align:left;color:var(--amb);font-size:10px;letter-spacing:1.5px;border-bottom:var(--bdr);">DELTA</th>
+            <th style="padding:8px 14px;text-align:left;color:var(--amb);font-size:10px;letter-spacing:1.5px;border-bottom:var(--bdr);">BID/ASK</th>
+            <th style="padding:8px 14px;text-align:left;color:var(--amb);font-size:10px;letter-spacing:1.5px;border-bottom:var(--bdr);">OI</th>
+            <th style="padding:8px 14px;text-align:left;color:var(--amb);font-size:10px;letter-spacing:1.5px;border-bottom:var(--bdr);">SCORE</th>
+            <th style="padding:8px 14px;text-align:center;color:var(--amb);font-size:10px;letter-spacing:1.5px;border-bottom:var(--bdr);">ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody id="cp-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
 
 <!-- ── HIGH-CONVICTION AUTO-SUBMIT MODAL ── -->
 <div id="hc-modal" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);align-items:center;justify-content:center;">
@@ -1884,6 +1939,7 @@ function switchTab(id){
   if(id==='mb')renderBreadth();
   if(id==='al')renderAlerts();
   if(id==='closed')fetchClosedPositions();
+  if(id==='cw'){cwRenderTable();cwRefreshAll();}
   if(id==='order'){
     var sym=eid('ord-sym').value.trim();
     if(sym)fetchLiveQuote();
@@ -7147,6 +7203,434 @@ function showVersionBanner(){
   } catch(e){}
 }
 
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  CONTRACT PANEL — fetch all calls through 365 days, display best per expiry
+// ═══════════════════════════════════════════════════════════════════════════
+
+var CP_TICKER = '';
+var CP_PRICE  = 0;
+var CW_KEY    = 'panda_watchlist';
+
+function openContractPanel(ticker){
+  CP_TICKER = ticker;
+  var panel = document.getElementById('contract-panel');
+  panel.style.display = 'flex';
+  document.getElementById('cp-ticker').textContent = ticker;
+  document.getElementById('cp-price').textContent = '';
+  document.getElementById('cp-loading').style.display = 'block';
+  document.getElementById('cp-content').style.display = 'none';
+  fetchAllContracts(ticker);
+}
+
+function closeContractPanel(){
+  document.getElementById('contract-panel').style.display = 'none';
+}
+
+// Close panel on overlay click
+document.addEventListener('click', function(e){
+  if(e.target.id === 'contract-panel') closeContractPanel();
+});
+
+async function fetchAllContracts(ticker){
+  var creds = getTradierCreds();
+  if(!creds){
+    document.getElementById('cp-loading').textContent = 'No Tradier API key — go to API tab';
+    return;
+  }
+
+  // Get current price
+  try{
+    var qr = await fetch(creds.host+'/v1/markets/quotes?symbols='+encodeURIComponent(ticker),{
+      headers:{Authorization:'Bearer '+creds.key, Accept:'application/json'}
+    }).then(function(r){return r.json();});
+    var q = qr.quotes.quote;
+    CP_PRICE = parseFloat(q.last||q.prevclose||0);
+    document.getElementById('cp-price').textContent = '$'+fmt2(CP_PRICE);
+  }catch(e){ CP_PRICE = 0; }
+
+  // Get all expirations within 365 days
+  var expRes;
+  try{
+    expRes = await fetch(creds.host+'/v1/markets/options/expirations?symbol='+encodeURIComponent(ticker),{
+      headers:{Authorization:'Bearer '+creds.key, Accept:'application/json'}
+    }).then(function(r){return r.json();});
+  }catch(e){
+    document.getElementById('cp-loading').textContent = 'Error fetching expirations';
+    return;
+  }
+
+  var dates = [];
+  try{ dates = expRes.expirations.date; if(!Array.isArray(dates)) dates=[dates]; }catch(e){}
+
+  // Filter to next 365 days
+  var today = new Date(); today.setHours(0,0,0,0);
+  var cutoff = new Date(today.getTime() + 365*86400000);
+  dates = dates.filter(function(d){
+    var dt = new Date(d+'T00:00:00');
+    return dt > today && dt <= cutoff;
+  });
+
+  if(!dates.length){
+    document.getElementById('cp-loading').textContent = 'No expirations found within 365 days';
+    return;
+  }
+
+  document.getElementById('cp-loading').textContent = 'Fetching '+dates.length+' expiry chains...';
+
+  // Fetch chains in batches of 4 to avoid rate limiting
+  var results = [];
+  for(var i=0; i<dates.length; i+=4){
+    var batch = dates.slice(i, i+4);
+    var batchPromises = batch.map(function(expDate){
+      return fetch(creds.host+'/v1/markets/options/chains?symbol='+encodeURIComponent(ticker)+'&expiration='+expDate+'&greeks=true',{
+        headers:{Authorization:'Bearer '+creds.key, Accept:'application/json'}
+      }).then(function(r){return r.json();})
+      .then(function(d){
+        var opts = [];
+        try{ opts=d.options.option; if(!Array.isArray(opts)) opts=[opts]; }catch(e){}
+        // Filter to calls only
+        var calls = opts.filter(function(o){
+          return o && o.option_type==='call' && o.greeks && o.greeks.delta > 0.02;
+        });
+        if(!calls.length) return null;
+
+        // Find best call: prefer delta 0.70-0.90, highest volume as tiebreak
+        var dte = Math.round((new Date(expDate) - today) / 86400000);
+        var scored = calls.map(function(o){
+          var delta = o.greeks ? Math.abs(o.greeks.delta||0) : 0;
+          var mid = (o.bid+o.ask)/2;
+          var intrinsic = Math.max(CP_PRICE - o.strike, 0);
+          var extrinsic = Math.max(mid - intrinsic, 0);
+          var extPct = mid > 0 ? (extrinsic/mid*100) : 100;
+          var spread = o.ask - o.bid;
+          var spreadPct = mid > 0 ? (spread/mid*100) : 100;
+          // Score: prefer delta 0.70-0.90
+          var deltaScore = (delta>=0.70&&delta<=0.90) ? 30 : (delta>=0.60&&delta<0.70) ? 20 : (delta>=0.90) ? 15 : 5;
+          var volScore = Math.min((o.volume||0)/100, 20);
+          var oiScore = Math.min((o.open_interest||0)/500, 20);
+          var spreadScore = spreadPct < 5 ? 15 : spreadPct < 10 ? 8 : 0;
+          var extScore = extPct < 15 ? 15 : extPct < 25 ? 8 : 0;
+          return {
+            opt:o, expDate:expDate, dte:dte,
+            delta:delta, mid:mid, extPct:extPct, spreadPct:spreadPct,
+            totalScore: deltaScore+volScore+oiScore+spreadScore+extScore
+          };
+        });
+        scored.sort(function(a,b){return b.totalScore-a.totalScore;});
+        return scored[0] || null;
+      }).catch(function(){ return null; });
+    });
+
+    var batchResults = await Promise.all(batchPromises);
+    batchResults.forEach(function(r){ if(r) results.push(r); });
+
+    // Small delay between batches
+    if(i+4 < dates.length) await new Promise(function(res){setTimeout(res,200);});
+  }
+
+  results.sort(function(a,b){ return a.dte - b.dte; });
+  renderContractPanel(ticker, results);
+}
+
+function renderContractPanel(ticker, contracts){
+  document.getElementById('cp-loading').style.display = 'none';
+  document.getElementById('cp-content').style.display = 'block';
+
+  var DS = String.fromCharCode(36);
+  var tbody = document.getElementById('cp-tbody');
+
+  if(!contracts.length){
+    tbody.innerHTML = '<tr><td colspan="9" style="padding:20px;text-align:center;color:var(--gry);">No qualifying contracts found</td></tr>';
+    return;
+  }
+
+  var watched = cwGetAll();
+  tbody.innerHTML = contracts.map(function(c){
+    var o = c.opt;
+    var watchKey = ticker+'_'+o.strike+'_'+c.expDate+'_C';
+    var isWatched = !!watched[watchKey];
+    var dteCls = c.dte <= 14 ? 'color:var(--ngo)' : c.dte <= 45 ? 'color:var(--ambb)' : 'color:var(--wht)';
+    var deltaCls = (c.delta>=0.70&&c.delta<=0.90) ? 'color:var(--amb)' : 'color:var(--gry)';
+    var scoreColor = c.totalScore>=65?'var(--amb)':c.totalScore>=45?'var(--wrn)':'var(--ngo)';
+
+    return '<tr style="border-bottom:var(--bdr);transition:background .15s;" onmouseover="this.style.background='rgba(0,212,255,.05)'" onmouseout="this.style.background=''">'+
+      '<td style="padding:8px 14px;'+dteCls+'">'+c.expDate+'</td>'+
+      '<td style="padding:8px 14px;'+dteCls+'">'+c.dte+'d</td>'+
+      '<td style="padding:8px 14px;color:var(--wht);font-weight:600;">'+DS+fmt2(o.strike)+'</td>'+
+      '<td style="padding:8px 14px;color:var(--ambb);font-weight:700;">'+DS+fmt2(c.mid)+'</td>'+
+      '<td style="padding:8px 14px;'+deltaCls+'">'+fmt2(c.delta)+'</td>'+
+      '<td style="padding:8px 14px;color:var(--gry);">'+DS+fmt2(o.bid)+'/'+DS+fmt2(o.ask)+'</td>'+
+      '<td style="padding:8px 14px;color:var(--gry);">'+fmtK(o.open_interest||0)+'</td>'+
+      '<td style="padding:8px 14px;font-weight:700;color:'+scoreColor+'">'+c.totalScore+'</td>'+
+      '<td style="padding:8px 14px;text-align:center;white-space:nowrap;">'+
+        '<button class="btn" style="font-size:10px;padding:3px 10px;margin-right:6px;background:var(--amb3);border-color:var(--amb);color:var(--amb);" '+
+          'onclick="cpBuyNow(''+ticker+'','+o.strike+',''+c.expDate+'','+c.mid+')">&#9650; BUY NOW</button>'+
+        '<button class="btn" style="font-size:10px;padding:3px 10px;'+(isWatched?'background:rgba(0,212,255,.2);border-color:var(--amb);color:var(--amb);':'border-color:var(--gry2);color:var(--gry);"')+'" '+
+          'id="watch-btn-'+watchKey+'" '+
+          'onclick="cwToggleWatch(''+ticker+'','+o.strike+',''+c.expDate+'','+c.mid+','+c.delta+','+c.totalScore+')">'+
+          (isWatched?'&#9733; WATCHING':'&#9734; WATCH')+'</button>'+
+      '</td>'+
+    '</tr>';
+  }).join('');
+}
+
+function cpBuyNow(ticker, strike, expDate, mid){
+  closeContractPanel();
+  switchTab('order');
+  setTimeout(function(){
+    if(eid('ord-sym'))    eid('ord-sym').value    = ticker;
+    if(eid('ord-type'))   eid('ord-type').value   = 'CALL';
+    if(eid('ord-action')) eid('ord-action').value = 'BUY_TO_OPEN';
+    if(eid('ord-otype'))  eid('ord-otype').value  = 'limit';
+    if(eid('ord-strike')) eid('ord-strike').value = strike;
+    if(eid('ord-exp'))    eid('ord-exp').value     = expDate;
+    if(eid('ord-lmt'))    eid('ord-lmt').value     = fmt2(mid);
+    if(eid('ord-qty'))    eid('ord-qty').value     = 1;
+    fetchLiveQuote();
+    updateOrdChart();
+    toast('Order pre-filled: '+ticker+' $'+strike+' CALL '+expDate);
+  }, 150);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  CONTRACT WATCHLIST ENGINE
+// ═══════════════════════════════════════════════════════════════════════════
+
+function cwGetAll(){
+  try{ return JSON.parse(localStorage.getItem(CW_KEY)||'{}'); }catch(e){ return {}; }
+}
+
+function cwSaveAll(data){
+  try{ localStorage.setItem(CW_KEY, JSON.stringify(data)); }catch(e){}
+}
+
+function cwToggleWatch(ticker, strike, expDate, mid, delta, score){
+  var watchKey = ticker+'_'+strike+'_'+expDate+'_C';
+  var data = cwGetAll();
+  var btn = document.getElementById('watch-btn-'+watchKey);
+
+  if(data[watchKey]){
+    delete data[watchKey];
+    cwSaveAll(data);
+    if(btn){
+      btn.textContent = '☆ WATCH';
+      btn.style.borderColor = 'var(--gry2)';
+      btn.style.color = 'var(--gry)';
+      btn.style.background = '';
+    }
+    toast('Removed from watchlist: '+ticker+' $'+strike+' '+expDate);
+  } else {
+    data[watchKey] = {
+      ticker:ticker, strike:strike, expDate:expDate,
+      type:'CALL', addedMid:mid, currentMid:mid,
+      delta:delta, score:score, addedAt:new Date().toISOString(),
+      isBestForExpiry:true
+    };
+    cwSaveAll(data);
+    if(btn){
+      btn.textContent = '★ WATCHING';
+      btn.style.borderColor = 'var(--amb)';
+      btn.style.color = 'var(--amb)';
+      btn.style.background = 'rgba(0,212,255,.2)';
+    }
+    toast('Added to watchlist: '+ticker+' $'+strike+' CALL '+expDate);
+  }
+}
+
+function cwRenderTable(){
+  var wrap = eid('cw-tbl-wrap');
+  var data = cwGetAll();
+  var keys = Object.keys(data);
+
+  // Remove expired contracts
+  var today = new Date(); today.setHours(0,0,0,0);
+  keys = keys.filter(function(k){
+    var c = data[k];
+    var expDt = new Date(c.expDate+'T00:00:00');
+    if(expDt < today){ delete data[k]; return false; }
+    return true;
+  });
+  cwSaveAll(data);
+
+  if(!keys.length){
+    wrap.innerHTML = '<div class="empty-det" style="min-height:200px;"><div class="ei">&#9734;</div><p>No contracts watched yet</p></div>';
+    return;
+  }
+
+  var DS = String.fromCharCode(36);
+  var html = '<table><thead><tr>'+
+    '<th>TICKER</th><th>TYPE</th><th>STRIKE</th><th>EXPIRY</th><th>DTE</th>'+
+    '<th>ADDED AT</th><th>CURRENT PREMIUM</th><th>CHANGE</th><th>DELTA</th>'+
+    '<th>SCORE</th><th>BEST?</th><th>ACTIONS</th>'+
+    '</tr></thead><tbody>';
+
+  keys.sort(function(a,b){
+    return new Date(data[a].expDate) - new Date(data[b].expDate);
+  });
+
+  keys.forEach(function(k){
+    var c = data[k];
+    var dte = Math.round((new Date(c.expDate+' 00:00:00') - today) / 86400000);
+    var dteCls = dte <= 14 ? 'color:var(--ngo)' : dte <= 45 ? 'color:var(--ambb)' : '';
+    var midChange = c.currentMid - c.addedMid;
+    var midChangePct = c.addedMid > 0 ? ((midChange/c.addedMid)*100).toFixed(1) : '0';
+    var changeCls = midChange >= 0 ? 'color:var(--amb)' : 'color:var(--ngo)';
+    var bestBadge = c.isBestForExpiry
+      ? '<span class="badge go" style="font-size:9px;">&#10003; BEST</span>'
+      : '<span class="badge" style="font-size:9px;background:rgba(255,0,230,.12);color:var(--ngo);border:1px solid var(--ngo);">&#9888; NOT BEST</span>';
+    var rowStyle = c.isBestForExpiry ? '' : 'background:rgba(255,0,230,.04);';
+
+    html += '<tr style="border-bottom:var(--bdr);'+rowStyle+'">'+
+      '<td><b style="color:var(--amb);">'+c.ticker+'</b></td>'+
+      '<td>'+c.type+'</td>'+
+      '<td>'+DS+fmt2(c.strike)+'</td>'+
+      '<td style="'+dteCls+'">'+c.expDate+'</td>'+
+      '<td style="'+dteCls+'">'+dte+'d</td>'+
+      '<td style="color:var(--gry);font-size:10px;">'+new Date(c.addedAt).toLocaleDateString()+'</td>'+
+      '<td style="color:var(--ambb);font-weight:700;" id="cw-mid-'+k+'">'+DS+fmt2(c.currentMid)+'</td>'+
+      '<td style="'+changeCls+';">'+(midChange>=0?'+':'')+DS+fmt2(midChange)+' ('+(midChange>=0?'+':'')+midChangePct+'%)</td>'+
+      '<td>'+fmt2(c.delta)+'</td>'+
+      '<td>'+c.score+'</td>'+
+      '<td>'+bestBadge+'</td>'+
+      '<td style="white-space:nowrap;">'+
+        '<button class="btn" style="font-size:10px;padding:3px 8px;margin-right:4px;background:var(--amb3);border-color:var(--amb);color:var(--amb);" '+
+          'onclick="cpBuyNow(''+c.ticker+'','+c.strike+',''+c.expDate+'','+c.currentMid+')">&#9650; BUY</button>'+
+        '<button class="btn" style="font-size:10px;padding:3px 8px;border-color:var(--ngo);color:var(--ngo);" '+
+          'onclick="cwRemove(''+k+'')">&#10005;</button>'+
+      '</td>'+
+    '</tr>';
+  });
+
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+}
+
+function cwRemove(key){
+  var data = cwGetAll();
+  delete data[key];
+  cwSaveAll(data);
+  cwRenderTable();
+  toast('Removed from watchlist');
+}
+
+function cwClearExpired(){
+  var data = cwGetAll();
+  var today = new Date(); today.setHours(0,0,0,0);
+  var removed = 0;
+  Object.keys(data).forEach(function(k){
+    var expDt = new Date(data[k].expDate+'T00:00:00');
+    if(expDt < today){ delete data[k]; removed++; }
+  });
+  cwSaveAll(data);
+  cwRenderTable();
+  toast('Cleared '+removed+' expired contract'+(removed!==1?'s':''));
+}
+
+async function cwRefreshAll(){
+  var data = cwGetAll();
+  var keys = Object.keys(data);
+  if(!keys.length) return;
+
+  var creds = getTradierCreds();
+  if(!creds){ toast('No Tradier API key'); return; }
+
+  eid('cw-last-update').textContent = 'Refreshing...';
+
+  // Group by ticker to batch quote requests
+  var byTicker = {};
+  keys.forEach(function(k){
+    var c = data[k];
+    if(!byTicker[c.ticker]) byTicker[c.ticker] = [];
+    byTicker[c.ticker].push({key:k, contract:c});
+  });
+
+  var tickers = Object.keys(byTicker);
+  for(var i=0; i<tickers.length; i++){
+    var ticker = tickers[i];
+    var contracts = byTicker[ticker];
+
+    // Build OCC symbols for batch quote
+    for(var j=0; j<contracts.length; j++){
+      var c = contracts[j].contract;
+      var k = contracts[j].key;
+      try{
+        var parts = c.expDate.split('-');
+        var yy=parts[0].slice(2), mm=parts[1], dd=parts[2];
+        var sp=String(Math.round(c.strike*1000)).padStart(8,'0');
+        var occSym = c.ticker+yy+mm+dd+'C'+sp;
+
+        var qr = await fetch(creds.host+'/v1/markets/quotes?symbols='+encodeURIComponent(occSym)+'&greeks=true',{
+          headers:{Authorization:'Bearer '+creds.key, Accept:'application/json'}
+        }).then(function(r){return r.json();});
+
+        var q = qr.quotes.quote;
+        if(q && q.bid && q.ask){
+          var newMid = +((q.bid+q.ask)/2).toFixed(2);
+          data[k].currentMid = newMid;
+          if(q.greeks) data[k].delta = +(q.greeks.delta||data[k].delta).toFixed(2);
+
+          // Update display if visible
+          var midEl = eid('cw-mid-'+k);
+          if(midEl) midEl.textContent = '$'+fmt2(newMid);
+        }
+      }catch(e){}
+
+      await new Promise(function(res){setTimeout(res,150);});
+    }
+
+    // Check best-for-expiry status by fetching current chain
+    // Re-score watched contracts vs all available calls for that expiry
+    for(var j=0; j<contracts.length; j++){
+      var c = contracts[j].contract;
+      var k = contracts[j].key;
+      try{
+        var chainRes = await fetch(creds.host+'/v1/markets/options/chains?symbol='+encodeURIComponent(ticker)+'&expiration='+c.expDate+'&greeks=true',{
+          headers:{Authorization:'Bearer '+creds.key, Accept:'application/json'}
+        }).then(function(r){return r.json();});
+
+        var opts = [];
+        try{ opts=chainRes.options.option; if(!Array.isArray(opts)) opts=[opts]; }catch(e){}
+        var calls = opts.filter(function(o){ return o&&o.option_type==='call'&&o.greeks&&o.greeks.delta>0.02; });
+
+        if(calls.length){
+          // Find best strike using same scoring logic
+          var priceNow = 0;
+          try{
+            var pr = await fetch(creds.host+'/v1/markets/quotes?symbols='+encodeURIComponent(ticker),{
+              headers:{Authorization:'Bearer '+creds.key, Accept:'application/json'}
+            }).then(function(r){return r.json();});
+            priceNow = parseFloat(pr.quotes.quote.last||0);
+          }catch(e){}
+
+          var best = calls.reduce(function(prev, o){
+            var delta = Math.abs(o.greeks?o.greeks.delta||0:0);
+            var mid = (o.bid+o.ask)/2;
+            var intrinsic = Math.max(priceNow - o.strike, 0);
+            var extrinsic = Math.max(mid - intrinsic, 0);
+            var extPct = mid>0?(extrinsic/mid*100):100;
+            var spreadPct = mid>0?((o.ask-o.bid)/mid*100):100;
+            var ds = (delta>=0.70&&delta<=0.90)?30:(delta>=0.60)?20:5;
+            var vs = Math.min((o.volume||0)/100,20);
+            var os = Math.min((o.open_interest||0)/500,20);
+            var ss = spreadPct<5?15:spreadPct<10?8:0;
+            var es = extPct<15?15:extPct<25?8:0;
+            var score = ds+vs+os+ss+es;
+            return score > (prev.score||0) ? {strike:o.strike, score:score} : prev;
+          }, {});
+
+          data[k].isBestForExpiry = (best.strike === c.strike);
+        }
+      }catch(e){}
+    }
+  }
+
+  cwSaveAll(data);
+  cwRenderTable();
+  eid('cw-last-update').textContent = 'Updated: '+new Date().toLocaleTimeString();
+  toast('Watchlist refreshed');
+}
+
 function init(){
   loadKeys();
   loadWL();
@@ -7167,6 +7651,10 @@ function init(){
     if(day>=1&&day<=5&&mins>=(9*60+30)&&mins<=(16*60)) updateHeaderQuotes();
   }, 60000);
   setInterval(saveAppSettings, 60000);
+  setInterval(function(){
+    var activePane = document.querySelector('.tab-pane.active');
+    if(activePane && activePane.id === 'tab-cw') cwRefreshAll();
+  }, 300000);
   setInterval(runMarketBreadth, 300000);        // breadth: every 5 minutes
   runScan();
   refreshWL();
