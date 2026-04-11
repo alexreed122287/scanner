@@ -1169,7 +1169,7 @@ tr.sel-row td{background:var(--blu3);}
     </div>
     <div id="cp-content" style="display:none;">
       <div style="padding:10px 18px;background:var(--bg2);border-bottom:var(--bdr);display:flex;gap:16px;font-size:11px;color:var(--gry);">
-        <span>&#9650; Best contract per expiry &nbsp;|&nbsp; Delta 0.70-0.90 preferred &nbsp;|&nbsp; Sorted by expiry date</span>
+        <span>&#9650; Call contracts ranked by liquidity (OI × volume)</span>
       </div>
       <table style="width:100%;border-collapse:collapse;font-size:12px;">
         <thead>
@@ -3282,28 +3282,10 @@ function getTvSettings(){
 
 
 function renderTV(cid,ticker){
+  // TradingView embed removed. Container hidden to reclaim space.
   var c=eid(cid);if(!c)return;
   c.innerHTML='';
-  var wrap=document.createElement('div');wrap.style.cssText='width:100%;height:100%;';c.appendChild(wrap);
-  var s=getTvSettings();
-  var studies=[];
-  if(s.indicators){
-    if(s.indicators.macd) studies.push('MACD@tv-screener');
-    if(s.indicators.rsi)  studies.push('RSI@tv-screener');
-    if(s.indicators.adx)  studies.push('ADX@tv-screener');
-    if(s.indicators.vol)  studies.push('Volume@tv-screener');
-    if(s.indicators.bb)   studies.push('BB@tv-screener');
-    if(s.indicators.vwap) studies.push('VWAP@tv-screener');
-    if(s.indicators.ema)  studies.push('MAExp@tv-screener');
-  }
-  if(!studies.length) studies=['MACD@tv-screener','RSI@tv-screener','ADX@tv-screener'];
-  var cfg={autosize:true,symbol:ticker,interval:s.interval||'5',style:s.style||'1',
-    timezone:s.timezone||'America/New_York',theme:'dark',locale:'en',
-    backgroundColor:'#0d1117',gridColor:'#21262d',
-    hide_top_toolbar:s.hideToolbar||false,save_image:false,withdateranges:true,studies:studies};
-  var sc=document.createElement('script');
-  sc.src='https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';
-  sc.async=true;sc.innerHTML=JSON.stringify(cfg);wrap.appendChild(sc);
+  c.style.display='none';
 }
 
 function buildDetail(r,detId,emptyId){
@@ -7205,7 +7187,7 @@ async function fetchAllContracts(ticker){
         });
         if(!calls.length) return null;
 
-        // Find best call: prefer delta 0.70-0.90, highest volume as tiebreak
+        // Neutral ranker: liquidity (OI x volume) + tight spread, no delta bias
         var dte = Math.round((new Date(expDate) - today) / 86400000);
         var scored = calls.map(function(o){
           var delta = o.greeks ? Math.abs(o.greeks.delta||0) : 0;
@@ -7215,16 +7197,17 @@ async function fetchAllContracts(ticker){
           var extPct = mid > 0 ? (extrinsic/mid*100) : 100;
           var spread = o.ask - o.bid;
           var spreadPct = mid > 0 ? (spread/mid*100) : 100;
-          // Score: prefer delta 0.70-0.90
-          var deltaScore = (delta>=0.70&&delta<=0.90) ? 30 : (delta>=0.60&&delta<0.70) ? 20 : (delta>=0.90) ? 15 : 5;
-          var volScore = Math.min((o.volume||0)/100, 20);
-          var oiScore = Math.min((o.open_interest||0)/500, 20);
-          var spreadScore = spreadPct < 5 ? 15 : spreadPct < 10 ? 8 : 0;
-          var extScore = extPct < 15 ? 15 : extPct < 25 ? 8 : 0;
+          var oi = o.open_interest||0;
+          var vol = o.volume||0;
+          // Liquidity score: log-scaled OI x vol, capped
+          var liquidity = Math.log10(1 + oi*Math.max(vol,1));
+          var liqScore = Math.min(liquidity*10, 60);
+          var spreadScore = spreadPct < 2 ? 25 : spreadPct < 5 ? 15 : spreadPct < 10 ? 5 : 0;
+          var oiScore = Math.min(oi/500, 15);
           return {
             opt:o, expDate:expDate, dte:dte,
             delta:delta, mid:mid, extPct:extPct, spreadPct:spreadPct,
-            totalScore: deltaScore+volScore+oiScore+spreadScore+extScore
+            totalScore: liqScore+spreadScore+oiScore
           };
         });
         scored.sort(function(a,b){return b.totalScore-a.totalScore;});
@@ -7302,7 +7285,7 @@ function renderContractPanel(ticker, contracts){
     var watchKey = ticker+'_'+o.strike+'_'+c.expDate+'_C';
     var isWatched = !!watched[watchKey];
     var dteCls = c.dte <= 14 ? 'color:var(--ngo)' : c.dte <= 45 ? 'color:var(--ambb)' : 'color:var(--wht)';
-    var deltaCls = (c.delta>=0.70&&c.delta<=0.90) ? 'color:var(--amb)' : 'color:var(--gry)';
+    var deltaCls = 'color:var(--wht)';
     var scoreColor = c.totalScore>=65?'var(--amb)':c.totalScore>=45?'var(--wrn)':'var(--ngo)';
 
     var monthly = isMonthlyExp(c.expDate);
@@ -7570,18 +7553,14 @@ async function cwRefreshAll(){
           }catch(e){}
 
           var best = calls.reduce(function(prev, o){
-            var delta = Math.abs(o.greeks?o.greeks.delta||0:0);
             var mid = (o.bid+o.ask)/2;
-            var intrinsic = Math.max(priceNow - o.strike, 0);
-            var extrinsic = Math.max(mid - intrinsic, 0);
-            var extPct = mid>0?(extrinsic/mid*100):100;
             var spreadPct = mid>0?((o.ask-o.bid)/mid*100):100;
-            var ds = (delta>=0.70&&delta<=0.90)?30:(delta>=0.60)?20:5;
-            var vs = Math.min((o.volume||0)/100,20);
-            var os = Math.min((o.open_interest||0)/500,20);
-            var ss = spreadPct<5?15:spreadPct<10?8:0;
-            var es = extPct<15?15:extPct<25?8:0;
-            var score = ds+vs+os+ss+es;
+            var oi = o.open_interest||0;
+            var vol = o.volume||0;
+            var liquidity = Math.log10(1 + oi*Math.max(vol,1));
+            var liqScore = Math.min(liquidity*10, 60);
+            var spreadScore = spreadPct<2?25:spreadPct<5?15:spreadPct<10?5:0;
+            var score = liqScore+spreadScore+Math.min(oi/500,15);
             return score > (prev.score||0) ? {strike:o.strike, score:score} : prev;
           }, {});
 
