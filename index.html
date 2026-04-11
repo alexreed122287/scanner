@@ -4364,8 +4364,7 @@ function renderScan(){
       }
     }
     // Buy button — shown for all tickers regardless of GO/NO-GO
-    rows += '<td><button class="btn" style="font-size:10px;padding:3px 10px;white-space:nowrap;border-color:var(--amb);color:var(--amb);background:var(--amb3);" '
-      +'onclick="event.stopPropagation();openContractPanel(''+tk+'')" title="View all call contracts">&#9650; BUY</button></td>';
+    rows += '<td><button class="btn" style="font-size:10px;padding:3px 10px;white-space:nowrap;border-color:var(--amb);color:var(--amb);background:var(--amb3);" onclick="event.stopPropagation();openContractPanel(\''+tk+'\')" title="View all call contracts">&#9650; BUY</button></td>';
     rows+='</tr>';
   });
 
@@ -7359,7 +7358,7 @@ function renderContractPanel(ticker, contracts){
     var deltaCls = (c.delta>=0.70&&c.delta<=0.90) ? 'color:var(--amb)' : 'color:var(--gry)';
     var scoreColor = c.totalScore>=65?'var(--amb)':c.totalScore>=45?'var(--wrn)':'var(--ngo)';
 
-    return '<tr style="border-bottom:var(--bdr);transition:background .15s;" onmouseover="this.style.background='rgba(0,212,255,.05)'" onmouseout="this.style.background=''">'+
+    return '<tr style="border-bottom:var(--bdr);transition:background .15s;">'+
       '<td style="padding:8px 14px;'+dteCls+'">'+c.expDate+'</td>'+
       '<td style="padding:8px 14px;'+dteCls+'">'+c.dte+'d</td>'+
       '<td style="padding:8px 14px;color:var(--wht);font-weight:600;">'+DS+fmt2(o.strike)+'</td>'+
