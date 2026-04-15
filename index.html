@@ -5006,15 +5006,9 @@ function finishScan(){
           }
         });
       }, fmpDelay);
-      fmpDelay += 150;
+      fmpDelay += 150; // stagger 150ms
     });
-    setTimeout(function(){ G.results.sort(function(a,b){ return b.score-a.score; }); G.filtered=G.results.slice(); renderBuySig(); renderScan(); }, fmpDelay+500);
   }
-
-  var histTickers=G.results.slice(0,100).map(function(r){ return r.ticker; });
-  var histDelay=0,_histCount=0;
-  histTickers.forEach(function(t){ setTimeout(function(){ fetchIndicatorHistory(t).then(function(days){ if(not days) return; G_HIST_CACHE[t]=days; var r=G.results.filter(function(x){ return x.ticker===t; })[0]; if(r){ var u=scoreIt(t,r.ind,r.opt); r.score=u.score; r.techScore=u.techScore; r.fundScore=u.fundScore; r.isGo=u.isGo; r.rules=u.rules; r.passes=u.passes; _histCount++; if(_histCount%10===0){ G.results.sort(function(a,b){ return b.score-a.score; }); G.filtered=G.results.slice(); renderBuySig(); renderScan(); } } }); }, histDelay); histDelay+=200; });
-  setTimeout(function(){ G.results.sort(function(a,b){ return b.score-a.score; }); G.filtered=G.results.slice(); renderBuySig(); renderScan(); }, histDelay+1000);
 
   var goCount = G.results.filter(function(r){ return r.isGo; }).length;
   addAlert('SYS', 'Scan complete: ' + G.results.length + ' tickers | ' + goCount + ' GO', 'go');
