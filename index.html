@@ -4935,28 +4935,42 @@ function runScan(){
       var sc2 = scoreIt(u.t, ind, usedOpt);
 
       G.results.push({
-        ticker: u.t, sector: u.s, price: u.price,
-        change: u.change, changePct: u.changePct,
-        volume: u.volume, ind: ind, opt: usedOpt,
-        score: sc2.score, techScore: sc2.techScore, fundScore: sc2.fundScore,
-        isGo: sc2.isGo, filtersPass: sc2.filtersPass,
-        rules: sc2.rules, passes: sc2.passes
-      });
-
-      if(idx % 50 === 0){
-        var pct = 65 + (idx / total) * 30;
-        setScanProgress(pct, 'Scored ' + idx + ' / ' + total + ' tickers...');
-      }
+  // Post-scan FMP rescore: fetch FMP for ALL results, rescore, re-render
+  var fmpKey='';try{fmpKey=localStorage.getItem('rrjcar_fmp')||'';}catch(e){}
+  if(!fmpKey && typeof FMP_KEY_DEFAULT !== 'undefined') fmpKey = FMP_KEY_DEFAULT;
+  if(fmpKey){
+    var allScanTickers = G.results.map(function(r){ return r.ticker; });
+    var fmpDelay = 0;
+    var rescoredCount = 0;
+    allScanTickers.forEach(function(t){
+      setTimeout(function(){
+        fetchFmpData(t).then(function(data){
+          if(!data) return;
+          var r = G.results.filter(function(x){ return x.ticker===t; })[0];
+          if(r){
+            var updated = scoreIt(t, r.ind, r.opt);
+            r.score=updated.score; r.techScore=updated.techScore; r.fundScore=updated.fundScore;
+            r.isGo=updated.isGo; r.rules=updated.rules; r.passes=updated.passes;
+            rescoredCount++;
+            // Re-render every 50 tickers so scores update progressively
+            if(rescoredCount % 50 === 0){
+              G.results.sort(function(a,b){ return b.score - a.score; });
+              G.filtered = G.results.slice();
+              renderBuySig(); renderScan();
+            }
+          }
+        });
+      }, fmpDelay);
+      fmpDelay += 100;
     });
+    // Final re-render after all rescoring done
+    setTimeout(function(){
+      G.results.sort(function(a,b){ return b.score - a.score; });
+      G.filtered = G.results.slice();
+      renderBuySig(); renderScan();
+    }, fmpDelay + 500);
+  }
 
-    finishScan();
-  });
-}
-
-function finishScan(){
-  // Rebuild sector dropdown from actual results
-  var sc = eid('sc-sect');
-  var sectors = [...new Set(G.results.map(function(r){ return r.sector; }))].sort();
   sectors.forEach(function(s){
     var o = document.createElement('option');
     o.value = s; o.textContent = s;
