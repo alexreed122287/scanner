@@ -4700,8 +4700,8 @@ async function fetchDynamicUniverse(key, mode){
     var batch = allTickers.slice(b * BATCH_SIZE, (b + 1) * BATCH_SIZE);
     var symbols = batch.map(function(u){ return u.t; }).join(',');
     setScanProgress(
-      10 + Math.round((b / totalBatches) * 30),
-      'Fetching quotes batch ' + (b+1) + '/' + totalBatches + ' (' + allTickers.length + ' tickers total)...'
+      10 + Math.round((b / totalBatches) * 25),
+      'Pass 1 batch ' + (b+1) + '/' + totalBatches + ' (' + allTickers.length + ' tickers)...'
     );
     try {
       var resp = await fetch(host + '/v1/markets/quotes', {
@@ -4720,7 +4720,41 @@ async function fetchDynamicUniverse(key, mode){
         arr.forEach(function(qt){ if(qt && qt.symbol) allQuotes.push(qt); });
       }
     } catch(e) {
-      console.warn('Batch ' + (b+1) + ' fetch failed:', e);
+      console.warn('Pass 1 batch ' + (b+1) + ' failed:', e);
+    }
+  }
+  var gotQuote = {};
+  allQuotes.forEach(function(q){ if(q && q.symbol) gotQuote[q.symbol] = true; });
+  var missed = allTickers.filter(function(u){ return !gotQuote[u.t]; });
+  if(missed.length > 0){
+    var RETRY_SIZE = 50;
+    var retryBatches = Math.ceil(missed.length / RETRY_SIZE);
+    for(var r = 0; r < retryBatches; r++){
+      var rbatch = missed.slice(r * RETRY_SIZE, (r + 1) * RETRY_SIZE);
+      var rsymbols = rbatch.map(function(u){ return u.t; }).join(',');
+      setScanProgress(
+        35 + Math.round((r / retryBatches) * 5),
+        'Pass 2 retry ' + (r+1) + '/' + retryBatches + ' (' + missed.length + ' missed)...'
+      );
+      try {
+        var rresp = await fetch(host + '/v1/markets/quotes', {
+          method: 'POST',
+          headers: {
+            Authorization: 'Bearer ' + key,
+            Accept: 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: 'symbols=' + encodeURIComponent(rsymbols) + '&greeks=false'
+        });
+        var rdata = await rresp.json();
+        var rq = rdata.quotes && rdata.quotes.quote;
+        if(rq){
+          var rarr = Array.isArray(rq) ? rq : [rq];
+          rarr.forEach(function(qt){ if(qt && qt.symbol) allQuotes.push(qt); });
+        }
+      } catch(e) {
+        console.warn('Pass 2 retry ' + (r+1) + ' failed:', e);
+      }
     }
   }
   setScanProgress(40, 'Filtering ' + allQuotes.length + ' quotes by price and volume...');
