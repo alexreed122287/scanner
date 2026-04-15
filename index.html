@@ -4757,7 +4757,52 @@ async function fetchDynamicUniverse(key, mode){
       }
     }
   }
-  setScanProgress(40, 'Filtering ' + allQuotes.length + ' quotes by price and volume...');
+  var fmpKey = '';
+  try{ fmpKey = localStorage.getItem('rrjcar_fmp') || ''; }catch(e){}
+  if(fmpKey){
+    var gotQuote2 = {};
+    allQuotes.forEach(function(q){ if(q && q.symbol) gotQuote2[q.symbol] = true; });
+    var stillMissed = allTickers.filter(function(u){ return !gotQuote2[u.t]; });
+    if(stillMissed.length > 0){
+      var FMP_BATCH = 50;
+      var fmpBatches = Math.ceil(stillMissed.length / FMP_BATCH);
+      var fmpBase = 'https://financialmodelingprep.com/stable';
+      for(var f = 0; f < fmpBatches; f++){
+        var fbatch = stillMissed.slice(f * FMP_BATCH, (f + 1) * FMP_BATCH);
+        var fsymbols = fbatch.map(function(u){ return u.t; }).join(',');
+        setScanProgress(
+          40 + Math.round((f / fmpBatches) * 5),
+          'Pass 3 FMP fallback ' + (f+1) + '/' + fmpBatches + ' (' + stillMissed.length + ' remaining)...'
+        );
+        try {
+          var fresp = await fetch(fmpBase + '/batch-quote-short?symbols=' + encodeURIComponent(fsymbols) + '&apikey=' + fmpKey);
+          var fdata = await fresp.json();
+          if(Array.isArray(fdata)){
+            fdata.forEach(function(fq){
+              if(!fq || !fq.symbol) return;
+              allQuotes.push({
+                symbol: fq.symbol,
+                last: fq.price || 0,
+                prevclose: fq.previousClose || fq.price || 0,
+                change: fq.change || 0,
+                change_percentage: fq.changesPercentage || 0,
+                volume: fq.volume || 0,
+                average_volume: fq.avgVolume || 0,
+                week_52_high: fq.yearHigh || 0,
+                week_52_low: fq.yearLow || 0,
+                _source: 'fmp'
+              });
+            });
+          }
+        } catch(e) {
+          console.warn('Pass 3 FMP batch ' + (f+1) + ' failed:', e);
+        }
+      }
+      var fmpFilled = allQuotes.filter(function(q){ return q._source === 'fmp'; }).length;
+      if(fmpFilled > 0) console.log('FMP fallback filled ' + fmpFilled + ' missing quotes');
+    }
+  }
+  setScanProgress(45, 'Filtering ' + allQuotes.length + ' quotes by price and volume...');
   var quoteMap = {};
   allQuotes.forEach(function(q){ if(q && q.symbol) quoteMap[q.symbol] = q; });
   var passed = [];
