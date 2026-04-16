@@ -918,8 +918,9 @@ tr.sel-row td{background:var(--blu3);}
           <label>ALERT EMAIL ADDRESS</label>
           <input id="notif-email-to" type="email" placeholder="you@example.com" oninput="saveNotifSettings()">
         </div>
-        <div class="ord-field" style="flex:0.5;display:flex;align-items:flex-end;">
+        <div class="ord-field" style="flex:0.5;display:flex;align-items:flex-end;gap:6px;">
           <button class="btn blu" style="font-size:10px;padding:3px 10px;" onclick="testEmailAlert()">SEND TEST</button>
+          <button class="btn" style="font-size:10px;padding:3px 10px;border-color:var(--grn);color:var(--grn);" onclick="saveNotifSettings();toast('Alert settings saved');this.textContent='&#10003; SAVED';var b=this;setTimeout(function(){b.textContent='SAVE';},2000);">SAVE</button>
         </div>
       </div>
       <div class="api-note">
@@ -1191,7 +1192,7 @@ tr.sel-row td{background:var(--blu3);}
       <button class="btn" style="font-size:10px;padding:3px 10px;border-color:var(--ngo);color:var(--ngo);" onclick="cwClearExpired()">CLEAR EXPIRED</button>
     </div>
   </div>
-  <div class="tbl-wrap" id="cw-tbl-wrap">
+  <div class="tbl-wrap" id="cw-tbl-wrap" style="display:block;">
     <div class="empty-det" style="min-height:200px;">
       <div class="ei">&#9734;</div>
       <p>No contracts watched yet — click WATCH next to any contract in the scanner</p>
@@ -1226,24 +1227,38 @@ tr.sel-row td{background:var(--blu3);}
         <!-- Leg 2: buy to open -->
         <div style="background:var(--bg2);border:1px solid rgba(0,212,255,.2);border-radius:4px;padding:10px 12px;">
           <div style="font-size:10px;color:var(--gry);margin-bottom:6px;">New contract</div>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;">
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;align-items:flex-end;">
             <div style="display:flex;flex-direction:column;gap:2px;">
               <label style="font-size:9px;color:var(--gry);">TYPE</label>
-              <select id="roll-new-type" style="background:var(--bg0);border:var(--bdr);color:var(--wht);font-size:11px;padding:2px 4px;" onchange="rollFetchBest()">
+              <select id="roll-new-type" style="background:var(--bg0);border:var(--bdr);color:var(--wht);font-size:11px;padding:2px 4px;" onchange="rollLoadExpirations()">
                 <option>CALL</option><option>PUT</option>
               </select>
             </div>
             <div style="display:flex;flex-direction:column;gap:2px;">
               <label style="font-size:9px;color:var(--gry);">EXPIRY</label>
-              <input type="date" id="roll-new-exp" style="background:var(--bg0);border:var(--bdr);color:var(--wht);font-size:11px;padding:2px 4px;" onchange="rollFetchBest()">
+              <select id="roll-new-exp" style="background:var(--bg0);border:var(--bdr);color:var(--wht);font-size:11px;padding:2px 4px;min-width:110px;" onchange="rollLoadChain()">
+                <option value="">-- load expirations --</option>
+              </select>
             </div>
-            <div style="display:flex;flex-direction:column;gap:2px;">
-              <label style="font-size:9px;color:var(--gry);">MIN DTE</label>
-              <input type="number" id="roll-min-dte" value="21" min="1" step="1" style="width:52px;background:var(--bg0);border:var(--bdr);color:var(--wht);font-size:11px;padding:2px 4px;">
-            </div>
-            <button class="btn blu" style="font-size:10px;padding:3px 10px;align-self:flex-end;" onclick="rollFetchBest()">&#9650; FIND BEST</button>
+            <button class="btn" style="font-size:10px;padding:3px 10px;border-color:var(--gry2);color:var(--gry);" onclick="rollLoadExpirations()">&#8635; LOAD</button>
+            <button class="btn blu" style="font-size:10px;padding:3px 10px;" onclick="rollSelectBest()">&#9650; BEST</button>
           </div>
-          <div id="roll-leg2-info" style="font-size:11px;color:var(--wht);margin-bottom:6px;">--</div>
+          <!-- Contract picker table -->
+          <div id="roll-chain-wrap" style="display:none;max-height:160px;overflow-y:auto;margin-bottom:8px;border:1px solid var(--bg3);border-radius:3px;">
+            <table style="width:100%;font-size:10px;border-collapse:collapse;">
+              <thead><tr style="background:var(--bg3);position:sticky;top:0;">
+                <th style="padding:3px 6px;color:var(--amb);text-align:left;">STRIKE</th>
+                <th style="padding:3px 6px;color:var(--amb);">DELTA</th>
+                <th style="padding:3px 6px;color:var(--amb);">BID</th>
+                <th style="padding:3px 6px;color:var(--amb);">ASK</th>
+                <th style="padding:3px 6px;color:var(--amb);">OI</th>
+                <th style="padding:3px 6px;color:var(--amb);">SCORE</th>
+                <th style="padding:3px 6px;"></th>
+              </tr></thead>
+              <tbody id="roll-chain-body"></tbody>
+            </table>
+          </div>
+          <div id="roll-leg2-info" style="font-size:11px;color:var(--wht);margin-bottom:6px;">-- select expiry and pick a contract --</div>
           <div style="display:flex;gap:6px;align-items:center;font-size:10px;color:var(--gry);">
             <span>Qty:</span><input type="number" id="roll-leg2-qty" min="1" step="1" value="1" style="width:50px;background:var(--bg0);border:var(--bdr);color:var(--wht);padding:2px 5px;font-size:11px;">
             <span>Bid: <b id="roll-leg2-bid" style="color:var(--wrn)">--</b></span>
@@ -6507,16 +6522,18 @@ function doRoll(btn){
   eid('roll-log').style.display='none'; eid('roll-log').innerHTML='';
   eid('roll-status').textContent='';
 
-  // Default new expiry: 30 days out
-  var d = new Date(); d.setDate(d.getDate()+30);
-  eid('roll-new-exp').value = d.toISOString().slice(0,10);
+  // Reset chain state
+  G_roll._chainCache=[];
+  eid('roll-chain-wrap').style.display='none';
+  eid('roll-chain-body').innerHTML='';
 
   // Show modal
   var modal = eid('roll-modal');
   modal.style.display='flex';
 
-  // Fetch leg1 live quote
+  // Fetch leg1 quote and expirations in parallel
   rollFetchLeg1Quote();
+  rollLoadExpirations();
 }
 
 function closeRollModal(){
@@ -6562,13 +6579,55 @@ function rollFetchLeg1Quote(){
   }).catch(function(){});
 }
 
-function rollFetchBest(){
+// Loaded chain cache for current expiry
+G_roll._chainCache = [];
+
+function rollLoadExpirations(){
+  var c=rollGetCreds();
+  if(!G_roll.ticker){return;}
+  var expSel=eid('roll-new-exp');
+  expSel.innerHTML='<option value="">Loading...</option>';
+  eid('roll-chain-wrap').style.display='none';
+  eid('roll-leg2-info').textContent='-- loading expirations --';
+
+  fetch(c.host+'/v1/markets/options/expirations?symbol='+G_roll.ticker+'&includeAllRoots=true',{
+    headers:{Authorization:'Bearer '+c.key,Accept:'application/json'}
+  }).then(function(r){return r.json();})
+  .then(function(data){
+    var dates=(data.expirations&&data.expirations.date)?data.expirations.date:[];
+    if(!Array.isArray(dates)) dates=[dates];
+    var today=new Date(); today.setHours(0,0,0,0);
+    // Filter to future dates and sort
+    dates=dates.filter(function(d){return new Date(d+'T00:00:00')>today;});
+    expSel.innerHTML='<option value="">-- select expiry --</option>';
+    dates.forEach(function(d){
+      var dte=Math.round((new Date(d+'T00:00:00')-today)/86400000);
+      var opt=document.createElement('option');
+      opt.value=d;
+      opt.textContent=d+' ('+dte+'d)';
+      expSel.appendChild(opt);
+    });
+    // Auto-select first expiry >= 21 DTE
+    for(var i=0;i<dates.length;i++){
+      var dte=Math.round((new Date(dates[i]+'T00:00:00')-today)/86400000);
+      if(dte>=21){expSel.value=dates[i];break;}
+    }
+    eid('roll-status').textContent='Select expiry then load chain';
+    if(expSel.value) rollLoadChain();
+  }).catch(function(e){
+    expSel.innerHTML='<option value="">Error loading</option>';
+    eid('roll-status').textContent='Error: '+e.message;
+  });
+}
+
+function rollLoadChain(){
   var c=rollGetCreds();
   var newType=eid('roll-new-type').value;
   var newExp=eid('roll-new-exp').value;
-  if(!newExp){toast('Set expiry date first');return;}
-  eid('roll-leg2-info').textContent='Fetching chain...';
-  eid('roll-status').textContent='Finding best contract...';
+  if(!newExp){return;}
+  eid('roll-leg2-info').textContent='Loading chain...';
+  eid('roll-chain-body').innerHTML='<tr><td colspan="7" style="padding:8px;color:var(--gry);text-align:center;">Loading...</td></tr>';
+  eid('roll-chain-wrap').style.display='block';
 
   fetch(c.host+'/v1/markets/options/chains?symbol='+G_roll.ticker+'&expiration='+newExp+'&greeks=true',{
     headers:{Authorization:'Bearer '+c.key,Accept:'application/json'}
@@ -6576,32 +6635,85 @@ function rollFetchBest(){
   .then(function(data){
     var chain=(data.options&&data.options.option)?data.options.option:[];
     if(!Array.isArray(chain)) chain=[chain];
-    // Filter by type
     chain=chain.filter(function(o){return o.option_type===(newType==='CALL'?'call':'put');});
-    if(!chain.length){eid('roll-leg2-info').textContent='No contracts found for that expiry';return;}
-
-    // Score: prefer delta 0.30-0.50 for OTM roll, OI>100, tight spread
+    if(!chain.length){
+      eid('roll-chain-body').innerHTML='<tr><td colspan="7" style="padding:8px;color:var(--gry);text-align:center;">No contracts</td></tr>';
+      return;
+    }
+    // Score each contract
     chain.forEach(function(o){
       var d=Math.abs(+(o.greeks&&o.greeks.delta)||0);
       var oi=+o.open_interest||0;
       var spread=(+o.ask)-(+o.bid);
       var spreadPct=o.ask>0?spread/o.ask:1;
-      // Score: closer delta to 0.40, more OI, tighter spread
-      o._score = (1-Math.abs(d-0.40))*40 + Math.min(oi/1000,30) + (1-Math.min(spreadPct,1))*30;
+      o._score=Math.round((1-Math.abs(d-0.40))*40+Math.min(oi/1000,30)+(1-Math.min(spreadPct,1))*30);
     });
-    chain.sort(function(a,b){return b._score-a._score;});
-    var best=chain[0];
-    G_roll.leg2={occSym:best.symbol,strike:+best.strike,exp:newExp,type:newType,bid:+best.bid,ask:+best.ask,delta:best.greeks?best.greeks.delta:null};
-    eid('roll-leg2-info').innerHTML='<b style="color:var(--amb)">'+best.symbol+'</b>'
-      +' $'+fmt2(+best.strike)+' '+(best.greeks?'δ'+fmt2(Math.abs(+best.greeks.delta)):'');
-    eid('roll-leg2-bid').textContent='$'+fmt2(+best.bid);
-    eid('roll-leg2-ask').textContent='$'+fmt2(+best.ask);
-    eid('roll-status').textContent='Best contract found';
-    rollUpdateNet();
+    chain.sort(function(a,b){return +a.strike - +b.strike;});
+    G_roll._chainCache=chain;
+    G_roll._chainExp=newExp;
+    G_roll._chainType=newType;
+
+    // Render table
+    var tbody=eid('roll-chain-body');
+    var bestScore=Math.max.apply(null,chain.map(function(o){return o._score;}));
+    tbody.innerHTML=chain.map(function(o){
+      var d=o.greeks?fmt2(Math.abs(+o.greeks.delta)):'--';
+      var oi=fmtK(+o.open_interest||0);
+      var isBest=o._score===bestScore;
+      var rowCls=isBest?'background:rgba(0,212,255,0.07);':'';
+      var bestTag=isBest?'<span style="color:var(--amb);font-size:9px;">★</span> ':'';
+      return '<tr style="border-bottom:1px solid var(--bg3);'+rowCls+'" data-sym="'+o.symbol+'">'
+        +'<td style="padding:3px 6px;color:var(--wht);">$'+fmt2(+o.strike)+'</td>'
+        +'<td style="padding:3px 6px;color:var(--gry);text-align:center;">'+d+'</td>'
+        +'<td style="padding:3px 6px;color:var(--wrn);text-align:center;">$'+fmt2(+o.bid)+'</td>'
+        +'<td style="padding:3px 6px;color:var(--amb);text-align:center;">$'+fmt2(+o.ask)+'</td>'
+        +'<td style="padding:3px 6px;color:var(--gry);text-align:center;">'+oi+'</td>'
+        +'<td style="padding:3px 6px;color:var(--ambb);text-align:center;">'+bestTag+o._score+'</td>'
+        +'<td style="padding:3px 6px;"><button onclick="rollSelectContract(''+o.symbol+'')" '
+        +'style="background:none;border:1px solid rgba(0,212,255,0.3);color:var(--amb);font-size:9px;padding:1px 6px;cursor:pointer;border-radius:2px;">SELECT</button></td>'
+        +'</tr>';
+    }).join('');
+    // Auto-highlight best
+    rollSelectBest();
   }).catch(function(e){
-    eid('roll-leg2-info').textContent='Error fetching chain';
-    eid('roll-status').textContent='Error: '+e.message;
+    eid('roll-chain-body').innerHTML='<tr><td colspan="7" style="padding:8px;color:var(--ngo);text-align:center;">Error: '+e.message+'</td></tr>';
   });
+}
+
+function rollSelectContract(sym){
+  var chain=G_roll._chainCache||[];
+  var o=null;
+  for(var i=0;i<chain.length;i++){if(chain[i].symbol===sym){o=chain[i];break;}}
+  if(!o) return;
+  var newExp=G_roll._chainExp||eid('roll-new-exp').value;
+  var newType=G_roll._chainType||eid('roll-new-type').value;
+  G_roll.leg2={occSym:o.symbol,strike:+o.strike,exp:newExp,type:newType,bid:+o.bid,ask:+o.ask,delta:o.greeks?o.greeks.delta:null};
+  eid('roll-leg2-info').innerHTML='<b style="color:var(--amb)">'+o.symbol+'</b>'
+    +' $'+fmt2(+o.strike)+' '+(o.greeks?'δ'+fmt2(Math.abs(+o.greeks.delta)):'');
+  eid('roll-leg2-bid').textContent='$'+fmt2(+o.bid);
+  eid('roll-leg2-ask').textContent='$'+fmt2(+o.ask);
+  eid('roll-status').textContent='Contract selected';
+  // Highlight selected row
+  var rows=eid('roll-chain-body').querySelectorAll('tr');
+  rows.forEach(function(r){r.style.background=r.dataset.sym===sym?'rgba(0,212,255,0.12)':'';});
+  rollUpdateNet();
+}
+
+function rollSelectBest(){
+  var chain=G_roll._chainCache||[];
+  if(!chain.length){
+    var newExp=eid('roll-new-exp').value;
+    if(newExp) rollLoadChain();
+    return;
+  }
+  var bestScore=Math.max.apply(null,chain.map(function(o){return o._score;}));
+  var best=null;
+  for(var i=0;i<chain.length;i++){if(chain[i]._score===bestScore){best=chain[i];break;}}
+  if(best) rollSelectContract(best.symbol);
+}
+
+function rollFetchBest(){
+  rollLoadExpirations();
 }
 
 function rollUpdateNet(){
