@@ -399,6 +399,7 @@ tr.sel-row td{background:var(--blu3);}
     <span id="clk">--:--:--</span>
     <span id="mkt-status">--</span>
     <span id="mode-badge">SANDBOX</span>
+    <span id="api-counter-badge" title="Tradier API calls today (resets at midnight). Click to view breakdown." onclick="showApiBreakdown()" style="cursor:pointer;background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.25);border-radius:3px;padding:1px 7px;font-size:10px;font-family:var(--ff-mono);color:var(--amb);letter-spacing:.5px;user-select:none;">API: 0</span>
   </div>
 </div>
 <div id="nav">
@@ -1270,6 +1271,20 @@ tr.sel-row td{background:var(--blu3);}
     </div>
   </div>
 </div>
+<div id="api-breakdown-modal" style="display:none;position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,.75);backdrop-filter:blur(3px);align-items:flex-start;justify-content:center;padding-top:60px;" onclick="if(event.target===this)this.style.display='none'">
+  <div style="background:var(--bg1);border:1px solid var(--amb);border-radius:8px;width:420px;max-width:94vw;max-height:70vh;overflow:hidden;display:flex;flex-direction:column;">
+    <div style="background:var(--bg2);border-bottom:var(--bdr);padding:8px 14px;display:flex;align-items:center;justify-content:space-between;">
+      <span style="font-family:var(--ff-brand);font-size:12px;color:var(--amb);letter-spacing:2px;">API CALL LOG</span>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span id="api-modal-total" style="font-size:11px;color:var(--gry);font-family:var(--ff-mono);"></span>
+        <button class="btn" style="font-size:10px;padding:2px 8px;border-color:var(--wrn);color:var(--wrn);" onclick="clearApiLog()">CLEAR</button>
+        <button class="btn" style="font-size:10px;padding:2px 8px;" onclick="document.getElementById('api-breakdown-modal').style.display='none'">&#10005;</button>
+      </div>
+    </div>
+    <div style="padding:8px 14px;border-bottom:var(--bdr);display:flex;gap:16px;flex-wrap:wrap;" id="api-summary-row"></div>
+    <div id="api-log-list" style="overflow-y:auto;flex:1;font-size:10px;font-family:var(--ff-mono);padding:6px 10px;line-height:1.9;"></div>
+  </div>
+</div>
 <div id="toast"></div>
 
 <!-- ── CONTRACT PANEL MODAL ── -->
@@ -1341,6 +1356,168 @@ tr.sel-row td{background:var(--blu3);}
 </div>
 
 <script>
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  API CALL COUNTER — intercepts all Tradier fetch() calls
+// ═══════════════════════════════════════════════════════════════════════════
+(function(){
+  var STORE_KEY = 'op_api_log';
+  var TRADIER_HOSTS = ['api.tradier.com','sandbox.tradier.com'];
+
+  function isTradier(url){
+    try{
+      var h = (typeof url==='string') ? url : url.url||'';
+      return TRADIER_HOSTS.some(function(d){return h.indexOf(d)!==-1;});
+    }catch(e){return false;}
+  }
+
+  function endpointLabel(url){
+    var s = typeof url==='string'?url:(url.url||'');
+    var ep = s.split('?')[0];
+    // strip host
+    ep = ep.replace(/https?:\/\/[^/]+/,'');
+    // shorten common paths
+    var map = [
+      ['/v1/markets/history','history'],
+      ['/v1/markets/timesales','timesales'],
+      ['/v1/markets/options/chains','opt-chain'],
+      ['/v1/markets/options/expirations','opt-exp'],
+      ['/v1/markets/options/quotes','opt-quote'],
+      ['/v1/markets/quotes','quotes'],
+      ['/v1/accounts/',function(u){
+        if(u.indexOf('/orders')!==-1) return 'orders';
+        if(u.indexOf('/positions')!==-1) return 'positions';
+        if(u.indexOf('/balances')!==-1) return 'balances';
+        return 'account';
+      }],
+      ['/v1/user/profile','profile'],
+    ];
+    for(var i=0;i<map.length;i++){
+      if(ep.indexOf(map[i][0])!==-1){
+        return typeof map[i][1]==='function'?map[i][1](ep):map[i][1];
+      }
+    }
+    return ep.slice(0,28);
+  }
+
+  function loadLog(){
+    try{
+      var raw=localStorage.getItem(STORE_KEY);
+      if(!raw) return {date:'',calls:[],counts:{}};
+      return JSON.parse(raw);
+    }catch(e){return {date:'',calls:[],counts:{}};}
+  }
+
+  function saveLog(log){
+    try{localStorage.setItem(STORE_KEY,JSON.stringify(log));}catch(e){}
+  }
+
+  function todayStr(){
+    return new Date().toLocaleDateString('en-US',{month:'numeric',day:'numeric',year:'2-digit'});
+  }
+
+  function record(label, method){
+    var log = loadLog();
+    var today = todayStr();
+    if(log.date !== today){ log = {date:today, calls:[], counts:{}}; }
+    var ts = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
+    log.calls.push({t:ts, ep:label, m:method||'GET'});
+    log.counts[label] = (log.counts[label]||0)+1;
+    // Keep last 500 entries only
+    if(log.calls.length>500) log.calls=log.calls.slice(-500);
+    saveLog(log);
+    updateBadge(log.calls.length);
+  }
+
+  function updateBadge(n){
+    var el=document.getElementById('api-counter-badge');
+    if(!el) return;
+    el.textContent='API: '+n;
+    // Color ramp: green < 100, amber < 200, red >= 200
+    el.style.borderColor = n<100?'rgba(0,230,118,0.4)':n<200?'rgba(255,215,64,0.4)':'rgba(255,0,230,0.5)';
+    el.style.color = n<100?'var(--grn)':n<200?'var(--wrn)':'var(--ngo)';
+    el.style.background = n<100?'rgba(0,230,118,0.07)':n<200?'rgba(255,215,64,0.07)':'rgba(255,0,230,0.08)';
+  }
+
+  // Patch window.fetch
+  var _fetch = window.fetch.bind(window);
+  window.fetch = function(input, init){
+    if(isTradier(input)){
+      var method = (init&&init.method)||'GET';
+      var label = endpointLabel(input);
+      record(label, method);
+    }
+    return _fetch(input, init);
+  };
+
+  // Init badge on load from stored log
+  window.addEventListener('DOMContentLoaded', function(){
+    var log = loadLog();
+    if(log.date===todayStr()) updateBadge(log.calls.length);
+  });
+
+  // Midnight reset
+  window.__apiLogScheduleMidnight = function(){
+    var now=new Date(), next=new Date(now);
+    next.setDate(next.getDate()+1); next.setHours(0,0,3,0);
+    setTimeout(function(){
+      saveLog({date:todayStr(),calls:[],counts:{}});
+      updateBadge(0);
+      var el=document.getElementById('api-log-list');
+      if(el) el.innerHTML='';
+      window.__apiLogScheduleMidnight();
+    }, next-now);
+  };
+  window.__apiLogScheduleMidnight();
+
+})();
+
+window.showApiBreakdown = function(){
+  var log = (function(){try{var r=localStorage.getItem('op_api_log');return r?JSON.parse(r):{date:'',calls:[],counts:{}};}catch(e){return {date:'',calls:[],counts:{}};}})();
+  var modal = document.getElementById('api-breakdown-modal');
+  var total = log.calls ? log.calls.length : 0;
+
+  document.getElementById('api-modal-total').textContent = total+' calls today ('+( log.date||'--')+')';
+
+  // Summary row — counts per endpoint type
+  var sumEl = document.getElementById('api-summary-row');
+  var counts = log.counts||{};
+  var keys = Object.keys(counts).sort(function(a,b){return counts[b]-counts[a];});
+  var colors = {
+    'quotes':'var(--amb)','opt-chain':'var(--blu)','opt-exp':'var(--blub)',
+    'history':'var(--grn)','timesales':'var(--grn)','orders':'var(--ngo)',
+    'positions':'var(--ambb)','balances':'var(--gry)','opt-quote':'var(--amb3)'
+  };
+  sumEl.innerHTML = keys.map(function(k){
+    var c=colors[k]||'var(--gry)';
+    return '<span style="font-size:10px;font-family:var(--ff-mono);"><span style="color:'+c+'">'+k+'</span>'
+      +' <b style="color:var(--wht)">'+counts[k]+'</b></span>';
+  }).join('<span style="color:var(--bg3);margin:0 2px;">|</span>');
+
+  // Log list — newest first
+  var listEl = document.getElementById('api-log-list');
+  var calls = (log.calls||[]).slice().reverse();
+  listEl.innerHTML = calls.map(function(c){
+    var mc = c.m==='POST'?'color:var(--ngo)':'color:var(--gry)';
+    return '<div><span style="color:var(--gry2)">'+c.t+'</span>'
+      +' <span style="'+mc+'">'+c.m+'</span>'
+      +' <span style="color:var(--amb)">'+c.ep+'</span></div>';
+  }).join('');
+
+  modal.style.display='flex';
+};
+
+window.clearApiLog = function(){
+  try{localStorage.removeItem('op_api_log');}catch(e){}
+  var el=document.getElementById('api-counter-badge');
+  if(el){el.textContent='API: 0';el.style.borderColor='rgba(0,212,255,0.25)';el.style.color='var(--amb)';el.style.background='rgba(0,212,255,0.08)';}
+  var li=document.getElementById('api-log-list');if(li)li.innerHTML='';
+  var su=document.getElementById('api-summary-row');if(su)su.innerHTML='';
+  var mt=document.getElementById('api-modal-total');if(mt)mt.textContent='0 calls today';
+  document.getElementById('api-breakdown-modal').style.display='none';
+  toast('API log cleared');
+};
+
 // FMP circuit breaker — once an endpoint fails, stop trying for the session
 window._fmpDead = false;
 
