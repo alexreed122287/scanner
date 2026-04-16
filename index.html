@@ -2440,26 +2440,55 @@ function switchTab(id){
   var idx=ids.indexOf(id);
   var btns=document.querySelectorAll('.ntab');
   if(btns[idx])btns[idx].classList.add('active');
-  if(id==='mb')renderBreadth();
+  if(id==='mb'){
+    // Restore from cache immediately, refresh in background only during market hours
+    var bc=cacheGet(CACHE_KEYS.breadth);
+    if(bc){
+      try{
+        if(bc.mb   && eid('mb-body'))         eid('mb-body').innerHTML=bc.mb;
+        if(bc.idx  && eid('mb-indices-body')) eid('mb-indices-body').innerHTML=bc.idx;
+        if(bc.scan && eid('mb-scan-body'))    eid('mb-scan-body').innerHTML=bc.scan;
+        if(bc.sect && eid('sect-body'))       eid('sect-body').innerHTML=bc.sect;
+        if(bc.ts   && eid('mb-ts'))           eid('mb-ts').textContent='Cached: '+bc.ts;
+      }catch(_e){}
+      var now=new Date(),et=new Date(now.toLocaleString('en-US',{timeZone:'America/New_York'}));
+      var mins=et.getHours()*60+et.getMinutes(),day=et.getDay();
+      if(day>=1&&day<=5&&mins>=(9*60+30)&&mins<=(16*60)) runMarketBreadth();
+    } else {
+      runMarketBreadth();
+    }
+  }
   if(id==='al')renderAlerts();
-  if(id==='closed')fetchClosedPositions();
-  if(id==='cw'){cwRenderTable();cwRefreshAll();}
+  if(id==='closed'){
+    // Load from cache first, show stale banner
+    var cachedClosed = cacheGet('op_cache_closed');
+    if(cachedClosed){
+      G_closed.trades = cachedClosed.trades||[];
+      G_closed.raw    = cachedClosed.raw||[];
+      renderClosedTable();
+      var clAge=cacheAge('op_cache_closed_ts');
+      showStaleBanner('tab-closed','Showing cached trade history'+(clAge?' ('+clAge+')':'')+' — not live','fetchClosedPositions');
+    } else {
+      fetchClosedPositions();
+    }
+  }
+  if(id==='cw'){cwRenderTable();}
   if(id==='order'){
     var sym=eid('ord-sym').value.trim();
     if(sym)fetchLiveQuote();
   }
-  // Positions tab: start periodic 60s auto-refresh while tab is active
+  // Positions tab: restore from cache, no auto-fetch, no poller on tab switch
   if(G.posRefreshTimer){ clearInterval(G.posRefreshTimer); G.posRefreshTimer=null; }
   if(id==='pos'){
-    if(G.acctId) fetchPositions();
-    G.posRefreshTimer = setInterval(function(){
-      var activePane = document.querySelector('.tab-pane.active');
-      if(activePane && activePane.id === 'tab-pos' && G.acctId){
-        fetchPositions();
-      } else {
-        clearInterval(G.posRefreshTimer); G.posRefreshTimer=null;
-      }
-    }, 60000);
+    var cp=cacheGet(CACHE_KEYS.positions);
+    var cl=cacheGet(CACHE_KEYS.posLabel);
+    if(cp&&cp.length&&!G._posLoadedLive){
+      renderPositionsTable(cp,(cl||'[CACHED]')+' — cached');
+      var pa=cacheAge(CACHE_KEYS.posTs);
+      showStaleBanner('tab-pos','Showing cached positions'+(pa?' ('+pa+')':'')+' — not live','fetchPositions');
+    } else if(G.acctId){
+      fetchPositions();
+    }
   }
 }
 
@@ -4928,7 +4957,11 @@ function finishScan(){
 
   var goCount = G.results.filter(function(r){ return r.isGo; }).length;
   addAlert('SYS', 'Scan complete: ' + G.results.length + ' tickers | ' + goCount + ' GO', 'go');
-  toast('Scan complete \u2014 ' + G.results.length + ' tickers');
+  toast('Scan complete — ' + G.results.length + ' tickers');
+  // Cache scan results for reload
+  cacheSet(CACHE_KEYS.scanResults, G.results);
+  cacheSet(CACHE_KEYS.scanTs, Date.now());
+  hideStaleBanner('tab-bs');
   if(G.results.length > 0 && !G.selTicker){ viewDetail(G.results[0].ticker, 'bs-detail', 'bs-empty'); }
   // Check for high-conviction signals after scan
   checkHighConvictionSignals(G.results);
@@ -5559,6 +5592,14 @@ function toggleTsRow(sym){
 }
 
 function renderPositionsTable(pos,srcLabel){
+  // Cache live positions so page reload doesn't need an API call
+  if(pos&&pos.length&&srcLabel&&srcLabel.indexOf('cached')===-1){
+    cacheSet(CACHE_KEYS.positions, pos);
+    cacheSet(CACHE_KEYS.posLabel, srcLabel);
+    cacheSet(CACHE_KEYS.posTs, Date.now());
+    G._posLoadedLive = true;
+    hideStaleBanner('tab-pos');
+  }
   eid('pos-src').textContent=srcLabel||'';
   var wrap=eid('pos-tbl-wrap');
   if(!pos.length){wrap.innerHTML='<div class="empty-det" style="min-height:200px;"><div class="ei">\u25a0</div><p>No open positions</p></div>';return;}
@@ -6967,6 +7008,10 @@ function fetchClosedPositions(){
 }
 
 function renderClosedTable(){
+  // Cache closed trade history
+  cacheSet('op_cache_closed',{trades:G_closed.trades||[],raw:G_closed.raw||[]});
+  cacheSet('op_cache_closed_ts', Date.now());
+  hideStaleBanner('tab-closed');
   var wrap=eid('cl-tbl-wrap');
   var filter=eid('cl-filter').value;
   var symFilter=(eid('cl-sym-filter').value||'').trim().toUpperCase();
@@ -7302,9 +7347,32 @@ async function runMarketBreadth(){
   if(eid('sect-body')) eid('sect-body').innerHTML=sectHtml;
 
   eid('mb-ts').textContent='Updated: '+new Date().toLocaleTimeString();
+  // Cache all breadth panel HTML for restore on reload
+  try{
+    var bc={
+      mb:  eid('mb-body')         ? eid('mb-body').innerHTML         : '',
+      idx: eid('mb-indices-body') ? eid('mb-indices-body').innerHTML : '',
+      scan:eid('mb-scan-body')    ? eid('mb-scan-body').innerHTML    : '',
+      sect:eid('sect-body')       ? eid('sect-body').innerHTML       : '',
+      ts:  new Date().toLocaleTimeString()
+    };
+    cacheSet(CACHE_KEYS.breadth, bc);
+    cacheSet(CACHE_KEYS.breadthTs, Date.now());
+  }catch(_e){}
 }
 
-function renderBreadth(){ runMarketBreadth(); }
+function renderBreadth(){
+  // Restore from cache first, then refresh in background
+  var bc=cacheGet(CACHE_KEYS.breadth);
+  if(bc){
+    if(bc.mb   && eid('mb-body'))          eid('mb-body').innerHTML=bc.mb;
+    if(bc.idx  && eid('mb-indices-body'))  eid('mb-indices-body').innerHTML=bc.idx;
+    if(bc.scan && eid('mb-scan-body'))     eid('mb-scan-body').innerHTML=bc.scan;
+    if(bc.sect && eid('sect-body'))        eid('sect-body').innerHTML=bc.sect;
+    if(bc.ts   && eid('mb-ts'))            eid('mb-ts').textContent='Cached: '+bc.ts;
+  }
+  runMarketBreadth();
+}
 
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 //  NOTIFICATION ENGINE
@@ -8151,6 +8219,7 @@ function updateHeaderQuotes(){
       {sym:'GLD',   id:'gld'},
       {sym:'$SPX.X',id:'spx'}
     ];
+    var hqCache={};
     pairs.forEach(function(p){
       var q=qmap[p.sym];
       if(!q) return;
@@ -8158,12 +8227,15 @@ function updateHeaderQuotes(){
       var chgPct=parseFloat(q.change_percentage)||0;
       var el=eid('h-'+p.id);
       if(el) el.textContent='$'+fmt2(price);
+      hqCache[p.id]=price;
       var cel=eid('h-'+p.id+'-c');
       if(cel){
         cel.textContent='('+(chgPct>=0?'+':'')+chgPct.toFixed(2)+'%)';
         cel.className='tc '+(chgPct>=0?'up':'dn');
       }
     });
+    // Cache header quotes for page reload
+    try{cacheSet(CACHE_KEYS.headerQ,hqCache);cacheSet(CACHE_KEYS.headerTs,Date.now());}catch(_e){}
   })
   .catch(function(){
     // Silently fail \u2014 keep showing last values
@@ -8799,35 +8871,154 @@ async function cwRefreshAll(){
   toast('Watchlist refreshed');
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+//  CACHE HELPERS — save/restore last-known data without API calls
+// ═══════════════════════════════════════════════════════════════════════════
+var CACHE_KEYS = {
+  positions:   'op_cache_positions',
+  posLabel:    'op_cache_pos_label',
+  headerQ:     'op_cache_header_quotes',
+  breadth:     'op_cache_breadth',
+  scanResults: 'op_cache_scan_results',
+  scanTs:      'op_cache_scan_ts',
+  posTs:       'op_cache_pos_ts',
+  breadthTs:   'op_cache_breadth_ts',
+  headerTs:    'op_cache_header_ts',
+};
+
+function cacheSet(key, val){
+  try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){}
+}
+function cacheGet(key){
+  try{ var v=localStorage.getItem(key); return v?JSON.parse(v):null; }catch(e){return null;} 
+}
+function cacheAge(tsKey){
+  var ts=cacheGet(tsKey);
+  if(!ts) return null;
+  var mins=Math.round((Date.now()-ts)/60000);
+  return mins<60 ? mins+'m ago' : Math.round(mins/60)+'h ago';
+}
+
+function showStaleBanner(id, msg, refreshFn){
+  var el=document.getElementById(id);
+  if(!el) return;
+  // Remove existing banner
+  var old=document.getElementById('stale-'+id);
+  if(old) old.remove();
+  var bar=document.createElement('div');
+  bar.id='stale-'+id;
+  bar.style.cssText='background:rgba(255,215,64,0.08);border-bottom:1px solid rgba(255,215,64,0.2);'
+    +'padding:4px 12px;font-size:10px;color:var(--wrn);display:flex;align-items:center;gap:10px;flex-shrink:0;';
+  bar.innerHTML='<span>&#9888; '+msg+'</span>'
+    +'<button onclick="('+refreshFn+')()" style="background:none;border:1px solid rgba(255,215,64,0.3);'
+    +'color:var(--wrn);font-size:9px;padding:1px 8px;border-radius:2px;cursor:pointer;font-family:var(--ff);">'
+    +'&#8635; REFRESH NOW</button>';
+  el.insertBefore(bar, el.firstChild);
+}
+
+function hideStaleBanner(id){
+  var old=document.getElementById('stale-'+id);
+  if(old) old.remove();
+}
+
 function init(){
   loadKeys();
   loadWL();
   loadAppSettings();
-  /* removed */;
   loadNotifSettings();
   loadAutoTraderSettings();
   loadAutoTraderState();
-  // showVersionBanner();  // Disabled — annoying popup
   updateClock();
-  updateHeaderQuotes();
   setInterval(updateClock, 1000);
-  setInterval(function(){
-    var now = new Date();
-    var et = new Date(now.toLocaleString('en-US',{timeZone:'America/New_York'}));
-    var mins = et.getHours()*60 + et.getMinutes();
-    var day = et.getDay();
-    if(day>=1&&day<=5&&mins>=(9*60+30)&&mins<=(16*60)) updateHeaderQuotes();
-  }, 60000);
   setInterval(saveAppSettings, 60000);
-  setInterval(function(){
-    var activePane = document.querySelector('.tab-pane.active');
-    if(activePane && activePane.id === 'tab-cw') cwRefreshAll();
-  }, 300000);
-  setInterval(runMarketBreadth, 300000);        // breadth: every 5 minutes
-  runScan();
+
+  // ── Restore cached data — ZERO API calls on load ────────────────────────
+
+  // 1. Scan results
+  var cachedScan = cacheGet(CACHE_KEYS.scanResults);
+  if(cachedScan && cachedScan.length){
+    G.results = cachedScan;
+    G.filtered = cachedScan;
+    renderSignals();
+    var scanAge = cacheAge(CACHE_KEYS.scanTs);
+    showStaleBanner('tab-bs', 'Showing last scan'+(scanAge?' ('+scanAge+')':'')+' — no live data loaded yet', 'runScan');
+  }
+
+  // 2. Positions
+  var cachedPos = cacheGet(CACHE_KEYS.positions);
+  var cachedPosLabel = cacheGet(CACHE_KEYS.posLabel);
+  if(cachedPos && cachedPos.length){
+    G.positions = cachedPos;
+    renderPositionsTable(cachedPos, (cachedPosLabel||'[CACHED]')+' — cached');
+    var posAge = cacheAge(CACHE_KEYS.posTs);
+    showStaleBanner('tab-pos', 'Showing cached positions'+(posAge?' ('+posAge+')':'')+' — not live', 'fetchPositions');
+  }
+
+  // 3. Header quotes — restore last known values silently, no banner needed
+  var cachedHQ = cacheGet(CACHE_KEYS.headerQ);
+  if(cachedHQ){
+    try{
+      var _hqIds=['spy','qqq','dia','iwm','vix','gld','spx'];
+      _hqIds.forEach(function(id){
+        if(cachedHQ[id]!==undefined){
+          var _e=eid('h-'+id);
+          if(_e) _e.textContent='$'+fmt2(cachedHQ[id]);
+        }
+      });
+    }catch(e){}
+  } else {
+    // No cache yet — fire one header quote fetch after 5s
+    setTimeout(updateHeaderQuotes, 5000);
+  }
+
+  // 4. Market breadth — restore cached panels
+  var cachedBreadth = cacheGet(CACHE_KEYS.breadth);
+  if(cachedBreadth){
+    try{
+      if(cachedBreadth.mb   && eid('mb-body'))         eid('mb-body').innerHTML=cachedBreadth.mb;
+      if(cachedBreadth.idx  && eid('mb-indices-body')) eid('mb-indices-body').innerHTML=cachedBreadth.idx;
+      if(cachedBreadth.scan && eid('mb-scan-body'))    eid('mb-scan-body').innerHTML=cachedBreadth.scan;
+      if(cachedBreadth.sect && eid('sect-body'))       eid('sect-body').innerHTML=cachedBreadth.sect;
+      if(cachedBreadth.ts   && eid('mb-ts'))           eid('mb-ts').textContent='Cached: '+cachedBreadth.ts;
+    }catch(e){}
+  }
+
+  // 5. Watchlist — no API, just re-render from stored tickers
   refreshWL();
-  setTimeout(runMarketBreadth, 3000);           // initial breadth load after 3s
-  addAlert('SYS','RRJCAR Terminal v'+APP_VERSION+' initialized','go');
+
+  // ── Schedule periodic refreshes ONLY while tab is active ────────────────
+  // Header quotes: refresh every 60s during market hours only
+  setInterval(function(){
+    var now=new Date();
+    var et=new Date(now.toLocaleString('en-US',{timeZone:'America/New_York'}));
+    var mins=et.getHours()*60+et.getMinutes();
+    var day=et.getDay();
+    if(day>=1&&day<=5&&mins>=(9*60+25)&&mins<=(16*60+5)) updateHeaderQuotes();
+  }, 60000);
+
+  // Market breadth: every 5 min during market hours only, active tab only
+  setInterval(function(){
+    var now=new Date();
+    var et=new Date(now.toLocaleString('en-US',{timeZone:'America/New_York'}));
+    var mins=et.getHours()*60+et.getMinutes();
+    var day=et.getDay();
+    var isMarketHours=day>=1&&day<=5&&mins>=(9*60+30)&&mins<=(16*60);
+    var activePane=document.querySelector('.tab-pane.active');
+    if(isMarketHours && activePane && activePane.id==='tab-mb') runMarketBreadth();
+  }, 300000);
+
+  // Contract watchlist: only refresh when CW tab is active and market is open
+  setInterval(function(){
+    var now=new Date();
+    var et=new Date(now.toLocaleString('en-US',{timeZone:'America/New_York'}));
+    var mins=et.getHours()*60+et.getMinutes();
+    var day=et.getDay();
+    var isMarketHours=day>=1&&day<=5&&mins>=(9*60+30)&&mins<=(16*60);
+    var activePane=document.querySelector('.tab-pane.active');
+    if(isMarketHours && activePane && activePane.id==='tab-cw') cwRefreshAll();
+  }, 300000);
+
+  addAlert('SYS','Option Panda v'+APP_VERSION+' initialized — cached data loaded, no API calls on startup','go');
 }
 window.addEventListener('DOMContentLoaded',init);</script>
 </body>
