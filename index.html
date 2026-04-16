@@ -381,6 +381,7 @@ tr.sel-row td{background:var(--blu3);}
 .tbl-wrap tbody tr:hover{background:rgba(0,212,255,0.04);}
 
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
 </head>
 <body>
 <div id="hdr">
@@ -3404,9 +3405,7 @@ function buildDetail(r,detId,emptyId){
     +'<div class="chain-tab active" id="dtab-signals" onclick="switchDetTab(\''+r.ticker+'\',\'signals\')">SIGNALS</div>'
     +'<div class="chain-tab" id="dtab-chain" onclick="switchDetTab(\''+r.ticker+'\',\'chain\')">&#9783; OPTION CHAIN</div>'
     +'</div>'
-    +'<div id="det-signals-'+r.ticker+'" style="display:flex;flex-direction:column;overflow:hidden;flex:1;">'
-    +''
-    +'<div class="det-scroll">'
+    +'<div id="det-signals-'+r.ticker+'" style="display:flex;flex-direction:column;overflow:hidden;flex:1;">'    +'<div id="chart-wrap-'+r.ticker+'" style="flex-shrink:0;height:220px;background:var(--bg0);border-bottom:1px solid var(--bg3);position:relative;">'    +'<div id="chart-ec-'+r.ticker+'" style="width:100%;height:100%;"></div>'    +'<div id="chart-loading-'+r.ticker+'" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--gry);font-size:11px;font-family:var(--ff-mono);letter-spacing:1px;">LOADING CHART...</div>'    +'</div>'    +'<div class="det-scroll">'
     +'<div class="s-hdr">TECHNICAL INDICATORS</div>'
     +'<div class="ind-grid">'
     +'<div class="ig-cell"><div class="ig-lbl">RSI(14)</div><div class="ig-val '+(ind.rsi<40||ind.rsi>70?'warn':'')+'">'+ind.rsi+'</div></div>'
@@ -3455,6 +3454,153 @@ function buildDetail(r,detId,emptyId){
     sigDiv.style.overflow = 'hidden';
   }
   // TV charts removed
+  // Render ECharts daily candle chart for this ticker
+  renderTickerChart(r.ticker);
+}
+
+function renderTickerChart(ticker) {
+  var loadEl = document.getElementById('chart-loading-' + ticker);
+  var chartEl = document.getElementById('chart-ec-' + ticker);
+  if (!chartEl) return;
+
+  var mode = localStorage.getItem('rrjcar_mode') || 'sandbox';
+  var host = mode === 'live' ? 'https://api.tradier.com' : 'https://sandbox.tradier.com';
+  var tk = '';
+  try {
+    tk = mode === 'live'
+      ? (localStorage.getItem('rrjcar_tradier_live') || localStorage.getItem('rrjcar_tradier') || '')
+      : (localStorage.getItem('rrjcar_tradier_sandbox') || localStorage.getItem('rrjcar_tradier') || '');
+    if (!tk) tk = (typeof TRADIER_KEY_DEFAULT !== 'undefined') ? TRADIER_KEY_DEFAULT : '';
+  } catch(e) {}
+
+  var end = new Date();
+  var start = new Date(); start.setDate(start.getDate() - 120);
+  var fmt = function(d){ return d.toISOString().slice(0,10); };
+
+  fetch(host + '/v1/markets/history?symbol=' + ticker + '&interval=daily&start=' + fmt(start) + '&end=' + fmt(end), {
+    headers: { 'Authorization': 'Bearer ' + tk, 'Accept': 'application/json' }
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data) {
+    if (loadEl) loadEl.style.display = 'none';
+    var days = (data.history && data.history.day) ? data.history.day : [];
+    if (!Array.isArray(days)) days = [days];
+    if (!days.length) { if (loadEl) { loadEl.style.display='flex'; loadEl.textContent='NO DATA'; } return; }
+
+    var labels = days.map(function(d){ return d.date.slice(5); });
+    var closes = days.map(function(d){ return +d.close; });
+
+    function calcEma(data, period) {
+      var k = 2 / (period + 1), out = [], prev = null;
+      data.forEach(function(v, i) {
+        if (i < period - 1) { out.push(null); return; }
+        if (prev === null) { prev = data.slice(0, period).reduce(function(a,b){return a+b;},0)/period; out.push(+prev.toFixed(2)); return; }
+        prev = v * k + prev * (1 - k);
+        out.push(+prev.toFixed(2));
+      });
+      return out;
+    }
+
+    var ema10 = calcEma(closes, 10);
+    var ema20 = calcEma(closes, 20);
+    var ema50 = calcEma(closes, 50);
+
+    function findSR(data, lb) {
+      lb = lb || 4;
+      var highs = [], lows = [];
+      for (var i = lb; i < data.length - lb; i++) {
+        var h = data[i].high, l = data[i].low;
+        var isH = true, isL = true;
+        for (var j = i-lb; j < i; j++) { if(data[j].high > h) isH=false; if(data[j].low < l) isL=false; }
+        for (var j = i+1; j <= i+lb; j++) { if(data[j].high > h) isH=false; if(data[j].low < l) isL=false; }
+        if (isH) highs.push(h);
+        if (isL) lows.push(l);
+      }
+      function cluster(pts) {
+        var zones = [], tol = (Math.max.apply(null,closes) - Math.min.apply(null,closes)) * 0.012;
+        pts.sort(function(a,b){return a-b;});
+        pts.forEach(function(p) {
+          var m = null;
+          for(var i=0;i<zones.length;i++){if(Math.abs(zones[i].mid-p)<tol){m=zones[i];break;}}
+          if(m){m.vals.push(p);m.mid=m.vals.reduce(function(a,b){return a+b;},0)/m.vals.length;}
+          else zones.push({mid:p,vals:[p]});
+        });
+        return zones.map(function(z){return {lo:+(z.mid-tol*0.5).toFixed(2),hi:+(z.mid+tol*0.5).toFixed(2)};});
+      }
+      return { res: cluster(highs), sup: cluster(lows) };
+    }
+
+    var sr = findSR(days, 4);
+    var priceMin = Math.min.apply(null, days.map(function(d){return d.low;})) * 0.99;
+    var priceMax = Math.max.apply(null, days.map(function(d){return d.high;})) * 1.01;
+
+    var resAreas = sr.res.map(function(z){ return [{yAxis:z.lo,itemStyle:{color:'rgba(255,82,82,0.1)',borderColor:'rgba(255,82,82,0.4)',borderWidth:1}},{yAxis:z.hi}]; });
+    var supAreas = sr.sup.map(function(z){ return [{yAxis:z.lo,itemStyle:{color:'rgba(0,230,118,0.08)',borderColor:'rgba(0,230,118,0.4)',borderWidth:1}},{yAxis:z.hi}]; });
+
+    var ec = echarts.init(chartEl, null, {renderer:'canvas'});
+    ec.setOption({
+      backgroundColor: 'transparent',
+      animation: false,
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: { type:'cross', crossStyle:{color:'rgba(55,138,221,0.35)',width:1} },
+        backgroundColor: '#071018',
+        borderColor: 'rgba(0,212,255,0.2)',
+        textStyle: { color:'#c8daf8', fontSize:10 },
+        formatter: function(params) {
+          var c = null;
+          for(var i=0;i<params.length;i++){if(params[i].seriesName==='Price'){c=params[i];break;}}
+          if(!c) return '';
+          var d = days[c.dataIndex];
+          var chg = (((d.close-d.open)/d.open)*100).toFixed(2);
+          var e10=ema10[c.dataIndex], e20=ema20[c.dataIndex], e50=ema50[c.dataIndex];
+          return '<b>'+c.name+'</b><br>O:$'+d.open+' H:$'+d.high+' L:$'+d.low+' C:$'+d.close+'<br>'
+            +(chg>=0?'+':'')+chg+'%'
+            +(e10?'<br><span style="color:#00e676">EMA10: $'+e10+'</span>':'')
+            +(e20?'<br><span style="color:#ffd740">EMA20: $'+e20+'</span>':'')
+            +(e50?'<br><span style="color:#ff5252">EMA50: $'+e50+'</span>':'');
+        }
+      },
+      grid: { left:58, right:10, top:8, bottom:36 },
+      xAxis: {
+        type:'category', data:labels,
+        axisLine:{lineStyle:{color:'rgba(120,140,180,0.1)'}},
+        axisLabel:{color:'#7090c8',fontSize:9,interval:Math.floor(days.length/8)},
+        splitLine:{show:false}
+      },
+      yAxis: {
+        scale:true, min:priceMin, max:priceMax,
+        splitLine:{lineStyle:{color:'rgba(120,140,180,0.08)',type:'dashed'}},
+        axisLabel:{color:'#7090c8',fontSize:9,formatter:function(v){return '$'+v.toFixed(0);}}
+      },
+      dataZoom:[
+        {type:'inside',start:0,end:100},
+        {type:'slider',start:0,end:100,bottom:0,height:18,
+          borderColor:'rgba(0,212,255,0.15)',fillerColor:'rgba(0,212,255,0.05)',
+          handleStyle:{color:'#378ADD'},textStyle:{color:'#7090c8',fontSize:8},
+          dataBackground:{areaStyle:{color:'rgba(0,212,255,0.04)'}}}
+      ],
+      series:[
+        {
+          name:'Price', type:'candlestick',
+          data: days.map(function(d){return [d.open,d.close,d.low,d.high];}),
+          itemStyle:{color:'#1D9E75',color0:'#D85A30',borderColor:'#1D9E75',borderColor0:'#D85A30',borderWidth:1},
+          barMaxWidth:10,
+          markArea:{silent:true,data:resAreas.concat(supAreas)}
+        },
+        {name:'EMA10',type:'line',data:ema10,smooth:false,lineStyle:{color:'#00e676',width:1.5},symbol:'none',connectNulls:false},
+        {name:'EMA20',type:'line',data:ema20,smooth:false,lineStyle:{color:'#ffd740',width:1.5},symbol:'none',connectNulls:false},
+        {name:'EMA50',type:'line',data:ema50,smooth:false,lineStyle:{color:'#ff5252',width:2},symbol:'none',connectNulls:false}
+      ]
+    });
+
+    // Resize when panel resizes
+    var ro = new ResizeObserver(function(){ ec.resize(); });
+    ro.observe(chartEl);
+  })
+  .catch(function(e) {
+    if (loadEl) { loadEl.style.display='flex'; loadEl.textContent='CHART UNAVAILABLE'; }
+  });
 }
 
 function switchDetTab(ticker, tab){
