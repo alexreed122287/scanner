@@ -3934,10 +3934,14 @@ function scoreIt(ticker, ind, opt){
   var analystOk = fmp ? fmp.analystRevisionsOk : false;
   var insiderOk = fmp ? fmp.insiderBuyingOk    : false;
 
+  var _hasFmpKey = false;
+  try{ _hasFmpKey = !!(localStorage.getItem('rrjcar_fmp')||'').length; }catch(e){}
+  var _fmpMissReason = _hasFmpKey ? 'FMP data unavailable (rate-limited or skipped)' : 'No FMP key';
+
   var analystVal = fmp
     ? (fmp.revisionsUp >= 2 ? fmp.revisionsUp+' analysts / '+fmp.upgradesLast30+' upgrades' : fmp.revisionsUp+' analysts (need \u22652)')
-    : 'No FMP key';
-  var insiderVal = fmp ? (insiderOk ? '$'+Math.round(fmp.insiderBuyValue/1000)+'K buys' : 'Requires Premium plan') : 'No FMP key';
+    : _fmpMissReason;
+  var insiderVal = fmp ? (insiderOk ? '$'+Math.round(fmp.insiderBuyValue/1000)+'K buys' : 'Requires Premium plan') : _fmpMissReason;
 
   var fmpChecks = [
     {ok:analystOk, n:'Analyst Revisions \u2191', val:analystVal, pts:12},
@@ -5019,23 +5023,38 @@ function finishScan(){
     if(wrap) wrap.style.display = 'none';
   }, 2500);
 
-  // Pre-fetch FMP data for top GO tickers in background \u2014 warms cache before user clicks
+  // Pre-fetch FMP data for top scored tickers in background \u2014 warms cache before user clicks.
+  // Capped at 100 to stay under FMP plan rate limits. Queue respects rate-limit cooldowns instead
+  // of firing N setTimeouts that all get rejected when 429 hits mid-scan.
   var fmpKey='';try{fmpKey=localStorage.getItem('rrjcar_fmp')||'';}catch(e){}
   if(!fmpKey && typeof FMP_KEY_DEFAULT !== 'undefined') fmpKey = FMP_KEY_DEFAULT;
   if(fmpKey){
-    var goTickers = G.results.slice(0,150).map(function(r){ return r.ticker; });
-    var fmpDelay = 0;
-    goTickers.forEach(function(t){
-      setTimeout(function(){
-        fetchFmpData(t).then(function(data){
-          if(!data) return;
+    var goTickers = G.results.slice(0,100).map(function(r){ return r.ticker; });
+    var _fmpIdx = 0;
+    function _fmpNext(){
+      if(_fmpIdx >= goTickers.length) return;
+      // If in cooldown, wait and re-check \u2014 don't burn through the queue during a 429 pause
+      if(window._fmpRateLimited > 0 && (Date.now() - window._fmpRateLimited) < (window._FMP_COOLDOWN_MS||60000)){
+        setTimeout(_fmpNext, 5000);
+        return;
+      }
+      if(window._fmpDead) return; // circuit breaker open \u2014 give up
+      var t = goTickers[_fmpIdx++];
+      // Skip tickers that already have fresh cache
+      var cached = G_FMP_CACHE[t] || loadFmpCache(t);
+      if(cached && cached.numAnalysts > 0){
+        setTimeout(_fmpNext, 0);
+        return;
+      }
+      fetchFmpData(t).then(function(data){
+        if(data){
           // Re-score this ticker with fresh FMP data
           var r = G.results.filter(function(x){ return x.ticker===t; })[0];
           if(r){
             var updated = scoreIt(t, r.ind, r.opt);
             r.score=updated.score; r.techScore=updated.techScore; r.fundScore=updated.fundScore;
             r.isGo=updated.isGo; r.rules=updated.rules; r.passes=updated.passes;
-            if(typeof _rescoredCount==='undefined') window._rescoredCount=0;
+            if(typeof window._rescoredCount==='undefined') window._rescoredCount=0;
             window._rescoredCount++;
             if(window._rescoredCount % 25 === 0){
               G.results.sort(function(a,b){ return b.score-a.score; });
@@ -5043,10 +5062,12 @@ function finishScan(){
               renderBuySig(); renderScan();
             }
           }
-        });
-      }, fmpDelay);
-      fmpDelay += 150; // stagger 150ms
-    });
+        }
+      }).catch(function(){/* cooldown rejection \u2014 will retry this ticker? no: idx already incremented. fine. */});
+      // Pace: 250ms between calls = ~240 req/min \u2014 under FMP Starter 300/min limit
+      setTimeout(_fmpNext, 250);
+    }
+    setTimeout(_fmpNext, 500); // small delay so base scan renders first
   }
 
   // Sequential enrichment queue — one ticker at a time, no browser lockup
@@ -5062,7 +5083,9 @@ function finishScan(){
     setScanProgress(62 + Math.round((enrichIdx/enrichQueue.length)*35), 'Enriching '+enrichIdx+'/'+enrichQueue.length+': '+t+'...');
     fetchIndicatorHistory(t).then(function(days){
       if(days) G_HIST_CACHE[t]=days;
-      var p = fmpKey ? fetchFmpData(t) : Promise.resolve(null);
+      // Skip FMP if in cooldown or circuit breaker open \u2014 history alone still improves score
+      var fmpActive = fmpKey && !window._fmpDead && !(window._fmpRateLimited > 0 && (Date.now()-window._fmpRateLimited) < (window._FMP_COOLDOWN_MS||60000));
+      var p = fmpActive ? fetchFmpData(t) : Promise.resolve(null);
       p.then(function(){
         var u=scoreIt(t,r.ind,r.opt);
         r.score=u.score; r.techScore=u.techScore; r.fundScore=u.fundScore;
@@ -5070,6 +5093,8 @@ function finishScan(){
         G.results.sort(function(a,b){ return b.score-a.score; });
         G.filtered=G.results.slice();
         renderBuySig(); renderScan();
+        setTimeout(enrichNext, 100);
+      }).catch(function(){
         setTimeout(enrichNext, 100);
       });
     });
@@ -5318,7 +5343,7 @@ function runGex(){
   var mode='sandbox';try{mode=localStorage.getItem('rrjcar_mode')||'sandbox';}catch(e){}
   var host=mode==='live'?'https://api.tradier.com':'https://sandbox.tradier.com';
 
-  eid('gex-ts').textContent='Fetching flow data...';
+  var _gt1=eid('gex-ts'); if(_gt1) _gt1.textContent='Fetching flow data...';
 
   if(!key){
     // No API key \u2014 generate simulated GEX from scan results
@@ -5341,7 +5366,7 @@ function runGex(){
   // Live path: fetch real 30DTE options chain for each ticker to compute net GEX flow
   // Call OI vs Put OI at 30DTE expiry = real flow proxy
   var gexTickers = sourceTickers.slice(0, 35); // expanded for full GO coverage
-  eid('gex-ts').textContent = 'Fetching 30DTE options flow for ' + gexTickers.length + ' tickers...';
+  var _gt2=eid('gex-ts'); if(_gt2) _gt2.textContent = 'Fetching 30DTE options flow for ' + gexTickers.length + ' tickers...';
 
   // Step 1: get expirations for all tickers, find nearest 25-50 calendar day expiry each
   var today = new Date();
@@ -5490,7 +5515,7 @@ function renderGex(){
   });
   html+='</tbody></table>';
   wrap.innerHTML=html;
-  eid('gex-ts').textContent='Updated: '+new Date().toLocaleTimeString()
+  var _gt3=eid('gex-ts'); if(_gt3) _gt3.textContent='Updated: '+new Date().toLocaleTimeString()
     +' \u2014 '+(G.results&&G.results.length>0?'top scan results':'static list');
 }
 
@@ -10073,7 +10098,8 @@ function init(){
   if(cachedScan && cachedScan.length){
     G.results = cachedScan;
     G.filtered = cachedScan;
-    renderSignals();
+    if(typeof renderBuySig==='function') renderBuySig();
+    if(typeof renderScan==='function') renderScan();
     var scanAge = cacheAge(CACHE_KEYS.scanTs);
     showStaleBanner('tab-bs', 'Showing last scan'+(scanAge?' ('+scanAge+')':'')+' — no live data loaded yet', 'runScan');
   }
