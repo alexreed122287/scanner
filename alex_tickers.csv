@@ -1,0 +1,2401 @@
+Symbol,Description,Price,Price - Currency,Sector
+NVDA,NVIDIA Corporation,198.87,USD,Electronic technology
+GOOG,Alphabet Inc.,334.47,USD,Technology services
+AAPL,Apple Inc.,266.43,USD,Electronic technology
+MSFT,Microsoft Corporation,411.22,USD,Technology services
+AMZN,"Amazon.com, Inc.",248.5,USD,Retail trade
+AVGO,Broadcom Inc.,396.72,USD,Electronic technology
+META,"Meta Platforms, Inc.",671.58,USD,Technology services
+TSLA,"Tesla, Inc.",391.95,USD,Consumer durables
+WMT,Walmart Inc.,124.76,USD,Retail trade
+LLY,Eli Lilly and Company,905.03,USD,Health technology
+JPM,JP Morgan Chase & Co.,305.93,USD,Finance
+XOM,Exxon Mobil Corporation,149.01,USD,Energy minerals
+V,Visa Inc.,315.91,USD,Finance
+JNJ,Johnson & Johnson,238.67,USD,Health technology
+MU,"Micron Technology, Inc.",456.23,USD,Electronic technology
+ORCL,Oracle Corporation,169.81,USD,Technology services
+MA,Mastercard Incorporated,519.96,USD,Finance
+NFLX,"Netflix, Inc.",107.71,USD,Technology services
+COST,Costco Wholesale Corporation,984.75,USD,Retail trade
+AMD,"Advanced Micro Devices, Inc.",258.12,USD,Electronic technology
+BAC,Bank of America Corporation,54.32,USD,Finance
+CVX,Chevron Corporation,184.91,USD,Energy minerals
+ABBV,AbbVie Inc.,208.42,USD,Health technology
+CAT,"Caterpillar, Inc.",770.17,USD,Producer manufacturing
+PLTR,Palantir Technologies Inc.,142.15,USD,Technology services
+HD,"Home Depot, Inc. (The)",338.91,USD,Retail trade
+PG,Procter & Gamble Company (The),143.38,USD,Consumer non-durables
+LRCX,Lam Research Corporation,265.16,USD,Producer manufacturing
+GE,GE Aerospace,313.93,USD,Electronic technology
+INTC,Intel Corporation,64.94,USD,Electronic technology
+CSCO,"Cisco Systems, Inc.",82.36,USD,Electronic technology
+KO,Coca-Cola Company (The),75.31,USD,Consumer non-durables
+AMAT,"Applied Materials, Inc.",394.26,USD,Producer manufacturing
+MS,Morgan Stanley,191.62,USD,Finance
+MRK,"Merck & Company, Inc.",117.9,USD,Health technology
+UNH,UnitedHealth Group Incorporated,314.05,USD,Health services
+BABA,Alibaba Group Holding Limited,133.28,USD,Retail trade
+RTX,RTX Corporation,198.39,USD,Electronic technology
+GEV,GE Vernova Inc.,985.92,USD,Producer manufacturing
+GS,"Goldman Sachs Group, Inc. (The)",899.49,USD,Finance
+WFC,Wells Fargo & Company,80.29,USD,Finance
+PM,Philip Morris International Inc,157.19,USD,Consumer non-durables
+LIN,Linde plc,497.94,USD,Process industries
+C,"Citigroup, Inc.",131.69,USD,Finance
+IBM,International Business Machines Corporation,244.8,USD,Technology services
+KLAC,KLA Corporation,1748.11,USD,Electronic technology
+AXP,American Express Company,329.06,USD,Finance
+MCD,McDonald's Corporation,306.26,USD,Consumer services
+PEP,"PepsiCo, Inc.",154.85,USD,Consumer non-durables
+TMUS,"T-Mobile US, Inc.",190.19,USD,Communications
+TMO,Thermo Fisher Scientific Inc,531.67,USD,Health technology
+TXN,Texas Instruments Incorporated,216.29,USD,Electronic technology
+ANET,"Arista Networks, Inc.",154.33,USD,Electronic technology
+NEE,"NextEra Energy, Inc.",91.24,USD,Utilities
+VZ,Verizon Communications Inc.,45.03,USD,Communications
+AMGN,Amgen Inc.,348.22,USD,Health technology
+DIS,Walt Disney Company (The),103.04,USD,Consumer services
+APH,Amphenol Corporation,146.98,USD,Electronic technology
+T,AT&T Inc.,25.46,USD,Communications
+TJX,"TJX Companies, Inc. (The)",160.23,USD,Retail trade
+ABT,Abbott Laboratories,101.56,USD,Health technology
+BA,Boeing Company (The),223.93,USD,Electronic technology
+SCHW,Charles Schwab Corporation (The),100.27,USD,Finance
+GILD,"Gilead Sciences, Inc.",139.77,USD,Health technology
+ARM,Arm Holdings plc,159.34,USD,Electronic technology
+BLK,"BlackRock, Inc.",1048.6,USD,Finance
+ADI,"Analog Devices, Inc.",347.94,USD,Electronic technology
+ISRG,"Intuitive Surgical, Inc.",468.36,USD,Health technology
+SHOP,Shopify Inc.,127.41,USD,Commercial services
+CRM,"Salesforce, Inc.",177.6,USD,Technology services
+BX,Blackstone Inc.,130.19,USD,Finance
+UBER,"Uber Technologies, Inc.",77.28,USD,Transportation
+APP,Applovin Corporation,464.63,USD,Technology services
+DE,Deere & Company,576.64,USD,Producer manufacturing
+SCCO,Southern Copper Corporation,189.3,USD,Non-energy minerals
+PFE,"Pfizer, Inc.",27.19,USD,Health technology
+ETN,"Eaton Corporation, PLC",395.06,USD,Producer manufacturing
+HON,Honeywell International Inc.,232.19,USD,Electronic technology
+UNP,Union Pacific Corporation,248.03,USD,Transportation
+WELL,Welltower Inc.,211.33,USD,Finance
+BKNG,Booking Holdings Inc. Common Stock,185.69,USD,Consumer services
+COP,ConocoPhillips,118.92,USD,Energy minerals
+GLW,Corning Incorporated,168.27,USD,Electronic technology
+PDD,PDD Holdings Inc.,101.97,USD,Retail trade
+QCOM,QUALCOMM Incorporated,133.05,USD,Electronic technology
+LMT,Lockheed Martin Corporation,611.1,USD,Electronic technology
+DHR,Danaher Corporation,198.14,USD,Health technology
+LOW,"Lowe's Companies, Inc.",243.99,USD,Retail trade
+IBKR,"Interactive Brokers Group, Inc.",79.69,USD,Finance
+PANW,"Palo Alto Networks, Inc.",164.11,USD,Technology services
+PLD,"Prologis, Inc.",139.77,USD,Finance
+SNDK,Sandisk Corporation,891.72,USD,Electronic technology
+SYK,Stryker Corporation,341.24,USD,Health technology
+SPGI,S&P Global Inc.,430.58,USD,Commercial services
+CB,Chubb Limited,327.27,USD,Finance
+COF,Capital One Financial Corporation,202.98,USD,Finance
+WDC,Western Digital Corporation,365,USD,Electronic technology
+NEM,Newmont Corporation,113.04,USD,Non-energy minerals
+PH,Parker-Hannifin Corporation,963.76,USD,Producer manufacturing
+ACN,Accenture plc,194,USD,Technology services
+BMY,Bristol-Myers Squibb Company,57.89,USD,Health technology
+PGR,Progressive Corporation (The),201.23,USD,Finance
+MRVL,"Marvell Technology, Inc.",134.6,USD,Electronic technology
+VRT,"Vertiv Holdings, LLC",301.16,USD,Electronic technology
+DELL,Dell Technologies Inc.,177.28,USD,Electronic technology
+STX,Seagate Technology Holdings PLC,519.6,USD,Electronic technology
+VRTX,Vertex Pharmaceuticals Incorporated,441.7,USD,Health technology
+SBUX,Starbucks Corporation,98.34,USD,Consumer services
+MDT,Medtronic plc.,87.1,USD,Health technology
+SPOT,Spotify Technology S.A.,531.17,USD,Technology services
+HCA,"HCA Healthcare, Inc.",488.58,USD,Health services
+INTU,Intuit Inc.,389.72,USD,Technology services
+CME,CME Group Inc.,296.9,USD,Finance
+MO,"Altria Group, Inc.",64.42,USD,Consumer non-durables
+CEG,Constellation Energy Corporation,294.73,USD,Utilities
+SO,Southern Company (The),94.64,USD,Utilities
+MCK,McKesson Corporation,863.42,USD,Distribution services
+CRWD,"CrowdStrike Holdings, Inc.",411.16,USD,Technology services
+EQIX,"Equinix, Inc.",1052.98,USD,Finance
+TT,Trane Technologies plc,462.56,USD,Producer manufacturing
+HWM,Howmet Aerospace Inc.,254.04,USD,Electronic technology
+CMCSA,Comcast Corporation,28.3,USD,Consumer services
+DUK,Duke Energy Corporation (Holding Company),127.98,USD,Utilities
+ADBE,Adobe Inc.,244.66,USD,Technology services
+FCX,"Freeport-McMoRan, Inc.",68.7,USD,Non-energy minerals
+NOW,"ServiceNow, Inc.",94.19,USD,Technology services
+MAR,Marriott International,363.74,USD,Consumer services
+NOC,Northrop Grumman Corporation,678.59,USD,Electronic technology
+BSX,Boston Scientific Corporation,64.61,USD,Health technology
+CVS,CVS Health Corporation,74.99,USD,Retail trade
+MELI,"MercadoLibre, Inc.",1872.12,USD,Retail trade
+ICE,Intercontinental Exchange Inc.,165.07,USD,Finance
+KKR,KKR & Co. Inc.,103.85,USD,Finance
+GD,General Dynamics Corporation,338.88,USD,Electronic technology
+BK,The Bank of New York Mellon Corporation,131.96,USD,Finance
+WM,"Waste Management, Inc.",224.93,USD,Industrial services
+PNC,"PNC Financial Services Group, Inc. (The)",222.06,USD,Finance
+PWR,"Quanta Services, Inc.",591.82,USD,Industrial services
+UPS,"United Parcel Service, Inc.",103.57,USD,Transportation
+USB,U.S. Bancorp,56.37,USD,Finance
+FDX,FedEx Corporation,364.92,USD,Transportation
+WMB,"Williams Companies, Inc. (The)",70.76,USD,Industrial services
+MRSH,Marsh,174.9,USD,Finance
+SNPS,"Synopsys, Inc.",438.45,USD,Technology services
+JCI,Johnson Controls International plc,137.21,USD,Producer manufacturing
+CDNS,"Cadence Design Systems, Inc.",304.1,USD,Technology services
+ABNB,"Airbnb, Inc.",137.51,USD,Consumer services
+CMI,Cummins Inc.,601.46,USD,Producer manufacturing
+AMT,American Tower Corporation (REIT),176.99,USD,Finance
+SHW,Sherwin-Williams Company (The),328.84,USD,Process industries
+CVNA,Carvana Co.,371.08,USD,Retail trade
+BAM,Brookfield Asset Management Inc,48.83,USD,Finance
+REGN,"Regeneron Pharmaceuticals, Inc.",753.93,USD,Health technology
+MMM,3M Company,151.24,USD,Producer manufacturing
+ADP,"Automatic Data Processing, Inc.",196.92,USD,Technology services
+MCO,Moody's Corporation,446.81,USD,Commercial services
+EMR,Emerson Electric Company,140.4,USD,Electronic technology
+SLB,SLB Limited,52.42,USD,Industrial services
+HOOD,"Robinhood Markets, Inc.",87.32,USD,Finance
+ORLY,"O'Reilly Automotive, Inc.",93.6,USD,Retail trade
+CSX,CSX Corporation,42.1,USD,Transportation
+DASH,"DoorDash, Inc.",179.935,USD,Transportation
+CRH,CRH PLC,116.21,USD,Non-energy minerals
+RCL,Royal Caribbean Cruises Ltd.,282.31,USD,Consumer services
+ECL,Ecolab Inc.,270.37,USD,Process industries
+ITW,Illinois Tool Works Inc.,264.39,USD,Producer manufacturing
+HLT,Hilton Worldwide Holdings Inc.,328.91,USD,Consumer services
+NU,Nu Holdings Ltd.,15.34,USD,Finance
+MNST,Monster Beverage Corporation,74.93,USD,Consumer non-durables
+AEP,"American Electric Power Company, Inc.",134.39,USD,Utilities
+MSI,"Motorola Solutions, Inc.",440.21,USD,Electronic technology
+NSC,Norfolk Southern Corporation,297.71,USD,Transportation
+MDLZ,"Mondelez International, Inc.",56.58,USD,Consumer non-durables
+ROST,"Ross Stores, Inc.",224.15,USD,Retail trade
+EOG,"EOG Resources, Inc.",132.39,USD,Energy minerals
+CI,The Cigna Group,268.63,USD,Health services
+CTAS,Cintas Corporation,176.46,USD,Commercial services
+KMI,"Kinder Morgan, Inc.",31.7,USD,Industrial services
+GM,General Motors Company,77.78,USD,Consumer durables
+AON,Aon plc,328.08,USD,Finance
+VLO,Valero Energy Corporation,235,USD,Energy minerals
+APO,"Apollo Global Management, Inc. (New)",120.54,USD,Finance
+TEL,TE Connectivity plc,234.15,USD,Electronic technology
+NTES,"NetEase, Inc.",115.87,USD,Technology services
+ELV,"Elevance Health, Inc.",311.18,USD,Health services
+WBD,"Warner Bros. Discovery, Inc. - Series A",27.2,USD,Consumer services
+NKE,"Nike, Inc.",45.44,USD,Consumer non-durables
+DLR,"Digital Realty Trust, Inc.",195.69,USD,Finance
+CIEN,Ciena Corporation,475.76,USD,Electronic technology
+CL,Colgate-Palmolive Company,83.49,USD,Consumer non-durables
+NET,"Cloudflare, Inc.",190.13,USD,Technology services
+LHX,"L3Harris Technologies, Inc.",355.92,USD,Electronic technology
+MPWR,"Monolithic Power Systems, Inc.",1353,USD,Electronic technology
+SPG,"Simon Property Group, Inc.",201.61,USD,Finance
+APD,"Air Products and Chemicals, Inc.",295.21,USD,Process industries
+MPC,Marathon Petroleum Corporation,223.03,USD,Energy minerals
+RSG,"Republic Services, Inc.",210.87,USD,Industrial services
+PCAR,PACCAR Inc.,123.48,USD,Producer manufacturing
+TRV,"The Travelers Companies, Inc.",299.33,USD,Finance
+PSX,Phillips 66,161.44,USD,Energy minerals
+MDLN,Medline Inc.,47.93,USD,Health technology
+CRWV,"CoreWeave, Inc.",118.69,USD,Technology services
+SRE,DBA Sempra,95.47,USD,Utilities
+TFC,Truist Financial Corporation,49.59,USD,Finance
+COR,"Cencora, Inc.",317.58,USD,Distribution services
+BE,Bloom Energy Corporation,213.84,USD,Electronic technology
+COHR,Coherent Corp.,308.2,USD,Electronic technology
+O,Realty Income Corporation,63.96,USD,Finance
+BKR,Baker Hughes Company,60.07,USD,Industrial services
+FTNT,"Fortinet, Inc.",79.64,USD,Technology services
+LITE,Lumentum Holdings Inc.,824.01,USD,Producer manufacturing
+AFL,AFLAC Incorporated,112.98,USD,Finance
+AJG,Arthur J. Gallagher & Co.,223.17,USD,Finance
+TER,"Teradyne, Inc.",364.96,USD,Electronic technology
+ALL,Allstate Corporation (The),218.23,USD,Finance
+KEYS,Keysight Technologies Inc.,325.25,USD,Electronic technology
+TGT,Target Corporation,122.87,USD,Retail trade
+AU,AngloGold Ashanti PLC,104.47,USD,Non-energy minerals
+VST,Vistra Corp.,162.94,USD,Utilities
+OXY,Occidental Petroleum Corporation,55.83,USD,Energy minerals
+D,"Dominion Energy, Inc.",62.38,USD,Utilities
+CTVA,"Corteva, Inc.",81.32,USD,Process industries
+LNG,"Cheniere Energy, Inc.",256.75,USD,Industrial services
+PSA,Public Storage,299.83,USD,Finance
+OKE,"ONEOK, Inc.",84.1,USD,Industrial services
+NXPI,NXP Semiconductors N.V.,209.39,USD,Electronic technology
+AME,"AMETEK, Inc.",230.1,USD,Producer manufacturing
+ETR,Entergy Corporation,114.95,USD,Utilities
+FANG,"Diamondback Energy, Inc.",185.87,USD,Energy minerals
+COIN,"Coinbase Global, Inc.",195.9,USD,Finance
+TRGP,"Targa Resources, Inc.",238.75,USD,Utilities
+GRMN,Garmin Ltd.,265.84,USD,Electronic technology
+FAST,Fastenal Company,44.4,USD,Distribution services
+ZTS,Zoetis Inc.,120.76,USD,Health technology
+EA,Electronic Arts Inc.,203.24,USD,Technology services
+F,Ford Motor Company,12.71,USD,Consumer durables
+SE,Sea Limited,90.33,USD,Retail trade
+MET,"MetLife, Inc.",77.52,USD,Finance
+ADSK,"Autodesk, Inc.",239.32,USD,Technology services
+NDAQ,"Nasdaq, Inc.",88.55,USD,Finance
+FERG,Ferguson Enterprises Inc.,257.16,USD,Distribution services
+SNOW,Snowflake Inc.,144.48,USD,Technology services
+CAH,"Cardinal Health, Inc.",211.83,USD,Distribution services
+MSTR,Strategy Inc,143.54,USD,Technology services
+XEL,Xcel Energy Inc.,78.65,USD,Utilities
+EXC,Exelon Corporation,47.88,USD,Utilities
+CARR,Carrier Global Corporation,58.55,USD,Producer manufacturing
+URI,"United Rentals, Inc.",765.29,USD,Finance
+DAL,"Delta Air Lines, Inc.",71.99,USD,Transportation
+IDXX,"IDEXX Laboratories, Inc.",580.76,USD,Health technology
+CMG,"Chipotle Mexican Grill, Inc.",35.25,USD,Consumer services
+PYPL,"PayPal Holdings, Inc.",49.57,USD,Commercial services
+EW,Edwards Lifesciences Corporation,78.2,USD,Health technology
+FITB,Fifth Third Bancorp,49.84,USD,Finance
+EBAY,eBay Inc.,100.01,USD,Retail trade
+YUM,"Yum! Brands, Inc.",161.94,USD,Consumer services
+ROK,"Rockwell Automation, Inc.",397.4,USD,Producer manufacturing
+BDX,"Becton, Dickinson and Company",155.52,USD,Health technology
+ALNY,"Alnylam Pharmaceuticals, Inc.",333.39,USD,Health technology
+WAB,Westinghouse Air Brake Technologies Corporation,257.38,USD,Producer manufacturing
+RKT,"Rocket Companies, Inc.",15.5,USD,Finance
+CBRE,CBRE Group Inc,147.48,USD,Finance
+NUE,Nucor Corporation,189.6,USD,Non-energy minerals
+CCEP,Coca-Cola Europacific Partners plc,96.17,USD,Consumer non-durables
+ODFL,"Old Dominion Freight Line, Inc.",205.19,USD,Transportation
+DDOG,"Datadog, Inc.",121.06,USD,Technology services
+AMP,"Ameriprise Financial, Inc.",468.15,USD,Finance
+RBLX,Roblox Corporation,59.79,USD,Technology services
+NBIS,Nebius Group N.V.,166.77,USD,Technology services
+RKLB,Rocket Lab Corporation,73.6,USD,Electronic technology
+DHI,"D.R. Horton, Inc.",144.2,USD,Consumer durables
+VTR,"Ventas, Inc.",84.87,USD,Finance
+AIG,"American International Group, Inc. New",77.09,USD,Finance
+MSCI,MSCI Inc.,560.06,USD,Commercial services
+KR,Kroger Company (The),66.63,USD,Retail trade
+XYZ,"Block, Inc.",67.97,USD,Commercial services
+PEG,Public Service Enterprise Group Incorporated,80.94,USD,Utilities
+MCHP,Microchip Technology Incorporated,74.49,USD,Electronic technology
+CCL,Carnival Corporation,28.82,USD,Consumer services
+ED,"Consolidated Edison, Inc.",110.28,USD,Utilities
+STT,State Street Corporation,142.74,USD,Finance
+TTWO,"Take-Two Interactive Software, Inc.",214.15,USD,Technology services
+CPNG,"Coupang, Inc.",21.29,USD,Retail trade
+HSY,The Hershey Company,191.89,USD,Consumer non-durables
+HIG,"The Hartford Insurance Group, Inc.",138.75,USD,Finance
+PCG,Pacific Gas & Electric Co.,17.39,USD,Utilities
+JD,"JD.com, Inc.",31.47,USD,Retail trade
+VMC,Vulcan Materials Company (Holding Company),291.25,USD,Non-energy minerals
+SATS,EchoStar Corporation,131.39,USD,Communications
+LVS,Las Vegas Sands Corp.,56.26,USD,Consumer services
+CCI,Crown Castle Inc.,85.63,USD,Finance
+TKO,"TKO Group Holdings, Inc.",193.1,USD,Consumer services
+ROP,"Roper Technologies, Inc.",358.09,USD,Technology services
+WEC,"WEC Energy Group, Inc.",114.85,USD,Utilities
+LYV,"Live Nation Entertainment, Inc.",155.82,USD,Consumer services
+VIK,Viking Holdings Ltd,81.17,USD,Consumer services
+NRG,"NRG Energy, Inc.",168.45,USD,Utilities
+QSR,Restaurant Brands International Inc.,78.72,USD,Consumer services
+EQT,EQT Corporation,56.76,USD,Energy minerals
+SYY,Sysco Corporation,74.09,USD,Distribution services
+SYM,Symbotic Inc.,58.74,USD,Producer manufacturing
+KDP,Keurig Dr Pepper Inc.,26,USD,Consumer non-durables
+ACGL,Arch Capital Group Ltd.,97.47,USD,Finance
+HEI,Heico Corporation,292.36,USD,Electronic technology
+PRU,"Prudential Financial, Inc.",99.42,USD,Finance
+IRM,Iron Mountain Incorporated (Delaware),113.55,USD,Finance
+A,"Agilent Technologies, Inc.",119.77,USD,Health technology
+HBAN,Huntington Bancshares Incorporated,16.67,USD,Finance
+GEHC,GE HealthCare Technologies Inc.,73.51,USD,Health technology
+RMD,ResMed Inc.,228.8,USD,Health technology
+ASTS,"AST SpaceMobile, Inc.",86.91,USD,Communications
+KVUE,Kenvue Inc.,17.3,USD,Consumer non-durables
+FISV,"Fiserv, Inc.",61.29,USD,Commercial services
+HPE,Hewlett Packard Enterprise Company,24.62,USD,Electronic technology
+IR,Ingersoll Rand Inc.,83.39,USD,Producer manufacturing
+AMRZ,Amrize Ltd,58.73,USD,Non-energy minerals
+MTB,M&T Bank Corporation,217.1,USD,Finance
+PAYX,"Paychex, Inc.",90.26,USD,Technology services
+AXON,"Axon Enterprise, Inc.",402.18,USD,Electronic technology
+ADM,Archer-Daniels-Midland Company,66.95,USD,Process industries
+JBL,Jabil Inc.,304.95,USD,Producer manufacturing
+CPRT,"Copart, Inc.",33.36,USD,Retail trade
+KMB,Kimberly-Clark Corporation,96.81,USD,Consumer non-durables
+WAT,Waters Corporation,326.2,USD,Health technology
+CBOE,"Cboe Global Markets, Inc.",304.99,USD,Finance
+WDAY,"Workday, Inc.",124.12,USD,Technology services
+INSM,Insmed Incorporated,146.74,USD,Health technology
+EXPE,"Expedia Group, Inc.",257.44,USD,Consumer services
+OTIS,Otis Worldwide Corporation,81,USD,Industrial services
+HAL,Halliburton Company,37.54,USD,Industrial services
+CHTR,"Charter Communications, Inc.",220.29,USD,Consumer services
+CRDO,Credo Technology Group Holding Ltd,168.35,USD,Technology services
+ATO,Atmos Energy Corporation,186.26,USD,Utilities
+RJF,"Raymond James Financial, Inc.",155.77,USD,Finance
+TPR,"Tapestry, Inc.",151.37,USD,Retail trade
+AEE,Ameren Corporation,110.74,USD,Utilities
+DTE,DTE Energy Company,146.75,USD,Utilities
+UAL,"United Airlines Holdings, Inc.",94.27,USD,Transportation
+XYL,Xylem Inc.,125.19,USD,Producer manufacturing
+VICI,VICI Properties Inc.,28.13,USD,Finance
+RDDT,"Reddit, Inc.",158.48,USD,Technology services
+RVMD,"Revolution Medicines, Inc.",152.54,USD,Health technology
+IQV,"IQVIA Holdings, Inc.",178.1,USD,Health technology
+EXR,Extra Space Storage Inc,141.06,USD,Finance
+PPL,PPL Corporation,39.36,USD,Utilities
+NTRA,"Natera, Inc.",207.19,USD,Health technology
+ALAB,"Astera Labs, Inc.",172.09,USD,Electronic technology
+FE,FirstEnergy Corp.,50.55,USD,Utilities
+DOV,Dover Corporation,215.46,USD,Producer manufacturing
+NTRS,Northern Trust Corporation,156.07,USD,Finance
+CTSH,Cognizant Technology Solutions Corporation,60.39,USD,Technology services
+FLEX,Flex Ltd.,78.43,USD,Electronic technology
+FTI,TechnipFMC plc,72.04,USD,Industrial services
+MTZ,"MasTec, Inc.",365.07,USD,Industrial services
+TPL,Texas Pacific Land Corporation,417.3,USD,Miscellaneous
+ON,ON Semiconductor Corporation,72.43,USD,Electronic technology
+TW,Tradeweb Markets Inc.,120.71,USD,Finance
+STZ,"Constellation Brands, Inc.",163.95,USD,Consumer non-durables
+STLD,"Steel Dynamics, Inc.",194.11,USD,Non-energy minerals
+DVN,Devon Energy Corporation,45.23,USD,Energy minerals
+RPRX,Royalty Pharma plc,48.7,USD,Health technology
+DOW,Dow Inc.,38.84,USD,Process industries
+HUBB,Hubbell Inc,526.94,USD,Producer manufacturing
+CNP,"CenterPoint Energy, Inc (Holding Co)",42.48,USD,Utilities
+EL,"Estee Lauder Companies, Inc. (The)",76.6,USD,Consumer non-durables
+CFG,"Citizens Financial Group, Inc.",65.19,USD,Finance
+FTAI,FTAI Aviation Ltd.,269.83,USD,Electronic technology
+Q,"Qnity Electronics, Inc.",131.79,USD,Electronic technology
+WTW,Willis Towers Watson Public Limited Company,292.15,USD,Finance
+EIX,Edison International,71.35,USD,Utilities
+VEEV,Veeva Systems Inc.,167.3,USD,Technology services
+CASY,"Caseys General Stores, Inc.",736.83,USD,Retail trade
+GFS,GlobalFoundries Inc.,48.31,USD,Electronic technology
+DG,Dollar General Corporation,121.56,USD,Retail trade
+LPLA,LPL Financial Holdings Inc.,331.41,USD,Finance
+BIIB,Biogen Inc.,180.54,USD,Health technology
+SYF,Synchrony Financial,75.99,USD,Finance
+ARES,Ares Management Corporation,119.28,USD,Finance
+ZM,"Zoom Communications, Inc.",89.03,USD,Technology services
+ROL,"Rollins, Inc.",54.38,USD,Commercial services
+KHC,The Kraft Heinz Company,22.01,USD,Consumer non-durables
+CRCL,"Circle Internet Group, Inc.",105.52,USD,Technology services
+ES,Eversource Energy (D/B/A),68.77,USD,Utilities
+FOX,Fox Corporation,57.05,USD,Consumer services
+AWK,"American Water Works Company, Inc.",130.31,USD,Utilities
+CINF,Cincinnati Financial Corporation,163,USD,Finance
+UTHR,United Therapeutics Corporation,577.58,USD,Health technology
+VRSN,"VeriSign, Inc.",275.26,USD,Technology services
+FIS,"Fidelity National Information Services, Inc.",48.32,USD,Technology services
+WRB,W.R. Berkley Corporation,66.1,USD,Finance
+BNTX,BioNTech SE,99.47,USD,Health technology
+XPO,"XPO, Inc.",210.33,USD,Transportation
+AER,AerCap Holdings N.V.,147.24,USD,Finance
+FN,Fabrinet,685.81,USD,Electronic technology
+VRSK,"Verisk Analytics, Inc.",176.84,USD,Technology services
+PPG,"PPG Industries, Inc.",107.72,USD,Process industries
+TSEM,Tower Semiconductor Ltd.,215.63,USD,Electronic technology
+CTRA,Coterra Energy Inc.,31.6,USD,Energy minerals
+SOFI,"SoFi Technologies, Inc.",18.79,USD,Finance
+AVB,"AvalonBay Communities, Inc.",171.29,USD,Finance
+CMS,CMS Energy Corporation,77.48,USD,Utilities
+HUM,Humana Inc.,198.37,USD,Health services
+RF,Regions Financial Corporation,27.85,USD,Finance
+DXCM,"DexCom, Inc.",61.54,USD,Health technology
+ULTA,"Ulta Beauty, Inc.",539.14,USD,Retail trade
+LYB,LyondellBasell Industries NV,73.13,USD,Process industries
+TSCO,Tractor Supply Company,44.75,USD,Retail trade
+WWD,"Woodward, Inc.",393.11,USD,Producer manufacturing
+BG,Bunge Limited,120,USD,Process industries
+EQR,Equity Residential,61.3,USD,Finance
+PHM,"PulteGroup, Inc.",120.82,USD,Consumer durables
+KEY,KeyCorp,21.57,USD,Finance
+EXE,Expand Energy Corporation,96.05,USD,Energy minerals
+SBAC,SBA Communications Corporation,214.2,USD,Finance
+WSM,"Williams-Sonoma, Inc.",192.87,USD,Retail trade
+RGLD,"Royal Gold, Inc.",270,USD,Non-energy minerals
+BRO,"Brown & Brown, Inc.",67.4,USD,Finance
+DRI,"Darden Restaurants, Inc.",199.68,USD,Consumer services
+L,Loews Corporation,110.23,USD,Finance
+NI,NiSource Inc,47.37,USD,Utilities
+VLTO,Veralto Corp,92.32,USD,Producer manufacturing
+EFX,"Equifax, Inc.",186.85,USD,Commercial services
+FUTU,Futu Holdings Limited,164.72,USD,Finance
+CHD,"Church & Dwight Company, Inc.",94.63,USD,Consumer non-durables
+RL,Ralph Lauren Corporation,369.36,USD,Consumer non-durables
+OMC,Omnicom Group Inc.,77.49,USD,Commercial services
+CPAY,"Corpay, Inc.",323.96,USD,Commercial services
+LH,Labcorp Holdings Inc.,266.73,USD,Health services
+TSN,"Tyson Foods, Inc.",63.38,USD,Consumer non-durables
+ALB,Albemarle Corporation,185.38,USD,Process industries
+BWXT,"BWX Technologies, Inc.",238.42,USD,Electronic technology
+STE,STERIS plc (Ireland),221.5,USD,Health technology
+LEN,Lennar Corporation,88.44,USD,Consumer durables
+SW,Smurfit WestRock plc,41.4,USD,Process industries
+PSTG,"Everpure, Inc.",64.89,USD,Electronic technology
+MRNA,"Moderna, Inc.",54.26,USD,Health technology
+ATI,ATI Inc.,156.83,USD,Non-energy minerals
+CRS,Carpenter Technology Corporation,428.67,USD,Non-energy minerals
+BURL,"Burlington Stores, Inc.",339.2,USD,Retail trade
+NVT,nVent Electric plc,131.38,USD,Electronic technology
+JBHT,"J.B. Hunt Transport Services, Inc.",224.17,USD,Transportation
+ZS,"Zscaler, Inc.",131.01,USD,Technology services
+AS,"Amer Sports, Inc.",36.41,USD,Consumer durables
+ROIV,Roivant Sciences Ltd.,29.39,USD,Health technology
+DGX,Quest Diagnostics Incorporated,191.42,USD,Health services
+FSLR,"First Solar, Inc.",195.2,USD,Electronic technology
+TROW,"T. Rowe Price Group, Inc.",96.11,USD,Finance
+ENTG,"Entegris, Inc.",136.995,USD,Producer manufacturing
+PFG,Principal Financial Group Inc,94.68,USD,Finance
+LUV,Southwest Airlines Company,41.7,USD,Transportation
+RIVN,"Rivian Automotive, Inc.",16.41,USD,Consumer durables
+CDE,"Coeur Mining, Inc.",19.67,USD,Non-energy minerals
+TWLO,Twilio Inc.,134.07,USD,Technology services
+ILMN,"Illumina, Inc.",132.26,USD,Health technology
+LDOS,"Leidos Holdings, Inc.",159.04,USD,Technology services
+DLTR,"Dollar Tree, Inc.",101.33,USD,Retail trade
+CHRW,"C.H. Robinson Worldwide, Inc.",168.08,USD,Transportation
+USFD,US Foods Holding Corp.,90.21,USD,Distribution services
+AFRM,"Affirm Holdings, Inc.",59.62,USD,Finance
+NTAP,"NetApp, Inc.",100.33,USD,Electronic technology
+LULU,lululemon athletica inc.,162.74,USD,Consumer non-durables
+MDB,"MongoDB, Inc.",244.06,USD,Technology services
+FLUT,Flutter Entertainment plc,111.79,USD,Consumer services
+MTSI,"MACOM Technology Solutions Holdings, Inc.",261.16,USD,Electronic technology
+APG,APi Group Corporation,44.88,USD,Industrial services
+IP,International Paper Company,36.51,USD,Process industries
+INCY,Incyte Corporation,97.1,USD,Health technology
+DKS,Dick's Sporting Goods Inc,216.98,USD,Retail trade
+GPN,Global Payments Inc.,70.17,USD,Commercial services
+WST,"West Pharmaceutical Services, Inc.",266.5,USD,Health technology
+EXPD,"Expeditors International of Washington, Inc.",144.02,USD,Transportation
+JBS,JBS N.V.,17.75,USD,Consumer non-durables
+DD,"DuPont de Nemours, Inc.",46.06,USD,Process industries
+CG,The Carlyle Group Inc.,52.06,USD,Finance
+EVRG,"Evergy, Inc.",81.54,USD,Utilities
+BR,"Broadridge Financial Solutions, Inc.",160.83,USD,Technology services
+AMCR,Amcor plc,40.6,USD,Process industries
+LNT,Alliant Energy Corporation,72.18,USD,Utilities
+AA,Alcoa Corporation,70.38,USD,Non-energy minerals
+ITT,ITT Inc.,215.73,USD,Producer manufacturing
+CF,"CF Industries Holdings, Inc.",120.81,USD,Process industries
+CNC,Centene Corporation,37.6,USD,Health services
+PKG,Packaging Corporation of America,207.07,USD,Process industries
+ZBH,"Zimmer Biomet Holdings, Inc.",94.2,USD,Health technology
+GIS,"General Mills, Inc.",34.49,USD,Consumer non-durables
+FTV,Fortive Corporation,59.37,USD,Electronic technology
+IFF,"International Flavors & Fragrances, Inc.",71.53,USD,Consumer non-durables
+ULS,UL Solutions Inc.,90.42,USD,Commercial services
+MKSI,MKS Inc.,269,USD,Producer manufacturing
+WY,Weyerhaeuser Company,24.21,USD,Finance
+HPQ,HP Inc.,19.23,USD,Technology services
+TEAM,Atlassian Corporation,66,USD,Technology services
+PR,Permian Resources Corporation,20.09,USD,Energy minerals
+YUMC,"Yum China Holdings, Inc.",49.38,USD,Consumer services
+SSNC,"SS&C Technologies Holdings, Inc.",71.46,USD,Technology services
+SGI,Somnigroup International Inc.,80.51,USD,Consumer durables
+WSO,"Watsco, Inc.",415.97,USD,Producer manufacturing
+FFIV,"F5, Inc.",299.09,USD,Technology services
+TPG,TPG Inc.,43.97,USD,Finance
+LII,"Lennox International, Inc.",484.29,USD,Producer manufacturing
+THC,Tenet Healthcare Corporation,193.56,USD,Health services
+IOT,Samsara Inc.,28.85,USD,Technology services
+BALL,Ball Corporation,62.76,USD,Process industries
+VNOM,"Viper Energy, Inc.",46.5,USD,Miscellaneous
+TOST,"Toast, Inc.",28.16,USD,Technology services
+CDW,CDW Corporation,129.56,USD,Technology services
+SNX,TD SYNNEX Corporation,205.45,USD,Distribution services
+CSGP,"CoStar Group, Inc.",39.31,USD,Technology services
+QXO,"QXO, Inc.",23.22,USD,Distribution services
+SMMT,Summit Therapeutics Inc.,21.12,USD,Health technology
+NXT,Nextpower Inc.,110.12,USD,Electronic technology
+SMCI,"Super Micro Computer, Inc.",27.29,USD,Electronic technology
+SN,"SharkNinja, Inc.",115.51,USD,Consumer durables
+PTC,PTC Inc.,136.58,USD,Technology services
+ESS,"Essex Property Trust, Inc.",251.71,USD,Finance
+IREN,IREN Limited,48.82,USD,Technology services
+EWBC,"East West Bancorp, Inc.",117.34,USD,Finance
+INVH,Invitation Homes Inc.,26.28,USD,Finance
+ROKU,"Roku, Inc.",109.33,USD,Technology services
+NLY,Annaly Capital Management Inc.,22.64,USD,Finance
+GRAB,Grab Holdings Limited,3.92,USD,Transportation
+TLN,Talen Energy Corporation,353.3,USD,Utilities
+SUI,"Sun Communities, Inc.",128.66,USD,Finance
+VTRS,Viatris Inc.,13.86,USD,Health technology
+KIM,Kimco Realty Corporation (HC),23.48,USD,Finance
+IONQ,"IonQ, Inc.",43.25,USD,Electronic technology
+TXT,Textron Inc.,90.49,USD,Electronic technology
+WPC,W. P. Carey Inc. REIT,71.58,USD,Finance
+CLH,"Clean Harbors, Inc.",296,USD,Industrial services
+TRMB,Trimble Inc.,66.79,USD,Technology services
+OVV,Ovintiv Inc. (DE),55.04,USD,Energy minerals
+DECK,Deckers Outdoor Corporation,108.87,USD,Consumer non-durables
+H,Hyatt Hotels Corporation,163.46,USD,Consumer services
+NIO,NIO Inc.,6.43,USD,Consumer durables
+OWL,Blue Owl Capital Inc.,9.92,USD,Finance
+GPC,Genuine Parts Company,110.44,USD,Distribution services
+ASND,Ascendis Pharma A/S,241.71,USD,Health technology
+PAA,"Plains All American Pipeline, L.P.",21.56,USD,Industrial services
+WMG,Warner Music Group Corp.,29.05,USD,Commercial services
+BBIO,"BridgeBio Pharma, Inc.",77.7,USD,Health technology
+J,Jacobs Solutions Inc.,127.31,USD,Technology services
+WCC,"WESCO International, Inc.",305.93,USD,Distribution services
+PAYP,PayPay Corporation - American Depository Shares,21.56,USD,Commercial services
+LSCC,Lattice Semiconductor Corporation,108.4,USD,Electronic technology
+IEX,IDEX Corporation,199.52,USD,Producer manufacturing
+AMKR,"Amkor Technology, Inc.",59.72,USD,Electronic technology
+MAA,"Mid-America Apartment Communities, Inc.",124.19,USD,Finance
+NWS,News Corporation,29.15,USD,Consumer services
+WLK,Westlake Corporation,115.25,USD,Process industries
+REG,Regency Centers Corporation,79.52,USD,Finance
+TRU,TransUnion,74.81,USD,Commercial services
+HST,"Host Hotels & Resorts, Inc.",20.69,USD,Finance
+TYL,"Tyler Technologies, Inc.",337.61,USD,Technology services
+MKC,"McCormick & Company, Incorporated",53.34,USD,Consumer non-durables
+PNR,Pentair plc.,88.35,USD,Producer manufacturing
+PODD,Insulet Corporation,202.5,USD,Health technology
+AEIS,"Advanced Energy Industries, Inc.",374.32,USD,Electronic technology
+PNFP,"Pinnacle Financial Partners, Inc.",93.99,USD,Finance
+CPT,Camden Property Trust,101.38,USD,Finance
+EVR,Evercore Inc.,357.05,USD,Finance
+GGG,Graco Inc.,85.21,USD,Producer manufacturing
+CHKP,Check Point Software Technologies Ltd.,134.69,USD,Technology services
+LECO,"Lincoln Electric Holdings, Inc.",255.35,USD,Producer manufacturing
+STRL,"Sterling Infrastructure, Inc.",456.08,USD,Industrial services
+KTOS,"Kratos Defense & Security Solutions, Inc.",74.66,USD,Electronic technology
+PFGC,Performance Food Group Company,88.86,USD,Transportation
+CAR,"Avis Budget Group, Inc.",395.77,USD,Finance
+BEN,"Franklin Resources, Inc.",26.63,USD,Finance
+COO,"The Cooper Companies, Inc.",70.29,USD,Health technology
+LAMR,Lamar Advertising Company,134.37,USD,Finance
+RPM,RPM International Inc.,105.69,USD,Process industries
+OHI,"Omega Healthcare Investors, Inc.",46.63,USD,Finance
+DTM,"DT Midstream, Inc.",131.88,USD,Industrial services
+ALGN,"Align Technology, Inc.",186.53,USD,Health technology
+MLI,"Mueller Industries, Inc.",120.66,USD,Producer manufacturing
+AKAM,"Akamai Technologies, Inc.",90.38,USD,Technology services
+TOL,"Toll Brothers, Inc.",140.13,USD,Consumer durables
+BBY,"Best Buy Co., Inc.",63.39,USD,Retail trade
+GLPI,"Gaming and Leisure Properties, Inc.",46.75,USD,Finance
+HAS,"Hasbro, Inc.",93.93,USD,Consumer durables
+CNH,CNH Industrial N.V.,10.64,USD,Producer manufacturing
+NBIX,"Neurocrine Biosciences, Inc.",131.44,USD,Health technology
+NYT,New York Times Company (The),81.1,USD,Consumer services
+FNF,"Fidelity National Financial, Inc.",48.42,USD,Finance
+PEN,"Penumbra, Inc.",332.42,USD,Health technology
+TIGO,Millicom International Cellular S.A.,77.85,USD,Communications
+ALLY,Ally Financial Inc.,42.24,USD,Finance
+PINS,"Pinterest, Inc.",20.27,USD,Technology services
+RMBS,"Rambus, Inc.",120.02,USD,Electronic technology
+PSKY,Paramount Skydance Corporation,11.67,USD,Consumer services
+APA,APA Corporation,36.6,USD,Energy minerals
+AVY,Avery Dennison Corporation,168.03,USD,Process industries
+RRX,Regal Rexnord Corporation,193.41,USD,Producer manufacturing
+ONTO,Onto Innovation Inc.,258.9,USD,Electronic technology
+MAS,Masco Corporation,63.17,USD,Producer manufacturing
+HL,Hecla Mining Company,19.12,USD,Non-energy minerals
+GMED,"Globus Medical, Inc.",94.55,USD,Health technology
+UNM,Unum Group,78.9,USD,Finance
+IONS,"Ionis Pharmaceuticals, Inc.",76.82,USD,Health technology
+SF,Stifel Financial Corporation,81.85,USD,Finance
+SOLS,Solstice Advanced Materials Inc.,79.24,USD,Process industries
+MOD,Modine Manufacturing Company,238.14,USD,Producer manufacturing
+ELS,"Equity Lifestyle Properties, Inc.",64.38,USD,Finance
+COKE,"Coca-Cola Consolidated, Inc.",187.46,USD,Consumer non-durables
+APTV,Aptiv PLC,58.46,USD,Producer manufacturing
+CLX,Clorox Company (The),102.92,USD,Consumer non-durables
+PNW,Pinnacle West Capital Corporation,102.8,USD,Utilities
+DPZ,Domino's Pizza Inc,368.07,USD,Consumer services
+FIVE,"Five Below, Inc.",223.32,USD,Retail trade
+DRS,"Leonardo DRS, Inc.",46.29,USD,Electronic technology
+KRMN,Karman Holdings Inc.,92.73,USD,Electronic technology
+JAZZ,Jazz Pharmaceuticals plc,199.33,USD,Health technology
+CRBG,Corebridge Financial Inc.,26.82,USD,Finance
+ALLE,Allegion plc,141.64,USD,Consumer durables
+TTMI,"TTM Technologies, Inc.",116.6,USD,Electronic technology
+DOC,"Healthpeak Properties, Inc.",17.2,USD,Finance
+GNRC,Generac Holdings Inc.,204.4,USD,Producer manufacturing
+SOLV,Solventum Corporation,69.1,USD,Health services
+AGNC,AGNC Investment Corp.,10.74,USD,Finance
+GEN,Gen Digital Inc.,19.67,USD,Technology services
+OKTA,"Okta, Inc.",67.35,USD,Technology services
+PL,Planet Labs PBC,34.41,USD,Technology services
+DY,"Dycom Industries, Inc.",395,USD,Industrial services
+EQH,"Equitable Holdings, Inc.",42,USD,Finance
+CCK,"Crown Holdings, Inc.",104.89,USD,Process industries
+BJ,"BJ's Wholesale Club Holdings, Inc.",90.7,USD,Retail trade
+ONON,On Holding AG,35.43,USD,Consumer non-durables
+DKNG,DraftKings Inc.,23.64,USD,Consumer services
+GL,Globe Life Inc.,149.08,USD,Finance
+WBS,Webster Financial Corporation,72.52,USD,Finance
+JHX,James Hardie Industries plc.,19.94,USD,Non-energy minerals
+GWRE,"Guidewire Software, Inc.",136.57,USD,Technology services
+ELAN,Elanco Animal Health Incorporated,23.23,USD,Health technology
+FHN,First Horizon Corporation,24.17,USD,Finance
+UDR,"UDR, Inc.",34.86,USD,Finance
+HUBS,"HubSpot, Inc.",218.62,USD,Technology services
+ARMK,Aramark,43.81,USD,Consumer services
+WMS,"Advanced Drainage Systems, Inc.",147.75,USD,Producer manufacturing
+EXEL,"Exelixis, Inc.",44.28,USD,Health technology
+HRL,Hormel Foods Corporation,20.66,USD,Consumer non-durables
+CHWY,"Chewy, Inc.",27.17,USD,Retail trade
+ZBRA,Zebra Technologies Corporation,229.64,USD,Electronic technology
+AR,Antero Resources Corporation,36.34,USD,Energy minerals
+ACM,AECOM,86.47,USD,Industrial services
+SCI,Service Corporation International,80.58,USD,Consumer services
+HLI,"Houlihan Lokey, Inc.",159.87,USD,Finance
+WYNN,"Wynn Resorts, Limited",106.84,USD,Consumer services
+GH,"Guardant Health, Inc.",84.86,USD,Health services
+GME,GameStop Corporation,24.79,USD,Retail trade
+JKHY,"Jack Henry & Associates, Inc.",153.4,USD,Technology services
+SFD,"Smithfield Foods, Inc.",28.03,USD,Consumer non-durables
+U,Unity Software Inc.,25.26,USD,Technology services
+UHS,"Universal Health Services, Inc.",180.15,USD,Health services
+OKLO,Oklo Inc.,63.35,USD,Producer manufacturing
+CR,Crane Company,190.32,USD,Electronic technology
+GDDY,GoDaddy Inc.,82.33,USD,Technology services
+IVZ,Invesco Ltd,24.71,USD,Finance
+SPXC,"SPX Technologies, Inc.",219.99,USD,Producer manufacturing
+XP,XP Inc.,20.8,USD,Finance
+AMH,American Homes 4 Rent,30.16,USD,Finance
+WTRG,"Essential Utilities, Inc.",38.58,USD,Utilities
+BLD,TopBuild Corp.,387.9,USD,Industrial services
+AFG,"American Financial Group, Inc.",130.59,USD,Finance
+BWA,BorgWarner Inc.,52.49,USD,Producer manufacturing
+TXRH,"Texas Roadhouse, Inc.",163.03,USD,Consumer services
+IT,"Gartner, Inc.",152.39,USD,Technology services
+AAOI,"Applied Optoelectronics, Inc.",142.55,USD,Electronic technology
+TTD,"The Trade Desk, Inc.",22.38,USD,Technology services
+BMRN,BioMarin Pharmaceutical Inc.,55.27,USD,Health technology
+FIG,FIGMA INC,20.34,USD,Technology services
+SAIA,"Saia, Inc.",397.79,USD,Transportation
+MP,MP Materials Corp.,59.52,USD,Non-energy minerals
+DT,"Dynatrace, Inc.",35.45,USD,Technology services
+DINO,HF Sinclair Corporation,58.28,USD,Energy minerals
+EHC,Encompass Health Corporation,105.24,USD,Health services
+ALSN,"Allison Transmission Holdings, Inc.",125.82,USD,Producer manufacturing
+Z,"Zillow Group, Inc.",43.5,USD,Technology services
+SWK,"Stanley Black & Decker, Inc.",67.18,USD,Consumer durables
+RBRK,"Rubrik, Inc.",51.36,USD,Technology services
+RVTY,"Revvity, Inc.",92.9,USD,Health technology
+CNM,"Core & Main, Inc.",53.36,USD,Distribution services
+GSAT,"Globalstar, Inc.",80.64,USD,Communications
+AUR,"Aurora Innovation, Inc.",5.3,USD,Technology services
+BSY,"Bentley Systems, Incorporated",34.05,USD,Technology services
+AES,The AES Corporation,14.45,USD,Utilities
+CAVA,"CAVA Group, Inc.",88.44,USD,Consumer services
+DCI,"Donaldson Company, Inc.",88.52,USD,Producer manufacturing
+SNAP,Snap Inc.,6.04,USD,Technology services
+BMNR,"BitMine Immersion Technologies, Inc.",22.34,USD,Finance
+NTNX,"Nutanix, Inc.",38.26,USD,Technology services
+FORM,"FormFactor, Inc.",129.62,USD,Electronic technology
+BILI,Bilibili Inc.,24.95,USD,Technology services
+TEM,"Tempus AI, Inc.",56.41,USD,Technology services
+W,Wayfair Inc.,76.92,USD,Retail trade
+AM,Antero Midstream Corporation,21.26,USD,Industrial services
+ORI,Old Republic International Corporation,41.23,USD,Finance
+FLS,Flowserve Corporation,78.82,USD,Producer manufacturing
+OGE,OGE Energy Corp,48.55,USD,Utilities
+KNX,Knight-Swift Transportation Holdings Inc.,61.56,USD,Transportation
+VFS,VinFast Auto Ltd.,4.27,USD,Consumer durables
+SJM,The J.M. Smucker Company,93.49,USD,Consumer non-durables
+GTLS,"Chart Industries, Inc.",207.99,USD,Producer manufacturing
+ARWR,"Arrowhead Pharmaceuticals, Inc.",70.95,USD,Health technology
+CART,Maplebear Inc.,41.29,USD,Transportation
+BAH,Booz Allen Hamilton Holding Corporation,82.3,USD,Commercial services
+AVAV,"AeroVironment, Inc.",198.42,USD,Electronic technology
+MGM,MGM Resorts International,38.36,USD,Consumer services
+SEIC,SEI Investments Company,80.01,USD,Finance
+RRC,Range Resources Corporation,41.22,USD,Energy minerals
+DVA,DaVita Inc.,144.57,USD,Health services
+NCLH,Norwegian Cruise Line Holdings Ltd.,21.12,USD,Consumer services
+SSB,SouthState Bank Corporation,97.97,USD,Finance
+RYAN,"Ryan Specialty Holdings, Inc.",36.39,USD,Finance
+JEF,Jefferies Financial Group Inc.,46.84,USD,Finance
+FRT,Federal Realty Investment Trust,110.15,USD,Finance
+GAP,"Gap, Inc. (The)",25.8,USD,Retail trade
+AXSM,"Axsome Therapeutics, Inc.",184.18,USD,Health technology
+BPOP,"Popular, Inc.",144.95,USD,Finance
+BLDR,"Builders FirstSource, Inc.",85.13,USD,Retail trade
+OC,Owens Corning Inc,116.58,USD,Process industries
+GLXY,Galaxy Digital Inc.,24.04,USD,Finance
+EDU,"New Oriental Education & Technology Group, Inc. Sponsored",55.47,USD,Consumer services
+MASI,Masimo Corporation,178.39,USD,Health technology
+ADC,Agree Realty Corporation,78.01,USD,Finance
+AHR,"American Healthcare REIT, Inc.",49.48,USD,Finance
+DAR,Darling Ingredients Inc.,58.44,USD,Consumer non-durables
+BRX,Brixmor Property Group Inc.,30.12,USD,Finance
+TECH,Bio-Techne Corp,58.49,USD,Health technology
+ZION,Zions Bancorporation N.A.,61.85,USD,Finance
+ESI,Element Solutions Inc.,37.53,USD,Process industries
+UMBF,UMB Financial Corporation,119.87,USD,Finance
+CGNX,Cognex Corporation,54.64,USD,Electronic technology
+DOCU,"DocuSign, Inc.",46.84,USD,Technology services
+ONB,Old National Bancorp,23.36,USD,Finance
+BAX,Baxter International Inc.,17.6,USD,Health technology
+VIAV,Viavi Solutions Inc.,39.26,USD,Technology services
+CELH,"Celsius Holdings, Inc.",35.28,USD,Consumer non-durables
+SARO,"StandardAero, Inc.",27.24,USD,Transportation
+CUBE,CubeSmart,38.95,USD,Finance
+TTC,Toro Company (The),92.79,USD,Producer manufacturing
+CHYM,"Chime Financial, Inc.",23.41,USD,Finance
+CFR,"Cullen/Frost Bankers, Inc.",142.01,USD,Finance
+JOBY,"Joby Aviation, Inc.",9.13,USD,Electronic technology
+BTSG,"BrightSpring Health Services, Inc.",46.01,USD,Health services
+ICLR,ICON plc,116.5,USD,Commercial services
+CRL,"Charles River Laboratories International, Inc.",180.56,USD,Commercial services
+HSIC,"Henry Schein, Inc.",77.42,USD,Distribution services
+LUMN,"Lumen Technologies, Inc.",8.59,USD,Communications
+PRIM,Primoris Services Corporation,162.52,USD,Industrial services
+VICR,Vicor Corporation,194.2,USD,Electronic technology
+TAP,Molson Coors Beverage Company,44.31,USD,Consumer non-durables
+APLD,Applied Digital Corporation,30.81,USD,Technology services
+AUGO,Aura Minerals Inc.,105.01,USD,Non-energy minerals
+CTRE,"CareTrust REIT, Inc.",39.73,USD,Finance
+OSK,Oshkosh Corporation (Holding Company),140.21,USD,Consumer durables
+AOS,A.O. Smith Corporation,63.37,USD,Producer manufacturing
+BXP,"BXP, Inc.",55.93,USD,Finance
+SWKS,"Skyworks Solutions, Inc.",57.93,USD,Electronic technology
+YMM,Full Truck Alliance Co. Ltd.,8.6,USD,Technology services
+PCVX,"Vaxcyte, Inc.",60.45,USD,Health technology
+SMTC,Semtech Corporation,93.27,USD,Electronic technology
+ARW,"Arrow Electronics, Inc.",168.98,USD,Distribution services
+WAL,Western Alliance Bancorporation,78.51,USD,Finance
+COLB,"Columbia Banking System, Inc.",29.1,USD,Finance
+ACI,"Albertsons Companies, Inc.",16.6,USD,Retail trade
+BROS,Dutch Bros Inc.,51.72,USD,Consumer services
+NFG,National Fuel Gas Company,89.49,USD,Energy minerals
+AYI,Acuity Inc.,278.48,USD,Producer manufacturing
+SANM,Sanmina Corporation,154.31,USD,Electronic technology
+FDS,FactSet Research Systems Inc.,230.75,USD,Commercial services
+NNN,"NNN REIT, Inc.",44.29,USD,Finance
+POWL,"Powell Industries, Inc.",229.73,USD,Producer manufacturing
+FR,"First Industrial Realty Trust, Inc.",61.33,USD,Finance
+AGCO,AGCO Corporation,115.27,USD,Producer manufacturing
+WULF,TeraWulf Inc.,19.67,USD,Technology services
+EMN,Eastman Chemical Company,72.75,USD,Process industries
+POOL,Pool Corporation,226.59,USD,Distribution services
+ATR,"AptarGroup, Inc.",129.65,USD,Process industries
+CWEN,"Clearway Energy, Inc.",40.27,USD,Utilities
+TTEK,"Tetra Tech, Inc.",31.66,USD,Industrial services
+NUVL,"Nuvalent, Inc.",104.75,USD,Health technology
+REXR,"Rexford Industrial Realty, Inc.",35.69,USD,Finance
+ALV,"Autoliv, Inc.",109.16,USD,Producer manufacturing
+LINE,"Lineage, Inc.",35.68,USD,Finance
+VSAT,"ViaSat, Inc.",59.92,USD,Electronic technology
+SIRI,SiriusXM Holdings Inc.,24.21,USD,Consumer services
+HALO,"Halozyme Therapeutics, Inc.",68.05,USD,Health technology
+CYTK,"Cytokinetics, Incorporated",65.37,USD,Health technology
+SNEX,StoneX Group Inc.,102.3,USD,Finance
+CRUS,"Cirrus Logic, Inc.",157.71,USD,Electronic technology
+IDA,"IDACORP, Inc.",146.51,USD,Utilities
+AAL,"American Airlines Group, Inc.",12.17,USD,Transportation
+MTCH,"Match Group, Inc.",34.52,USD,Technology services
+IBRX,"ImmunityBio, Inc.",7.78,USD,Health technology
+PPC,Pilgrim's Pride Corporation,33.64,USD,Process industries
+UGI,UGI Corporation,37.1,USD,Distribution services
+DOCN,"DigitalOcean Holdings, Inc.",77.71,USD,Technology services
+JHG,Janus Henderson Group plc,51.6,USD,Finance
+ZWS,Zurn Elkay Water Solutions Corporation,47.39,USD,Producer manufacturing
+HUT,Hut 8 Corp.,71.09,USD,Technology services
+ARE,"Alexandria Real Estate Equities, Inc.",47.61,USD,Finance
+PCOR,"Procore Technologies, Inc.",52.39,USD,Technology services
+VIRT,"Virtu Financial, Inc.",50.59,USD,Finance
+LKQ,LKQ Corporation,30.34,USD,Consumer durables
+HESM,Hess Midstream LP,37.25,USD,Energy minerals
+MANH,"Manhattan Associates, Inc.",128.88,USD,Technology services
+QBTS,D-Wave Quantum Inc.,20.81,USD,Electronic technology
+VFC,V.F. Corporation,19.64,USD,Consumer non-durables
+FIGR,"Figure Technology Solutions, Inc.",35.62,USD,Finance
+MOH,Molina Healthcare Inc,146.8,USD,Health services
+KEX,Kirby Corporation,142.49,USD,Transportation
+KNTK,Kinetik Holdings Inc.,46.79,USD,Industrial services
+AAON,"AAON, Inc.",92.6,USD,Producer manufacturing
+JXN,Jackson Financial Inc.,107.49,USD,Finance
+NE,Noble Corporation plc A,47.42,USD,Industrial services
+MOS,Mosaic Company (The),23.73,USD,Process industries
+QRVO,"Qorvo, Inc.",81.19,USD,Electronic technology
+LGN,Legence Corp.,69.54,USD,Industrial services
+AXS,Axis Capital Holdings Limited,100.74,USD,Finance
+CBSH,"Commerce Bancshares, Inc.",50.69,USD,Finance
+RGEN,Repligen Corporation,131.93,USD,Health technology
+STAG,"Stag Industrial, Inc.",38.45,USD,Finance
+CHRD,Chord Energy Corporation,129.9,USD,Energy minerals
+VIPS,Vipshop Holdings Limited,15.1,USD,Retail trade
+CDP,COPT Defense Properties,32.4,USD,Finance
+VLY,Valley National Bancorp,13.14,USD,Finance
+CIFR,Cipher Digital Inc.,18,USD,Technology services
+KYMR,"Kymera Therapeutics, Inc.",89,USD,Health technology
+UEC,Uranium Energy Corp.,14.82,USD,Non-energy minerals
+CE,Celanese Corporation,64.73,USD,Process industries
+TKR,Timken Company (The),103.73,USD,Producer manufacturing
+PEGA,Pegasystems Inc.,42.75,USD,Technology services
+CMC,Commercial Metals Company,64.91,USD,Non-energy minerals
+PRMB,Primo Brands Corporation,19.75,USD,Consumer non-durables
+WFRD,Weatherford International plc,99.79,USD,Industrial services
+CWAN,"Clearwater Analytics Holdings, Inc.",24.04,USD,Technology services
+MORN,"Morningstar, Inc.",179.47,USD,Commercial services
+INGR,Ingredion Incorporated,112.7,USD,Consumer non-durables
+MTDR,Matador Resources Company,57.07,USD,Energy minerals
+SFM,"Sprouts Farmers Market, Inc.",74.93,USD,Retail trade
+HQY,"HealthEquity, Inc.",83.67,USD,Finance
+TAL,TAL Education Group,11.79,USD,Commercial services
+DOX,Amdocs Limited,65.47,USD,Technology services
+GKOS,Glaukos Corporation,121,USD,Health technology
+PB,"Prosperity Bancshares, Inc.",69.12,USD,Finance
+TRNO,Terreno Realty Corporation,65.74,USD,Finance
+FLR,Fluor Corporation,48.56,USD,Industrial services
+BIRK,Birkenstock Holding plc,37.81,USD,Consumer non-durables
+ORA,"Ormat Technologies, Inc.",113.81,USD,Utilities
+ALGM,"Allegro MicroSystems, Inc.",37.25,USD,Electronic technology
+FSS,Federal Signal Corporation,113.15,USD,Consumer durables
+NOV,NOV Inc.,19.02,USD,Industrial services
+EAT,"Brinker International, Inc.",157.23,USD,Consumer services
+LNC,Lincoln National Corporation,36.01,USD,Finance
+YOU,"Clear Secure, Inc.",51.1,USD,Technology services
+VOYA,"Voya Financial, Inc.",73.44,USD,Finance
+RIG,Transocean Ltd (Switzerland),6.15,USD,Industrial services
+EPRT,"Essential Properties Realty Trust, Inc.",32.67,USD,Finance
+MWH,"SOLV Energy, Inc.",33.49,USD,Industrial services
+EPAM,"EPAM Systems, Inc.",128.42,USD,Technology services
+OMF,"OneMain Holdings, Inc.",57.66,USD,Finance
+CAG,"ConAgra Brands, Inc.",14.09,USD,Consumer non-durables
+PTGX,"Protagonist Therapeutics, Inc.",105.44,USD,Health technology
+AMTM,"Amentum Holdings, Inc.",27.58,USD,Electronic technology
+ACLX,"Arcellx, Inc.",115,USD,Health technology
+PAYC,"Paycom Software, Inc.",123.64,USD,Technology services
+STWD,Starwood Property Trust Inc.,18.15,USD,Finance
+TEX,Terex Corporation,58.66,USD,Producer manufacturing
+SAIL,"SailPoint, Inc.",11.76,USD,Technology services
+RIOT,"Riot Platforms, Inc.",17.42,USD,Technology services
+SWX,"Southwest Gas Holdings, Inc.",91.04,USD,Utilities
+MIDD,The Middleby Corporation,139.38,USD,Producer manufacturing
+WH,"Wyndham Hotels & Resorts, Inc.",87.54,USD,Consumer services
+ECG,"Everus Construction Group, Inc.",128.57,USD,Industrial services
+INGM,Ingram Micro Holding Corporation,28.23,USD,Technology services
+FAF,First American Corporation (New),63.79,USD,Finance
+SM,SM Energy Company,27.33,USD,Energy minerals
+STEP,StepStone Group Inc.,54.58,USD,Finance
+MBLY,Mobileye Global Inc.,7.72,USD,Technology services
+BYD,Boyd Gaming Corporation,85.98,USD,Consumer services
+RYN,Rayonier Inc. REIT,20.82,USD,Finance
+BZ,KANZHUN LIMITED - American Depository Shares,14.23,USD,Commercial services
+TXNM,"TXNM Energy, Inc.",59.03,USD,Utilities
+RHP,"Ryman Hospitality Properties, Inc. (REIT)",101.04,USD,Finance
+CHDN,"Churchill Downs, Incorporated",91.99,USD,Consumer services
+GXO,"GXO Logistics, Inc.",55.76,USD,Transportation
+MHK,"Mohawk Industries, Inc.",103.88,USD,Producer manufacturing
+SSRM,SSR Mining Inc.,31.16,USD,Non-energy minerals
+AROC,"Archrock, Inc.",36.31,USD,Industrial services
+FNB,F.N.B. Corporation,17.89,USD,Finance
+BEPC,Brookfield Renewable Corporation,43.66,USD,Utilities
+RGTI,"Rigetti Computing, Inc.",19.11,USD,Electronic technology
+VAL,Valaris Limited,91.67,USD,Industrial services
+CENX,Century Aluminum Company,64.09,USD,Non-energy minerals
+GTES,Gates Industrial Corporation plc,24.91,USD,Producer manufacturing
+HXL,Hexcel Corporation,83.29,USD,Electronic technology
+PIPR,Piper Sandler Companies,88.58,USD,Finance
+ROAD,"Construction Partners, Inc.",111.7,USD,Industrial services
+VSEC,VSE Corporation,224.64,USD,Industrial services
+BLSH,Bullish,41.67,USD,Technology services
+HR,Healthcare Realty Trust Incorporated,17.82,USD,Finance
+GBCI,"Glacier Bancorp, Inc.",47.75,USD,Finance
+APGE,"Apogee Therapeutics, Inc.",89.32,USD,Health technology
+EXP,Eagle Materials Inc,197.1,USD,Non-energy minerals
+ESAB,ESAB Corporation,101.41,USD,Producer manufacturing
+LTH,"Life Time Group Holdings, Inc.",27.76,USD,Consumer services
+G,Genpact Limited,36.24,USD,Commercial services
+LOAR,Loar Holdings Inc.,65.5,USD,Electronic technology
+SITE,"SiteOne Landscape Supply, Inc.",137.72,USD,Distribution services
+CPB,The Campbell's Company,20.49,USD,Consumer non-durables
+UWMC,UWM Holdings Corporation,3.81,USD,Finance
+PTCT,"PTC Therapeutics, Inc.",73.57,USD,Health technology
+TERN,"Terns Pharmaceuticals, Inc.",52.71,USD,Health technology
+POR,Portland General Electric Co,52.49,USD,Utilities
+UBSI,"United Bankshares, Inc.",43.5,USD,Finance
+PSN,Parsons Corporation,56.57,USD,Technology services
+LEA,Lear Corporation,118.79,USD,Producer manufacturing
+CORZ,"Core Scientific, Inc.",19.08,USD,Technology services
+REZI,"Resideo Technologies, Inc.",39.81,USD,Distribution services
+DLB,Dolby Laboratories,63.01,USD,Technology services
+FLY,Firefly Aerospace Inc.,37.62,USD,Electronic technology
+BRKR,Bruker Corporation,39.48,USD,Health technology
+RYTM,"Rhythm Pharmaceuticals, Inc.",87.81,USD,Health technology
+AXTA,Axalta Coating Systems Ltd.,28.09,USD,Process industries
+CBC,"Central Bancompany, Inc.",24.94,USD,Finance
+CELC,Celcuity Inc.,123.47,USD,Health technology
+NXST,"Nexstar Media Group, Inc.",196.59,USD,Consumer services
+LW,"Lamb Weston Holdings, Inc.",43.17,USD,Consumer non-durables
+WEX,WEX Inc.,171.45,USD,Commercial services
+RRR,"Red Rock Resorts, Inc.",56.58,USD,Consumer services
+CAI,"Caris Life Sciences, Inc.",20.95,USD,Health technology
+CNTA,Centessa Pharmaceuticals plc,39.61,USD,Health technology
+TTAN,"ServiceTitan, Inc.",61.93,USD,Technology services
+VSNT,"Versant Media Group, Inc.",41,USD,Consumer services
+COGT,"Cogent Biosciences, Inc.",36.32,USD,Health technology
+FLG,"Flagstar Bank, N.A.",14.13,USD,Finance
+HLNE,Hamilton Lane Incorporated,105.12,USD,Finance
+MTG,MGIC Investment Corporation,27.22,USD,Finance
+URBN,"Urban Outfitters, Inc.",68.2,USD,Retail trade
+LYFT,"Lyft, Inc.",14.66,USD,Transportation
+BKH,Black Hills Corporation,76.56,USD,Utilities
+MIRM,"Mirum Pharmaceuticals, Inc.",96.4,USD,Health technology
+OLLI,"Ollie's Bargain Outlet Holdings, Inc.",95.23,USD,Retail trade
+CRC,California Resources Corporation,64.93,USD,Energy minerals
+FND,"Floor & Decor Holdings, Inc.",53.19,USD,Retail trade
+AVT,"Avnet, Inc.",70.22,USD,Distribution services
+KMX,CarMax Inc,40.51,USD,Retail trade
+PLNT,"Planet Fitness, Inc.",72.22,USD,Consumer services
+ESNT,Essent Group Ltd.,60.81,USD,Finance
+CGON,"CG Oncology, Inc.",67.68,USD,Health technology
+OTF,Blue Owl Technology Finance Corp.,12.27,USD,Finance
+NSA,National Storage Affiliates Trust,41.9,USD,Finance
+SRRK,Scholar Rock Holding Corporation,49.32,USD,Health technology
+AVTR,"Avantor, Inc.",8.37,USD,Health technology
+ERAS,"Erasca, Inc.",18.2,USD,Health technology
+DBX,"Dropbox, Inc.",23.69,USD,Technology services
+ST,Sensata Technologies Holding plc,38.74,USD,Electronic technology
+GLBE,Global-E Online Ltd.,33.3,USD,Retail trade
+NJR,NewJersey Resources Corporation,55.93,USD,Utilities
+SGHC,Super Group (SGHC) Limited,11.22,USD,Consumer services
+RITM,Rithm Capital Corp.,10.18,USD,Finance
+XENE,Xenon Pharmaceuticals Inc.,58.88,USD,Health technology
+ABCB,Ameris Bancorp,82.67,USD,Finance
+KLAR,Klarna Group plc,14.86,USD,Commercial services
+KVYO,"Klaviyo, Inc. Series A",18.37,USD,Technology services
+HOMB,"Home BancShares, Inc.",27.67,USD,Finance
+CNX,CNX Resources Corporation,39.35,USD,Energy minerals
+TFX,Teleflex Incorporated,126.34,USD,Health technology
+IMVT,"Immunovant, Inc.",27.43,USD,Health technology
+ETSY,"Etsy, Inc.",57.92,USD,Retail trade
+TMHC,Taylor Morrison Home Corporation,57.74,USD,Consumer durables
+OGS,"ONE Gas, Inc.",88.61,USD,Utilities
+PATH,"UiPath, Inc.",10.61,USD,Technology services
+CZR,"Caesars Entertainment, Inc.",27.29,USD,Consumer services
+HIMS,"Hims & Hers Health, Inc.",24.29,USD,Health services
+BGC,"BGC Group, Inc.",11.67,USD,Finance
+TGTX,"TG Therapeutics, Inc.",34.6,USD,Health technology
+ALKS,Alkermes plc,33.22,USD,Health technology
+CLF,Cleveland-Cliffs Inc.,9.66,USD,Non-energy minerals
+MAC,Macerich Company (The),21.52,USD,Finance
+MUR,Murphy Oil Corporation,38.22,USD,Energy minerals
+COMP,"Compass, Inc.",7.28,USD,Finance
+PACS,"PACS Group, Inc.",34.84,USD,Health services
+GVA,Granite Construction Incorporated,125.78,USD,Industrial services
+GLNG,Golar LNG Limited,53.83,USD,Industrial services
+HWC,Hancock Whitney Corporation,67.03,USD,Finance
+LNTH,"Lantheus Holdings, Inc.",83.94,USD,Health technology
+SON,Sonoco Products Company,55.18,USD,Process industries
+CRSP,CRISPR Therapeutics AG,56.76,USD,Health technology
+AUB,Atlantic Union Bankshares Corporation,38.03,USD,Finance
+KGS,"Kodiak Gas Services, Inc.",61.61,USD,Industrial services
+OZK,Bank OZK,47.88,USD,Finance
+SYRE,"Spyre Therapeutics, Inc.",68.99,USD,Health technology
+PCTY,Paylocity Holding Corporation,100.52,USD,Technology services
+MGY,Magnolia Oil & Gas Corporation,28.19,USD,Energy minerals
+SRAD,Sportradar Group AG,17.24,USD,Technology services
+AX,"Axos Financial, Inc.",94.77,USD,Finance
+RLI,RLI Corp.,58.35,USD,Finance
+CHH,"Choice Hotels International, Inc.",116.5,USD,Consumer services
+ADT,ADT Inc.,6.98,USD,Commercial services
+PECO,"Phillips Edison & Company, Inc.",38.82,USD,Finance
+VNO,Vornado Realty Trust,28.57,USD,Finance
+EQPT,EquipmentShare.com Inc,20.01,USD,Technology services
+MC,Moelis & Company,66.53,USD,Finance
+KRG,Kite Realty Group Trust,25.77,USD,Finance
+RSI,"Rush Street Interactive, Inc.",22.8,USD,Consumer services
+MSM,"MSC Industrial Direct Company, Inc.",94.71,USD,Distribution services
+WING,Wingstop Inc.,191.4,USD,Consumer services
+APLS,"Apellis Pharmaceuticals, Inc.",40.845,USD,Health technology
+MAIN,Main Street Capital Corporation,57.83,USD,Finance
+FROG,JFrog Ltd.,42.87,USD,Technology services
+CWST,"Casella Waste Systems, Inc.",81.54,USD,Industrial services
+LUNR,"Intuitive Machines, Inc.",23.88,USD,Electronic technology
+HASI,"HA Sustainable Infrastructure Capital, Inc.",40.42,USD,Finance
+ATAT,Atour Lifestyle Holdings Limited,37.01,USD,Consumer services
+LPX,Louisiana-Pacific Corporation,73.81,USD,Non-energy minerals
+VNT,Vontier Corporation,36.4,USD,Transportation
+CROX,"Crocs, Inc.",102.52,USD,Consumer non-durables
+MRCY,Mercury Systems Inc,85.51,USD,Electronic technology
+SBRA,"Sabra Health Care REIT, Inc.",20.49,USD,Finance
+OUT,OUTFRONT Media Inc.,29.07,USD,Finance
+RAL,Ralliant Corporation,45.8,USD,Electronic technology
+KC,Kingsoft Cloud Holdings Limited,16.88,USD,Technology services
+BIPC,Brookfield Infrastructure Corporation,42.51,USD,Utilities
+DNTH,"Dianthus Therapeutics, Inc.",95.76,USD,Health technology
+ATMU,Atmus Filtration Technologies Inc.,62.19,USD,Producer manufacturing
+M,Macy's Inc,19.15,USD,Retail trade
+YSS,York Space Systems Inc.,39.68,USD,Electronic technology
+LMND,"Lemonade, Inc.",65.86,USD,Finance
+BC,Brunswick Corporation,77.23,USD,Producer manufacturing
+IEP,Icahn Enterprises L.P.,7.83,USD,Energy minerals
+CPA,"Copa Holdings, S.A.",120.68,USD,Transportation
+MIR,"Mirion Technologies, Inc.",19.76,USD,Electronic technology
+ALH,Alliance Laundry Holdings Inc.,25,USD,Producer manufacturing
+ESTC,Elastic N.V.,47.51,USD,Technology services
+FOUR,"Shift4 Payments, Inc.",48.01,USD,Commercial services
+TNL,Travel Leisure Co.,78.45,USD,Consumer services
+EXLS,"ExlService Holdings, Inc.",31.26,USD,Technology services
+ALK,"Alaska Air Group, Inc.",42.54,USD,Transportation
+ZGN,Ermenegildo Zegna N.V.,11.5,USD,Consumer non-durables
+SIGI,"Selective Insurance Group, Inc.",80.62,USD,Finance
+EBC,"Eastern Bankshares, Inc.",20.68,USD,Finance
+KNF,Knife Riv Holding Co.,84.82,USD,Non-energy minerals
+BOOT,"Boot Barn Holdings, Inc.",157.95,USD,Retail trade
+SNDR,"Schneider National, Inc.",27.34,USD,Transportation
+PFSI,"PennyMac Financial Services, Inc.",91.74,USD,Finance
+CRK,"Comstock Resources, Inc.",16.27,USD,Energy minerals
+GPGI,"GPGI, Inc.",16.46,USD,Commercial services
+POST,"Post Holdings, Inc.",99.39,USD,Consumer non-durables
+PBF,PBF Energy Inc.,40.53,USD,Energy minerals
+MRP,"Millrose Properties, Inc.",30.43,USD,Finance
+TDS,"Telephone and Data Systems, Inc.",44.68,USD,Communications
+WAY,Waystar Holding Corp.,24.68,USD,Technology services
+LAUR,"Laureate Education, Inc.",33.01,USD,Commercial services
+RDN,Radian Group Inc.,34.53,USD,Finance
+SPHR,Sphere Entertainment Co.,132.41,USD,Consumer services
+ONDS,Ondas Inc,10.03,USD,Electronic technology
+VCTR,"Victory Capital Holdings, Inc. Class A Common Stock",73.15,USD,Finance
+GNTX,Gentex Corporation,21.69,USD,Producer manufacturing
+CORT,Corcept Therapeutics Incorporated,43.9,USD,Health technology
+HCC,"Warrior Met Coal, Inc.",88.81,USD,Energy minerals
+OLED,Universal Display Corporation,98.6,USD,Electronic technology
+KBR,"KBR, Inc.",36.7,USD,Technology services
+DUOL,"Duolingo, Inc.",98.78,USD,Technology services
+FBIN,"Fortune Brands Innovations, Inc.",38.6,USD,Producer manufacturing
+BFAM,Bright Horizons Family Solutions Inc.,83.93,USD,Commercial services
+LAZ,"Lazard, Inc.",49.22,USD,Finance
+OPEN,Opendoor Technologies Inc,4.82,USD,Finance
+PAGP,"Plains GP Holdings, L.P.",23.32,USD,Industrial services
+ASB,Associated Banc-Corp,27.61,USD,Finance
+MTN,"Vail Resorts, Inc.",128.23,USD,Consumer services
+MWA,MUELLER WATER PRODUCTS,29.19,USD,Producer manufacturing
+REYN,Reynolds Consumer Products Inc.,21.64,USD,Consumer non-durables
+SHC,Sotera Health Company,16.03,USD,Health technology
+TPC,Tutor Perini Corporation,86.25,USD,Industrial services
+FOLD,"Amicus Therapeutics, Inc.",14.46,USD,Health technology
+CNR,"Core Natural Resources, Inc.",89.31,USD,Energy minerals
+SEI,"Solaris Energy Infrastructure, Inc.",66.05,USD,Technology services
+RDNT,"RadNet, Inc.",58.22,USD,Health services
+S,"SentinelOne, Inc.",13.26,USD,Technology services
+ACHR,Archer Aviation Inc.,6.06,USD,Electronic technology
+NWE,"NorthWestern Energy Group, Inc.",73.36,USD,Utilities
+LBRT,Liberty Energy Inc.,27.78,USD,Industrial services
+MAT,"Mattel, Inc.",14.84,USD,Consumer durables
+MDU,"MDU Resources Group, Inc.",21.89,USD,Utilities
+BCO,Brinks Company (The),108.72,USD,Commercial services
+FFIN,"First Financial Bankshares, Inc.",31.14,USD,Finance
+MMYT,MakeMyTrip Limited,46.91,USD,Technology services
+OPCH,"Option Care Health, Inc.",28.34,USD,Health services
+NVST,Envista Holdings Corporation,27.03,USD,Health technology
+IBOC,International Bancshares Corporation,71.17,USD,Finance
+SIMO,Silicon Motion Technology Corporation,139.03,USD,Electronic technology
+DOCS,"Doximity, Inc.",23.9,USD,Technology services
+FHI,"Federated Hermes, Inc.",58,USD,Finance
+QS,QuantumScape Corporation,7.17,USD,Producer manufacturing
+NG,Novagold Resources Inc.,9.96,USD,Non-energy minerals
+MTH,Meritage Homes Corporation,65.03,USD,Finance
+ITRI,"Itron, Inc.",97.55,USD,Electronic technology
+ACIW,"ACI Worldwide, Inc.",42.48,USD,Technology services
+SHAK,"Shake Shack, Inc.",101.17,USD,Consumer services
+EPR,EPR Properties,56.38,USD,Finance
+FTDR,"Frontdoor, Inc.",60.7,USD,Consumer durables
+SLGN,Silgan Holdings Inc.,40.62,USD,Process industries
+WHD,"Cactus, Inc. Class A Common Stock",53.27,USD,Industrial services
+VISN,"Vistance Networks, Inc.",18.98,USD,Electronic technology
+ALHC,"Alignment Healthcare, Inc.",20.92,USD,Health services
+TREX,"Trex Company, Inc.",40.87,USD,Non-energy minerals
+SLM,SLM Corporation,21.41,USD,Finance
+ZETA,Zeta Global Holdings Corp.,17.37,USD,Technology services
+ENPH,"Enphase Energy, Inc.",32.18,USD,Electronic technology
+VVV,Valvoline Inc.,33.09,USD,Consumer services
+MMSI,"Merit Medical Systems, Inc.",70.73,USD,Health technology
+SKT,Tanger Inc.,36.22,USD,Finance
+BETA,"Beta Technologies, Inc.",18.27,USD,Electronic technology
+SKY,"Champion Homes, Inc.",75.69,USD,Consumer durables
+FULT,Fulton Financial Corporation,21.74,USD,Finance
+KLIC,"Kulicke and Soffa Industries, Inc.",79.84,USD,Producer manufacturing
+SAIC,Science Applications International Corporation,96.2,USD,Technology services
+CRNX,"Crinetics Pharmaceuticals, Inc.",39.77,USD,Health technology
+AMRX,"Amneal Pharmaceuticals, Inc.",13.05,USD,Health technology
+TDW,Tidewater Inc.,83.61,USD,Transportation
+DIOD,Diodes Incorporated,90.26,USD,Electronic technology
+ELF,"e.l.f. Beauty, Inc.",69.86,USD,Consumer non-durables
+TBBB,BBB Foods Inc.,35,USD,Retail trade
+LBTYA,Liberty Global Ltd.,12.39,USD,Communications
+ANF,Abercrombie & Fitch Company,91.45,USD,Retail trade
+TFSL,TFS Financial Corporation,14.62,USD,Finance
+CVLT,"Commvault Systems, Inc.",93.21,USD,Technology services
+VKTX,"Viking Therapeutics, Inc.",35.45,USD,Health technology
+OSCR,"Oscar Health, Inc.",15.59,USD,Health services
+PLUG,"Plug Power, Inc.",2.93,USD,Electronic technology
+CNO,"CNO Financial Group, Inc.",43.17,USD,Finance
+PRM,"Perimeter Solutions, SA",27.15,USD,Process industries
+MIAX,"Miami International Holdings, Inc.",44.22,USD,Finance
+STNE,StoneCo Ltd.,14.92,USD,Commercial services
+THO,"Thor Industries, Inc.",76.18,USD,Consumer durables
+CSTM,Constellium SE,29.65,USD,Non-energy minerals
+CRGY,Crescent Energy Company,12.21,USD,Energy minerals
+LRN,"Stride, Inc.",94.01,USD,Consumer services
+USAR,"USA Rare Earth, Inc.",18.35,USD,Producer manufacturing
+PVH,PVH Corp.,87.19,USD,Consumer non-durables
+UCB,"United Community Banks, Inc.",33.39,USD,Finance
+DLO,DLocal Limited,13.53,USD,Technology services
+VSCO,Victorias Secret & Co.,49.56,USD,Retail trade
+IRDM,Iridium Communications Inc,37.995,USD,Communications
+TMDX,"TransMedics Group, Inc.",116.11,USD,Health technology
+MARA,"MARA Holdings, Inc.",10.47,USD,Technology services
+TPH,"Tri Pointe Homes, Inc.",46.76,USD,Consumer durables
+KTB,"Kontoor Brands, Inc.",71.97,USD,Consumer non-durables
+RELY,"Remitly Global, Inc.",18.86,USD,Commercial services
+INDV,"Indivior Pharmaceuticals, Inc.",32.52,USD,Health technology
+SMR,NuScale Power Corporation,11.71,USD,Producer manufacturing
+HRB,"H&R Block, Inc.",30.9,USD,Consumer services
+NAMS,NewAmsterdam Pharma Company N.V.,34.01,USD,Commercial services
+BILL,"BILL Holdings, Inc.",39.31,USD,Technology services
+LEU,Centrus Energy Corp.,197.79,USD,Non-energy minerals
+NTSK,"Netskope, Inc.",9.68,USD,Technology services
+DAN,Dana Incorporated,35.37,USD,Producer manufacturing
+WIX,Wix.com Ltd.,70.16,USD,Technology services
+CUZ,Cousins Properties Incorporated,23.64,USD,Finance
+HGV,Hilton Grand Vacations Inc.,47.38,USD,Finance
+BNL,"Broadstone Net Lease, Inc.",20.14,USD,Finance
+STNG,Scorpio Tankers Inc.,73.96,USD,Transportation
+ASO,"Academy Sports and Outdoors, Inc.",59.09,USD,Retail trade
+MRX,Marex Group plc,52.03,USD,Technology services
+IRT,"Independence Realty Trust, Inc.",15.67,USD,Finance
+MMS,"Maximus, Inc.",69.42,USD,Commercial services
+TVTX,"Travere Therapeutics, Inc.",40.95,USD,Health technology
+GPCR,Structure Therapeutics Inc.,54.25,USD,Health technology
+PTEN,"Patterson-UTI Energy, Inc.",9.92,USD,Industrial services
+RNST,Renasant Corporation,39.46,USD,Finance
+SIG,Signet Jewelers Limited,92.69,USD,Retail trade
+ACAD,ACADIA Pharmaceuticals Inc.,21.76,USD,Health technology
+LASR,"nLIGHT, Inc.",66.42,USD,Electronic technology
+BLLN,"BillionToOne, Inc.",80.61,USD,Health services
+GTLB,GitLab Inc.,21.76,USD,Technology services
+INTR,Inter & Co. Inc.,8.38,USD,Finance
+INSW,"International Seaways, Inc.",74.49,USD,Transportation
+FRMI,Fermi Inc.,5.83,USD,Finance
+HYMC,Hycroft Mining Holding Corporation,40.33,USD,Non-energy minerals
+SMG,Scotts Miracle-Gro Company (The),62.62,USD,Process industries
+ACLS,"Axcelis Technologies, Inc.",117.88,USD,Producer manufacturing
+NAVN,"Navan, Inc.",14.43,USD,Technology services
+WHR,Whirlpool Corporation,55.75,USD,Consumer durables
+GTX,Garrett Motion Inc.,19.03,USD,Producer manufacturing
+EWTX,"Edgewise Therapeutics, Inc.",33.7,USD,Health technology
+TNGX,"Tango Therapeutics, Inc.",25.33,USD,Health technology
+BBWI,"Bath & Body Works, Inc.",17.94,USD,Retail trade
+FG,"F&G Annuities & Life, Inc.",26.46,USD,Finance
+BFH,"Bread Financial Holdings, Inc.",83.15,USD,Finance
+LIVN,LivaNova PLC,65.14,USD,Health technology
+OII,"Oceaneering International, Inc.",35.77,USD,Producer manufacturing
+FBP,First BanCorp. New,22.83,USD,Finance
+CALM,"Cal-Maine Foods, Inc.",75.02,USD,Process industries
+BHF,"Brighthouse Financial, Inc.",62.09,USD,Finance
+FSLY,"Fastly, Inc.",23.38,USD,Technology services
+GBDC,"Golub Capital BDC, Inc.",13.43,USD,Finance
+LQDA,Liquidia Corporation,40.12,USD,Health technology
+TWST,Twist Bioscience Corporation,57.62,USD,Health technology
+COLD,"Americold Realty Trust, Inc.",12.11,USD,Finance
+KNSA,"Kiniksa Pharmaceuticals International, plc",45.89,USD,Health technology
+AXTI,AXT Inc,62.93,USD,Electronic technology
+KRC,Kilroy Realty Corporation,30.46,USD,Finance
+BKU,"BankUnited, Inc.",47.42,USD,Finance
+MCHB,Mechanics Bancorp,15.06,USD,Finance
+WSBC,"WesBanco, Inc.",36.01,USD,Finance
+UCTT,"Ultra Clean Holdings, Inc.",76.08,USD,Producer manufacturing
+LEGN,Legend Biotech Corporation,20.52,USD,Health technology
+CC,Chemours Company (The),23.03,USD,Process industries
+CNK,"Cinemark Holdings, Inc.",29.9,USD,Consumer services
+WSC,WillScot Holdings Corporation,19.06,USD,Finance
+HP,"Helmerich & Payne, Inc.",34.51,USD,Industrial services
+FIBK,"First Interstate BancSystem, Inc.",34.07,USD,Finance
+AVNT,Avient Corporation,37.51,USD,Process industries
+BULL,Webull Corporation,6.47,USD,Technology services
+DNLI,Denali Therapeutics Inc.,21.68,USD,Health technology
+AAP,Advance Auto Parts Inc.,56.88,USD,Retail trade
+LIF,"Life360, Inc.",42.59,USD,Technology services
+BTU,Peabody Energy Corporation,28.03,USD,Energy minerals
+CARG,"CarGurus, Inc.",35.86,USD,Technology services
+AVA,Avista Corporation,41.41,USD,Utilities
+FRPT,"Freshpet, Inc.",68.79,USD,Consumer non-durables
+BXMT,"Blackstone Mortgage Trust, Inc.",20.12,USD,Finance
+EXPO,"Exponent, Inc.",68.29,USD,Industrial services
+GNW,Genworth Financial Inc,8.67,USD,Finance
+HRI,Herc Holdings Inc.,100.35,USD,Finance
+MNDY,monday.com Ltd.,65.43,USD,Technology services
+BKD,Brookdale Senior Living Inc.,14.07,USD,Health services
+FUL,H. B. Fuller Company,61.39,USD,Process industries
+KFY,Korn Ferry,64.33,USD,Commercial services
+CTRI,"Centuri Holdings, Inc.",33.1,USD,Utilities
+SOUN,"SoundHound AI, Inc.",7.85,USD,Technology services
+PAGS,PagSeguro Digital Ltd.,11.34,USD,Commercial services
+PATK,"Patrick Industries, Inc.",99.26,USD,Consumer durables
+DYN,"Dyne Therapeutics, Inc.",19.98,USD,Health technology
+BOX,"Box, Inc.",23.81,USD,Technology services
+NATL,NCR Atleos Corporation,44.71,USD,Electronic technology
+ACMR,"ACM Research, Inc.",49.79,USD,Producer manufacturing
+OPLN,"OPENLANE, Inc.",30.78,USD,Technology services
+UPST,"Upstart Holdings, Inc.",33.36,USD,Finance
+HNGE,"Hinge Health, Inc.",41.47,USD,Technology services
+BWIN,"The Baldwin Insurance Group, Inc.",22.83,USD,Finance
+RNG,"RingCentral, Inc.",38.71,USD,Technology services
+FHB,"First Hawaiian, Inc.",26.43,USD,Finance
+ORKA,"Oruka Therapeutics, Inc.",65.55,USD,Health technology
+TXG,"10x Genomics, Inc.",25.35,USD,Health technology
+IAC,IAC Inc.,43.24,USD,Technology services
+AEO,"American Eagle Outfitters, Inc.",19.42,USD,Retail trade
+KBH,KB Home,51.57,USD,Consumer durables
+VSH,"Vishay Intertechnology, Inc.",23.76,USD,Electronic technology
+CWK,Cushman & Wakefield Ltd.,13.89,USD,Finance
+WK,Workiva Inc.,56.47,USD,Technology services
+NIQ,NIQ Global Intelligence plc,10.84,USD,Technology services
+CVI,CVR Energy Inc.,31.64,USD,Energy minerals
+HAYW,"Hayward Holdings, Inc.",14.64,USD,Consumer durables
+CALX,"Calix, Inc",49.12,USD,Electronic technology
+OLN,Olin Corporation,27.76,USD,Process industries
+SBCF,Seacoast Banking Corporation of Florida,32.25,USD,Finance
+CCC,CCC Intelligent Solutions Holdings Inc.,5.38,USD,Technology services
+CPRX,"Catalyst Pharmaceuticals, Inc.",25.85,USD,Health technology
+QTWO,"Q2 Holdings, Inc.",50.11,USD,Technology services
+BEAM,Beam Therapeutics Inc.,30.68,USD,Health technology
+CLBT,Cellebrite DI Ltd.,12.51,USD,Technology services
+DAVE,Dave Inc.,230,USD,Finance
+KD,"Kyndryl Holdings, Inc.",13.82,USD,Technology services
+VERA,"Vera Therapeutics, Inc.",43.45,USD,Health technology
+LION,Lionsgate Studios Corp,10.66,USD,Consumer services
+SLG,SL Green Realty Corp,41.63,USD,Finance
+PARR,"Par Pacific Holdings, Inc. Common Stock",62.2,USD,Energy minerals
+ALMS,Alumis Inc.,24.16,USD,Health technology
+ARX,Accelerant Holdings,13.7,USD,Finance
+CAKE,The Cheesecake Factory Incorporated,61.47,USD,Consumer services
+GBTG,"Global Business Travel Group, Inc.",5.83,USD,Consumer services
+ARQT,"Arcutis Biotherapeutics, Inc.",24.58,USD,Health technology
+POWI,"Power Integrations, Inc.",54.87,USD,Electronic technology
+FFBC,First Financial Bancorp.,29.09,USD,Finance
+BTDR,Bitdeer Technologies Group,12.61,USD,Technology services
+QLYS,"Qualys, Inc.",85.17,USD,Technology services
+APAM,Artisan Partners Asset Management Inc.,37.59,USD,Finance
+COLM,Columbia Sportswear Company,57.94,USD,Consumer non-durables
+SYNA,Synaptics Incorporated,77.66,USD,Electronic technology
+MPT,"Medical Properties Trust, Inc.",5,USD,Finance
+APLE,"Apple Hospitality REIT, Inc.",12.51,USD,Finance
+DBD,Diebold Nixdorf Incorporated,84.82,USD,Electronic technology
+ADEA,Adeia Inc.,26.92,USD,Technology services
+SFNC,Simmons First National Corporation,20.55,USD,Finance
+ETOR,eToro Group Ltd.,36.93,USD,Technology services
+RCUS,"Arcus Biosciences, Inc.",23.7,USD,Health technology
+BANC,"Banc of California, Inc.",18.57,USD,Finance
+LXP,LXP Industrial Trust,49.68,USD,Finance
+DBRG,"DigitalBridge Group, Inc.",15.59,USD,Finance
+NMRK,"Newmark Group, Inc.",15.89,USD,Finance
+YETI,"YETI Holdings, Inc.",38.58,USD,Producer manufacturing
+LCII,LCI Industries,120.64,USD,Producer manufacturing
+PFS,"Provident Financial Services, Inc",22.31,USD,Finance
+KMT,Kennametal Inc.,38.09,USD,Producer manufacturing
+PRVA,"Privia Health Group, Inc.",23.44,USD,Finance
+EEFT,"Euronet Worldwide, Inc.",73.69,USD,Commercial services
+WRBY,Warby Parker Inc.,23.66,USD,Retail trade
+CON,"Concentra Group Holdings Parent, Inc.",22.44,USD,Health services
+CURB,Curbline Properties Corp.,27.16,USD,Finance
+CLSK,"CleanSpark, Inc.",11.26,USD,Technology services
+HAE,Haemonetics Corporation,61.95,USD,Health technology
+SUPN,"Supernus Pharmaceuticals, Inc.",49.94,USD,Health technology
+WU,Western Union Company (The),9.16,USD,Finance
+BKV,BKV Corporation,26.54,USD,Energy minerals
+GPK,Graphic Packaging Holding Company,9.68,USD,Process industries
+SDRL,Seadrill Limited,45.97,USD,Industrial services
+UNFI,"United Natural Foods, Inc.",46.97,USD,Distribution services
+DHT,"DHT Holdings, Inc.",17.66,USD,Transportation
+COCO,"The Vita Coco Company, Inc.",49.79,USD,Consumer non-durables
+RUN,Sunrun Inc.,12.1,USD,Electronic technology
+IDYA,"IDEAYA Biosciences, Inc.",32.18,USD,Health technology
+DJT,Trump Media & Technology Group Corp.,10.2,USD,Commercial services
+SBLK,Star Bulk Carriers Corp.,24.64,USD,Transportation
+SHOO,"Steven Madden, Ltd.",38.38,USD,Consumer non-durables
+FLNC,"Fluence Energy, Inc.",15.21,USD,Producer manufacturing
+RHI,Robert Half Inc.,27.59,USD,Commercial services
+CLMT,"Calumet, Inc",32,USD,Energy minerals
+RLAY,"Relay Therapeutics, Inc.",15.49,USD,Health technology
+CVBF,CVB Financial Corporation,20.31,USD,Finance
+AKR,Acadia Realty Trust,21.13,USD,Finance
+DX,"Dynex Capital, Inc.",13.41,USD,Finance
+KYIV,Kyivstar Group Ltd.,11.85,USD,Finance
+FCPT,"Four Corners Property Trust, Inc.",25.06,USD,Finance
+PBH,Prestige Consumer Healthcare Inc.,57.57,USD,Health technology
+ATRO,Astronics Corporation,76.26,USD,Electronic technology
+VRNS,"Varonis Systems, Inc.",23.14,USD,Technology services
+BKE,"Buckle, Inc. (The)",52.7,USD,Retail trade
+SLNO,"Soleno Therapeutics, Inc.",52.57,USD,Health technology
+RXO,"RXO, Inc.",16.47,USD,Technology services
+PII,Polaris Inc.,47.88,USD,Consumer durables
+VCYT,"Veracyte, Inc.",34.04,USD,Health technology
+PLAB,"Photronics, Inc.",45.86,USD,Electronic technology
+NOG,"Northern Oil and Gas, Inc.",25.87,USD,Energy minerals
+LCID,"Lucid Group, Inc.",8.21,USD,Consumer durables
+IRON,"Disc Medicine, Inc.",70.18,USD,Health technology
+UE,Urban Edge Properties,21.42,USD,Finance
+TRN,"Trinity Industries, Inc.",33.49,USD,Producer manufacturing
+SPNT,SiriusPoint Ltd.,22.76,USD,Finance
+CLDX,"Celldex Therapeutics, Inc.",33.87,USD,Health technology
+UA,"Under Armour, Inc.",6.15,USD,Consumer non-durables
+BBT,Beacon Financial Corporation,31.59,USD,Finance
+IMNM,"Immunome, Inc.",23.39,USD,Health technology
+RLX,RLX Technology Inc.,2.16,USD,Producer manufacturing
+CXT,"Crane NXT, Co.",45.83,USD,Producer manufacturing
+CHEF,"The Chefs' Warehouse, Inc.",64.49,USD,Distribution services
+ELVN,"Enliven Therapeutics, Inc.",43.95,USD,Health technology
+HE,"Hawaiian Electric Industries, Inc.",15.15,USD,Utilities
+UNIT,Uniti Group Inc.,11.05,USD,Finance
+KOD,Kodiak Sciences Inc,41.98,USD,Health technology
+TNK,Teekay Tankers Ltd.,74.73,USD,Transportation
+BRZE,"Braze, Inc.",22.74,USD,Technology services
+VECO,Veeco Instruments Inc.,42.66,USD,Electronic technology
+CALY,Callaway Golf Company,13.93,USD,Consumer durables
+FIGS,"FIGS, Inc.",15.39,USD,Consumer non-durables
+HNI,HNI Corporation,35.91,USD,Producer manufacturing
+HOG,"Harley-Davidson, Inc.",22.86,USD,Consumer durables
+LFST,"LifeStance Health Group, Inc.",6.55,USD,Health services
+ASH,Ashland Inc.,55.67,USD,Consumer non-durables
+STUB,"StubHub Holdings, Inc.",7.14,USD,Technology services
+ADMA,ADMA Biologics Inc,10.65,USD,Health technology
+HIW,"Highwoods Properties, Inc.",23.18,USD,Finance
+AMPX,"Amprius Technologies, Inc.",18.3,USD,Producer manufacturing
+HTFL,"Heartflow, Inc.",29.23,USD,Technology services
+MLYS,"Mineralys Therapeutics, Inc.",30.42,USD,Health technology
+AMBA,"Ambarella, Inc.",57.14,USD,Electronic technology
+VC,Visteon Corporation,93.18,USD,Producer manufacturing
+BW,"Babcock & Wilcox Enterprises, Inc.",18.35,USD,Electronic technology
+OSW,OneSpaWorld Holdings Limited,24.42,USD,Consumer services
+RARE,Ultragenyx Pharmaceutical Inc.,25.18,USD,Health technology
+WAFD,"WaFd, Inc.",32.48,USD,Finance
+KN,Knowles Corporation,28.76,USD,Electronic technology
+TDC,Teradata Corporation,26.67,USD,Technology services
+AMBP,Ardagh Metal Packaging S.A.,4.11,USD,Process industries
+ACHC,"Acadia Healthcare Company, Inc.",26.61,USD,Health services
+DK,"Delek US Holdings, Inc.",40.92,USD,Energy minerals
+RH,RH,129.52,USD,Retail trade
+HTO,H2O America,58.22,USD,Utilities
+VGNT,Versigent PLC,34.21,USD,Producer manufacturing
+RUM,Rumble Inc.,5.58,USD,Technology services
+BRSL,"Brightstar Lottery PLC Trading under the Legal Name to begin at the market open on July 21, 2025.",12.82,USD,Consumer services
+VNET,"VNET Group, Inc.",9.01,USD,Technology services
+TALO,"Talos Energy, Inc.",14.37,USD,Energy minerals
+WT,"WisdomTree, Inc.",17.09,USD,Miscellaneous
+XRAY,DENTSPLY SIRONA Inc.,12.05,USD,Health technology
+EOSE,"Eos Energy Enterprises, Inc.",7.08,USD,Producer manufacturing
+HUBG,"Hub Group, Inc.",39.25,USD,Transportation
+PTRN,Pattern Group Inc. - Series A,13.57,USD,Commercial services
+OGN,Organon & Co.,9.21,USD,Health technology
+GRND,Grindr Inc.,12.94,USD,Technology services
+VAC,Marriott Vacations Worldwide Corporation,69.71,USD,Consumer services
+SEZL,Sezzle Inc.,70.66,USD,Technology services
+NKTR,Nektar Therapeutics,83.22,USD,Health technology
+XMTR,"Xometry, Inc.",46,USD,Technology services
+GEO,Geo Group Inc (The) REIT,17.6,USD,Commercial services
+NVTS,Navitas Semiconductor Corporation,10.26,USD,Electronic technology
+BCRX,"BioCryst Pharmaceuticals, Inc.",9.44,USD,Health technology
+HUN,Huntsman Corporation,13.59,USD,Process industries
+CPRI,Capri Holdings Limited,19.77,USD,Retail trade
+GRDN,"Guardian Pharmacy Services, Inc.",37.09,USD,Retail trade
+FRSH,Freshworks Inc.,8.26,USD,Technology services
+NESR,National Energy Services Reunited Corp,23.23,USD,Industrial services
+NTCT,"NetScout Systems, Inc.",32.4,USD,Technology services
+LU,Lufax Holding Ltd,1.94,USD,Finance
+EXTR,"Extreme Networks, Inc.",17.35,USD,Electronic technology
+IE,Ivanhoe Electric Inc.,14.78,USD,Non-energy minerals
+ABM,ABM Industries Incorporated,39.73,USD,Commercial services
+PK,Park Hotels & Resorts Inc.,11.34,USD,Finance
+AEHR,Aehr Test Systems,73.22,USD,Electronic technology
+NN,NextNav Inc.,16.97,USD,Technology services
+MCW,"Mister Car Wash, Inc.",7,USD,Consumer services
+BUSE,First Busey Corporation,26.59,USD,Finance
+SLDE,"Slide Insurance Holdings, Inc.",18.39,USD,Technology services
+SEDG,"SolarEdge Technologies, Inc.",37.83,USD,Producer manufacturing
+SRPT,"Sarepta Therapeutics, Inc.",21.73,USD,Health technology
+ALRM,"Alarm.com Holdings, Inc.",45.8,USD,Technology services
+VRRM,Verra Mobility Corporation,14.98,USD,Transportation
+ATHM,Autohome Inc.,18.35,USD,Technology services
+ADPT,Adaptive Biotechnologies Corporation,14.53,USD,Health technology
+HLIO,"Helios Technologies, Inc.",67.44,USD,Producer manufacturing
+DNOW,DNOW Inc.,11.98,USD,Distribution services
+ICHR,Ichor Holdings,64.33,USD,Producer manufacturing
+CDNL,Cardinal Infrastructure Group Inc.,51.89,USD,Industrial services
+MLCO,Melco Resorts & Entertainment Limited,5.95,USD,Consumer services
+TMC,TMC the metals company Inc.,5.12,USD,Non-energy minerals
+DAWN,"Day One Biopharmaceuticals, Inc.",21.47,USD,Health technology
+DFTX,"Definium Therapeutics, Inc.",22.15,USD,Health technology
+GCMG,GCM Grosvenor Inc.,10.88,USD,Finance
+NTST,NetSTREIT Corp.,20.18,USD,Finance
+PRDO,Perdoceo Education Corporation,35.12,USD,Consumer services
+ARR,"ARMOUR Residential REIT, Inc.",17.56,USD,Finance
+FMC,FMC Corporation,17.42,USD,Process industries
+TENB,"Tenable Holdings, Inc.",18.93,USD,Technology services
+SNDX,"Syndax Pharmaceuticals, Inc.",24.33,USD,Health technology
+DXC,DXC Technology Company,12.63,USD,Technology services
+PENN,"PENN Entertainment, Inc.",16.01,USD,Consumer services
+AUPH,Aurinia Pharmaceuticals Inc,16.05,USD,Health technology
+DRH,Diamondrock Hospitality Company,10.3,USD,Finance
+CECO,CECO Environmental Corp.,64.69,USD,Producer manufacturing
+QUBT,Quantum Computing Inc.,9.4,USD,Technology services
+AVPT,"AvePoint, Inc.",9.75,USD,Technology services
+GLOB,Globant S.A.,48.74,USD,Technology services
+STOK,"Stoke Therapeutics, Inc.",35.54,USD,Health technology
+DRVN,Driven Brands Holdings Inc.,12.78,USD,Consumer services
+JBLU,JetBlue Airways Corporation,5.66,USD,Transportation
+FLOC,Flowco Holdings Inc.,22.91,USD,Industrial services
+SKWD,"Skyward Specialty Insurance Group, Inc.",46.65,USD,Finance
+NCNO,"nCino, Inc.",18.08,USD,Technology services
+SPSC,"SPS Commerce, Inc.",55.36,USD,Technology services
+WTTR,"Select Water Solutions, Inc.",14.99,USD,Energy minerals
+PTON,"Peloton Interactive, Inc.",4.86,USD,Consumer services
+FA,First Advantage Corporation,11.84,USD,Technology services
+WLY,"John Wiley & Sons, Inc.",40.29,USD,Consumer services
+ZYME,Zymeworks Inc.,27.73,USD,Health technology
+PAX,Patria Investments Limited,12.9,USD,Finance
+NEOG,Neogen Corporation,9.42,USD,Health technology
+HTZ,"Hertz Global Holdings, Inc",6.56,USD,Finance
+GRAL,"GRAIL, Inc.",49.79,USD,Health technology
+GNL,"Global Net Lease, Inc.",9.49,USD,Finance
+SEM,Select Medical Holdings Corporation,16.38,USD,Health services
+SGML,Sigma Lithium Corporation,18.22,USD,Non-energy minerals
+SION,"Sionna Therapeutics, Inc.",45.09,USD,Health technology
+COTY,Coty Inc.,2.3,USD,Consumer non-durables
+AGIO,"Agios Pharmaceuticals, Inc.",34.45,USD,Health technology
+GTY,Getty Realty Corporation,34.01,USD,Finance
+CAPR,"Capricor Therapeutics, Inc.",35.04,USD,Health technology
+IMAX,Imax Corporation,37.06,USD,Consumer durables
+EYE,"National Vision Holdings, Inc.",25.17,USD,Retail trade
+FUN,Six Flags Entertainment Corporation,19.62,USD,Consumer services
+XIFR,"XPLR Infrastructure, LP",10.32,USD,Utilities
+PWP,Perella Weinberg Partners,21.63,USD,Finance
+RXRX,"Recursion Pharmaceuticals, Inc.",3.75,USD,Health technology
+WGS,GeneDx Holdings Corp.,67.46,USD,Health services
+ANAB,"AnaptysBio, Inc.",67.89,USD,Health technology
+VERX,"Vertex, Inc.",12.2,USD,Technology services
+CXW,"CoreCivic, Inc.",20.08,USD,Commercial services
+WSR,Whitestone REIT,18.92,USD,Finance
+UTI,Universal Technical Institute Inc,35.39,USD,Commercial services
+NWBI,"Northwest Bancshares, Inc.",13.29,USD,Finance
+BL,"BlackLine, Inc.",32.57,USD,Technology services
+OCUL,"Ocular Therapeutix, Inc.",8.91,USD,Health technology
+GT,The Goodyear Tire & Rubber Company,6.73,USD,Consumer durables
+SMA,"SmartStop Self Storage REIT, Inc.",31.8,USD,Finance
+PSIX,"Power Solutions International, Inc.",83.13,USD,Producer manufacturing
+MGNI,"Magnite, Inc.",13.25,USD,Technology services
+FCF,First,18.68,USD,Finance
+KMPR,Kemper Corporation,32.5,USD,Finance
+LC,LendingClub Corporation,16.56,USD,Finance
+SOC,Sable Offshore Corp.,12.93,USD,Energy minerals
+MXL,"MaxLinear, Inc",22.01,USD,Electronic technology
+RDW,Redwire Corporation,9.91,USD,Electronic technology
+NEXT,NextDecade Corporation,7.16,USD,Energy minerals
+AMLX,"Amylyx Pharmaceuticals, Inc.",17.12,USD,Health technology
+CHA,Chagee Holdings Limited,10.46,USD,Consumer non-durables
+TYRA,"Tyra Biosciences, Inc.",34.97,USD,Health technology
+GTM,ZoomInfo Technologies Inc.,6.15,USD,Technology services
+BRBR,"BellRing Brands, Inc.",15.95,USD,Health technology
+INTA,"Intapp, Inc.",23.26,USD,Technology services
+WERN,"Werner Enterprises, Inc.",30.83,USD,Transportation
+MD,"Pediatrix Medical Group, Inc.",22.19,USD,Health services
+SHO,"Sunstone Hotel Investors, Inc.",9.57,USD,Finance
+XPRO,Expro Group Holdings N.V.,16.16,USD,Energy minerals
+TRVI,"Trevi Therapeutics, Inc.",14.27,USD,Health technology
+COHU,"Cohu, Inc.",38.95,USD,Electronic technology
+ATEN,"A10 Networks, Inc.",25.51,USD,Technology services
+AORT,"Artivion, Inc.",37.47,USD,Health technology
+TNET,"TriNet Group, Inc.",38.3,USD,Commercial services
+RNW,ReNew Energy Global plc,4.97,USD,Utilities
+EZPW,"EZCORP, Inc.",29.32,USD,Finance
+BBAI,"BigBear.ai, Inc.",3.79,USD,Technology services
+AXGN,"Axogen, Inc.",34.76,USD,Health technology
+SEMR,"SEMrush Holdings, Inc.",11.95,USD,Technology services
+FLO,"Flowers Foods, Inc.",8.52,USD,Consumer non-durables
+VCEL,Vericel Corporation,35.37,USD,Health technology
+LWLG,"Lightwave Logic, Inc.",12.09,USD,Process industries
+INVX,"Innovex International, Inc.",26.01,USD,Industrial services
+AMSC,American Superconductor Corporation,37.74,USD,Producer manufacturing
+RVLV,"Revolve Group, Inc.",25.03,USD,Retail trade
+ALKT,"Alkami Technology, Inc.",16.84,USD,Technology services
+PRKS,United Parks & Resorts Inc.,36.67,USD,Consumer services
+ZD,"Ziff Davis, Inc.",46.92,USD,Technology services
+INVA,"Innoviva, Inc.",23.92,USD,Health technology
+DHC,Diversified Healthcare Trust,7.45,USD,Finance
+PAYO,Payoneer Global Inc.,5.13,USD,Commercial services
+PUMP,ProPetro Holding Corp.,14.49,USD,Industrial services
+VOYG,"Voyager Technologies, Inc.",29.91,USD,Technology services
+VRE,"Veris Residential, Inc.",18.9,USD,Finance
+NTLA,"Intellia Therapeutics, Inc.",14.94,USD,Health technology
+MQ,"Marqeta, Inc.",4.12,USD,Commercial services
+CNXC,Concentrix Corporation,28.81,USD,Technology services
+NRIX,"Nurix Therapeutics, Inc.",16.97,USD,Health technology
+HLF,Herbalife Ltd.,16.89,USD,Consumer non-durables
+BLKB,"Blackbaud, Inc.",37.96,USD,Technology services
+FIHL,Fidelis Insurance Holdings Limited,20.14,USD,Finance
+ATEC,"Alphatec Holdings, Inc.",11.42,USD,Health technology
+RAMP,"LiveRamp Holdings, Inc.",27.36,USD,Technology services
+TSHA,"Taysha Gene Therapies, Inc.",6,USD,Health technology
+AHCO,AdaptHealth Corp.,12.65,USD,Health services
+NWL,Newell Brands Inc.,4.1,USD,Producer manufacturing
+SGRY,"Surgery Partners, Inc.",13.22,USD,Health services
+DV,"DoubleVerify Holdings, Inc.",10.55,USD,Technology services
+GCT,GigaCloud Technology Inc,46.57,USD,Distribution services
+PBI,Pitney Bowes Inc.,11.88,USD,Technology services
+HIMX,"Himax Technologies, Inc.",10.18,USD,Electronic technology
+PICS,PicS N.V.,13.12,USD,Commercial services
+BORR,Borr Drilling Limited,5.5,USD,Industrial services
+HRMY,"Harmony Biosciences Holdings, Inc.",29.22,USD,Health technology
+TIC,"TIC Solutions, Inc.",7.64,USD,Commercial services
+STGW,Stagwell Inc.,6.66,USD,Commercial services
+ECPG,Encore Capital Group Inc,78.69,USD,Finance
+NUVB,Nuvation Bio Inc.,4.82,USD,Health technology
+SONO,"Sonos, Inc.",13.86,USD,Consumer durables
+VIR,"Vir Biotechnology, Inc.",10.46,USD,Health technology
+CBZ,"CBIZ, Inc.",30.35,USD,Commercial services
+HLMN,Hillman Solutions Corp.,8.49,USD,Distribution services
+SNDA,"Sonida Senior Living, Inc.",35.01,USD,Health services
+WLTH,Wealthfront Corporation,11,USD,Technology services
+DEI,"Douglas Emmett, Inc.",10.15,USD,Finance
+AESI,Atlas Energy Solutions Inc.,13.17,USD,Industrial services
+FLNG,FLEX LNG Ltd.,30.8,USD,Transportation
+INSP,"Inspire Medical Systems, Inc.",56.64,USD,Health technology
+KDK,"Kodiak AI, Inc.",8.93,USD,Producer manufacturing
+ALGT,Allegiant Travel Company,88.24,USD,Transportation
+CTOS,"Custom Truck One Source, Inc.",7.17,USD,Finance
+NVRI,Enviri Corporation,19.55,USD,Industrial services
+OI,"O-I Glass, Inc.",10.59,USD,Process industries
+ASGN,ASGN Incorporated,39.05,USD,Technology services
+KEEL,Keel Infrastructure Corp.,2.84,USD,Technology services
+IMCR,Immunocore Holdings plc,31.64,USD,Health technology
+ADNT,Adient plc,20.49,USD,Producer manufacturing
+KSS,Kohl's Corporation,14.3,USD,Retail trade
+YELP,Yelp Inc.,26.93,USD,Technology services
+PEB,Pebblebrook Hotel Trust,14,USD,Finance
+GBX,"Greenbrier Companies, Inc. (The)",51.41,USD,Producer manufacturing
+CLVT,Clarivate Plc,2.48,USD,Commercial services
+TILE,"Interface, Inc.",27.13,USD,Producer manufacturing
+SKYT,"SkyWater Technology, Inc.",32.24,USD,Producer manufacturing
+EFC,Ellington Financial Inc.,12.81,USD,Finance
+APPN,Appian Corporation,21.41,USD,Technology services
+RCAT,"Red Cat Holdings, Inc.",13.03,USD,Technology services
+SFL,SFL Corporation Ltd,10.89,USD,Transportation
+IOVA,"Iovance Biotherapeutics, Inc.",3.82,USD,Health technology
+FLYW,Flywire Corporation - Voting,12.98,USD,Commercial services
+PRGO,Perrigo Company plc,11.41,USD,Health technology
+MBX,"MBX Biosciences, Inc.",32.96,USD,Health technology
+HOPE,"Hope Bancorp, Inc.",12.18,USD,Finance
+BHVN,Biohaven Ltd.,10.37,USD,Health technology
+BCAX,Bicara Therapeutics Inc.,23.72,USD,Health technology
+ECVT,Ecovyst Inc.,14.04,USD,Process industries
+ARLO,"Arlo Technologies, Inc.",14.51,USD,Electronic technology
+TPB,"Turning Point Brands, Inc.",80.99,USD,Consumer non-durables
+RES,"RPC, Inc.",6.99,USD,Industrial services
+ARDX,"Ardelyx, Inc.",6.3,USD,Health technology
+LEG,"Leggett & Platt, Incorporated",11.35,USD,Consumer durables
+QFIN,"Qfin Holdings, Inc.",14.26,USD,Finance
+ARI,"Apollo Commercial Real Estate Finance, Inc",11.22,USD,Finance
+OUST,"Ouster, Inc.",24.44,USD,Electronic technology
+UAMY,United States Antimony Corporation,10.7,USD,Non-energy minerals
+KOS,Kosmos Energy Ltd.,2.58,USD,Energy minerals
+LPG,Dorian LPG Ltd.,35.62,USD,Transportation
+VRDN,"Viridian Therapeutics, Inc.",14.88,USD,Health technology
+KW,Kennedy-Wilson Holdings Inc.,10.9,USD,Finance
+ABR,Arbor Realty Trust,7.92,USD,Finance
+XHR,"Xenia Hotels & Resorts, Inc.",15.96,USD,Finance
+SBET,"Sharplink, Inc.",7.57,USD,Commercial services
+TE,T1 Energy Inc.,5.34,USD,Producer manufacturing
+TH,Target Hospitality Corp.,14.85,USD,Consumer services
+TROX,Tronox Holdings plc,9.28,USD,Process industries
+UPWK,Upwork Inc.,11.3,USD,Commercial services
+MUX,McEwen Inc.,24.7,USD,Non-energy minerals
+ATRC,"AtriCure, Inc.",29.37,USD,Health technology
+AVAH,Aveanna Healthcare Holdings Inc.,6.72,USD,Health services
+ATAI,AtaiBeckley Inc.,4,USD,Health technology
+GLUE,"Monte Rosa Therapeutics, Inc.",18.23,USD,Health technology
+ENOV,Enovis Corporation,25.33,USD,Health technology
+ASAN,"Asana, Inc.",6.08,USD,Technology services
+PRCT,PROCEPT BioRobotics Corporation,25.67,USD,Health technology
+WWW,"Wolverine World Wide, Inc.",17.65,USD,Consumer non-durables
+CSWC,Capital Southwest Corporation,23.99,USD,Miscellaneous
+OLMA,"Olema Pharmaceuticals, Inc.",16.49,USD,Health technology
+TUYA,Tuya Inc.,2.44,USD,Technology services
+INOD,Innodata Inc.,43.84,USD,Technology services
+WVE,Wave Life Sciences Ltd.,7.59,USD,Health technology
+MAN,ManpowerGroup,30.73,USD,Commercial services
+PGNY,"Progyny, Inc.",17.39,USD,Commercial services
+FUBO,FuboTV Inc.,13.14,USD,Technology services
+DOLE,Dole plc,14.93,USD,Distribution services
+NVAX,"Novavax, Inc.",8.69,USD,Health technology
+DQ,DAQO New Energy Corp.,21.69,USD,Process industries
+TNDM,"Tandem Diabetes Care, Inc.",20.66,USD,Health technology
+OPRA,Opera Limited,16.27,USD,Technology services
+GILT,Gilat Satellite Networks Ltd.,18.41,USD,Electronic technology
+ORC,"Orchid Island Capital, Inc.",7.36,USD,Finance
+VIA,"Via Transportation, Inc.",17.14,USD,Technology services
+DCH,Dauch Corporation,5.87,USD,Producer manufacturing
+HLX,"Helix Energy Solutions Group, Inc.",9.42,USD,Industrial services
+NVCR,NovoCure Limited,12.17,USD,Health technology
+TRS,TriMas Corporation,37.65,USD,Process industries
+PGEN,"Precigen, Inc.",3.9,USD,Health technology
+ENVX,Enovix Corporation,6.31,USD,Producer manufacturing
+OLPX,"Olaplex Holdings, Inc.",2.04,USD,Distribution services
+IQ,"iQIYI, Inc.",1.41,USD,Technology services
+AMRC,"Ameresco, Inc.",25.62,USD,Industrial services
+HCSG,"Healthcare Services Group, Inc.",19.26,USD,Commercial services
+AI,"C3.ai, Inc.",9.52,USD,Technology services
+CXM,"Sprinklr, Inc.",5.41,USD,Technology services
+PENG,"Penguin Solutions, Inc.",26.5,USD,Electronic technology
+SBH,"Sally Beauty Holdings, Inc. (Name to be changed from Sally Holdings, Inc.)",13.79,USD,Retail trade
+MAZE,"Maze Therapeutics, Inc.",26.85,USD,Health technology
+ENR,"Energizer Holdings, Inc.",19.27,USD,Consumer non-durables
+CRI,"Carter's, Inc.",36.23,USD,Retail trade
+TRIP,"TripAdvisor, Inc.",11.48,USD,Consumer services
+LADR,Ladder Capital Corp,10.35,USD,Finance
+WEN,Wendy's Company (The),6.9,USD,Consumer services
+PLTK,Playtika Holding Corp.,3.46,USD,Technology services
+UMH,"UMH Properties, Inc.",15.3,USD,Finance
+LIND,Lindblad Expeditions Holdings Inc.,20.05,USD,Consumer services
+TRIN,Trinity Capital Inc.,15.67,USD,Miscellaneous
+AVBP,"ArriVent BioPharma, Inc.",29.41,USD,Health technology
+FINV,FinVolution Group,5.13,USD,Finance
+MLTX,MoonLake Immunotherapeutics,18.02,USD,Health technology
+SVV,"Savers Value Village, Inc.",8.28,USD,Retail trade
+NPKI,NPK International Inc.,15.16,USD,Producer manufacturing
+PRA,ProAssurance Corporation,24.66,USD,Finance
+CRVS,"Corvus Pharmaceuticals, Inc.",15.11,USD,Health technology
+ADTN,"ADTRAN Holdings, Inc.",15.73,USD,Electronic technology
+NNE,Nano Nuclear Energy Inc.,24.29,USD,Producer manufacturing
+GIII,"G-III Apparel Group, LTD.",29.72,USD,Consumer non-durables
+REAL,"The RealReal, Inc.",10.5,USD,Retail trade
+TIGR,UP Fintech Holding Limited,7.23,USD,Finance
+RLJ,RLJ Lodging Trust,8.04,USD,Finance
+KODK,Eastman Kodak Company,12.8,USD,Producer manufacturing
+NAT,Nordic American Tankers Limited,5.89,USD,Transportation
+PRGS,Progress Software Corporation,29.57,USD,Technology services
+BFLY,"Butterfly Network, Inc.",4.86,USD,Health technology
+DFH,"Dream Finders Homes, Inc.",13.47,USD,Consumer durables
+GENI,Genius Sports Limited,4.81,USD,Technology services
+STAA,STAAR Surgical Company,24.73,USD,Health technology
+BKSY,BlackSky Technology Inc.,33.08,USD,Technology services
+WKC,World Kinect Corporation,23.86,USD,Distribution services
+EYPT,"EyePoint, Inc.",14.63,USD,Health technology
+VSTS,Vestis Corporation,9.25,USD,Consumer non-durables
+PZZA,"Papa John's International, Inc.",36.94,USD,Consumer services
+SHLS,"Shoals Technologies Group, Inc.",7.23,USD,Electronic technology
+JKS,JinkoSolar Holding Company Limited,24.22,USD,Electronic technology
+PCT,"PureCycle Technologies, Inc.",6.69,USD,Industrial services
+ZBIO,"Zenas BioPharma, Inc.",21.05,USD,Health technology
+SVRA,"Savara, Inc.",5.87,USD,Health technology
+QDEL,QuidelOrtho Corporation,17.49,USD,Health technology
+CCOI,"Cogent Communications Holdings, Inc.",23.53,USD,Communications
+FIVN,"Five9, Inc.",15.36,USD,Technology services
+PGY,Pagaya Technologies Ltd.,14.2,USD,Technology services
+ABCL,AbCellera Biologics Inc.,3.86,USD,Health technology
+ARRY,"Array Technologies, Inc.",7.63,USD,Producer manufacturing
+TWO,Two Harbors Investment Corp,11.11,USD,Finance
+ABTC,American Bitcoin Corp.,1.1,USD,Technology services
+SBGI,"Sinclair, Inc.",16.24,USD,Consumer services
+AVNS,"Avanos Medical, Inc.",24.72,USD,Health technology
+AZTA,"Azenta, Inc.",24.95,USD,Health services
+TTI,"Tetra Technologies, Inc.",8.52,USD,Process industries
+BV,"BrightView Holdings, Inc.",12.13,USD,Commercial services
+OSBC,"Old Second Bancorp, Inc.",21.67,USD,Finance
+EVLV,"Evolv Technologies Holdings, Inc.",6.36,USD,Electronic technology
+GOLD,"Gold.com, Inc.",44.99,USD,Finance
+CIM,Chimera Investment Corporation,13.68,USD,Finance
+CLOV,"Clover Health Investments, Corp.",2.15,USD,Finance
+NEO,"NeoGenomics, Inc.",8.68,USD,Health services
+ACDC,ProFrac Holding Corp.,6.21,USD,Industrial services
+MRTN,"Marten Transport, Ltd.",13.75,USD,Transportation
+DEC,Diversified Energy Company,15.55,USD,Energy minerals
+UTZ,Utz Brands Inc,7.74,USD,Consumer non-durables
+RZLV,Rezolve AI PLC,2.79,USD,Technology services
+COLL,"Collegium Pharmaceutical, Inc.",34.93,USD,Health technology
+MLKN,"MillerKnoll, Inc.",16.2,USD,Producer manufacturing
+UPBD,"Upbound Group, Inc.",18.92,USD,Finance
+OCFC,OceanFirst Financial Corp.,19.07,USD,Finance
+MBC,"MasterBrand, Inc.",8.57,USD,Consumer durables
+TK,Teekay Corporation Ltd.,12.58,USD,Transportation
+TDAY,"USA TODAY Co., Inc.",7.41,USD,Consumer services
+HLIT,Harmonic Inc.,9.88,USD,Electronic technology
+CRML,Critical Metals Corp.,8.89,USD,Non-energy minerals
+GERN,Geron Corporation,1.69,USD,Health technology
+LZ,"LegalZoom.com, Inc.",6.24,USD,Technology services
+WOLF,"Wolfspeed, Inc.",23.9,USD,Electronic technology
+GPRE,"Green Plains, Inc.",15.41,USD,Process industries
+XERS,"Xeris Biopharma Holdings, Inc.",6.2,USD,Health technology
+KALV,"KalVista Pharmaceuticals, Inc.",20.86,USD,Health technology
+POET,POET Technologies Inc.,6.97,USD,Producer manufacturing
+QURE,uniQure N.V.,17.25,USD,Health technology
+SMPL,The Simply Good Foods Company,11.72,USD,Consumer non-durables
+CMPX,"Compass Therapeutics, Inc.",5.85,USD,Health technology
+RERE,ATRenew Inc.,4.88,USD,Retail trade
+PMT,PennyMac Mortgage Investment Trust,12.13,USD,Finance
+URGN,UroGen Pharma Ltd.,21.51,USD,Health technology
+NSP,"Insperity, Inc.",27.74,USD,Commercial services
+COUR,"Coursera, Inc.",6.15,USD,Technology services
+EPC,Edgewell Personal Care Company,22.26,USD,Consumer non-durables
+CMP,Compass Minerals Intl Inc,24.81,USD,Process industries
+ORIC,"Oric Pharmaceuticals, Inc.",10.28,USD,Health technology
+MFA,"MFA Financial, Inc.",10.13,USD,Finance
+ANNX,"Annexon, Inc.",6.35,USD,Health technology
+LXU,"LSB Industries, Inc.",14.15,USD,Process industries
+PHAT,"Phathom Pharmaceuticals, Inc.",12.79,USD,Health technology
+ARHS,"Arhaus, Inc.",7.12,USD,Consumer durables
+TBLA,Taboola.com Ltd.,3.6,USD,Technology services
+EXPI,"eXp World Holdings, Inc.",6.25,USD,Finance
+SATL,Satellogic Inc.,6.92,USD,Electronic technology
+TDOC,"Teladoc Health, Inc.",5.54,USD,Health services
+CTMX,"CytomX Therapeutics, Inc.",4.56,USD,Health technology
+CFFN,"Capitol Federal Financial, Inc.",7.58,USD,Finance
+AMPH,"Amphastar Pharmaceuticals, Inc.",21.68,USD,Health technology
+CERT,"Certara, Inc.",6.15,USD,Technology services
+AVO,"Mission Produce, Inc.",13.75,USD,Process industries
+AMC,"AMC Entertainment Holdings, Inc.",1.67,USD,Consumer services
+EVEX,"Eve Holding, Inc.",2.77,USD,Electronic technology
+SNCY,"Sun Country Airlines Holdings, Inc.",17.77,USD,Transportation
+VYX,NCR Voyix Corporation,6.91,USD,Technology services
+MOMO,Hello Group Inc.,6.19,USD,Technology services
+JBIO,"Jade Biosciences, Inc.",19.26,USD,Health technology
+PCRX,"Pacira BioSciences, Inc.",23.43,USD,Health technology
+AEBI,Aebi Schmidt Holding AG,12.21,USD,Consumer durables
+AEVA,"Aeva Technologies, Inc.",14.93,USD,Electronic technology
+FTRE,Fortrea Holdings Inc.,10.05,USD,Commercial services
+NABL,"N-able, Inc.",4.97,USD,Technology services
+ASST,"Strive, Inc.",13.53,USD,Miscellaneous
+PDM,"Piedmont Realty Trust, Inc.",7.65,USD,Finance
+AOSL,Alpha and Omega Semiconductor Limited,31.21,USD,Electronic technology
+LIFE,Ethos Technologies Inc.,14.77,USD,Technology services
+CSIQ,Canadian Solar Inc.,13.64,USD,Electronic technology
+AIP,"Arteris, Inc.",20.3,USD,Electronic technology
+ULCC,"Frontier Group Holdings, Inc.",4,USD,Transportation
+SANA,"Sana Biotechnology, Inc.",3.44,USD,Health technology
+XNCR,"Xencor, Inc.",12.51,USD,Health technology
+MGTX,MeiraGTx Holdings plc,11.25,USD,Health technology
+LMRI,"Lumexa Imaging Holdings, Inc.",9.53,USD,Health services
+SDGR,"Schrodinger, Inc.",12.4,USD,Technology services
+JANX,"Janux Therapeutics, Inc.",15.04,USD,Health technology
+ESRT,"Empire State Realty Trust, Inc.",5.46,USD,Finance
+METC,"Ramaco Resources, Inc.",14.1,USD,Energy minerals
+CRCT,"Cricut, Inc.",4.3,USD,Distribution services
+CGEM,"Cullinan Therapeutics, Inc.",14.95,USD,Health technology
+INMD,InMode Ltd.,14.25,USD,Health technology
+CDNA,"CareDx, Inc.",17.57,USD,Health technology
+MRVI,"Maravai LifeSciences Holdings, Inc.",3.5,USD,Health technology
+OPK,"Opko Health, Inc.",1.18,USD,Health services
+AMPL,"Amplitude, Inc.",6.69,USD,Technology services
+WGO,"Winnebago Industries, Inc.",31.65,USD,Consumer durables
+JBGS,JBG SMITH Properties,15.26,USD,Finance
+OMER,Omeros Corporation,12.25,USD,Health technology
+SLS,"SELLAS Life Sciences Group, Inc.",4.91,USD,Health technology
+BVS,Bioventus Inc.,10.56,USD,Health technology
+ABUS,Arbutus Biopharma Corporation,4.48,USD,Health technology
+NMAX,"Newsmax, Inc.",6.72,USD,Consumer services
+TALK,"Talkspace, Inc.",5.17,USD,Health services
+IART,Integra LifeSciences Holdings Corporation,11.03,USD,Health technology
+SCHL,Scholastic Corporation,39.51,USD,Consumer services
+NB,NioCorp Developments Ltd.,5.91,USD,Non-energy minerals
+TBPH,"Theravance Biopharma, Inc.",16.64,USD,Health technology
+ODD,ODDITY Tech Ltd.,15.11,USD,Technology services
+ACVA,ACV Auctions Inc.,4.91,USD,Technology services
+MNKD,MannKind Corporation,2.77,USD,Health technology
+ABX,"Abacus Global Management, Inc.",8.8,USD,Finance
+GSM,Ferroglobe PLC,4.52,USD,Non-energy minerals
+RPC,"Ridgepost Capital, Inc.",7.7,USD,Finance
+NMFC,New Mountain Finance Corporation,8.41,USD,Finance
+WOOF,"Petco Health and Wellness Company, Inc.",2.9,USD,Retail trade
+SLDB,Solid Biosciences Inc.,8.32,USD,Health technology
+CSHR,CoinShares PLC,6.17,USD,Technology services
+ANRO,"Alto Neuroscience, Inc.",25.47,USD,Health technology
+HTBK,Heritage Commerce Corp,13.19,USD,Finance
+EH,EHang Holdings Limited,11.35,USD,Technology services
+TLRY,"Tilray Brands, Inc.",6.95,USD,Process industries
+LPTH,"LightPath Technologies, Inc.",14.02,USD,Electronic technology
+PURR,Hyperliquid Strategies Inc,6.51,USD,Finance
+NAVI,Navient Corporation,8.44,USD,Finance
+KURA,"Kura Oncology, Inc.",9.05,USD,Health technology
+CTLP,"Cantaloupe, Inc.",10.84,USD,Commercial services
+SPRY,"ARS Pharmaceuticals, Inc.",8.02,USD,Health technology
+GDRX,"GoodRx Holdings, Inc.",2.32,USD,Health services
+PRCH,"Porch Group, Inc.",7.44,USD,Finance
+LXRX,"Lexicon Pharmaceuticals, Inc.",1.86,USD,Health technology
+SG,"Sweetgreen, Inc.",6.59,USD,Consumer services
+HMH,HMH Holding Inc.,18.15,USD,Industrial services
+CODI,D/B/A Compass Diversified Holdings Shares of Beneficial Interest,10.38,USD,Finance
+SVC,Service Properties Trust - Shares of Beneficial Interest,1.4,USD,Finance
+OMDA,"Omada Health, Inc.",13.12,USD,Technology services
+ALOY,REalloys Inc.,12.81,USD,Non-energy minerals
+BRSP,"BrightSpire Capital, Inc.",5.97,USD,Finance
+DC,Dakota Gold Corp.,5.71,USD,Non-energy minerals
+VOR,Vor Biopharma Inc.,15.6,USD,Health technology
+CTGO,Contango Silver & Gold Inc.,24.82,USD,Non-energy minerals
+IMSR,Terrestrial Energy Inc.,7.16,USD,Industrial services
+RWT,"Redwood Trust, Inc.",6.06,USD,Finance
+RLMD,"Relmada Therapeutics, Inc.",7.18,USD,Health technology
+BBOT,"BridgeBio Oncology Therapeutics, Inc.",9.39,USD,Health technology
+AMN,AMN Healthcare Services Inc,19.37,USD,Commercial services
+HUYA,HUYA Inc.,3.25,USD,Commercial services
+REPX,"Riley Exploration Permian, Inc.",34.51,USD,Energy minerals
+HNRG,Hallador Energy Company,15.82,USD,Energy minerals
+JBI,"Janus International Group, Inc.",5.34,USD,Producer manufacturing
+ETON,"Eton Pharmaceuticals, Inc.",26.97,USD,Health technology
+SSYS,"Stratasys, Ltd.",8.52,USD,Electronic technology
+HPK,"HighPeak Energy, Inc.",5.77,USD,Energy minerals
+KRUS,"Kura Sushi USA, Inc.",60,USD,Consumer services
+IVR,INVESCO MORTGAGE CAPITAL INC,8.4,USD,Finance
+SERV,Serve Robotics Inc.,9.56,USD,Producer manufacturing
+SPIR,"Spire Global, Inc.",20.54,USD,Technology services
+SLDP,"Solid Power, Inc.",3.26,USD,Producer manufacturing
+VTS,Vitesse Energy Inc.,18.07,USD,Energy minerals
+FWRG,"First Watch Restaurant Group, Inc.",11.73,USD,Consumer services
+UDMY,"Udemy, Inc.",4.91,USD,Technology services
+OPTU,"Optimum Communications, Inc.",1.52,USD,Communications
+FBRT,"Franklin BSP Realty Trust, Inc.",8.94,USD,Finance
+MNTN,"MNTN, Inc.",9.66,USD,Technology services
+IRWD,"Ironwood Pharmaceuticals, Inc.",4.37,USD,Health technology
+BETR,Better Home & Finance Holding Company,38.25,USD,Finance
+GO,Grocery Outlet Holding Corp.,7.23,USD,Retail trade
+QNST,"QuinStreet, Inc.",12.4,USD,Commercial services
+CGNT,Cognyte Software Ltd.,9.67,USD,Technology services
+CWH,"Camping World Holdings, Inc.",6.86,USD,Retail trade
+SWIM,"Latham Group, Inc.",6.03,USD,Producer manufacturing
+GRNT,"Granite Ridge Resources, Inc.",5.35,USD,Energy minerals
+ARVN,"Arvinas, Inc.",10.97,USD,Health technology
+NRDS,"NerdWallet, Inc.",10.49,USD,Technology services
+FOXF,Fox Factory Holding Corp.,16.7,USD,Producer manufacturing
+VTEX,VTEX,4.04,USD,Technology services
+ADAM,"Adamas Trust, Inc.",7.76,USD,Finance
+NTGR,"NETGEAR, Inc.",24.81,USD,Technology services
+SABR,Sabre Corporation,1.76,USD,Technology services
+EHAB,"Enhabit, Inc.",13.71,USD,Health services
+PSNL,"Personalis, Inc.",6.63,USD,Health services
+FIP,FTAI Infrastructure Inc.,5.83,USD,Consumer services
+PRME,"Prime Medicine, Inc.",3.79,USD,Health technology
+MITK,"Mitek Systems, Inc.",15.07,USD,Technology services
+ARKO,ARKO Corp.,6.11,USD,Retail trade
+ASPI,ASP Isotopes Inc.,5.38,USD,Health technology
+RYAM,Rayonier Advanced Materials Inc.,10.03,USD,Process industries
+TRON,Tron Inc.,2.44,USD,Consumer durables
+GDOT,Green Dot Corporation,12.04,USD,Finance
+NKLR,Terra Innovatum Global N.V.,6.03,USD,Producer manufacturing
+SB,"Safe Bulkers, Inc",6.51,USD,Transportation
+INDI,"indie Semiconductor, Inc.",2.97,USD,Electronic technology
+SWBI,"Smith & Wesson Brands, Inc.",14.82,USD,Electronic technology
+CRSR,"Corsair Gaming, Inc.",6.16,USD,Technology services
+CBRL,"Cracker Barrel Old Country Store, Inc.",29.33,USD,Consumer services
+AXG,Solowin Holdings,3.48,USD,Finance
+OIS,"Oil States International, Inc.",10.8,USD,Industrial services
+EVGO,EVgo Inc.,2.06,USD,Retail trade
+LAES,SEALSQ Corp,2.8,USD,Electronic technology
+BZH,"Beazer Homes USA, Inc.",21.82,USD,Consumer durables
+TRTX,"TPG RE Finance Trust, Inc.",8.29,USD,Finance
+GTN,"Gray Media, Inc.",5.69,USD,Consumer services
+SIBN,"SI-BONE, Inc.",14.49,USD,Health technology
+OCGN,"Ocugen, Inc.",1.95,USD,Health technology
+MAMA,"Mama's Creations, Inc.",15.7,USD,Consumer non-durables
+MVST,"Microvast Holdings, Inc.",1.92,USD,Producer manufacturing
+GOGO,Gogo Inc.,4.73,USD,Communications
+TASK,"TaskUs, Inc.",7.02,USD,Commercial services
+ASC,Ardmore Shipping Corporation,15.47,USD,Transportation
+ANL,Adlai Nortye Ltd.,13.25,USD,Commercial services
+ASIX,AdvanSix Inc.,23.02,USD,Process industries
+MAX,"MediaAlpha, Inc.",9.7,USD,Technology services
+WYFI,"WhiteFiber, Inc.",15.99,USD,Technology services
+FBRX,"Forte Biosciences, Inc.",31.28,USD,Health technology
+AVR,Anteris Technologies Global Corp.,6.29,USD,Health technology
+PROK,ProKidney Corp.,2.01,USD,Health technology
+ZVRA,"Zevra Therapeutics, Inc.",10.32,USD,Health technology
+NRGV,"Energy Vault Holdings, Inc.",3.5,USD,Producer manufacturing
+CNNE,"Cannae Holdings, Inc.",13.04,USD,Consumer services
+CTKB,"Cytek Biosciences, Inc.",4.69,USD,Health technology
+UMAC,"Unusual Machines, Inc.",15.42,USD,Electronic technology
+CARS,Cars.com Inc.,10.18,USD,Technology services
+DNUT,"Krispy Kreme, Inc.",3.46,USD,Distribution services
+EGY,"VAALCO Energy, Inc.",5.69,USD,Energy minerals
+INN,"Summit Hotel Properties, Inc.",4.82,USD,Finance
+AIV,Apartment Investment and Management Company,4.11,USD,Finance
+NXDR,"Nextdoor Holdings, Inc.",1.52,USD,Technology services
+GEMI,"Gemini Space Station, Inc.",4.9,USD,Finance
+AHRT,"AH Realty Trust, Inc.",5.87,USD,Finance
+PRTA,Prothena Corporation plc,10.82,USD,Health technology
+BBNX,"Beta Bionics, Inc.",13.02,USD,Health technology
+MDXG,"MiMedx Group, Inc",3.88,USD,Health technology
+PAR,PAR Technology Corporation,13.36,USD,Electronic technology
+CRMD,CorMedix Inc.,7.23,USD,Health technology
+EMBC,Embecta Corp.,9.61,USD,Health technology
+KYTX,"Kyverna Therapeutics, Inc.",9.4,USD,Health technology
+ETD,Ethan Allen Interiors Inc.,22.28,USD,Consumer durables
+ERII,"Energy Recovery, Inc.",10.62,USD,Producer manufacturing
+BLMN,"Bloomin' Brands, Inc.",6.55,USD,Consumer services
+EVER,"EverQuote, Inc.",15.47,USD,Technology services
+ESPR,"Esperion Therapeutics, Inc.",2.17,USD,Health technology
+VSTM,"Verastem, Inc.",6.33,USD,Health technology
+ADCT,ADC Therapeutics SA,4.37,USD,Health technology
+REAX,"The Real Brokerage, Inc.",2.61,USD,Commercial services
+CMPS,COMPASS Pathways Plc - American Depository Shares,5.96,USD,Health technology
+PHR,"Phreesia, Inc.",9.06,USD,Technology services
+FULC,"Fulcrum Therapeutics, Inc.",8.25,USD,Health technology
+VITL,"Vital Farms, Inc.",12.26,USD,Process industries
+SD,"SandRidge Energy, Inc.",14.86,USD,Energy minerals
+IHRT,"iHeartMedia, Inc.",3.93,USD,Consumer services
+ZURA,Zura Bio Limited,5.69,USD,Health technology
+RR,Richtech Robotics Inc.,2.41,USD,Consumer durables
+TDUP,ThredUp Inc.,4.24,USD,Retail trade
+UPB,"Upstream Bio, Inc.",9.88,USD,Health technology
+PD,"PagerDuty, Inc.",6.32,USD,Technology services
+KOPN,Kopin Corporation,2.92,USD,Electronic technology
+IMMX,"Immix Biopharma, Inc.",10.04,USD,Health technology
+BMBL,Bumble Inc.,4.09,USD,Technology services
+SXC,"SunCoke Energy, Inc.",6.26,USD,Non-energy minerals
+ALLO,"Allogene Therapeutics, Inc.",2.17,USD,Health technology
+GRPN,"Groupon, Inc.",12.92,USD,Retail trade
+SWMR,"Swarmer, Inc",40.96,USD,Technology services
+TWI,"Titan International, Inc. (DE)",8.12,USD,Producer manufacturing
+AQST,"Aquestive Therapeutics, Inc.",4.24,USD,Health technology
+ASTL,Algoma Steel Group Inc.,4.91,USD,Producer manufacturing
+STTK,"Shattuck Labs, Inc.",7.17,USD,Health technology
+CLNE,Clean Energy Fuels Corp.,2.31,USD,Utilities
+MATV,"Mativ Holdings, Inc.",9.23,USD,Process industries
+LXEO,"Lexeo Therapeutics, Inc.",6.8,USD,Health technology
+CYRX,"CryoPort, Inc.",10.07,USD,Transportation
+LRMR,"Larimar Therapeutics, Inc.",4.83,USD,Health technology
+GDYN,"Grid Dynamics Holdings, Inc.",5.87,USD,Technology services
+PANL,Pangaea Logistics Solutions Ltd.,7.66,USD,Miscellaneous
+BTBT,"Bit Digital, Inc.",1.53,USD,Commercial services
+SCVL,"Shoe Carnival, Inc.",18.17,USD,Retail trade
+CATX,"Perspective Therapeutics, Inc.",4.38,USD,Health technology
+FDMT,"4D Molecular Therapeutics, Inc.",9.77,USD,Health technology
+MNRO,"Monro, Inc.",16.57,USD,Retail trade
+SFIX,"Stitch Fix, Inc.",3.63,USD,Retail trade
+GEVO,"Gevo, Inc.",2,USD,Process industries
+MYGN,"Myriad Genetics, Inc.",5.19,USD,Health technology
+ABSI,Absci Corporation,3.17,USD,Health technology
+IVVD,"Invivyd, Inc.",1.71,USD,Health technology
+PACB,"Pacific Biosciences of California, Inc.",1.6,USD,Health technology
+RGNX,REGENXBIO Inc.,9.36,USD,Health technology
+MRLN,"Merlin, Inc.",14.29,USD,Technology services
+FLGT,"Fulgent Genetics, Inc.",16.17,USD,Health services
+BDN,Brandywine Realty Trust,2.81,USD,Finance
+DNA,"Ginkgo Bioworks Holdings, Inc.",7.79,USD,Health services
+ACRS,"Aclaris Therapeutics, Inc.",3.93,USD,Health technology
+PLAY,"Dave & Buster's Entertainment, Inc.",13.64,USD,Consumer services
+IPSC,"Century Therapeutics, Inc.",2.59,USD,Health technology
+RBBN,Ribbon Communications Inc.,2.62,USD,Technology services
+PUBM,"PubMatic, Inc.",9.69,USD,Technology services
+EBS,Emergent BioSolutions Inc.,8.66,USD,Health technology
+LAND,Gladstone Land Corporation,10.39,USD,Finance
+YEXT,"Yext, Inc.",3.62,USD,Technology services
+AGL,"agilon health, inc.",26.88,USD,Health services
+BGS,"B&G Foods, Inc.",5.53,USD,Consumer non-durables
+ALT,"Altimmune, Inc.",3.4,USD,Health technology
+SSP,E.W. Scripps Company (The),4.81,USD,Consumer services
+PSFE,Paysafe Limited,8.49,USD,Commercial services
+CAL,"Caleres, Inc.",12.94,USD,Retail trade
+CYH,"Community Health Systems, Inc.",3.15,USD,Health services
+AIOT,"PowerFleet, Inc.",3.25,USD,Technology services
+CMCO,Columbus McKinnon Corporation,15.13,USD,Producer manufacturing
+VNDA,Vanda Pharmaceuticals Inc.,7.27,USD,Health technology
+WTI,"W&T Offshore, Inc.",2.88,USD,Energy minerals
+ANGO,"AngioDynamics, Inc.",10.34,USD,Health technology
+KREF,KKR Real Estate Finance Trust Inc.,6.7,USD,Finance
+SES,SES AI Corporation,1.16,USD,Producer manufacturing
+RCKT,"Rocket Pharmaceuticals, Inc.",3.88,USD,Health technology
+ABAT,American Battery Technology Company,3.2,USD,Non-energy minerals
+ISSC,"Innovative Solutions and Support, Inc.",23.52,USD,Electronic technology
+OSPN,OneSpan Inc.,11.16,USD,Technology services
+PTLO,Portillo's Inc.,5.52,USD,Consumer services
+AKBA,"Akebia Therapeutics, Inc.",1.55,USD,Health technology
+LTBR,Lightbridge Corporation,12.14,USD,Process industries
+CLYM,"Climb Bio, Inc.",8.65,USD,Health technology
+ANGX,"Angel Studios, Inc.",2.43,USD,Consumer services
+WEAV,"Weave Communications, Inc.",5.22,USD,Technology services
+ECX,ECARX Holdings Inc.,1.15,USD,Technology services
+CDZI,"Cadiz, Inc.",4.91,USD,Finance
+APPS,"Digital Turbine, Inc.",3.39,USD,Technology services
+IRD,"Opus Genetics, Inc.",5.71,USD,Health technology
+LCTX,"Lineage Cell Therapeutics, Inc.",1.63,USD,Health technology
+OPTX,"Syntec Optics Holdings, Inc.",10.89,USD,Electronic technology
+HELE,Helen of Troy Limited,17.45,USD,Consumer durables
+FCEL,"FuelCell Energy, Inc.",7.53,USD,Electronic technology
+SNDL,SNDL Inc.,1.53,USD,Process industries
+BLND,"Blend Labs, Inc.",1.54,USD,Technology services
+TSSI,"TSS, Inc.",14.19,USD,Technology services
+AUTL,Autolus Therapeutics plc,1.49,USD,Health technology
+XFOR,"X4 Pharmaceuticals, Inc.",4.33,USD,Health technology
+SRTA,"Strata Critical Medical, Inc.",4.49,USD,Health services
+CERS,Cerus Corporation,2.02,USD,Health technology
+PALI,"Palisade Bio, Inc.",2.34,USD,Health technology
+AZ,A2Z Cust2Mate Solutions Corp.,8.6,USD,Finance
+BBBY,"Bed Bath & Beyond, Inc.",5.28,USD,Retail trade
+FWDI,"Forward Industries, Inc.",4.59,USD,Consumer durables
+INV,"Innventure, Inc.",4.76,USD,Miscellaneous
+ZNTL,"Zentalis Pharmaceuticals, Inc.",5.36,USD,Health technology
+NAGE,"Niagen Bioscience, Inc.",4.74,USD,Health technology
+RPD,"Rapid7, Inc.",5.76,USD,Technology services
+ALTO,"Alto Ingredients, Inc.",4.9,USD,Process industries
+LX,LexinFintech Holdings Ltd.,2.33,USD,Finance
+CABA,"Cabaletta Bio, Inc.",3.4,USD,Health technology
+OEC,Orion S.A.,6.71,USD,Process industries
+CADL,"Candel Therapeutics, Inc.",5.15,USD,Health technology
+CRNC,Cerence Inc.,8.36,USD,Technology services
+NMRA,"Neumora Therapeutics, Inc.",2.06,USD,Health technology
+HLLY,Holley Inc.,3.1,USD,Producer manufacturing
+IMRX,Immuneering Corporation,5.75,USD,Health technology
+DBI,Designer Brands Inc.,7.3,USD,Retail trade
+WNC,Wabash National Corporation,9.02,USD,Producer manufacturing
+NPWR,NET Power Inc.,1.63,USD,Producer manufacturing
+HNST,"The Honest Company, Inc.",3.25,USD,Retail trade
+OVID,Ovid Therapeutics Inc.,2.76,USD,Health technology
+KLC,"KinderCare Learning Companies, Inc.",3.06,USD,Consumer services
+NNDM,Nano Dimension Ltd.,1.77,USD,Producer manufacturing
+LE,"Lands' End, Inc.",11.55,USD,Retail trade
+LDI,"loanDepot, Inc.",1.55,USD,Finance
+BCYC,Bicycle Therapeutics plc,5.28,USD,Health technology
+TLS,Telos Corporation,4.44,USD,Technology services
+XPOF,"Xponential Fitness, Inc.",7.1,USD,Consumer services
+HYLN,Hyliion Holdings Corp.,1.94,USD,Producer manufacturing
+RZLT,"Rezolute, Inc.",3.59,USD,Health technology
+CEPT,"Cantor Equity Partners II, Inc.",11.2,USD,Finance
+TOI,"The Oncology Institute, Inc.",3.43,USD,Health services
+HPP,"Hudson Pacific Properties, Inc.",6.69,USD,Finance
+SIGA,SIGA Technologies Inc.,4.7,USD,Health technology
+ORGO,Organogenesis Holdings Inc.,2.6,USD,Health technology
+BNAI,Brand Engagement Network Inc.,56.95,USD,Technology services
+SPT,"Sprout Social, Inc",5.57,USD,Technology services
+VFF,"Village Farms International, Inc.",2.88,USD,Process industries
+EDIT,"Editas Medicine, Inc.",3.37,USD,Health technology
+NCMI,"National CineMedia, Inc.",3.49,USD,Commercial services
+SIDU,"Sidus Space, Inc.",4.88,USD,Electronic technology
+EVH,"Evolent Health, Inc",2.88,USD,Commercial services
+BRBS,"Blue Ridge Bankshares, Inc.",3.51,USD,Finance
+PAYS,"Paysign, Inc.",5.8,USD,Commercial services
+FOSL,"Fossil Group, Inc.",5.48,USD,Consumer durables
+EWCZ,"European Wax Center, Inc.",5.84,USD,Consumer services
+NUAI,"New Era Energy & Digital, Inc.",5.11,USD,Finance
+CLPT,ClearPoint Neuro Inc.,10.46,USD,Health technology
+XWIN,"XMAX, Inc.",7.19,USD,Consumer durables
+ABEO,Abeona Therapeutics Inc.,5.4,USD,Health technology
+AVTX,"Avalo Therapeutics, Inc.",13.35,USD,Health technology
+PDYN,Palladyne AI Corp.,6.54,USD,Producer manufacturing
+RXT,"Rackspace Technology, Inc.",1.23,USD,Technology services
+EOLS,"Evolus, Inc. Common Stock",4.63,USD,Health technology
+LENZ,"LENZ Therapeutics, Inc.",9.58,USD,Health technology
+AVXL,Anavex Life Sciences Corp.,3.24,USD,Health technology
+ALMU,"Aeluma, Inc.",16.63,USD,Commercial services
+RXST,"RxSight, Inc.",7.22,USD,Electronic technology
+DDD,3D Systems Corporation,2.03,USD,Technology services
+VELO,"Velo3D, Inc.",11.29,USD,Producer manufacturing
+SLP,"Simulations Plus, Inc.",14.64,USD,Technology services
+ACCO,Acco Brands Corporation,3.2,USD,Producer manufacturing
+NBP,NovaBridge Biosciences,2.6,USD,Health technology
+ANGI,Angi Inc.,7.28,USD,Technology services
+SLN,Silence Therapeutics Plc - American Depository Share,7.28,USD,Commercial services
+RWAY,Runway Growth Finance Corp.,6.8,USD,Finance
+ALEC,"Alector, Inc.",2.58,USD,Health technology
+SHMD,SCHMID Group N.V.,5.81,USD,Electronic technology
+BKKT,"Bakkt, Inc.",9.24,USD,Commercial services
+GRRR,Gorilla Technology Group Inc.,12.44,USD,Technology services
+CCCC,"C4 Therapeutics, Inc.",2.89,USD,Health technology
+CHRS,"Coherus Oncology, Inc.",1.88,USD,Health technology
+TARA,"Protara Therapeutics, Inc.",5.21,USD,Health technology
+APAD,A Paradise Acquisition Corp.,10.27,USD,Finance
+SITC,SITE Centers Corp.,5.34,USD,Finance
+ANNA,"AleAnna, Inc.",4.17,USD,Energy minerals
+SY,So-Young International Inc. - American Depository Shares,2.74,USD,Technology services
+ASPN,"Aspen Aerogels, Inc.",3.33,USD,Process industries
+RPAY,Repay Holdings Corporation,3.15,USD,Commercial services
+CGEN,Compugen Ltd.,2.89,USD,Health technology
+RILY,"BRC Group Holdings, Inc.",7.77,USD,Finance
+MRAM,"Everspin Technologies, Inc.",11.81,USD,Electronic technology
+RC,Ready Capital Corporation,1.7,USD,Finance
+AIRO,"AIRO Group Holdings, Inc.",8.36,USD,Electronic technology
+CNCK,Coincheck Group N.V.,1.93,USD,Finance
+FC,Franklin Covey Company,23.25,USD,Commercial services
+MIST,Milestone Pharmaceuticals Inc.,2.2,USD,Health technology
+EGHT,8x8 Inc,1.82,USD,Technology services
+MEI,"Methode Electronics, Inc.",7.1,USD,Electronic technology
+SUPX,SuperX AI Technology Limited,9.31,USD,Commercial services
+ELDN,"Eledon Pharmaceuticals, Inc.",3.3,USD,Health technology
+LUCD,Lucid Diagnostics Inc.,1.41,USD,Health technology
+POWW,Outdoor Holding Company,2.11,USD,Electronic technology
+ARCT,Arcturus Therapeutics Holdings Inc.,8.62,USD,Health technology
+OSS,"One Stop Systems, Inc.",9.83,USD,Electronic technology
+ETHM,Dynamix Corporation,10.76,USD,Finance
+AREC,American Resources Corporation,2.39,USD,Energy minerals
+DUOT,"Duos Technologies Group, Inc.",8.16,USD,Technology services
+TENX,"Tenax Therapeutics, Inc.",14.01,USD,Health technology
+ACH,"Accendra Health, Inc.",3.15,USD,Health technology
+VYGR,"Voyager Therapeutics, Inc.",4.03,USD,Health technology
+CNDT,Conduent Incorporated,1.54,USD,Commercial services
+LTRX,"Lantronix, Inc.",6,USD,Electronic technology
+FJET,"Starfighters Space, Inc.",5.38,USD,Commercial services
+IKT,"Inhibikase Therapeutics, Inc.",1.79,USD,Health technology
+WLAC,Willow Lane Acquisition Corp.,13.49,USD,Commercial services
+KROS,"Keros Therapeutics, Inc.",11.71,USD,Health technology
+CNTX,Context Therapeutics Inc.,2.51,USD,Health technology
+SPCE,"Virgin Galactic Holdings, Inc.",2.83,USD,Electronic technology
+GSIT,"GSI Technology, Inc.",6.35,USD,Electronic technology
+LODE,Comstock Inc.,3.1,USD,Process industries
+ZIP,"ZipRecruiter, Inc.",2.72,USD,Technology services
+BLZE,"Backblaze, Inc.",3.82,USD,Electronic technology
+YDDL,One and One Green Technologies. INC,4.22,USD,Industrial services
+CRNT,Ceragon Networks Ltd.,2.53,USD,Electronic technology
+QSI,Quantum-Si Incorporated,1.05,USD,Technology services
+ORBS,Eightco Holdings Inc.,1.14,USD,Technology services
+MGNX,"MacroGenics, Inc.",3.52,USD,Health technology
+CDXS,"Codexis, Inc.",2.46,USD,Process industries
+JACK,Jack In The Box Inc.,11.72,USD,Consumer services
+ALXO,ALX Oncology Holdings Inc.,1.68,USD,Health technology
+FNKO,"Funko, Inc.",3.97,USD,Consumer durables
+VUZI,Vuzix Corporation,2.61,USD,Electronic technology
+CURV,Torrid Holdings Inc.,2.17,USD,Retail trade
+OABI,"OmniAb, Inc.",1.48,USD,Commercial services
+OSG,"Octave Specialty Group, Inc.",4.75,USD,Finance
+CMRC,"Commerce.com, Inc. - Series 1",2.59,USD,Technology services
+CRBU,"Caribou Biosciences, Inc.",2.2,USD,Health technology
+PRQR,ProQR Therapeutics N.V.,1.99,USD,Health technology
+SABS,"SAB Biotherapeutics, Inc.",4.05,USD,Health technology
+CNTN,"Canton Strategic Holdings, Inc.",3.58,USD,Health technology
+BZAI,"Blaize Holdings, Inc.",1.65,USD,Electronic technology
+IMMR,Immersion Corporation,6.13,USD,Electronic technology
+LFCR,"Lifecore Biomedical, Inc.",5.38,USD,Health technology
+PLBY,"Playboy, Inc.",1.74,USD,Retail trade
+ATOM,Atomera Incorporated,5.14,USD,Commercial services
+LPRO,Open Lending Corporation,1.68,USD,Technology services
+AIRS,"AirSculpt Technologies, Inc.",2.79,USD,Health technology
+ABOS,"Acumen Pharmaceuticals, Inc.",2.72,USD,Health technology
+STXS,"Stereotaxis, Inc.",2.01,USD,Health technology
+HURA,"TuHURA Biosciences, Inc.",3.07,USD,Health technology
+KPTI,Karyopharm Therapeutics Inc.,8.56,USD,Health technology
+TNXP,Tonix Pharmaceuticals Holding Corp.,14.34,USD,Health technology
+IMPP,Imperial Petroleum Inc.,4.3,USD,Transportation
+VERI,"Veritone, Inc.",2.09,USD,Commercial services
+PLX,"Protalix BioTherapeutics, Inc. (DE)",2.38,USD,Health technology
+ELME,Elme Communities,2.16,USD,Finance
+XRX,Xerox Holdings Corporation,1.47,USD,Electronic technology
+ACHV,"Achieve Life Sciences, Inc.",3.55,USD,Health technology
+REPL,"Replimune Group, Inc.",2.28,USD,Health technology
+GPRO,"GoPro, Inc.",1.12,USD,Consumer durables
+AGEN,Agenus Inc.,4.83,USD,Health technology
+LFMD,"LifeMD, Inc.",3.83,USD,Health services
+ADAG,Adagene Inc.,3.82,USD,Health technology
+UNCY,"Unicycive Therapeutics, Inc.",6.97,USD,Health technology
+FF,FutureFuel Corp.,4,USD,Process industries
+UIS,Unisys Corporation New,2.41,USD,Technology services
+NKTX,"Nkarta, Inc.",2.42,USD,Health technology
+QTRX,Quanterix Corporation,3.6,USD,Health technology
+GALT,Galectin Therapeutics Inc.,2.56,USD,Health technology
+CNTB,Connect Biopharma Holdings Limited,2.93,USD,Health technology
+IDN,"Intellicheck, Inc.",8.17,USD,Technology services
+NNOX,NANO-X IMAGING LTD,2.59,USD,Health technology
+BDTX,"Black Diamond Therapeutics, Inc.",2.87,USD,Health technology
+BRR,"ProCap Financial, Inc.",1.93,USD,Technology services
+MBOT,Microbot Medical Inc.,2.39,USD,Health technology
+DOUG,Douglas Elliman Inc.,1.78,USD,Finance
+SKYX,SKYX Platforms Corp.,1.17,USD,Producer manufacturing
+AMTX,"Aemetis, Inc",2.33,USD,Process industries
+SPRO,"Spero Therapeutics, Inc.",2.64,USD,Health technology
+BYRN,"Byrna Technologies, Inc.",6.69,USD,Electronic technology
+FATE,"Fate Therapeutics, Inc.",1.29,USD,Health technology
+THRY,"Thryv Holdings, Inc.",3.39,USD,Technology services
+EMPD,Empery Digital Inc.,4.89,USD,Consumer durables
+TTEC,"TTEC Holdings, Inc.",3.03,USD,Technology services
+IMUX,"Immunic, Inc.",1.11,USD,Health technology
+SPWR,SunPower Inc.,1.21,USD,Industrial services
+CVGI,"Commercial Vehicle Group, Inc.",3.94,USD,Producer manufacturing
+TMCI,"Treace Medical Concepts, Inc.",2.23,USD,Health technology
+GLND,Greenland Energy Company,5.49,USD,Finance
+BMEA,"Biomea Fusion, Inc.",1.97,USD,Health technology
+VWAV,"VisionWave Holdings, Inc.",7.18,USD,Technology services
+BZUN,Baozun Inc.,2.68,USD,Retail trade
+GAMB,Gambling.com Group Limited,3.81,USD,Commercial services
+DOMO,"Domo, Inc.",3.19,USD,Technology services
+RGP,"Resources Connection, Inc.",3.85,USD,Commercial services
+CCLD,"CareCloud, Inc.",3.03,USD,Technology services
+ONCY,Oncolytics Biotech Inc.,1.1,USD,Health technology
+DFDV,DeFi Development Corp.,4.24,USD,Finance
+KULR,"KULR Technology Group, Inc.",2.64,USD,Producer manufacturing
+WATT,Energous Corporation,22.13,USD,Electronic technology
+OPRX,OptimizeRx Corporation,6.4,USD,Technology services
+PEPG,PepGen Inc.,1.72,USD,Health technology
+ANTX,"AN2 Therapeutics, Inc.",3.26,USD,Health technology
+SLNH,"Soluna Holdings, Inc.",1.05,USD,Electronic technology
+BAER,"Bridger Aerospace Group Holdings, Inc.",2.09,USD,Transportation
+NAMM,Namib Minerals,2.14,USD,Non-energy minerals
+CRDF,"Cardiff Oncology, Inc.",1.7,USD,Health technology
+SEER,"Seer, Inc.",1.96,USD,Health technology
+ALDX,"Aldeyra Therapeutics, Inc.",1.83,USD,Health technology
+CBUS,"Cibus, Inc.",1.44,USD,Technology services
+WW,"WW International, Inc.",10.82,USD,Consumer services
+DTI,Drilling Tools International Corporation,3.07,USD,Finance
+PYXS,"Pyxis Oncology, Inc.",1.71,USD,Health technology
+HSDT,Solana Company,1.94,USD,Health technology
+QMCO,Quantum Corporation,7.25,USD,Electronic technology
+STEX,Streamex Corp.,1.08,USD,Finance
+JELD,"JELD-WEN Holding, Inc.",1.18,USD,Non-energy minerals
+ARQ,"Arq, Inc.",2.36,USD,Process industries
+ZENA,"ZenaTech, Inc.",2.12,USD,Technology services
+NNBR,"NN, Inc.",1.98,USD,Producer manufacturing
+INO,"Inovio Pharmaceuticals, Inc.",1.19,USD,Health technology
+CGTX,"Cognition Therapeutics, Inc.",1.09,USD,Health technology
+STIM,"Neuronetics, Inc.",1.39,USD,Health technology
+PROP,Prairie Operating Co.,1.25,USD,Energy minerals
+HCAT,"Health Catalyst, Inc",1.23,USD,Technology services
+GANX,"Gain Therapeutics, Inc.",2.14,USD,Health technology
+BTCS,BTCS Inc.,1.79,USD,Finance
+UPXI,"Upexi, Inc.",1.27,USD,Health technology
+IFRX,InflaRx N.V.,1.21,USD,Health technology
+HTCO,High-Trend International Group,11.54,USD,Transportation
+AISP,"Airship AI Holdings, Inc",2.47,USD,Technology services
+NRXP,"NRX Pharmaceuticals, Inc.",2.52,USD,Health technology
+HOVR,New Horizon Aircraft Ltd.,1.84,USD,Electronic technology
+XTIA,"XTI Aerospace, Inc.",2.35,USD,Technology services
+LIDR,"AEye, Inc.",1.76,USD,Technology services
+WRAP,"Wrap Technologies, Inc.",1.43,USD,Health technology
+FBIO,"Fortress Biotech, Inc.",2.43,USD,Health technology
+PDSB,PDS Biotechnology Corporation,1.36,USD,Health technology
+PMVP,"PMV Pharmaceuticals, Inc.",1.41,USD,Health technology
+PLCE,"Children's Place, Inc. (The)",3.32,USD,Retail trade
+BLNE,"Beeline Holdings, Inc.",2.4,USD,Commercial services
+MERC,Mercer International Inc.,1.09,USD,Process industries
+IBIO,"iBio, Inc.",2.1,USD,Health technology
+STSS,Sharps Technology Inc.,1.85,USD,Health technology
+GRCE,"Grace Therapeutics, Inc.",4.36,USD,Health technology
+AGH,Aureus Greenway Holdings Inc.,3.27,USD,Consumer services
+OMEX,"Odyssey Marine Exploration, Inc.",1.11,USD,Process industries
+ACRV,"Acrivon Therapeutics, Inc.",1.67,USD,Health technology
+IMA,"ImageneBio, Inc.",5.65,USD,Health technology
+ONEG,OneConstruction Group Limited,3.94,USD,Industrial services
+SPWH,"Sportsman's Warehouse Holdings, Inc.",1.58,USD,Retail trade
+TCRX,"TScan Therapeutics, Inc.",1.07,USD,Health technology
+MDAI,"Spectral AI, Inc.",1.91,USD,Health technology
+ASTI,"Ascent Solar Technologies, Inc",6.36,USD,Electronic technology
+KSCP,"Knightscope, Inc.",3.45,USD,Producer manufacturing
+CDLX,"Cardlytics, Inc. Common Stock",1.01,USD,Technology services
+AMPG,"Amplitech Group, Inc.",2.08,USD,Electronic technology
+SNBR,Sleep Number Corporation,2.26,USD,Consumer durables
+IXHL,Incannex Healthcare Inc.,3.63,USD,Health technology
+SKIL,Skillsoft Corp.,5.68,USD,Technology services
+EHTH,"eHealth, Inc.",1.6,USD,Finance
+SCYX,"SCYNEXIS, Inc.",1.11,USD,Health technology
+HOLO,MicroCloud Hologram Inc.,2.09,USD,Electronic technology
+FUSE,Fusemachines Inc.,1.65,USD,Technology services
+BTM,Bitcoin Depot Inc.,4.16,USD,Finance
+BENF,Beneficient,3.27,USD,Finance
+FRMM,"Forum Markets, Incorporated",2.13,USD,Health technology
+SKYQ,Sky Quarry Inc.,11.09,USD,Energy minerals
+MNTS,Momentus Inc.,6.91,USD,Electronic technology
+PSTV,"PLUS THERAPEUTICS, Inc.",5.65,USD,Health technology
+ARAI,Arrive AI Inc.,1.01,USD,Technology services
+BOLD,"Boundless Bio, Inc.",1.63,USD,Health technology
+AHMA,Ambitions Enterprise Management Co. L.L.C,1.21,USD,Commercial services
+BCG,"Binah Capital Group, Inc.",2.09,USD,Finance
+MIGI,Mawson Infrastructure Group Inc.,6.27,USD,Technology services
+LASE,Laser Photonics Corporation,1.08,USD,Electronic technology
+MOBX,"Mobix Labs, Inc.",2.89,USD,Electronic technology
+JSPR,"Jasper Therapeutics, Inc.",1.05,USD,Health technology
+BTAI,"BioXcel Therapeutics, Inc.",1.05,USD,Health technology
+LTRN,Lantern Pharma Inc.,2.42,USD,Health technology
+MAXN,"Maxeon Solar Technologies, Ltd.",1.56,USD,Utilities
+LGVN,Longeveron Inc.,1.12,USD,Health technology
+SMX,SMX (Security Matters) Public Limited Company,5.29,USD,Technology services
+BBGI,"Beasley Broadcast Group, Inc.",13.72,USD,Consumer services
+AIFF,"Firefly Neuroscience, Inc.",1.58,USD,Health technology
+TURB,"Turbo Energy, S.A.",2,USD,Technology services
+BIRD,"Allbirds, Inc.",16.99,USD,Retail trade
+COCP,"Cocrystal Pharma, Inc.",1.5,USD,Health technology
+RECT,Rectitude Holdings Ltd,1.39,USD,Distribution services
+QNCX,"Quince Therapeutics, Inc.",1.23,USD,Health technology
+AGPU,Axe Compute Inc.,3.51,USD,Health technology
+LPCN,Lipocine Inc.,2.56,USD,Health technology
+IRIX,IRIDEX Corporation,1.04,USD,Health technology
+HUIZ,Huize Holding Limited,1.69,USD,Finance
+RIME,"Algorhythm Holdings, Inc.",1.08,USD,Consumer services
+VVOS,"Vivos Therapeutics, Inc.",1.47,USD,Health technology
+YYGH,YY Group Holding Limited,1.62,USD,Commercial services
+DBGI,"Digital Brands Group, Inc.",1.79,USD,Consumer non-durables
+AIXI,XIAO-I Corporation,1.14,USD,Technology services
+RBNE,Robin Energy Ltd.,1.9,USD,Transportation
+BIAF,"bioAffinity Technologies, Inc.",2.93,USD,Health technology
+NVNI,Nvni Group Limited,1.31,USD,Finance
+CYCN,"Cyclerion Therapeutics, Inc.",3.03,USD,Health technology
+CETX,Cemtrex Inc.,1.25,USD,Electronic technology
+RETO,"ReTo Eco-Solutions, Inc.",1.04,USD,Non-energy minerals
+GXAI,Gaxos.ai Inc.,1.21,USD,Technology services
+GNPX,"Genprex, Inc.",1.28,USD,Health technology
+BTBD,"BT Brands, Inc.",1.81,USD,Consumer services
+KPRX,"Kiora Pharmaceuticals, Inc.",2.54,USD,Health technology
+UGRO,"urban-gro, Inc.",12.12,USD,Distribution services
+RMSG,Real Messenger Corporation,1.79,USD,Technology services
+CLIK,Click Holdings Limited,2.78,USD,Commercial services
+HKIT,Hitek Global Inc.,1.01,USD,Technology services
+IQST,iQSTEL Inc.,1.67,USD,Communications
+ADVB,Advanced Biomed Inc.,6.2,USD,Health technology
+ELAB,PMGC Holdings Inc.,4.2,USD,Health technology
+CYCU,"Cycurion, Inc.",1.24,USD,Technology services
+IOTR,iOThree Limited,2.64,USD,Technology services
+RENX,RenX Enterprises Corp.,2.65,USD,Finance
+MYSE,"Myseum, Inc.",1.44,USD,Technology services
+HCAI,"Huachen AI Parking Management Technology Holding Co., Ltd.",5.21,USD,Producer manufacturing
+CIIT,"Tianci International, Inc.",1.59,USD,Transportation
+SQFT,"Presidio Property Trust, Inc.",3.89,USD,Finance
+MLEC,Moolec Science SA,7.61,USD,Commercial services
+ASTC,Astrotech Corporation,3.1,USD,Electronic technology
+FBLG,"FibroBiologics, Inc.",1.54,USD,Health technology
+GVH,Globavend Holdings Limited - Ord Shares,2.36,USD,Transportation
+JTAI,Jet.AI Inc.,7.66,USD,Transportation
+WBUY,WEBUY GLOBAL LTD.,1.18,USD,Retail trade
+ARTL,"Artelo Biosciences, Inc.",5.31,USD,Health technology
+UCAR,U Power Limited,1.36,USD,Consumer durables
+LNKS,Linkers Industries Limited,2.03,USD,Electronic technology
+HCTI,"Healthcare Triangle, Inc.",2.53,USD,Technology services
+ELPW,Elong Power Holding Limited,1.8,USD,Producer manufacturing
+PRFX,PRF Technologies Ltd.,2.69,USD,Health technology
+FCUV,Focus Universal Inc.,2.18,USD,Commercial services
+JEM,707 Cayman Holdings Limited,1.51,USD,Distribution services
+KIDZ,"Classover Holdings, Inc.",1.58,USD,Technology services
+MASK,3 E Network Technology Group Ltd,1.75,USD,Technology services
+NCT,Intercont (Cayman) Limited,1.61,USD,Transportation
+RDGT,"Ridgetech, Inc.",2.12,USD,Distribution services
+JDZG,JIADE LIMITED,1.29,USD,Commercial services
+PAVS,Paranovus Entertainment Technology Ltd.,1.69,USD,Health technology
+FCHL,Fitness Champs Holdings Limited,1.44,USD,Commercial services
+IPW,iPower Inc.,1.13,USD,Retail trade
+BDRX,Biodexa Pharmaceuticals plc,3.43,USD,Health technology
+BOXL,Boxlight Corporation,1.22,USD,Electronic technology
+RNA,"Atrium Therapeutics, Inc.",14.54,USD,Health technology
+MMED,"MiniMed Group, Inc.",15.22,USD,Health technology
+UMDD,UltraPro MidCap400,,,3X
+WEBL,Direxion Daily Dow Jones Internet Bull 3X ETF,,,3X
+FAS,Direxion Financial Bull 3X ETF,,,3X
+TPOR,Direxion Daily Transportation Bull 3X ETF,,,3X
+YSPY,GraniteShares YieldBOOST SPY ETF,,,3X
+HIBL,Direxion Daily S&P 500 High Beta Bull 3X ETF,,,3X
+UDOW,ProShares UltraPro Dow30,,,3X
+SPXL,Direxion Daily S&P 500 Bull 3X ETF,,,3X
+UPRO,ProShares UltraPro S&P 500,,,3X
+DPST,Direxion Daily Regional Banks Bull 3X ETF,,,3X
+TQQQ,ProShares UltraPro QQQ,,,3X
+TECL,Direxion Daily S&P 500 Bear 3X ETF,,,3X
+SEMY,GraniteShares YieldBOOST Semiconductor ETF,,,3X
+URTY,ProShares UltraPro Russell2000,,,3X
+DUSL,Direxion Daily Industrials Bull 3X ETF,,,3X
+TNA,Direxion Small Cap Bull 3X ETF,,,3X
+MEXX,Direxion Daily MSCI Mexico Bull 3X ETF,,,3X
+RETL,Direxion Daily Retail Bull 3X ETF,,,3X
+DFEN,Direxion Daily Aerospace & Defense Bull 3X ETF,,,3X
+NAIL,Direxion Daily Homebuilders & Supplies Bull 3X ETF,,,3X
+TMF,Direxion Daily 20-Yr Treasury Bull 3x Shrs,,,3X
+SOXL,Direxion Daily Semiconductor Bull 3X ETF,,,3X
+DRN,Direxion Daily Real Estate Bull 3X ETF,,,3X
+EDC,Direxion Emerging Markets Bull 3X ETF,,,3X
+YINN,Direxion Daily FTSE China Bull 3X ETF,,,3X
+KORU,Direxion Daily South Korea Bull 3X ETF,,,3X
+WANT,Direxion Daily Consumer Discretionary Bull 3X ETF,,,3X
+EURL,Direxion Daily FTSE Europe Bull 3X ETF,,,3X
+TQQY,GraniteShares YieldBOOST QQQ ETF,,,3X
+UTSL,Direxion Daily Utilities Bull 3X ETF,,,3X
+MIDU,Direxion Mid Cap Bull 3X ETF,,,3X
+TYD,Direxion Daily 10-Yr Treasury Bull 3x Shrs,,,3X
