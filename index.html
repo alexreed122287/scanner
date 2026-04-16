@@ -1822,7 +1822,31 @@ window._fmpActive = 0;
 window._FMP_MAX_CONCURRENT = 3;
 window._FMP_MIN_SPACING_MS = 200;
 window._FMP_COOLDOWN_MS = 60000;
+window._FMP_QUOTA_KEY = 'rrjcar_fmp_quota_exhausted_until';
 window._fmpLastStart = 0;
+
+// Check persisted quota-exhausted state on init
+(function(){
+  try{
+    var until = parseInt(localStorage.getItem(window._FMP_QUOTA_KEY)||'0');
+    if(until > Date.now()){
+      window._fmpQuotaExhausted = true;
+      var mins = Math.round((until - Date.now())/60000);
+      console.info('[FMP] Daily quota exhausted \u2014 FMP calls silenced for ~'+mins+' more minutes (resets at midnight UTC). Clear with: localStorage.removeItem("'+window._FMP_QUOTA_KEY+'")');
+    } else {
+      localStorage.removeItem(window._FMP_QUOTA_KEY);
+    }
+  }catch(e){}
+})();
+
+function _fmpMarkQuotaExhausted(){
+  window._fmpQuotaExhausted = true;
+  // Persist until next midnight UTC
+  var now = new Date();
+  var nextMidnightUtc = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()+1, 0, 0, 0);
+  try{ localStorage.setItem(window._FMP_QUOTA_KEY, String(nextMidnightUtc)); }catch(e){}
+  console.warn('[FMP] Daily quota exhausted \u2014 FMP calls silenced until midnight UTC');
+}
 
 function _fmpProcessQueue(){
   if(window._fmpActive >= window._FMP_MAX_CONCURRENT) return;
@@ -1860,16 +1884,27 @@ function _fmpProcessQueue(){
       window._fmpRateLimited = Date.now();
       window._fmpRateLimitLogs++;
       if(window._fmpRateLimitLogs <= 2){
-        console.warn('[FMP] Rate limited (429) — pausing FMP calls for 60s. Further 429 warnings silenced.');
+        console.warn('[FMP] Rate limited (429) \u2014 pausing FMP calls for 60s. Further 429 warnings silenced.');
       }
-      // Drain remaining queue
+      // Peek at body to detect daily-quota exhaustion vs transient rate limit
+      r.clone().text().then(function(txt){
+        if(txt && /Limit Reach|upgrade your plan|daily limit/i.test(txt)){
+          _fmpMarkQuotaExhausted();
+          // Drain queue permanently
+          while(window._fmpQueue.length){
+            var q = window._fmpQueue.shift();
+            q.reject(new Error('FMP quota exhausted'));
+          }
+        }
+      }).catch(function(){});
+      // Drain remaining queue (transient 60s pause)
       while(window._fmpQueue.length){
         var q = window._fmpQueue.shift();
         q.reject(new Error('FMP rate limit cooldown'));
       }
     } else if(r.status === 402 || r.status === 403){
       window._fmpDead = true;
-      console.warn('[FMP] Circuit breaker tripped on', r.status, '— silencing further FMP calls this session');
+      console.warn('[FMP] Circuit breaker tripped on', r.status, '\u2014 silencing further FMP calls this session');
     }
     return r;
   }).then(function(r){ item.resolve(r); }).catch(function(err){
@@ -1882,6 +1917,7 @@ function _fmpProcessQueue(){
 
 // FMP fetch wrapper with circuit breaker + rate-limit throttle + queueing
 window.fmpFetch = function(url, opts){
+  if(window._fmpQuotaExhausted) return Promise.reject(new Error('FMP quota exhausted'));
   if(window._fmpDead) return Promise.reject(new Error('FMP circuit breaker open'));
   if(window._fmpRateLimited > 0 && (Date.now() - window._fmpRateLimited) < window._FMP_COOLDOWN_MS){
     return Promise.reject(new Error('FMP rate limit cooldown'));
@@ -3834,12 +3870,13 @@ async function fetchFmpData(ticker){
   // FMP migrated to /stable/ endpoints Aug 31 2025 \u2014 v3 legacy endpoints blocked for new keys
   var base = 'https://financialmodelingprep.com/stable';
   try{
-    // Fetch analyst estimates + grades in parallel via throttled wrapper
+    // Fetch analyst estimates + grades + price target consensus in parallel via throttled wrapper
     var results = await Promise.all([
       window.fmpFetch(base+'/analyst-estimates?symbol='+ticker+'&period=annual&limit=5&apikey='+fmpKey).then(function(r){return r.json();}),
-      window.fmpFetch(base+'/grades?symbol='+ticker+'&limit=20&apikey='+fmpKey).then(function(r){return r.json();})
+      window.fmpFetch(base+'/grades?symbol='+ticker+'&limit=20&apikey='+fmpKey).then(function(r){return r.json();}),
+      window.fmpFetch(base+'/price-target-consensus?symbol='+ticker+'&apikey='+fmpKey).then(function(r){return r.json();})
     ]);
-    var estRes = results[0], gradesRes = results[1];
+    var estRes = results[0], gradesRes = results[1], ptRes = results[2];
 
     // Revision detection: use numAnalystsEps from estimate record (active analyst count)
     var revisionsUp = 0;
@@ -3865,7 +3902,10 @@ async function fetchFmpData(ticker){
       insiderBuyValue:    0,
       insiderSellValue:   0,
       analystRevisionsOk: revisionsUp >= 2,
-      insiderBuyingOk:    false  // requires FMP Premium plan \u2014 empty on Starter
+      ptConsensus:        (Array.isArray(ptRes) && ptRes[0]) ? ptRes[0].targetConsensus : null,
+      ptHigh:             (Array.isArray(ptRes) && ptRes[0]) ? ptRes[0].targetHigh : null,
+      ptUpsideOk:         (Array.isArray(ptRes) && ptRes[0] && ptRes[0].targetConsensus > 0),
+      insiderBuyingOk:    false
     };
     saveFmpCache(ticker, data);
     return data;
@@ -3933,6 +3973,7 @@ function scoreIt(ticker, ind, opt){
   // \u2500\u2500 SECTION B: FMP Daily Signals (2 rules, 20 pts) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
   var analystOk = fmp ? fmp.analystRevisionsOk : false;
   var insiderOk = fmp ? fmp.insiderBuyingOk    : false;
+  var ptOk      = fmp ? fmp.ptUpsideOk         : false;
 
   var _hasFmpKey = false;
   try{ _hasFmpKey = !!(localStorage.getItem('rrjcar_fmp')||'').length; }catch(e){}
@@ -3941,11 +3982,11 @@ function scoreIt(ticker, ind, opt){
   var analystVal = fmp
     ? (fmp.revisionsUp >= 2 ? fmp.revisionsUp+' analysts / '+fmp.upgradesLast30+' upgrades' : fmp.revisionsUp+' analysts (need \u22652)')
     : _fmpMissReason;
-  var insiderVal = fmp ? (insiderOk ? '$'+Math.round(fmp.insiderBuyValue/1000)+'K buys' : 'Requires Premium plan') : _fmpMissReason;
+  var ptVal      = fmp ? (fmp.ptConsensus != null ? 'PT $'+(+fmp.ptConsensus).toFixed(2)+(fmp.ptHigh ? ' (Hi $'+fmp.ptHigh+')' : '') : 'No PT data') : _fmpMissReason;
 
   var fmpChecks = [
     {ok:analystOk, n:'Analyst Revisions \u2191', val:analystVal, pts:12},
-    {ok:insiderOk, n:'Insider Buying',           val:insiderVal, pts:8}
+    {ok:ptOk,      n:'Analyst PT Exists',         val:ptVal,      pts:8}
   ];
   fmpChecks.forEach(function(c){
     if(c.ok){ score += c.pts; fundScore += c.pts; }
@@ -3997,7 +4038,7 @@ function scoreIt(ticker, ind, opt){
 
   // \u2500\u2500 GO DECISION \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
   var total = clamp(score, 0, 150); // 144 base + 6 GEX bonus
-  var isGo  = total >= 76 && !avoidBad;
+  var isGo  = total >= 110 && !avoidBad;
 
   return {
     score:      total,
@@ -5029,7 +5070,7 @@ function finishScan(){
   var fmpKey='';try{fmpKey=localStorage.getItem('rrjcar_fmp')||'';}catch(e){}
   if(!fmpKey && typeof FMP_KEY_DEFAULT !== 'undefined') fmpKey = FMP_KEY_DEFAULT;
   if(fmpKey){
-    var goTickers = G.results.slice(0,100).map(function(r){ return r.ticker; });
+    var goTickers = G.results.slice(0,50).map(function(r){ return r.ticker; });
     var _fmpIdx = 0;
     function _fmpNext(){
       if(_fmpIdx >= goTickers.length) return;
