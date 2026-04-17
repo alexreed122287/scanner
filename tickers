@@ -1,0 +1,1934 @@
+Table 1
+Symbol,Description,Sector
+NVDA,NVIDIA Corporation,Electronic technology
+GOOG,Alphabet Inc.,Technology services
+AAPL,Apple Inc.,Electronic technology
+MSFT,Microsoft Corporation,Technology services
+AMZN,"Amazon.com, Inc.",Retail trade
+AVGO,Broadcom Inc.,Electronic technology
+META,"Meta Platforms, Inc.",Technology services
+TSLA,"Tesla, Inc.",Consumer durables
+WMT,Walmart Inc.,Retail trade
+JPM,JP Morgan Chase & Co.,Finance
+XOM,Exxon Mobil Corporation,Energy minerals
+V,Visa Inc.,Finance
+MU,"Micron Technology, Inc.",Electronic technology
+ORCL,Oracle Corporation,Technology services
+MA,Mastercard Incorporated,Finance
+NFLX,"Netflix, Inc.",Technology services
+COST,Costco Wholesale Corporation,Retail trade
+AMD,"Advanced Micro Devices, Inc.",Electronic technology
+BAC,Bank of America Corporation,Finance
+CVX,Chevron Corporation,Energy minerals
+CAT,"Caterpillar, Inc.",Producer manufacturing
+PLTR,Palantir Technologies Inc.,Technology services
+HD,"Home Depot, Inc. (The)",Retail trade
+PG,Procter & Gamble Company (The),Consumer non-durables
+LRCX,Lam Research Corporation,Producer manufacturing
+GE,GE Aerospace,Electronic technology
+INTC,Intel Corporation,Electronic technology
+CSCO,"Cisco Systems, Inc.",Electronic technology
+KO,Coca-Cola Company (The),Consumer non-durables
+AMAT,"Applied Materials, Inc.",Producer manufacturing
+MS,Morgan Stanley,Finance
+BABA,Alibaba Group Holding Limited,Retail trade
+RTX,RTX Corporation,Electronic technology
+GEV,GE Vernova Inc.,Producer manufacturing
+GS,"Goldman Sachs Group, Inc. (The)",Finance
+WFC,Wells Fargo & Company,Finance
+PM,Philip Morris International Inc,Consumer non-durables
+LIN,Linde plc,Process industries
+C,"Citigroup, Inc.",Finance
+IBM,International Business Machines Corporation,Technology services
+KLAC,KLA Corporation,Electronic technology
+AXP,American Express Company,Finance
+MCD,McDonald's Corporation,Consumer services
+PEP,"PepsiCo, Inc.",Consumer non-durables
+TMUS,"T-Mobile US, Inc.",Communications
+TXN,Texas Instruments Incorporated,Electronic technology
+ANET,"Arista Networks, Inc.",Electronic technology
+NEE,"NextEra Energy, Inc.",Utilities
+VZ,Verizon Communications Inc.,Communications
+DIS,Walt Disney Company (The),Consumer services
+APH,Amphenol Corporation,Electronic technology
+T,AT&T Inc.,Communications
+TJX,"TJX Companies, Inc. (The)",Retail trade
+BA,Boeing Company (The),Electronic technology
+SCHW,Charles Schwab Corporation (The),Finance
+ARM,Arm Holdings plc,Electronic technology
+BLK,"BlackRock, Inc.",Finance
+ADI,"Analog Devices, Inc.",Electronic technology
+SHOP,Shopify Inc.,Commercial services
+CRM,"Salesforce, Inc.",Technology services
+BX,Blackstone Inc.,Finance
+UBER,"Uber Technologies, Inc.",Transportation
+APP,Applovin Corporation,Technology services
+DE,Deere & Company,Producer manufacturing
+SCCO,Southern Copper Corporation,Non-energy minerals
+ETN,"Eaton Corporation, PLC",Producer manufacturing
+HON,Honeywell International Inc.,Electronic technology
+UNP,Union Pacific Corporation,Transportation
+WELL,Welltower Inc.,Finance
+BKNG,Booking Holdings Inc. Common Stock,Consumer services
+COP,ConocoPhillips,Energy minerals
+GLW,Corning Incorporated,Electronic technology
+PDD,PDD Holdings Inc.,Retail trade
+QCOM,QUALCOMM Incorporated,Electronic technology
+LMT,Lockheed Martin Corporation,Electronic technology
+LOW,"Lowe's Companies, Inc.",Retail trade
+IBKR,"Interactive Brokers Group, Inc.",Finance
+PANW,"Palo Alto Networks, Inc.",Technology services
+PLD,"Prologis, Inc.",Finance
+SNDK,Sandisk Corporation,Electronic technology
+SPGI,S&P Global Inc.,Commercial services
+CB,Chubb Limited,Finance
+COF,Capital One Financial Corporation,Finance
+WDC,Western Digital Corporation,Electronic technology
+NEM,Newmont Corporation,Non-energy minerals
+PH,Parker-Hannifin Corporation,Producer manufacturing
+ACN,Accenture plc,Technology services
+PGR,Progressive Corporation (The),Finance
+MRVL,"Marvell Technology, Inc.",Electronic technology
+VRT,"Vertiv Holdings, LLC",Electronic technology
+DELL,Dell Technologies Inc.,Electronic technology
+STX,Seagate Technology Holdings PLC,Electronic technology
+SBUX,Starbucks Corporation,Consumer services
+SPOT,Spotify Technology S.A.,Technology services
+INTU,Intuit Inc.,Technology services
+CME,CME Group Inc.,Finance
+MO,"Altria Group, Inc.",Consumer non-durables
+CEG,Constellation Energy Corporation,Utilities
+SO,Southern Company (The),Utilities
+MCK,McKesson Corporation,Distribution services
+CRWD,"CrowdStrike Holdings, Inc.",Technology services
+EQIX,"Equinix, Inc.",Finance
+TT,Trane Technologies plc,Producer manufacturing
+HWM,Howmet Aerospace Inc.,Electronic technology
+CMCSA,Comcast Corporation,Consumer services
+DUK,Duke Energy Corporation (Holding Company),Utilities
+ADBE,Adobe Inc.,Technology services
+FCX,"Freeport-McMoRan, Inc.",Non-energy minerals
+NOW,"ServiceNow, Inc.",Technology services
+MAR,Marriott International,Consumer services
+NOC,Northrop Grumman Corporation,Electronic technology
+CVS,CVS Health Corporation,Retail trade
+MELI,"MercadoLibre, Inc.",Retail trade
+ICE,Intercontinental Exchange Inc.,Finance
+KKR,KKR & Co. Inc.,Finance
+GD,General Dynamics Corporation,Electronic technology
+BK,The Bank of New York Mellon Corporation,Finance
+WM,"Waste Management, Inc.",Industrial services
+PNC,"PNC Financial Services Group, Inc. (The)",Finance
+PWR,"Quanta Services, Inc.",Industrial services
+UPS,"United Parcel Service, Inc.",Transportation
+USB,U.S. Bancorp,Finance
+FDX,FedEx Corporation,Transportation
+WMB,"Williams Companies, Inc. (The)",Industrial services
+MRSH,Marsh,Finance
+SNPS,"Synopsys, Inc.",Technology services
+JCI,Johnson Controls International plc,Producer manufacturing
+CDNS,"Cadence Design Systems, Inc.",Technology services
+ABNB,"Airbnb, Inc.",Consumer services
+CMI,Cummins Inc.,Producer manufacturing
+AMT,American Tower Corporation (REIT),Finance
+SHW,Sherwin-Williams Company (The),Process industries
+CVNA,Carvana Co.,Retail trade
+BAM,Brookfield Asset Management Inc,Finance
+MMM,3M Company,Producer manufacturing
+ADP,"Automatic Data Processing, Inc.",Technology services
+MCO,Moody's Corporation,Commercial services
+EMR,Emerson Electric Company,Electronic technology
+SLB,SLB Limited,Industrial services
+HOOD,"Robinhood Markets, Inc.",Finance
+ORLY,"O'Reilly Automotive, Inc.",Retail trade
+CSX,CSX Corporation,Transportation
+DASH,"DoorDash, Inc.",Transportation
+CRH,CRH PLC,Non-energy minerals
+RCL,Royal Caribbean Cruises Ltd.,Consumer services
+ECL,Ecolab Inc.,Process industries
+ITW,Illinois Tool Works Inc.,Producer manufacturing
+HLT,Hilton Worldwide Holdings Inc.,Consumer services
+NU,Nu Holdings Ltd.,Finance
+MNST,Monster Beverage Corporation,Consumer non-durables
+AEP,"American Electric Power Company, Inc.",Utilities
+MSI,"Motorola Solutions, Inc.",Electronic technology
+NSC,Norfolk Southern Corporation,Transportation
+MDLZ,"Mondelez International, Inc.",Consumer non-durables
+ROST,"Ross Stores, Inc.",Retail trade
+EOG,"EOG Resources, Inc.",Energy minerals
+CTAS,Cintas Corporation,Commercial services
+KMI,"Kinder Morgan, Inc.",Industrial services
+GM,General Motors Company,Consumer durables
+AON,Aon plc,Finance
+VLO,Valero Energy Corporation,Energy minerals
+APO,"Apollo Global Management, Inc. (New)",Finance
+TEL,TE Connectivity plc,Electronic technology
+NTES,"NetEase, Inc.",Technology services
+WBD,"Warner Bros. Discovery, Inc. - Series A",Consumer services
+NKE,"Nike, Inc.",Consumer non-durables
+DLR,"Digital Realty Trust, Inc.",Finance
+CIEN,Ciena Corporation,Electronic technology
+CL,Colgate-Palmolive Company,Consumer non-durables
+NET,"Cloudflare, Inc.",Technology services
+LHX,"L3Harris Technologies, Inc.",Electronic technology
+MPWR,"Monolithic Power Systems, Inc.",Electronic technology
+SPG,"Simon Property Group, Inc.",Finance
+APD,"Air Products and Chemicals, Inc.",Process industries
+MPC,Marathon Petroleum Corporation,Energy minerals
+RSG,"Republic Services, Inc.",Industrial services
+PCAR,PACCAR Inc.,Producer manufacturing
+TRV,"The Travelers Companies, Inc.",Finance
+PSX,Phillips 66,Energy minerals
+CRWV,"CoreWeave, Inc.",Technology services
+SRE,DBA Sempra,Utilities
+TFC,Truist Financial Corporation,Finance
+COR,"Cencora, Inc.",Distribution services
+BE,Bloom Energy Corporation,Electronic technology
+COHR,Coherent Corp.,Electronic technology
+O,Realty Income Corporation,Finance
+BKR,Baker Hughes Company,Industrial services
+FTNT,"Fortinet, Inc.",Technology services
+LITE,Lumentum Holdings Inc.,Producer manufacturing
+AFL,AFLAC Incorporated,Finance
+AJG,Arthur J. Gallagher & Co.,Finance
+TER,"Teradyne, Inc.",Electronic technology
+ALL,Allstate Corporation (The),Finance
+KEYS,Keysight Technologies Inc.,Electronic technology
+TGT,Target Corporation,Retail trade
+AU,AngloGold Ashanti PLC,Non-energy minerals
+VST,Vistra Corp.,Utilities
+OXY,Occidental Petroleum Corporation,Energy minerals
+D,"Dominion Energy, Inc.",Utilities
+CTVA,"Corteva, Inc.",Process industries
+LNG,"Cheniere Energy, Inc.",Industrial services
+PSA,Public Storage,Finance
+OKE,"ONEOK, Inc.",Industrial services
+NXPI,NXP Semiconductors N.V.,Electronic technology
+AME,"AMETEK, Inc.",Producer manufacturing
+ETR,Entergy Corporation,Utilities
+FANG,"Diamondback Energy, Inc.",Energy minerals
+COIN,"Coinbase Global, Inc.",Finance
+TRGP,"Targa Resources, Inc.",Utilities
+GRMN,Garmin Ltd.,Electronic technology
+FAST,Fastenal Company,Distribution services
+EA,Electronic Arts Inc.,Technology services
+F,Ford Motor Company,Consumer durables
+SE,Sea Limited,Retail trade
+MET,"MetLife, Inc.",Finance
+ADSK,"Autodesk, Inc.",Technology services
+NDAQ,"Nasdaq, Inc.",Finance
+FERG,Ferguson Enterprises Inc.,Distribution services
+SNOW,Snowflake Inc.,Technology services
+CAH,"Cardinal Health, Inc.",Distribution services
+MSTR,Strategy Inc,Technology services
+XEL,Xcel Energy Inc.,Utilities
+EXC,Exelon Corporation,Utilities
+CARR,Carrier Global Corporation,Producer manufacturing
+URI,"United Rentals, Inc.",Finance
+DAL,"Delta Air Lines, Inc.",Transportation
+CMG,"Chipotle Mexican Grill, Inc.",Consumer services
+PYPL,"PayPal Holdings, Inc.",Commercial services
+FITB,Fifth Third Bancorp,Finance
+EBAY,eBay Inc.,Retail trade
+YUM,"Yum! Brands, Inc.",Consumer services
+ROK,"Rockwell Automation, Inc.",Producer manufacturing
+WAB,Westinghouse Air Brake Technologies Corporation,Producer manufacturing
+RKT,"Rocket Companies, Inc.",Finance
+CBRE,CBRE Group Inc,Finance
+NUE,Nucor Corporation,Non-energy minerals
+CCEP,Coca-Cola Europacific Partners plc,Consumer non-durables
+ODFL,"Old Dominion Freight Line, Inc.",Transportation
+DDOG,"Datadog, Inc.",Technology services
+AMP,"Ameriprise Financial, Inc.",Finance
+RBLX,Roblox Corporation,Technology services
+NBIS,Nebius Group N.V.,Technology services
+RKLB,Rocket Lab Corporation,Electronic technology
+DHI,"D.R. Horton, Inc.",Consumer durables
+VTR,"Ventas, Inc.",Finance
+AIG,"American International Group, Inc. New",Finance
+MSCI,MSCI Inc.,Commercial services
+KR,Kroger Company (The),Retail trade
+XYZ,"Block, Inc.",Commercial services
+PEG,Public Service Enterprise Group Incorporated,Utilities
+MCHP,Microchip Technology Incorporated,Electronic technology
+CCL,Carnival Corporation,Consumer services
+ED,"Consolidated Edison, Inc.",Utilities
+STT,State Street Corporation,Finance
+TTWO,"Take-Two Interactive Software, Inc.",Technology services
+CPNG,"Coupang, Inc.",Retail trade
+HSY,The Hershey Company,Consumer non-durables
+HIG,"The Hartford Insurance Group, Inc.",Finance
+PCG,Pacific Gas & Electric Co.,Utilities
+JD,"JD.com, Inc.",Retail trade
+VMC,Vulcan Materials Company (Holding Company),Non-energy minerals
+SATS,EchoStar Corporation,Communications
+LVS,Las Vegas Sands Corp.,Consumer services
+CCI,Crown Castle Inc.,Finance
+TKO,"TKO Group Holdings, Inc.",Consumer services
+ROP,"Roper Technologies, Inc.",Technology services
+WEC,"WEC Energy Group, Inc.",Utilities
+LYV,"Live Nation Entertainment, Inc.",Consumer services
+VIK,Viking Holdings Ltd,Consumer services
+NRG,"NRG Energy, Inc.",Utilities
+QSR,Restaurant Brands International Inc.,Consumer services
+EQT,EQT Corporation,Energy minerals
+SYY,Sysco Corporation,Distribution services
+SYM,Symbotic Inc.,Producer manufacturing
+KDP,Keurig Dr Pepper Inc.,Consumer non-durables
+ACGL,Arch Capital Group Ltd.,Finance
+HEI,Heico Corporation,Electronic technology
+PRU,"Prudential Financial, Inc.",Finance
+IRM,Iron Mountain Incorporated (Delaware),Finance
+HBAN,Huntington Bancshares Incorporated,Finance
+ASTS,"AST SpaceMobile, Inc.",Communications
+KVUE,Kenvue Inc.,Consumer non-durables
+FISV,"Fiserv, Inc.",Commercial services
+HPE,Hewlett Packard Enterprise Company,Electronic technology
+IR,Ingersoll Rand Inc.,Producer manufacturing
+AMRZ,Amrize Ltd,Non-energy minerals
+MTB,M&T Bank Corporation,Finance
+PAYX,"Paychex, Inc.",Technology services
+AXON,"Axon Enterprise, Inc.",Electronic technology
+ADM,Archer-Daniels-Midland Company,Process industries
+JBL,Jabil Inc.,Producer manufacturing
+CPRT,"Copart, Inc.",Retail trade
+KMB,Kimberly-Clark Corporation,Consumer non-durables
+CBOE,"Cboe Global Markets, Inc.",Finance
+WDAY,"Workday, Inc.",Technology services
+EXPE,"Expedia Group, Inc.",Consumer services
+OTIS,Otis Worldwide Corporation,Industrial services
+HAL,Halliburton Company,Industrial services
+CHTR,"Charter Communications, Inc.",Consumer services
+CRDO,Credo Technology Group Holding Ltd,Technology services
+ATO,Atmos Energy Corporation,Utilities
+RJF,"Raymond James Financial, Inc.",Finance
+TPR,"Tapestry, Inc.",Retail trade
+AEE,Ameren Corporation,Utilities
+DTE,DTE Energy Company,Utilities
+UAL,"United Airlines Holdings, Inc.",Transportation
+XYL,Xylem Inc.,Producer manufacturing
+VICI,VICI Properties Inc.,Finance
+RDDT,"Reddit, Inc.",Technology services
+EXR,Extra Space Storage Inc,Finance
+PPL,PPL Corporation,Utilities
+ALAB,"Astera Labs, Inc.",Electronic technology
+FE,FirstEnergy Corp.,Utilities
+DOV,Dover Corporation,Producer manufacturing
+NTRS,Northern Trust Corporation,Finance
+CTSH,Cognizant Technology Solutions Corporation,Technology services
+FLEX,Flex Ltd.,Electronic technology
+FTI,TechnipFMC plc,Industrial services
+MTZ,"MasTec, Inc.",Industrial services
+TPL,Texas Pacific Land Corporation,Miscellaneous
+ON,ON Semiconductor Corporation,Electronic technology
+TW,Tradeweb Markets Inc.,Finance
+STZ,"Constellation Brands, Inc.",Consumer non-durables
+STLD,"Steel Dynamics, Inc.",Non-energy minerals
+DVN,Devon Energy Corporation,Energy minerals
+DOW,Dow Inc.,Process industries
+HUBB,Hubbell Inc,Producer manufacturing
+CNP,"CenterPoint Energy, Inc (Holding Co)",Utilities
+EL,"Estee Lauder Companies, Inc. (The)",Consumer non-durables
+CFG,"Citizens Financial Group, Inc.",Finance
+FTAI,FTAI Aviation Ltd.,Electronic technology
+Q,"Qnity Electronics, Inc.",Electronic technology
+WTW,Willis Towers Watson Public Limited Company,Finance
+EIX,Edison International,Utilities
+VEEV,Veeva Systems Inc.,Technology services
+CASY,"Caseys General Stores, Inc.",Retail trade
+GFS,GlobalFoundries Inc.,Electronic technology
+DG,Dollar General Corporation,Retail trade
+LPLA,LPL Financial Holdings Inc.,Finance
+SYF,Synchrony Financial,Finance
+ARES,Ares Management Corporation,Finance
+ZM,"Zoom Communications, Inc.",Technology services
+ROL,"Rollins, Inc.",Commercial services
+KHC,The Kraft Heinz Company,Consumer non-durables
+CRCL,"Circle Internet Group, Inc.",Technology services
+ES,Eversource Energy (D/B/A),Utilities
+FOX,Fox Corporation,Consumer services
+AWK,"American Water Works Company, Inc.",Utilities
+CINF,Cincinnati Financial Corporation,Finance
+VRSN,"VeriSign, Inc.",Technology services
+FIS,"Fidelity National Information Services, Inc.",Technology services
+WRB,W.R. Berkley Corporation,Finance
+XPO,"XPO, Inc.",Transportation
+AER,AerCap Holdings N.V.,Finance
+FN,Fabrinet,Electronic technology
+VRSK,"Verisk Analytics, Inc.",Technology services
+PPG,"PPG Industries, Inc.",Process industries
+TSEM,Tower Semiconductor Ltd.,Electronic technology
+CTRA,Coterra Energy Inc.,Energy minerals
+SOFI,"SoFi Technologies, Inc.",Finance
+AVB,"AvalonBay Communities, Inc.",Finance
+CMS,CMS Energy Corporation,Utilities
+RF,Regions Financial Corporation,Finance
+ULTA,"Ulta Beauty, Inc.",Retail trade
+LYB,LyondellBasell Industries NV,Process industries
+TSCO,Tractor Supply Company,Retail trade
+WWD,"Woodward, Inc.",Producer manufacturing
+BG,Bunge Limited,Process industries
+EQR,Equity Residential,Finance
+PHM,"PulteGroup, Inc.",Consumer durables
+KEY,KeyCorp,Finance
+EXE,Expand Energy Corporation,Energy minerals
+SBAC,SBA Communications Corporation,Finance
+WSM,"Williams-Sonoma, Inc.",Retail trade
+RGLD,"Royal Gold, Inc.",Non-energy minerals
+BRO,"Brown & Brown, Inc.",Finance
+DRI,"Darden Restaurants, Inc.",Consumer services
+L,Loews Corporation,Finance
+NI,NiSource Inc,Utilities
+VLTO,Veralto Corp,Producer manufacturing
+EFX,"Equifax, Inc.",Commercial services
+FUTU,Futu Holdings Limited,Finance
+CHD,"Church & Dwight Company, Inc.",Consumer non-durables
+RL,Ralph Lauren Corporation,Consumer non-durables
+OMC,Omnicom Group Inc.,Commercial services
+CPAY,"Corpay, Inc.",Commercial services
+TSN,"Tyson Foods, Inc.",Consumer non-durables
+ALB,Albemarle Corporation,Process industries
+BWXT,"BWX Technologies, Inc.",Electronic technology
+LEN,Lennar Corporation,Consumer durables
+SW,Smurfit WestRock plc,Process industries
+PSTG,"Everpure, Inc.",Electronic technology
+ATI,ATI Inc.,Non-energy minerals
+CRS,Carpenter Technology Corporation,Non-energy minerals
+BURL,"Burlington Stores, Inc.",Retail trade
+NVT,nVent Electric plc,Electronic technology
+JBHT,"J.B. Hunt Transport Services, Inc.",Transportation
+ZS,"Zscaler, Inc.",Technology services
+AS,"Amer Sports, Inc.",Consumer durables
+FSLR,"First Solar, Inc.",Electronic technology
+TROW,"T. Rowe Price Group, Inc.",Finance
+ENTG,"Entegris, Inc.",Producer manufacturing
+PFG,Principal Financial Group Inc,Finance
+LUV,Southwest Airlines Company,Transportation
+RIVN,"Rivian Automotive, Inc.",Consumer durables
+CDE,"Coeur Mining, Inc.",Non-energy minerals
+TWLO,Twilio Inc.,Technology services
+LDOS,"Leidos Holdings, Inc.",Technology services
+DLTR,"Dollar Tree, Inc.",Retail trade
+CHRW,"C.H. Robinson Worldwide, Inc.",Transportation
+USFD,US Foods Holding Corp.,Distribution services
+AFRM,"Affirm Holdings, Inc.",Finance
+NTAP,"NetApp, Inc.",Electronic technology
+LULU,lululemon athletica inc.,Consumer non-durables
+MDB,"MongoDB, Inc.",Technology services
+FLUT,Flutter Entertainment plc,Consumer services
+MTSI,"MACOM Technology Solutions Holdings, Inc.",Electronic technology
+APG,APi Group Corporation,Industrial services
+IP,International Paper Company,Process industries
+DKS,Dick's Sporting Goods Inc,Retail trade
+GPN,Global Payments Inc.,Commercial services
+EXPD,"Expeditors International of Washington, Inc.",Transportation
+JBS,JBS N.V.,Consumer non-durables
+DD,"DuPont de Nemours, Inc.",Process industries
+CG,The Carlyle Group Inc.,Finance
+EVRG,"Evergy, Inc.",Utilities
+BR,"Broadridge Financial Solutions, Inc.",Technology services
+AMCR,Amcor plc,Process industries
+LNT,Alliant Energy Corporation,Utilities
+AA,Alcoa Corporation,Non-energy minerals
+ITT,ITT Inc.,Producer manufacturing
+CF,"CF Industries Holdings, Inc.",Process industries
+PKG,Packaging Corporation of America,Process industries
+GIS,"General Mills, Inc.",Consumer non-durables
+FTV,Fortive Corporation,Electronic technology
+IFF,"International Flavors & Fragrances, Inc.",Consumer non-durables
+ULS,UL Solutions Inc.,Commercial services
+MKSI,MKS Inc.,Producer manufacturing
+WY,Weyerhaeuser Company,Finance
+HPQ,HP Inc.,Technology services
+TEAM,Atlassian Corporation,Technology services
+PR,Permian Resources Corporation,Energy minerals
+YUMC,"Yum China Holdings, Inc.",Consumer services
+SSNC,"SS&C Technologies Holdings, Inc.",Technology services
+SGI,Somnigroup International Inc.,Consumer durables
+WSO,"Watsco, Inc.",Producer manufacturing
+FFIV,"F5, Inc.",Technology services
+TPG,TPG Inc.,Finance
+LII,"Lennox International, Inc.",Producer manufacturing
+IOT,Samsara Inc.,Technology services
+BALL,Ball Corporation,Process industries
+VNOM,"Viper Energy, Inc.",Miscellaneous
+TOST,"Toast, Inc.",Technology services
+CDW,CDW Corporation,Technology services
+SNX,TD SYNNEX Corporation,Distribution services
+CSGP,"CoStar Group, Inc.",Technology services
+QXO,"QXO, Inc.",Distribution services
+NXT,Nextpower Inc.,Electronic technology
+SMCI,"Super Micro Computer, Inc.",Electronic technology
+SN,"SharkNinja, Inc.",Consumer durables
+PTC,PTC Inc.,Technology services
+ESS,"Essex Property Trust, Inc.",Finance
+IREN,IREN Limited,Technology services
+EWBC,"East West Bancorp, Inc.",Finance
+INVH,Invitation Homes Inc.,Finance
+ROKU,"Roku, Inc.",Technology services
+NLY,Annaly Capital Management Inc.,Finance
+GRAB,Grab Holdings Limited,Transportation
+TLN,Talen Energy Corporation,Utilities
+SUI,"Sun Communities, Inc.",Finance
+KIM,Kimco Realty Corporation (HC),Finance
+IONQ,"IonQ, Inc.",Electronic technology
+TXT,Textron Inc.,Electronic technology
+WPC,W. P. Carey Inc. REIT,Finance
+CLH,"Clean Harbors, Inc.",Industrial services
+TRMB,Trimble Inc.,Technology services
+OVV,Ovintiv Inc. (DE),Energy minerals
+DECK,Deckers Outdoor Corporation,Consumer non-durables
+H,Hyatt Hotels Corporation,Consumer services
+NIO,NIO Inc.,Consumer durables
+OWL,Blue Owl Capital Inc.,Finance
+GPC,Genuine Parts Company,Distribution services
+PAA,"Plains All American Pipeline, L.P.",Industrial services
+WMG,Warner Music Group Corp.,Commercial services
+J,Jacobs Solutions Inc.,Technology services
+WCC,"WESCO International, Inc.",Distribution services
+PAYP,PayPay Corporation - American Depository Shares,Commercial services
+LSCC,Lattice Semiconductor Corporation,Electronic technology
+IEX,IDEX Corporation,Producer manufacturing
+AMKR,"Amkor Technology, Inc.",Electronic technology
+MAA,"Mid-America Apartment Communities, Inc.",Finance
+NWS,News Corporation,Consumer services
+WLK,Westlake Corporation,Process industries
+REG,Regency Centers Corporation,Finance
+TRU,TransUnion,Commercial services
+HST,"Host Hotels & Resorts, Inc.",Finance
+TYL,"Tyler Technologies, Inc.",Technology services
+MKC,"McCormick & Company, Incorporated",Consumer non-durables
+PNR,Pentair plc.,Producer manufacturing
+AEIS,"Advanced Energy Industries, Inc.",Electronic technology
+PNFP,"Pinnacle Financial Partners, Inc.",Finance
+CPT,Camden Property Trust,Finance
+EVR,Evercore Inc.,Finance
+GGG,Graco Inc.,Producer manufacturing
+CHKP,Check Point Software Technologies Ltd.,Technology services
+LECO,"Lincoln Electric Holdings, Inc.",Producer manufacturing
+STRL,"Sterling Infrastructure, Inc.",Industrial services
+KTOS,"Kratos Defense & Security Solutions, Inc.",Electronic technology
+PFGC,Performance Food Group Company,Transportation
+CAR,"Avis Budget Group, Inc.",Finance
+BEN,"Franklin Resources, Inc.",Finance
+LAMR,Lamar Advertising Company,Finance
+RPM,RPM International Inc.,Process industries
+OHI,"Omega Healthcare Investors, Inc.",Finance
+DTM,"DT Midstream, Inc.",Industrial services
+MLI,"Mueller Industries, Inc.",Producer manufacturing
+AKAM,"Akamai Technologies, Inc.",Technology services
+TOL,"Toll Brothers, Inc.",Consumer durables
+BBY,"Best Buy Co., Inc.",Retail trade
+GLPI,"Gaming and Leisure Properties, Inc.",Finance
+HAS,"Hasbro, Inc.",Consumer durables
+CNH,CNH Industrial N.V.,Producer manufacturing
+NYT,New York Times Company (The),Consumer services
+FNF,"Fidelity National Financial, Inc.",Finance
+TIGO,Millicom International Cellular S.A.,Communications
+ALLY,Ally Financial Inc.,Finance
+PINS,"Pinterest, Inc.",Technology services
+RMBS,"Rambus, Inc.",Electronic technology
+PSKY,Paramount Skydance Corporation,Consumer services
+APA,APA Corporation,Energy minerals
+AVY,Avery Dennison Corporation,Process industries
+RRX,Regal Rexnord Corporation,Producer manufacturing
+ONTO,Onto Innovation Inc.,Electronic technology
+MAS,Masco Corporation,Producer manufacturing
+HL,Hecla Mining Company,Non-energy minerals
+UNM,Unum Group,Finance
+SF,Stifel Financial Corporation,Finance
+SOLS,Solstice Advanced Materials Inc.,Process industries
+MOD,Modine Manufacturing Company,Producer manufacturing
+ELS,"Equity Lifestyle Properties, Inc.",Finance
+COKE,"Coca-Cola Consolidated, Inc.",Consumer non-durables
+APTV,Aptiv PLC,Producer manufacturing
+CLX,Clorox Company (The),Consumer non-durables
+PNW,Pinnacle West Capital Corporation,Utilities
+DPZ,Domino's Pizza Inc,Consumer services
+FIVE,"Five Below, Inc.",Retail trade
+DRS,"Leonardo DRS, Inc.",Electronic technology
+KRMN,Karman Holdings Inc.,Electronic technology
+CRBG,Corebridge Financial Inc.,Finance
+ALLE,Allegion plc,Consumer durables
+TTMI,"TTM Technologies, Inc.",Electronic technology
+DOC,"Healthpeak Properties, Inc.",Finance
+GNRC,Generac Holdings Inc.,Producer manufacturing
+AGNC,AGNC Investment Corp.,Finance
+GEN,Gen Digital Inc.,Technology services
+OKTA,"Okta, Inc.",Technology services
+PL,Planet Labs PBC,Technology services
+DY,"Dycom Industries, Inc.",Industrial services
+EQH,"Equitable Holdings, Inc.",Finance
+CCK,"Crown Holdings, Inc.",Process industries
+BJ,"BJ's Wholesale Club Holdings, Inc.",Retail trade
+ONON,On Holding AG,Consumer non-durables
+DKNG,DraftKings Inc.,Consumer services
+GL,Globe Life Inc.,Finance
+WBS,Webster Financial Corporation,Finance
+JHX,James Hardie Industries plc.,Non-energy minerals
+GWRE,"Guidewire Software, Inc.",Technology services
+FHN,First Horizon Corporation,Finance
+UDR,"UDR, Inc.",Finance
+HUBS,"HubSpot, Inc.",Technology services
+ARMK,Aramark,Consumer services
+WMS,"Advanced Drainage Systems, Inc.",Producer manufacturing
+HRL,Hormel Foods Corporation,Consumer non-durables
+CHWY,"Chewy, Inc.",Retail trade
+ZBRA,Zebra Technologies Corporation,Electronic technology
+AR,Antero Resources Corporation,Energy minerals
+ACM,AECOM,Industrial services
+SCI,Service Corporation International,Consumer services
+HLI,"Houlihan Lokey, Inc.",Finance
+WYNN,"Wynn Resorts, Limited",Consumer services
+GME,GameStop Corporation,Retail trade
+JKHY,"Jack Henry & Associates, Inc.",Technology services
+SFD,"Smithfield Foods, Inc.",Consumer non-durables
+U,Unity Software Inc.,Technology services
+OKLO,Oklo Inc.,Producer manufacturing
+CR,Crane Company,Electronic technology
+GDDY,GoDaddy Inc.,Technology services
+IVZ,Invesco Ltd,Finance
+SPXC,"SPX Technologies, Inc.",Producer manufacturing
+XP,XP Inc.,Finance
+AMH,American Homes 4 Rent,Finance
+WTRG,"Essential Utilities, Inc.",Utilities
+BLD,TopBuild Corp.,Industrial services
+AFG,"American Financial Group, Inc.",Finance
+BWA,BorgWarner Inc.,Producer manufacturing
+TXRH,"Texas Roadhouse, Inc.",Consumer services
+IT,"Gartner, Inc.",Technology services
+AAOI,"Applied Optoelectronics, Inc.",Electronic technology
+TTD,"The Trade Desk, Inc.",Technology services
+FIG,FIGMA INC,Technology services
+SAIA,"Saia, Inc.",Transportation
+MP,MP Materials Corp.,Non-energy minerals
+DT,"Dynatrace, Inc.",Technology services
+DINO,HF Sinclair Corporation,Energy minerals
+ALSN,"Allison Transmission Holdings, Inc.",Producer manufacturing
+Z,"Zillow Group, Inc.",Technology services
+SWK,"Stanley Black & Decker, Inc.",Consumer durables
+RBRK,"Rubrik, Inc.",Technology services
+CNM,"Core & Main, Inc.",Distribution services
+GSAT,"Globalstar, Inc.",Communications
+AUR,"Aurora Innovation, Inc.",Technology services
+BSY,"Bentley Systems, Incorporated",Technology services
+AES,The AES Corporation,Utilities
+CAVA,"CAVA Group, Inc.",Consumer services
+DCI,"Donaldson Company, Inc.",Producer manufacturing
+SNAP,Snap Inc.,Technology services
+BMNR,"BitMine Immersion Technologies, Inc.",Finance
+NTNX,"Nutanix, Inc.",Technology services
+FORM,"FormFactor, Inc.",Electronic technology
+BILI,Bilibili Inc.,Technology services
+TEM,"Tempus AI, Inc.",Technology services
+W,Wayfair Inc.,Retail trade
+AM,Antero Midstream Corporation,Industrial services
+ORI,Old Republic International Corporation,Finance
+FLS,Flowserve Corporation,Producer manufacturing
+OGE,OGE Energy Corp,Utilities
+KNX,Knight-Swift Transportation Holdings Inc.,Transportation
+VFS,VinFast Auto Ltd.,Consumer durables
+SJM,The J.M. Smucker Company,Consumer non-durables
+GTLS,"Chart Industries, Inc.",Producer manufacturing
+CART,Maplebear Inc.,Transportation
+BAH,Booz Allen Hamilton Holding Corporation,Commercial services
+AVAV,"AeroVironment, Inc.",Electronic technology
+MGM,MGM Resorts International,Consumer services
+SEIC,SEI Investments Company,Finance
+RRC,Range Resources Corporation,Energy minerals
+NCLH,Norwegian Cruise Line Holdings Ltd.,Consumer services
+SSB,SouthState Bank Corporation,Finance
+RYAN,"Ryan Specialty Holdings, Inc.",Finance
+JEF,Jefferies Financial Group Inc.,Finance
+FRT,Federal Realty Investment Trust,Finance
+GAP,"Gap, Inc. (The)",Retail trade
+BPOP,"Popular, Inc.",Finance
+BLDR,"Builders FirstSource, Inc.",Retail trade
+OC,Owens Corning Inc,Process industries
+GLXY,Galaxy Digital Inc.,Finance
+EDU,"New Oriental Education & Technology Group, Inc. Sponsored",Consumer services
+ADC,Agree Realty Corporation,Finance
+AHR,"American Healthcare REIT, Inc.",Finance
+DAR,Darling Ingredients Inc.,Consumer non-durables
+BRX,Brixmor Property Group Inc.,Finance
+ZION,Zions Bancorporation N.A.,Finance
+ESI,Element Solutions Inc.,Process industries
+UMBF,UMB Financial Corporation,Finance
+CGNX,Cognex Corporation,Electronic technology
+DOCU,"DocuSign, Inc.",Technology services
+ONB,Old National Bancorp,Finance
+VIAV,Viavi Solutions Inc.,Technology services
+CELH,"Celsius Holdings, Inc.",Consumer non-durables
+SARO,"StandardAero, Inc.",Transportation
+CUBE,CubeSmart,Finance
+TTC,Toro Company (The),Producer manufacturing
+CHYM,"Chime Financial, Inc.",Finance
+CFR,"Cullen/Frost Bankers, Inc.",Finance
+JOBY,"Joby Aviation, Inc.",Electronic technology
+ICLR,ICON plc,Commercial services
+CRL,"Charles River Laboratories International, Inc.",Commercial services
+HSIC,"Henry Schein, Inc.",Distribution services
+LUMN,"Lumen Technologies, Inc.",Communications
+PRIM,Primoris Services Corporation,Industrial services
+VICR,Vicor Corporation,Electronic technology
+TAP,Molson Coors Beverage Company,Consumer non-durables
+APLD,Applied Digital Corporation,Technology services
+AUGO,Aura Minerals Inc.,Non-energy minerals
+CTRE,"CareTrust REIT, Inc.",Finance
+OSK,Oshkosh Corporation (Holding Company),Consumer durables
+AOS,A.O. Smith Corporation,Producer manufacturing
+BXP,"BXP, Inc.",Finance
+SWKS,"Skyworks Solutions, Inc.",Electronic technology
+YMM,Full Truck Alliance Co. Ltd.,Technology services
+SMTC,Semtech Corporation,Electronic technology
+ARW,"Arrow Electronics, Inc.",Distribution services
+WAL,Western Alliance Bancorporation,Finance
+COLB,"Columbia Banking System, Inc.",Finance
+ACI,"Albertsons Companies, Inc.",Retail trade
+BROS,Dutch Bros Inc.,Consumer services
+NFG,National Fuel Gas Company,Energy minerals
+AYI,Acuity Inc.,Producer manufacturing
+SANM,Sanmina Corporation,Electronic technology
+FDS,FactSet Research Systems Inc.,Commercial services
+NNN,"NNN REIT, Inc.",Finance
+POWL,"Powell Industries, Inc.",Producer manufacturing
+FR,"First Industrial Realty Trust, Inc.",Finance
+AGCO,AGCO Corporation,Producer manufacturing
+WULF,TeraWulf Inc.,Technology services
+EMN,Eastman Chemical Company,Process industries
+POOL,Pool Corporation,Distribution services
+ATR,"AptarGroup, Inc.",Process industries
+CWEN,"Clearway Energy, Inc.",Utilities
+TTEK,"Tetra Tech, Inc.",Industrial services
+REXR,"Rexford Industrial Realty, Inc.",Finance
+ALV,"Autoliv, Inc.",Producer manufacturing
+LINE,"Lineage, Inc.",Finance
+VSAT,"ViaSat, Inc.",Electronic technology
+SIRI,SiriusXM Holdings Inc.,Consumer services
+SNEX,StoneX Group Inc.,Finance
+CRUS,"Cirrus Logic, Inc.",Electronic technology
+IDA,"IDACORP, Inc.",Utilities
+AAL,"American Airlines Group, Inc.",Transportation
+MTCH,"Match Group, Inc.",Technology services
+PPC,Pilgrim's Pride Corporation,Process industries
+UGI,UGI Corporation,Distribution services
+DOCN,"DigitalOcean Holdings, Inc.",Technology services
+JHG,Janus Henderson Group plc,Finance
+ZWS,Zurn Elkay Water Solutions Corporation,Producer manufacturing
+HUT,Hut 8 Corp.,Technology services
+ARE,"Alexandria Real Estate Equities, Inc.",Finance
+PCOR,"Procore Technologies, Inc.",Technology services
+VIRT,"Virtu Financial, Inc.",Finance
+LKQ,LKQ Corporation,Consumer durables
+HESM,Hess Midstream LP,Energy minerals
+MANH,"Manhattan Associates, Inc.",Technology services
+QBTS,D-Wave Quantum Inc.,Electronic technology
+VFC,V.F. Corporation,Consumer non-durables
+FIGR,"Figure Technology Solutions, Inc.",Finance
+KEX,Kirby Corporation,Transportation
+KNTK,Kinetik Holdings Inc.,Industrial services
+AAON,"AAON, Inc.",Producer manufacturing
+JXN,Jackson Financial Inc.,Finance
+NE,Noble Corporation plc A,Industrial services
+MOS,Mosaic Company (The),Process industries
+QRVO,"Qorvo, Inc.",Electronic technology
+LGN,Legence Corp.,Industrial services
+AXS,Axis Capital Holdings Limited,Finance
+CBSH,"Commerce Bancshares, Inc.",Finance
+STAG,"Stag Industrial, Inc.",Finance
+CHRD,Chord Energy Corporation,Energy minerals
+VIPS,Vipshop Holdings Limited,Retail trade
+CDP,COPT Defense Properties,Finance
+VLY,Valley National Bancorp,Finance
+CIFR,Cipher Digital Inc.,Technology services
+UEC,Uranium Energy Corp.,Non-energy minerals
+CE,Celanese Corporation,Process industries
+TKR,Timken Company (The),Producer manufacturing
+PEGA,Pegasystems Inc.,Technology services
+CMC,Commercial Metals Company,Non-energy minerals
+PRMB,Primo Brands Corporation,Consumer non-durables
+WFRD,Weatherford International plc,Industrial services
+CWAN,"Clearwater Analytics Holdings, Inc.",Technology services
+MORN,"Morningstar, Inc.",Commercial services
+INGR,Ingredion Incorporated,Consumer non-durables
+MTDR,Matador Resources Company,Energy minerals
+SFM,"Sprouts Farmers Market, Inc.",Retail trade
+HQY,"HealthEquity, Inc.",Finance
+TAL,TAL Education Group,Commercial services
+DOX,Amdocs Limited,Technology services
+PB,"Prosperity Bancshares, Inc.",Finance
+TRNO,Terreno Realty Corporation,Finance
+FLR,Fluor Corporation,Industrial services
+BIRK,Birkenstock Holding plc,Consumer non-durables
+ORA,"Ormat Technologies, Inc.",Utilities
+ALGM,"Allegro MicroSystems, Inc.",Electronic technology
+FSS,Federal Signal Corporation,Consumer durables
+NOV,NOV Inc.,Industrial services
+EAT,"Brinker International, Inc.",Consumer services
+LNC,Lincoln National Corporation,Finance
+YOU,"Clear Secure, Inc.",Technology services
+VOYA,"Voya Financial, Inc.",Finance
+RIG,Transocean Ltd (Switzerland),Industrial services
+EPRT,"Essential Properties Realty Trust, Inc.",Finance
+MWH,"SOLV Energy, Inc.",Industrial services
+EPAM,"EPAM Systems, Inc.",Technology services
+OMF,"OneMain Holdings, Inc.",Finance
+CAG,"ConAgra Brands, Inc.",Consumer non-durables
+AMTM,"Amentum Holdings, Inc.",Electronic technology
+PAYC,"Paycom Software, Inc.",Technology services
+STWD,Starwood Property Trust Inc.,Finance
+TEX,Terex Corporation,Producer manufacturing
+SAIL,"SailPoint, Inc.",Technology services
+RIOT,"Riot Platforms, Inc.",Technology services
+SWX,"Southwest Gas Holdings, Inc.",Utilities
+MIDD,The Middleby Corporation,Producer manufacturing
+WH,"Wyndham Hotels & Resorts, Inc.",Consumer services
+ECG,"Everus Construction Group, Inc.",Industrial services
+INGM,Ingram Micro Holding Corporation,Technology services
+FAF,First American Corporation (New),Finance
+SM,SM Energy Company,Energy minerals
+STEP,StepStone Group Inc.,Finance
+MBLY,Mobileye Global Inc.,Technology services
+BYD,Boyd Gaming Corporation,Consumer services
+RYN,Rayonier Inc. REIT,Finance
+BZ,KANZHUN LIMITED - American Depository Shares,Commercial services
+TXNM,"TXNM Energy, Inc.",Utilities
+RHP,"Ryman Hospitality Properties, Inc. (REIT)",Finance
+CHDN,"Churchill Downs, Incorporated",Consumer services
+GXO,"GXO Logistics, Inc.",Transportation
+MHK,"Mohawk Industries, Inc.",Producer manufacturing
+SSRM,SSR Mining Inc.,Non-energy minerals
+AROC,"Archrock, Inc.",Industrial services
+FNB,F.N.B. Corporation,Finance
+BEPC,Brookfield Renewable Corporation,Utilities
+RGTI,"Rigetti Computing, Inc.",Electronic technology
+VAL,Valaris Limited,Industrial services
+CENX,Century Aluminum Company,Non-energy minerals
+GTES,Gates Industrial Corporation plc,Producer manufacturing
+HXL,Hexcel Corporation,Electronic technology
+PIPR,Piper Sandler Companies,Finance
+ROAD,"Construction Partners, Inc.",Industrial services
+VSEC,VSE Corporation,Industrial services
+BLSH,Bullish,Technology services
+HR,Healthcare Realty Trust Incorporated,Finance
+GBCI,"Glacier Bancorp, Inc.",Finance
+EXP,Eagle Materials Inc,Non-energy minerals
+ESAB,ESAB Corporation,Producer manufacturing
+LTH,"Life Time Group Holdings, Inc.",Consumer services
+G,Genpact Limited,Commercial services
+LOAR,Loar Holdings Inc.,Electronic technology
+SITE,"SiteOne Landscape Supply, Inc.",Distribution services
+CPB,The Campbell's Company,Consumer non-durables
+UWMC,UWM Holdings Corporation,Finance
+POR,Portland General Electric Co,Utilities
+UBSI,"United Bankshares, Inc.",Finance
+PSN,Parsons Corporation,Technology services
+LEA,Lear Corporation,Producer manufacturing
+CORZ,"Core Scientific, Inc.",Technology services
+REZI,"Resideo Technologies, Inc.",Distribution services
+DLB,Dolby Laboratories,Technology services
+FLY,Firefly Aerospace Inc.,Electronic technology
+AXTA,Axalta Coating Systems Ltd.,Process industries
+CBC,"Central Bancompany, Inc.",Finance
+NXST,"Nexstar Media Group, Inc.",Consumer services
+LW,"Lamb Weston Holdings, Inc.",Consumer non-durables
+WEX,WEX Inc.,Commercial services
+RRR,"Red Rock Resorts, Inc.",Consumer services
+TTAN,"ServiceTitan, Inc.",Technology services
+VSNT,"Versant Media Group, Inc.",Consumer services
+FLG,"Flagstar Bank, N.A.",Finance
+HLNE,Hamilton Lane Incorporated,Finance
+MTG,MGIC Investment Corporation,Finance
+URBN,"Urban Outfitters, Inc.",Retail trade
+LYFT,"Lyft, Inc.",Transportation
+BKH,Black Hills Corporation,Utilities
+OLLI,"Ollie's Bargain Outlet Holdings, Inc.",Retail trade
+CRC,California Resources Corporation,Energy minerals
+FND,"Floor & Decor Holdings, Inc.",Retail trade
+AVT,"Avnet, Inc.",Distribution services
+KMX,CarMax Inc,Retail trade
+PLNT,"Planet Fitness, Inc.",Consumer services
+ESNT,Essent Group Ltd.,Finance
+OTF,Blue Owl Technology Finance Corp.,Finance
+NSA,National Storage Affiliates Trust,Finance
+DBX,"Dropbox, Inc.",Technology services
+ST,Sensata Technologies Holding plc,Electronic technology
+GLBE,Global-E Online Ltd.,Retail trade
+NJR,NewJersey Resources Corporation,Utilities
+SGHC,Super Group (SGHC) Limited,Consumer services
+RITM,Rithm Capital Corp.,Finance
+ABCB,Ameris Bancorp,Finance
+KLAR,Klarna Group plc,Commercial services
+KVYO,"Klaviyo, Inc. Series A",Technology services
+HOMB,"Home BancShares, Inc.",Finance
+CNX,CNX Resources Corporation,Energy minerals
+ETSY,"Etsy, Inc.",Retail trade
+TMHC,Taylor Morrison Home Corporation,Consumer durables
+OGS,"ONE Gas, Inc.",Utilities
+PATH,"UiPath, Inc.",Technology services
+CZR,"Caesars Entertainment, Inc.",Consumer services
+HIMS,"Hims & Hers Health, Inc.",Health services
+BGC,"BGC Group, Inc.",Finance
+CLF,Cleveland-Cliffs Inc.,Non-energy minerals
+MAC,Macerich Company (The),Finance
+MUR,Murphy Oil Corporation,Energy minerals
+COMP,"Compass, Inc.",Finance
+GVA,Granite Construction Incorporated,Industrial services
+GLNG,Golar LNG Limited,Industrial services
+HWC,Hancock Whitney Corporation,Finance
+SON,Sonoco Products Company,Process industries
+AUB,Atlantic Union Bankshares Corporation,Finance
+KGS,"Kodiak Gas Services, Inc.",Industrial services
+OZK,Bank OZK,Finance
+PCTY,Paylocity Holding Corporation,Technology services
+MGY,Magnolia Oil & Gas Corporation,Energy minerals
+SRAD,Sportradar Group AG,Technology services
+AX,"Axos Financial, Inc.",Finance
+RLI,RLI Corp.,Finance
+CHH,"Choice Hotels International, Inc.",Consumer services
+ADT,ADT Inc.,Commercial services
+PECO,"Phillips Edison & Company, Inc.",Finance
+VNO,Vornado Realty Trust,Finance
+EQPT,EquipmentShare.com Inc,Technology services
+MC,Moelis & Company,Finance
+KRG,Kite Realty Group Trust,Finance
+RSI,"Rush Street Interactive, Inc.",Consumer services
+MSM,"MSC Industrial Direct Company, Inc.",Distribution services
+WING,Wingstop Inc.,Consumer services
+MAIN,Main Street Capital Corporation,Finance
+FROG,JFrog Ltd.,Technology services
+CWST,"Casella Waste Systems, Inc.",Industrial services
+LUNR,"Intuitive Machines, Inc.",Electronic technology
+HASI,"HA Sustainable Infrastructure Capital, Inc.",Finance
+ATAT,Atour Lifestyle Holdings Limited,Consumer services
+LPX,Louisiana-Pacific Corporation,Non-energy minerals
+VNT,Vontier Corporation,Transportation
+CROX,"Crocs, Inc.",Consumer non-durables
+MRCY,Mercury Systems Inc,Electronic technology
+SBRA,"Sabra Health Care REIT, Inc.",Finance
+OUT,OUTFRONT Media Inc.,Finance
+RAL,Ralliant Corporation,Electronic technology
+KC,Kingsoft Cloud Holdings Limited,Technology services
+BIPC,Brookfield Infrastructure Corporation,Utilities
+ATMU,Atmus Filtration Technologies Inc.,Producer manufacturing
+M,Macy's Inc,Retail trade
+YSS,York Space Systems Inc.,Electronic technology
+LMND,"Lemonade, Inc.",Finance
+BC,Brunswick Corporation,Producer manufacturing
+IEP,Icahn Enterprises L.P.,Energy minerals
+CPA,"Copa Holdings, S.A.",Transportation
+MIR,"Mirion Technologies, Inc.",Electronic technology
+ALH,Alliance Laundry Holdings Inc.,Producer manufacturing
+ESTC,Elastic N.V.,Technology services
+FOUR,"Shift4 Payments, Inc.",Commercial services
+TNL,Travel Leisure Co.,Consumer services
+EXLS,"ExlService Holdings, Inc.",Technology services
+ALK,"Alaska Air Group, Inc.",Transportation
+ZGN,Ermenegildo Zegna N.V.,Consumer non-durables
+SIGI,"Selective Insurance Group, Inc.",Finance
+EBC,"Eastern Bankshares, Inc.",Finance
+KNF,Knife Riv Holding Co.,Non-energy minerals
+BOOT,"Boot Barn Holdings, Inc.",Retail trade
+SNDR,"Schneider National, Inc.",Transportation
+PFSI,"PennyMac Financial Services, Inc.",Finance
+CRK,"Comstock Resources, Inc.",Energy minerals
+GPGI,"GPGI, Inc.",Commercial services
+POST,"Post Holdings, Inc.",Consumer non-durables
+PBF,PBF Energy Inc.,Energy minerals
+MRP,"Millrose Properties, Inc.",Finance
+TDS,"Telephone and Data Systems, Inc.",Communications
+WAY,Waystar Holding Corp.,Technology services
+LAUR,"Laureate Education, Inc.",Commercial services
+RDN,Radian Group Inc.,Finance
+SPHR,Sphere Entertainment Co.,Consumer services
+ONDS,Ondas Inc,Electronic technology
+VCTR,"Victory Capital Holdings, Inc. Class A Common Stock",Finance
+GNTX,Gentex Corporation,Producer manufacturing
+HCC,"Warrior Met Coal, Inc.",Energy minerals
+OLED,Universal Display Corporation,Electronic technology
+KBR,"KBR, Inc.",Technology services
+DUOL,"Duolingo, Inc.",Technology services
+FBIN,"Fortune Brands Innovations, Inc.",Producer manufacturing
+BFAM,Bright Horizons Family Solutions Inc.,Commercial services
+LAZ,"Lazard, Inc.",Finance
+OPEN,Opendoor Technologies Inc,Finance
+PAGP,"Plains GP Holdings, L.P.",Industrial services
+ASB,Associated Banc-Corp,Finance
+MTN,"Vail Resorts, Inc.",Consumer services
+MWA,MUELLER WATER PRODUCTS,Producer manufacturing
+REYN,Reynolds Consumer Products Inc.,Consumer non-durables
+TPC,Tutor Perini Corporation,Industrial services
+CNR,"Core Natural Resources, Inc.",Energy minerals
+SEI,"Solaris Energy Infrastructure, Inc.",Technology services
+S,"SentinelOne, Inc.",Technology services
+ACHR,Archer Aviation Inc.,Electronic technology
+NWE,"NorthWestern Energy Group, Inc.",Utilities
+LBRT,Liberty Energy Inc.,Industrial services
+MAT,"Mattel, Inc.",Consumer durables
+MDU,"MDU Resources Group, Inc.",Utilities
+BCO,Brinks Company (The),Commercial services
+FFIN,"First Financial Bankshares, Inc.",Finance
+MMYT,MakeMyTrip Limited,Technology services
+IBOC,International Bancshares Corporation,Finance
+SIMO,Silicon Motion Technology Corporation,Electronic technology
+DOCS,"Doximity, Inc.",Technology services
+FHI,"Federated Hermes, Inc.",Finance
+QS,QuantumScape Corporation,Producer manufacturing
+NG,Novagold Resources Inc.,Non-energy minerals
+MTH,Meritage Homes Corporation,Finance
+ITRI,"Itron, Inc.",Electronic technology
+ACIW,"ACI Worldwide, Inc.",Technology services
+SHAK,"Shake Shack, Inc.",Consumer services
+EPR,EPR Properties,Finance
+FTDR,"Frontdoor, Inc.",Consumer durables
+SLGN,Silgan Holdings Inc.,Process industries
+WHD,"Cactus, Inc. Class A Common Stock",Industrial services
+VISN,"Vistance Networks, Inc.",Electronic technology
+TREX,"Trex Company, Inc.",Non-energy minerals
+SLM,SLM Corporation,Finance
+ZETA,Zeta Global Holdings Corp.,Technology services
+ENPH,"Enphase Energy, Inc.",Electronic technology
+VVV,Valvoline Inc.,Consumer services
+SKT,Tanger Inc.,Finance
+BETA,"Beta Technologies, Inc.",Electronic technology
+SKY,"Champion Homes, Inc.",Consumer durables
+FULT,Fulton Financial Corporation,Finance
+KLIC,"Kulicke and Soffa Industries, Inc.",Producer manufacturing
+SAIC,Science Applications International Corporation,Technology services
+TDW,Tidewater Inc.,Transportation
+DIOD,Diodes Incorporated,Electronic technology
+ELF,"e.l.f. Beauty, Inc.",Consumer non-durables
+TBBB,BBB Foods Inc.,Retail trade
+LBTYA,Liberty Global Ltd.,Communications
+ANF,Abercrombie & Fitch Company,Retail trade
+TFSL,TFS Financial Corporation,Finance
+CVLT,"Commvault Systems, Inc.",Technology services
+OSCR,"Oscar Health, Inc.",Health services
+PLUG,"Plug Power, Inc.",Electronic technology
+CNO,"CNO Financial Group, Inc.",Finance
+PRM,"Perimeter Solutions, SA",Process industries
+MIAX,"Miami International Holdings, Inc.",Finance
+STNE,StoneCo Ltd.,Commercial services
+THO,"Thor Industries, Inc.",Consumer durables
+CSTM,Constellium SE,Non-energy minerals
+CRGY,Crescent Energy Company,Energy minerals
+LRN,"Stride, Inc.",Consumer services
+USAR,"USA Rare Earth, Inc.",Producer manufacturing
+PVH,PVH Corp.,Consumer non-durables
+UCB,"United Community Banks, Inc.",Finance
+DLO,DLocal Limited,Technology services
+VSCO,Victorias Secret & Co.,Retail trade
+IRDM,Iridium Communications Inc,Communications
+MARA,"MARA Holdings, Inc.",Technology services
+TPH,"Tri Pointe Homes, Inc.",Consumer durables
+KTB,"Kontoor Brands, Inc.",Consumer non-durables
+RELY,"Remitly Global, Inc.",Commercial services
+SMR,NuScale Power Corporation,Producer manufacturing
+HRB,"H&R Block, Inc.",Consumer services
+NAMS,NewAmsterdam Pharma Company N.V.,Commercial services
+BILL,"BILL Holdings, Inc.",Technology services
+LEU,Centrus Energy Corp.,Non-energy minerals
+NTSK,"Netskope, Inc.",Technology services
+DAN,Dana Incorporated,Producer manufacturing
+WIX,Wix.com Ltd.,Technology services
+CUZ,Cousins Properties Incorporated,Finance
+HGV,Hilton Grand Vacations Inc.,Finance
+BNL,"Broadstone Net Lease, Inc.",Finance
+STNG,Scorpio Tankers Inc.,Transportation
+ASO,"Academy Sports and Outdoors, Inc.",Retail trade
+MRX,Marex Group plc,Technology services
+IRT,"Independence Realty Trust, Inc.",Finance
+MMS,"Maximus, Inc.",Commercial services
+PTEN,"Patterson-UTI Energy, Inc.",Industrial services
+RNST,Renasant Corporation,Finance
+SIG,Signet Jewelers Limited,Retail trade
+LASR,"nLIGHT, Inc.",Electronic technology
+GTLB,GitLab Inc.,Technology services
+INTR,Inter & Co. Inc.,Finance
+INSW,"International Seaways, Inc.",Transportation
+FRMI,Fermi Inc.,Finance
+HYMC,Hycroft Mining Holding Corporation,Non-energy minerals
+SMG,Scotts Miracle-Gro Company (The),Process industries
+ACLS,"Axcelis Technologies, Inc.",Producer manufacturing
+NAVN,"Navan, Inc.",Technology services
+WHR,Whirlpool Corporation,Consumer durables
+GTX,Garrett Motion Inc.,Producer manufacturing
+BBWI,"Bath & Body Works, Inc.",Retail trade
+FG,"F&G Annuities & Life, Inc.",Finance
+BFH,"Bread Financial Holdings, Inc.",Finance
+OII,"Oceaneering International, Inc.",Producer manufacturing
+FBP,First BanCorp. New,Finance
+CALM,"Cal-Maine Foods, Inc.",Process industries
+BHF,"Brighthouse Financial, Inc.",Finance
+FSLY,"Fastly, Inc.",Technology services
+GBDC,"Golub Capital BDC, Inc.",Finance
+COLD,"Americold Realty Trust, Inc.",Finance
+AXTI,AXT Inc,Electronic technology
+KRC,Kilroy Realty Corporation,Finance
+BKU,"BankUnited, Inc.",Finance
+MCHB,Mechanics Bancorp,Finance
+WSBC,"WesBanco, Inc.",Finance
+UCTT,"Ultra Clean Holdings, Inc.",Producer manufacturing
+CC,Chemours Company (The),Process industries
+CNK,"Cinemark Holdings, Inc.",Consumer services
+WSC,WillScot Holdings Corporation,Finance
+HP,"Helmerich & Payne, Inc.",Industrial services
+FIBK,"First Interstate BancSystem, Inc.",Finance
+AVNT,Avient Corporation,Process industries
+BULL,Webull Corporation,Technology services
+AAP,Advance Auto Parts Inc.,Retail trade
+LIF,"Life360, Inc.",Technology services
+BTU,Peabody Energy Corporation,Energy minerals
+CARG,"CarGurus, Inc.",Technology services
+AVA,Avista Corporation,Utilities
+FRPT,"Freshpet, Inc.",Consumer non-durables
+BXMT,"Blackstone Mortgage Trust, Inc.",Finance
+EXPO,"Exponent, Inc.",Industrial services
+GNW,Genworth Financial Inc,Finance
+HRI,Herc Holdings Inc.,Finance
+MNDY,monday.com Ltd.,Technology services
+FUL,H. B. Fuller Company,Process industries
+KFY,Korn Ferry,Commercial services
+CTRI,"Centuri Holdings, Inc.",Utilities
+SOUN,"SoundHound AI, Inc.",Technology services
+PAGS,PagSeguro Digital Ltd.,Commercial services
+PATK,"Patrick Industries, Inc.",Consumer durables
+BOX,"Box, Inc.",Technology services
+NATL,NCR Atleos Corporation,Electronic technology
+ACMR,"ACM Research, Inc.",Producer manufacturing
+OPLN,"OPENLANE, Inc.",Technology services
+UPST,"Upstart Holdings, Inc.",Finance
+HNGE,"Hinge Health, Inc.",Technology services
+BWIN,"The Baldwin Insurance Group, Inc.",Finance
+RNG,"RingCentral, Inc.",Technology services
+FHB,"First Hawaiian, Inc.",Finance
+IAC,IAC Inc.,Technology services
+AEO,"American Eagle Outfitters, Inc.",Retail trade
+KBH,KB Home,Consumer durables
+VSH,"Vishay Intertechnology, Inc.",Electronic technology
+CWK,Cushman & Wakefield Ltd.,Finance
+WK,Workiva Inc.,Technology services
+NIQ,NIQ Global Intelligence plc,Technology services
+CVI,CVR Energy Inc.,Energy minerals
+HAYW,"Hayward Holdings, Inc.",Consumer durables
+CALX,"Calix, Inc",Electronic technology
+OLN,Olin Corporation,Process industries
+SBCF,Seacoast Banking Corporation of Florida,Finance
+CCC,CCC Intelligent Solutions Holdings Inc.,Technology services
+QTWO,"Q2 Holdings, Inc.",Technology services
+CLBT,Cellebrite DI Ltd.,Technology services
+DAVE,Dave Inc.,Finance
+KD,"Kyndryl Holdings, Inc.",Technology services
+LION,Lionsgate Studios Corp,Consumer services
+SLG,SL Green Realty Corp,Finance
+PARR,"Par Pacific Holdings, Inc. Common Stock",Energy minerals
+ARX,Accelerant Holdings,Finance
+CAKE,The Cheesecake Factory Incorporated,Consumer services
+GBTG,"Global Business Travel Group, Inc.",Consumer services
+POWI,"Power Integrations, Inc.",Electronic technology
+FFBC,First Financial Bancorp.,Finance
+BTDR,Bitdeer Technologies Group,Technology services
+QLYS,"Qualys, Inc.",Technology services
+APAM,Artisan Partners Asset Management Inc.,Finance
+COLM,Columbia Sportswear Company,Consumer non-durables
+SYNA,Synaptics Incorporated,Electronic technology
+MPT,"Medical Properties Trust, Inc.",Finance
+APLE,"Apple Hospitality REIT, Inc.",Finance
+DBD,Diebold Nixdorf Incorporated,Electronic technology
+ADEA,Adeia Inc.,Technology services
+SFNC,Simmons First National Corporation,Finance
+ETOR,eToro Group Ltd.,Technology services
+BANC,"Banc of California, Inc.",Finance
+LXP,LXP Industrial Trust,Finance
+DBRG,"DigitalBridge Group, Inc.",Finance
+NMRK,"Newmark Group, Inc.",Finance
+YETI,"YETI Holdings, Inc.",Producer manufacturing
+LCII,LCI Industries,Producer manufacturing
+PFS,"Provident Financial Services, Inc",Finance
+KMT,Kennametal Inc.,Producer manufacturing
+PRVA,"Privia Health Group, Inc.",Finance
+EEFT,"Euronet Worldwide, Inc.",Commercial services
+WRBY,Warby Parker Inc.,Retail trade
+CURB,Curbline Properties Corp.,Finance
+CLSK,"CleanSpark, Inc.",Technology services
+WU,Western Union Company (The),Finance
+BKV,BKV Corporation,Energy minerals
+GPK,Graphic Packaging Holding Company,Process industries
+SDRL,Seadrill Limited,Industrial services
+UNFI,"United Natural Foods, Inc.",Distribution services
+DHT,"DHT Holdings, Inc.",Transportation
+COCO,"The Vita Coco Company, Inc.",Consumer non-durables
+RUN,Sunrun Inc.,Electronic technology
+DJT,Trump Media & Technology Group Corp.,Commercial services
+SBLK,Star Bulk Carriers Corp.,Transportation
+SHOO,"Steven Madden, Ltd.",Consumer non-durables
+FLNC,"Fluence Energy, Inc.",Producer manufacturing
+RHI,Robert Half Inc.,Commercial services
+CLMT,"Calumet, Inc",Energy minerals
+CVBF,CVB Financial Corporation,Finance
+AKR,Acadia Realty Trust,Finance
+DX,"Dynex Capital, Inc.",Finance
+KYIV,Kyivstar Group Ltd.,Finance
+FCPT,"Four Corners Property Trust, Inc.",Finance
+ATRO,Astronics Corporation,Electronic technology
+VRNS,"Varonis Systems, Inc.",Technology services
+BKE,"Buckle, Inc. (The)",Retail trade
+RXO,"RXO, Inc.",Technology services
+PII,Polaris Inc.,Consumer durables
+PLAB,"Photronics, Inc.",Electronic technology
+NOG,"Northern Oil and Gas, Inc.",Energy minerals
+LCID,"Lucid Group, Inc.",Consumer durables
+UE,Urban Edge Properties,Finance
+TRN,"Trinity Industries, Inc.",Producer manufacturing
+SPNT,SiriusPoint Ltd.,Finance
+UA,"Under Armour, Inc.",Consumer non-durables
+BBT,Beacon Financial Corporation,Finance
+RLX,RLX Technology Inc.,Producer manufacturing
+CXT,"Crane NXT, Co.",Producer manufacturing
+CHEF,"The Chefs' Warehouse, Inc.",Distribution services
+HE,"Hawaiian Electric Industries, Inc.",Utilities
+UNIT,Uniti Group Inc.,Finance
+TNK,Teekay Tankers Ltd.,Transportation
+BRZE,"Braze, Inc.",Technology services
+VECO,Veeco Instruments Inc.,Electronic technology
+CALY,Callaway Golf Company,Consumer durables
+FIGS,"FIGS, Inc.",Consumer non-durables
+HNI,HNI Corporation,Producer manufacturing
+HOG,"Harley-Davidson, Inc.",Consumer durables
+ASH,Ashland Inc.,Consumer non-durables
+STUB,"StubHub Holdings, Inc.",Technology services
+HIW,"Highwoods Properties, Inc.",Finance
+AMPX,"Amprius Technologies, Inc.",Producer manufacturing
+HTFL,"Heartflow, Inc.",Technology services
+AMBA,"Ambarella, Inc.",Electronic technology
+VC,Visteon Corporation,Producer manufacturing
+BW,"Babcock & Wilcox Enterprises, Inc.",Electronic technology
+OSW,OneSpaWorld Holdings Limited,Consumer services
+WAFD,"WaFd, Inc.",Finance
+KN,Knowles Corporation,Electronic technology
+TDC,Teradata Corporation,Technology services
+AMBP,Ardagh Metal Packaging S.A.,Process industries
+DK,"Delek US Holdings, Inc.",Energy minerals
+RH,RH,Retail trade
+HTO,H2O America,Utilities
+VGNT,Versigent PLC,Producer manufacturing
+RUM,Rumble Inc.,Technology services
+BRSL,"Brightstar Lottery PLC Trading under the Legal Name to begin at the market open on July 21, 2025.",Consumer services
+VNET,"VNET Group, Inc.",Technology services
+TALO,"Talos Energy, Inc.",Energy minerals
+WT,"WisdomTree, Inc.",Miscellaneous
+EOSE,"Eos Energy Enterprises, Inc.",Producer manufacturing
+HUBG,"Hub Group, Inc.",Transportation
+PTRN,Pattern Group Inc. - Series A,Commercial services
+GRND,Grindr Inc.,Technology services
+VAC,Marriott Vacations Worldwide Corporation,Consumer services
+SEZL,Sezzle Inc.,Technology services
+XMTR,"Xometry, Inc.",Technology services
+GEO,Geo Group Inc (The) REIT,Commercial services
+NVTS,Navitas Semiconductor Corporation,Electronic technology
+HUN,Huntsman Corporation,Process industries
+CPRI,Capri Holdings Limited,Retail trade
+GRDN,"Guardian Pharmacy Services, Inc.",Retail trade
+FRSH,Freshworks Inc.,Technology services
+NESR,National Energy Services Reunited Corp,Industrial services
+NTCT,"NetScout Systems, Inc.",Technology services
+LU,Lufax Holding Ltd,Finance
+EXTR,"Extreme Networks, Inc.",Electronic technology
+IE,Ivanhoe Electric Inc.,Non-energy minerals
+ABM,ABM Industries Incorporated,Commercial services
+PK,Park Hotels & Resorts Inc.,Finance
+AEHR,Aehr Test Systems,Electronic technology
+NN,NextNav Inc.,Technology services
+MCW,"Mister Car Wash, Inc.",Consumer services
+BUSE,First Busey Corporation,Finance
+SLDE,"Slide Insurance Holdings, Inc.",Technology services
+SEDG,"SolarEdge Technologies, Inc.",Producer manufacturing
+ALRM,"Alarm.com Holdings, Inc.",Technology services
+VRRM,Verra Mobility Corporation,Transportation
+ATHM,Autohome Inc.,Technology services
+HLIO,"Helios Technologies, Inc.",Producer manufacturing
+DNOW,DNOW Inc.,Distribution services
+ICHR,Ichor Holdings,Producer manufacturing
+CDNL,Cardinal Infrastructure Group Inc.,Industrial services
+MLCO,Melco Resorts & Entertainment Limited,Consumer services
+TMC,TMC the metals company Inc.,Non-energy minerals
+GCMG,GCM Grosvenor Inc.,Finance
+NTST,NetSTREIT Corp.,Finance
+PRDO,Perdoceo Education Corporation,Consumer services
+ARR,"ARMOUR Residential REIT, Inc.",Finance
+FMC,FMC Corporation,Process industries
+TENB,"Tenable Holdings, Inc.",Technology services
+DXC,DXC Technology Company,Technology services
+PENN,"PENN Entertainment, Inc.",Consumer services
+DRH,Diamondrock Hospitality Company,Finance
+CECO,CECO Environmental Corp.,Producer manufacturing
+QUBT,Quantum Computing Inc.,Technology services
+AVPT,"AvePoint, Inc.",Technology services
+GLOB,Globant S.A.,Technology services
+DRVN,Driven Brands Holdings Inc.,Consumer services
+JBLU,JetBlue Airways Corporation,Transportation
+FLOC,Flowco Holdings Inc.,Industrial services
+SKWD,"Skyward Specialty Insurance Group, Inc.",Finance
+NCNO,"nCino, Inc.",Technology services
+SPSC,"SPS Commerce, Inc.",Technology services
+WTTR,"Select Water Solutions, Inc.",Energy minerals
+PTON,"Peloton Interactive, Inc.",Consumer services
+FA,First Advantage Corporation,Technology services
+WLY,"John Wiley & Sons, Inc.",Consumer services
+PAX,Patria Investments Limited,Finance
+HTZ,"Hertz Global Holdings, Inc",Finance
+GNL,"Global Net Lease, Inc.",Finance
+SGML,Sigma Lithium Corporation,Non-energy minerals
+COTY,Coty Inc.,Consumer non-durables
+GTY,Getty Realty Corporation,Finance
+IMAX,Imax Corporation,Consumer durables
+EYE,"National Vision Holdings, Inc.",Retail trade
+FUN,Six Flags Entertainment Corporation,Consumer services
+XIFR,"XPLR Infrastructure, LP",Utilities
+PWP,Perella Weinberg Partners,Finance
+VERX,"Vertex, Inc.",Technology services
+CXW,"CoreCivic, Inc.",Commercial services
+WSR,Whitestone REIT,Finance
+UTI,Universal Technical Institute Inc,Commercial services
+NWBI,"Northwest Bancshares, Inc.",Finance
+BL,"BlackLine, Inc.",Technology services
+GT,The Goodyear Tire & Rubber Company,Consumer durables
+SMA,"SmartStop Self Storage REIT, Inc.",Finance
+PSIX,"Power Solutions International, Inc.",Producer manufacturing
+MGNI,"Magnite, Inc.",Technology services
+FCF,First,Finance
+KMPR,Kemper Corporation,Finance
+LC,LendingClub Corporation,Finance
+SOC,Sable Offshore Corp.,Energy minerals
+MXL,"MaxLinear, Inc",Electronic technology
+RDW,Redwire Corporation,Electronic technology
+NEXT,NextDecade Corporation,Energy minerals
+CHA,Chagee Holdings Limited,Consumer non-durables
+GTM,ZoomInfo Technologies Inc.,Technology services
+INTA,"Intapp, Inc.",Technology services
+WERN,"Werner Enterprises, Inc.",Transportation
+SHO,"Sunstone Hotel Investors, Inc.",Finance
+XPRO,Expro Group Holdings N.V.,Energy minerals
+COHU,"Cohu, Inc.",Electronic technology
+ATEN,"A10 Networks, Inc.",Technology services
+TNET,"TriNet Group, Inc.",Commercial services
+RNW,ReNew Energy Global plc,Utilities
+EZPW,"EZCORP, Inc.",Finance
+BBAI,"BigBear.ai, Inc.",Technology services
+SEMR,"SEMrush Holdings, Inc.",Technology services
+FLO,"Flowers Foods, Inc.",Consumer non-durables
+LWLG,"Lightwave Logic, Inc.",Process industries
+INVX,"Innovex International, Inc.",Industrial services
+AMSC,American Superconductor Corporation,Producer manufacturing
+RVLV,"Revolve Group, Inc.",Retail trade
+ALKT,"Alkami Technology, Inc.",Technology services
+PRKS,United Parks & Resorts Inc.,Consumer services
+ZD,"Ziff Davis, Inc.",Technology services
+DHC,Diversified Healthcare Trust,Finance
+PAYO,Payoneer Global Inc.,Commercial services
+PUMP,ProPetro Holding Corp.,Industrial services
+VOYG,"Voyager Technologies, Inc.",Technology services
+VRE,"Veris Residential, Inc.",Finance
+MQ,"Marqeta, Inc.",Commercial services
+CNXC,Concentrix Corporation,Technology services
+HLF,Herbalife Ltd.,Consumer non-durables
+BLKB,"Blackbaud, Inc.",Technology services
+FIHL,Fidelis Insurance Holdings Limited,Finance
+RAMP,"LiveRamp Holdings, Inc.",Technology services
+NWL,Newell Brands Inc.,Producer manufacturing
+DV,"DoubleVerify Holdings, Inc.",Technology services
+GCT,GigaCloud Technology Inc,Distribution services
+PBI,Pitney Bowes Inc.,Technology services
+HIMX,"Himax Technologies, Inc.",Electronic technology
+PICS,PicS N.V.,Commercial services
+BORR,Borr Drilling Limited,Industrial services
+TIC,"TIC Solutions, Inc.",Commercial services
+STGW,Stagwell Inc.,Commercial services
+ECPG,Encore Capital Group Inc,Finance
+SONO,"Sonos, Inc.",Consumer durables
+CBZ,"CBIZ, Inc.",Commercial services
+HLMN,Hillman Solutions Corp.,Distribution services
+WLTH,Wealthfront Corporation,Technology services
+DEI,"Douglas Emmett, Inc.",Finance
+AESI,Atlas Energy Solutions Inc.,Industrial services
+FLNG,FLEX LNG Ltd.,Transportation
+KDK,"Kodiak AI, Inc.",Producer manufacturing
+ALGT,Allegiant Travel Company,Transportation
+CTOS,"Custom Truck One Source, Inc.",Finance
+NVRI,Enviri Corporation,Industrial services
+OI,"O-I Glass, Inc.",Process industries
+ASGN,ASGN Incorporated,Technology services
+KEEL,Keel Infrastructure Corp.,Technology services
+ADNT,Adient plc,Producer manufacturing
+KSS,Kohl's Corporation,Retail trade
+YELP,Yelp Inc.,Technology services
+PEB,Pebblebrook Hotel Trust,Finance
+GBX,"Greenbrier Companies, Inc. (The)",Producer manufacturing
+CLVT,Clarivate Plc,Commercial services
+TILE,"Interface, Inc.",Producer manufacturing
+SKYT,"SkyWater Technology, Inc.",Producer manufacturing
+EFC,Ellington Financial Inc.,Finance
+APPN,Appian Corporation,Technology services
+RCAT,"Red Cat Holdings, Inc.",Technology services
+SFL,SFL Corporation Ltd,Transportation
+FLYW,Flywire Corporation - Voting,Commercial services
+HOPE,"Hope Bancorp, Inc.",Finance
+ECVT,Ecovyst Inc.,Process industries
+ARLO,"Arlo Technologies, Inc.",Electronic technology
+TPB,"Turning Point Brands, Inc.",Consumer non-durables
+RES,"RPC, Inc.",Industrial services
+LEG,"Leggett & Platt, Incorporated",Consumer durables
+QFIN,"Qfin Holdings, Inc.",Finance
+ARI,"Apollo Commercial Real Estate Finance, Inc",Finance
+OUST,"Ouster, Inc.",Electronic technology
+UAMY,United States Antimony Corporation,Non-energy minerals
+KOS,Kosmos Energy Ltd.,Energy minerals
+LPG,Dorian LPG Ltd.,Transportation
+KW,Kennedy-Wilson Holdings Inc.,Finance
+ABR,Arbor Realty Trust,Finance
+XHR,"Xenia Hotels & Resorts, Inc.",Finance
+SBET,"Sharplink, Inc.",Commercial services
+TE,T1 Energy Inc.,Producer manufacturing
+TH,Target Hospitality Corp.,Consumer services
+TROX,Tronox Holdings plc,Process industries
+UPWK,Upwork Inc.,Commercial services
+MUX,McEwen Inc.,Non-energy minerals
+ASAN,"Asana, Inc.",Technology services
+WWW,"Wolverine World Wide, Inc.",Consumer non-durables
+CSWC,Capital Southwest Corporation,Miscellaneous
+TUYA,Tuya Inc.,Technology services
+INOD,Innodata Inc.,Technology services
+MAN,ManpowerGroup,Commercial services
+PGNY,"Progyny, Inc.",Commercial services
+FUBO,FuboTV Inc.,Technology services
+DOLE,Dole plc,Distribution services
+DQ,DAQO New Energy Corp.,Process industries
+OPRA,Opera Limited,Technology services
+GILT,Gilat Satellite Networks Ltd.,Electronic technology
+ORC,"Orchid Island Capital, Inc.",Finance
+VIA,"Via Transportation, Inc.",Technology services
+DCH,Dauch Corporation,Producer manufacturing
+HLX,"Helix Energy Solutions Group, Inc.",Industrial services
+TRS,TriMas Corporation,Process industries
+ENVX,Enovix Corporation,Producer manufacturing
+OLPX,"Olaplex Holdings, Inc.",Distribution services
+IQ,"iQIYI, Inc.",Technology services
+AMRC,"Ameresco, Inc.",Industrial services
+HCSG,"Healthcare Services Group, Inc.",Commercial services
+AI,"C3.ai, Inc.",Technology services
+CXM,"Sprinklr, Inc.",Technology services
+PENG,"Penguin Solutions, Inc.",Electronic technology
+SBH,"Sally Beauty Holdings, Inc. (Name to be changed from Sally Holdings, Inc.)",Retail trade
+ENR,"Energizer Holdings, Inc.",Consumer non-durables
+CRI,"Carter's, Inc.",Retail trade
+TRIP,"TripAdvisor, Inc.",Consumer services
+LADR,Ladder Capital Corp,Finance
+WEN,Wendy's Company (The),Consumer services
+PLTK,Playtika Holding Corp.,Technology services
+UMH,"UMH Properties, Inc.",Finance
+LIND,Lindblad Expeditions Holdings Inc.,Consumer services
+TRIN,Trinity Capital Inc.,Miscellaneous
+FINV,FinVolution Group,Finance
+SVV,"Savers Value Village, Inc.",Retail trade
+NPKI,NPK International Inc.,Producer manufacturing
+PRA,ProAssurance Corporation,Finance
+ADTN,"ADTRAN Holdings, Inc.",Electronic technology
+NNE,Nano Nuclear Energy Inc.,Producer manufacturing
+GIII,"G-III Apparel Group, LTD.",Consumer non-durables
+REAL,"The RealReal, Inc.",Retail trade
+TIGR,UP Fintech Holding Limited,Finance
+RLJ,RLJ Lodging Trust,Finance
+KODK,Eastman Kodak Company,Producer manufacturing
+NAT,Nordic American Tankers Limited,Transportation
+PRGS,Progress Software Corporation,Technology services
+DFH,"Dream Finders Homes, Inc.",Consumer durables
+GENI,Genius Sports Limited,Technology services
+BKSY,BlackSky Technology Inc.,Technology services
+WKC,World Kinect Corporation,Distribution services
+VSTS,Vestis Corporation,Consumer non-durables
+PZZA,"Papa John's International, Inc.",Consumer services
+SHLS,"Shoals Technologies Group, Inc.",Electronic technology
+JKS,JinkoSolar Holding Company Limited,Electronic technology
+PCT,"PureCycle Technologies, Inc.",Industrial services
+CCOI,"Cogent Communications Holdings, Inc.",Communications
+FIVN,"Five9, Inc.",Technology services
+PGY,Pagaya Technologies Ltd.,Technology services
+ARRY,"Array Technologies, Inc.",Producer manufacturing
+TWO,Two Harbors Investment Corp,Finance
+ABTC,American Bitcoin Corp.,Technology services
+SBGI,"Sinclair, Inc.",Consumer services
+TTI,"Tetra Technologies, Inc.",Process industries
+BV,"BrightView Holdings, Inc.",Commercial services
+OSBC,"Old Second Bancorp, Inc.",Finance
+EVLV,"Evolv Technologies Holdings, Inc.",Electronic technology
+GOLD,"Gold.com, Inc.",Finance
+CIM,Chimera Investment Corporation,Finance
+CLOV,"Clover Health Investments, Corp.",Finance
+ACDC,ProFrac Holding Corp.,Industrial services
+MRTN,"Marten Transport, Ltd.",Transportation
+DEC,Diversified Energy Company,Energy minerals
+UTZ,Utz Brands Inc,Consumer non-durables
+RZLV,Rezolve AI PLC,Technology services
+MLKN,"MillerKnoll, Inc.",Producer manufacturing
+UPBD,"Upbound Group, Inc.",Finance
+OCFC,OceanFirst Financial Corp.,Finance
+MBC,"MasterBrand, Inc.",Consumer durables
+TK,Teekay Corporation Ltd.,Transportation
+TDAY,"USA TODAY Co., Inc.",Consumer services
+HLIT,Harmonic Inc.,Electronic technology
+CRML,Critical Metals Corp.,Non-energy minerals
+LZ,"LegalZoom.com, Inc.",Technology services
+WOLF,"Wolfspeed, Inc.",Electronic technology
+GPRE,"Green Plains, Inc.",Process industries
+POET,POET Technologies Inc.,Producer manufacturing
+SMPL,The Simply Good Foods Company,Consumer non-durables
+RERE,ATRenew Inc.,Retail trade
+PMT,PennyMac Mortgage Investment Trust,Finance
+NSP,"Insperity, Inc.",Commercial services
+COUR,"Coursera, Inc.",Technology services
+EPC,Edgewell Personal Care Company,Consumer non-durables
+CMP,Compass Minerals Intl Inc,Process industries
+MFA,"MFA Financial, Inc.",Finance
+LXU,"LSB Industries, Inc.",Process industries
+ARHS,"Arhaus, Inc.",Consumer durables
+TBLA,Taboola.com Ltd.,Technology services
+EXPI,"eXp World Holdings, Inc.",Finance
+SATL,Satellogic Inc.,Electronic technology
+CFFN,"Capitol Federal Financial, Inc.",Finance
+CERT,"Certara, Inc.",Technology services
+AVO,"Mission Produce, Inc.",Process industries
+AMC,"AMC Entertainment Holdings, Inc.",Consumer services
+EVEX,"Eve Holding, Inc.",Electronic technology
+SNCY,"Sun Country Airlines Holdings, Inc.",Transportation
+VYX,NCR Voyix Corporation,Technology services
+MOMO,Hello Group Inc.,Technology services
+AEBI,Aebi Schmidt Holding AG,Consumer durables
+AEVA,"Aeva Technologies, Inc.",Electronic technology
+FTRE,Fortrea Holdings Inc.,Commercial services
+NABL,"N-able, Inc.",Technology services
+ASST,"Strive, Inc.",Miscellaneous
+PDM,"Piedmont Realty Trust, Inc.",Finance
+AOSL,Alpha and Omega Semiconductor Limited,Electronic technology
+LIFE,Ethos Technologies Inc.,Technology services
+CSIQ,Canadian Solar Inc.,Electronic technology
+AIP,"Arteris, Inc.",Electronic technology
+ULCC,"Frontier Group Holdings, Inc.",Transportation
+SDGR,"Schrodinger, Inc.",Technology services
+ESRT,"Empire State Realty Trust, Inc.",Finance
+METC,"Ramaco Resources, Inc.",Energy minerals
+CRCT,"Cricut, Inc.",Distribution services
+AMPL,"Amplitude, Inc.",Technology services
+WGO,"Winnebago Industries, Inc.",Consumer durables
+JBGS,JBG SMITH Properties,Finance
+NMAX,"Newsmax, Inc.",Consumer services
+SCHL,Scholastic Corporation,Consumer services
+NB,NioCorp Developments Ltd.,Non-energy minerals
+ODD,ODDITY Tech Ltd.,Technology services
+ACVA,ACV Auctions Inc.,Technology services
+ABX,"Abacus Global Management, Inc.",Finance
+GSM,Ferroglobe PLC,Non-energy minerals
+RPC,"Ridgepost Capital, Inc.",Finance
+NMFC,New Mountain Finance Corporation,Finance
+WOOF,"Petco Health and Wellness Company, Inc.",Retail trade
+CSHR,CoinShares PLC,Technology services
+HTBK,Heritage Commerce Corp,Finance
+EH,EHang Holdings Limited,Technology services
+TLRY,"Tilray Brands, Inc.",Process industries
+LPTH,"LightPath Technologies, Inc.",Electronic technology
+PURR,Hyperliquid Strategies Inc,Finance
+NAVI,Navient Corporation,Finance
+CTLP,"Cantaloupe, Inc.",Commercial services
+PRCH,"Porch Group, Inc.",Finance
+SG,"Sweetgreen, Inc.",Consumer services
+HMH,HMH Holding Inc.,Industrial services
+CODI,D/B/A Compass Diversified Holdings Shares of Beneficial Interest,Finance
+SVC,Service Properties Trust - Shares of Beneficial Interest,Finance
+OMDA,"Omada Health, Inc.",Technology services
+ALOY,REalloys Inc.,Non-energy minerals
+BRSP,"BrightSpire Capital, Inc.",Finance
+DC,Dakota Gold Corp.,Non-energy minerals
+CTGO,Contango Silver & Gold Inc.,Non-energy minerals
+IMSR,Terrestrial Energy Inc.,Industrial services
+RWT,"Redwood Trust, Inc.",Finance
+AMN,AMN Healthcare Services Inc,Commercial services
+HUYA,HUYA Inc.,Commercial services
+REPX,"Riley Exploration Permian, Inc.",Energy minerals
+HNRG,Hallador Energy Company,Energy minerals
+JBI,"Janus International Group, Inc.",Producer manufacturing
+SSYS,"Stratasys, Ltd.",Electronic technology
+HPK,"HighPeak Energy, Inc.",Energy minerals
+KRUS,"Kura Sushi USA, Inc.",Consumer services
+IVR,INVESCO MORTGAGE CAPITAL INC,Finance
+SERV,Serve Robotics Inc.,Producer manufacturing
+SPIR,"Spire Global, Inc.",Technology services
+SLDP,"Solid Power, Inc.",Producer manufacturing
+VTS,Vitesse Energy Inc.,Energy minerals
+FWRG,"First Watch Restaurant Group, Inc.",Consumer services
+UDMY,"Udemy, Inc.",Technology services
+OPTU,"Optimum Communications, Inc.",Communications
+FBRT,"Franklin BSP Realty Trust, Inc.",Finance
+MNTN,"MNTN, Inc.",Technology services
+BETR,Better Home & Finance Holding Company,Finance
+GO,Grocery Outlet Holding Corp.,Retail trade
+QNST,"QuinStreet, Inc.",Commercial services
+CGNT,Cognyte Software Ltd.,Technology services
+CWH,"Camping World Holdings, Inc.",Retail trade
+SWIM,"Latham Group, Inc.",Producer manufacturing
+GRNT,"Granite Ridge Resources, Inc.",Energy minerals
+NRDS,"NerdWallet, Inc.",Technology services
+FOXF,Fox Factory Holding Corp.,Producer manufacturing
+VTEX,VTEX,Technology services
+ADAM,"Adamas Trust, Inc.",Finance
+NTGR,"NETGEAR, Inc.",Technology services
+SABR,Sabre Corporation,Technology services
+FIP,FTAI Infrastructure Inc.,Consumer services
+MITK,"Mitek Systems, Inc.",Technology services
+ARKO,ARKO Corp.,Retail trade
+RYAM,Rayonier Advanced Materials Inc.,Process industries
+TRON,Tron Inc.,Consumer durables
+GDOT,Green Dot Corporation,Finance
+NKLR,Terra Innovatum Global N.V.,Producer manufacturing
+SB,"Safe Bulkers, Inc",Transportation
+INDI,"indie Semiconductor, Inc.",Electronic technology
+SWBI,"Smith & Wesson Brands, Inc.",Electronic technology
+CRSR,"Corsair Gaming, Inc.",Technology services
+CBRL,"Cracker Barrel Old Country Store, Inc.",Consumer services
+AXG,Solowin Holdings,Finance
+OIS,"Oil States International, Inc.",Industrial services
+EVGO,EVgo Inc.,Retail trade
+LAES,SEALSQ Corp,Electronic technology
+BZH,"Beazer Homes USA, Inc.",Consumer durables
+TRTX,"TPG RE Finance Trust, Inc.",Finance
+GTN,"Gray Media, Inc.",Consumer services
+MAMA,"Mama's Creations, Inc.",Consumer non-durables
+MVST,"Microvast Holdings, Inc.",Producer manufacturing
+GOGO,Gogo Inc.,Communications
+TASK,"TaskUs, Inc.",Commercial services
+ASC,Ardmore Shipping Corporation,Transportation
+ANL,Adlai Nortye Ltd.,Commercial services
+ASIX,AdvanSix Inc.,Process industries
+MAX,"MediaAlpha, Inc.",Technology services
+WYFI,"WhiteFiber, Inc.",Technology services
+NRGV,"Energy Vault Holdings, Inc.",Producer manufacturing
+CNNE,"Cannae Holdings, Inc.",Consumer services
+UMAC,"Unusual Machines, Inc.",Electronic technology
+CARS,Cars.com Inc.,Technology services
+DNUT,"Krispy Kreme, Inc.",Distribution services
+EGY,"VAALCO Energy, Inc.",Energy minerals
+INN,"Summit Hotel Properties, Inc.",Finance
+AIV,Apartment Investment and Management Company,Finance
+NXDR,"Nextdoor Holdings, Inc.",Technology services
+GEMI,"Gemini Space Station, Inc.",Finance
+AHRT,"AH Realty Trust, Inc.",Finance
+PAR,PAR Technology Corporation,Electronic technology
+ETD,Ethan Allen Interiors Inc.,Consumer durables
+ERII,"Energy Recovery, Inc.",Producer manufacturing
+BLMN,"Bloomin' Brands, Inc.",Consumer services
+EVER,"EverQuote, Inc.",Technology services
+REAX,"The Real Brokerage, Inc.",Commercial services
+PHR,"Phreesia, Inc.",Technology services
+VITL,"Vital Farms, Inc.",Process industries
+SD,"SandRidge Energy, Inc.",Energy minerals
+IHRT,"iHeartMedia, Inc.",Consumer services
+RR,Richtech Robotics Inc.,Consumer durables
+TDUP,ThredUp Inc.,Retail trade
+PD,"PagerDuty, Inc.",Technology services
+KOPN,Kopin Corporation,Electronic technology
+BMBL,Bumble Inc.,Technology services
+SXC,"SunCoke Energy, Inc.",Non-energy minerals
+GRPN,"Groupon, Inc.",Retail trade
+SWMR,"Swarmer, Inc",Technology services
+TWI,"Titan International, Inc. (DE)",Producer manufacturing
+ASTL,Algoma Steel Group Inc.,Producer manufacturing
+CLNE,Clean Energy Fuels Corp.,Utilities
+MATV,"Mativ Holdings, Inc.",Process industries
+CYRX,"CryoPort, Inc.",Transportation
+GDYN,"Grid Dynamics Holdings, Inc.",Technology services
+PANL,Pangaea Logistics Solutions Ltd.,Miscellaneous
+BTBT,"Bit Digital, Inc.",Commercial services
+SCVL,"Shoe Carnival, Inc.",Retail trade
+MNRO,"Monro, Inc.",Retail trade
+SFIX,"Stitch Fix, Inc.",Retail trade
+GEVO,"Gevo, Inc.",Process industries
+MRLN,"Merlin, Inc.",Technology services
+BDN,Brandywine Realty Trust,Finance
+PLAY,"Dave & Buster's Entertainment, Inc.",Consumer services
+RBBN,Ribbon Communications Inc.,Technology services
+PUBM,"PubMatic, Inc.",Technology services
+LAND,Gladstone Land Corporation,Finance
+YEXT,"Yext, Inc.",Technology services
+BGS,"B&G Foods, Inc.",Consumer non-durables
+SSP,E.W. Scripps Company (The),Consumer services
+PSFE,Paysafe Limited,Commercial services
+CAL,"Caleres, Inc.",Retail trade
+AIOT,"PowerFleet, Inc.",Technology services
+CMCO,Columbus McKinnon Corporation,Producer manufacturing
+WTI,"W&T Offshore, Inc.",Energy minerals
+KREF,KKR Real Estate Finance Trust Inc.,Finance
+SES,SES AI Corporation,Producer manufacturing
+ABAT,American Battery Technology Company,Non-energy minerals
+ISSC,"Innovative Solutions and Support, Inc.",Electronic technology
+OSPN,OneSpan Inc.,Technology services
+PTLO,Portillo's Inc.,Consumer services
+LTBR,Lightbridge Corporation,Process industries
+ANGX,"Angel Studios, Inc.",Consumer services
+WEAV,"Weave Communications, Inc.",Technology services
+ECX,ECARX Holdings Inc.,Technology services
+CDZI,"Cadiz, Inc.",Finance
+APPS,"Digital Turbine, Inc.",Technology services
+OPTX,"Syntec Optics Holdings, Inc.",Electronic technology
+HELE,Helen of Troy Limited,Consumer durables
+FCEL,"FuelCell Energy, Inc.",Electronic technology
+SNDL,SNDL Inc.,Process industries
+BLND,"Blend Labs, Inc.",Technology services
+TSSI,"TSS, Inc.",Technology services
+AZ,A2Z Cust2Mate Solutions Corp.,Finance
+BBBY,"Bed Bath & Beyond, Inc.",Retail trade
+FWDI,"Forward Industries, Inc.",Consumer durables
+INV,"Innventure, Inc.",Miscellaneous
+RPD,"Rapid7, Inc.",Technology services
+ALTO,"Alto Ingredients, Inc.",Process industries
+LX,LexinFintech Holdings Ltd.,Finance
+OEC,Orion S.A.,Process industries
+CRNC,Cerence Inc.,Technology services
+HLLY,Holley Inc.,Producer manufacturing
+DBI,Designer Brands Inc.,Retail trade
+WNC,Wabash National Corporation,Producer manufacturing
+NPWR,NET Power Inc.,Producer manufacturing
+HNST,"The Honest Company, Inc.",Retail trade
+KLC,"KinderCare Learning Companies, Inc.",Consumer services
+NNDM,Nano Dimension Ltd.,Producer manufacturing
+LE,"Lands' End, Inc.",Retail trade
+LDI,"loanDepot, Inc.",Finance
+TLS,Telos Corporation,Technology services
+XPOF,"Xponential Fitness, Inc.",Consumer services
+HYLN,Hyliion Holdings Corp.,Producer manufacturing
+CEPT,"Cantor Equity Partners II, Inc.",Finance
+HPP,"Hudson Pacific Properties, Inc.",Finance
+BNAI,Brand Engagement Network Inc.,Technology services
+SPT,"Sprout Social, Inc",Technology services
+VFF,"Village Farms International, Inc.",Process industries
+NCMI,"National CineMedia, Inc.",Commercial services
+SIDU,"Sidus Space, Inc.",Electronic technology
+EVH,"Evolent Health, Inc",Commercial services
+BRBS,"Blue Ridge Bankshares, Inc.",Finance
+PAYS,"Paysign, Inc.",Commercial services
+FOSL,"Fossil Group, Inc.",Consumer durables
+EWCZ,"European Wax Center, Inc.",Consumer services
+NUAI,"New Era Energy & Digital, Inc.",Finance
+XWIN,"XMAX, Inc.",Consumer durables
+PDYN,Palladyne AI Corp.,Producer manufacturing
+RXT,"Rackspace Technology, Inc.",Technology services
+ALMU,"Aeluma, Inc.",Commercial services
+RXST,"RxSight, Inc.",Electronic technology
+DDD,3D Systems Corporation,Technology services
+VELO,"Velo3D, Inc.",Producer manufacturing
+SLP,"Simulations Plus, Inc.",Technology services
+ACCO,Acco Brands Corporation,Producer manufacturing
+ANGI,Angi Inc.,Technology services
+SLN,Silence Therapeutics Plc - American Depository Share,Commercial services
+RWAY,Runway Growth Finance Corp.,Finance
+SHMD,SCHMID Group N.V.,Electronic technology
+BKKT,"Bakkt, Inc.",Commercial services
+GRRR,Gorilla Technology Group Inc.,Technology services
+APAD,A Paradise Acquisition Corp.,Finance
+SITC,SITE Centers Corp.,Finance
+ANNA,"AleAnna, Inc.",Energy minerals
+SY,So-Young International Inc. - American Depository Shares,Technology services
+ASPN,"Aspen Aerogels, Inc.",Process industries
+RPAY,Repay Holdings Corporation,Commercial services
+RILY,"BRC Group Holdings, Inc.",Finance
+MRAM,"Everspin Technologies, Inc.",Electronic technology
+RC,Ready Capital Corporation,Finance
+AIRO,"AIRO Group Holdings, Inc.",Electronic technology
+CNCK,Coincheck Group N.V.,Finance
+FC,Franklin Covey Company,Commercial services
+EGHT,8x8 Inc,Technology services
+MEI,"Methode Electronics, Inc.",Electronic technology
+SUPX,SuperX AI Technology Limited,Commercial services
+POWW,Outdoor Holding Company,Electronic technology
+OSS,"One Stop Systems, Inc.",Electronic technology
+ETHM,Dynamix Corporation,Finance
+AREC,American Resources Corporation,Energy minerals
+DUOT,"Duos Technologies Group, Inc.",Technology services
+CNDT,Conduent Incorporated,Commercial services
+LTRX,"Lantronix, Inc.",Electronic technology
+FJET,"Starfighters Space, Inc.",Commercial services
+WLAC,Willow Lane Acquisition Corp.,Commercial services
+SPCE,"Virgin Galactic Holdings, Inc.",Electronic technology
+GSIT,"GSI Technology, Inc.",Electronic technology
+LODE,Comstock Inc.,Process industries
+ZIP,"ZipRecruiter, Inc.",Technology services
+BLZE,"Backblaze, Inc.",Electronic technology
+YDDL,One and One Green Technologies. INC,Industrial services
+CRNT,Ceragon Networks Ltd.,Electronic technology
+QSI,Quantum-Si Incorporated,Technology services
+ORBS,Eightco Holdings Inc.,Technology services
+CDXS,"Codexis, Inc.",Process industries
+JACK,Jack In The Box Inc.,Consumer services
+FNKO,"Funko, Inc.",Consumer durables
+VUZI,Vuzix Corporation,Electronic technology
+CURV,Torrid Holdings Inc.,Retail trade
+OABI,"OmniAb, Inc.",Commercial services
+OSG,"Octave Specialty Group, Inc.",Finance
+CMRC,"Commerce.com, Inc. - Series 1",Technology services
+BZAI,"Blaize Holdings, Inc.",Electronic technology
+IMMR,Immersion Corporation,Electronic technology
+PLBY,"Playboy, Inc.",Retail trade
+ATOM,Atomera Incorporated,Commercial services
+LPRO,Open Lending Corporation,Technology services
+IMPP,Imperial Petroleum Inc.,Transportation
+VERI,"Veritone, Inc.",Commercial services
+ELME,Elme Communities,Finance
+XRX,Xerox Holdings Corporation,Electronic technology
+GPRO,"GoPro, Inc.",Consumer durables
+FF,FutureFuel Corp.,Process industries
+UIS,Unisys Corporation New,Technology services
+IDN,"Intellicheck, Inc.",Technology services
+BRR,"ProCap Financial, Inc.",Technology services
+DOUG,Douglas Elliman Inc.,Finance
+SKYX,SKYX Platforms Corp.,Producer manufacturing
+AMTX,"Aemetis, Inc",Process industries
+BYRN,"Byrna Technologies, Inc.",Electronic technology
+THRY,"Thryv Holdings, Inc.",Technology services
+EMPD,Empery Digital Inc.,Consumer durables
+TTEC,"TTEC Holdings, Inc.",Technology services
+SPWR,SunPower Inc.,Industrial services
+CVGI,"Commercial Vehicle Group, Inc.",Producer manufacturing
+GLND,Greenland Energy Company,Finance
+VWAV,"VisionWave Holdings, Inc.",Technology services
+BZUN,Baozun Inc.,Retail trade
+GAMB,Gambling.com Group Limited,Commercial services
+DOMO,"Domo, Inc.",Technology services
+RGP,"Resources Connection, Inc.",Commercial services
+CCLD,"CareCloud, Inc.",Technology services
+DFDV,DeFi Development Corp.,Finance
+KULR,"KULR Technology Group, Inc.",Producer manufacturing
+WATT,Energous Corporation,Electronic technology
+OPRX,OptimizeRx Corporation,Technology services
+SLNH,"Soluna Holdings, Inc.",Electronic technology
+BAER,"Bridger Aerospace Group Holdings, Inc.",Transportation
+NAMM,Namib Minerals,Non-energy minerals
+CBUS,"Cibus, Inc.",Technology services
+WW,"WW International, Inc.",Consumer services
+DTI,Drilling Tools International Corporation,Finance
+QMCO,Quantum Corporation,Electronic technology
+STEX,Streamex Corp.,Finance
+JELD,"JELD-WEN Holding, Inc.",Non-energy minerals
+ARQ,"Arq, Inc.",Process industries
+ZENA,"ZenaTech, Inc.",Technology services
+NNBR,"NN, Inc.",Producer manufacturing
+PROP,Prairie Operating Co.,Energy minerals
+HCAT,"Health Catalyst, Inc",Technology services
+BTCS,BTCS Inc.,Finance
+HTCO,High-Trend International Group,Transportation
+AISP,"Airship AI Holdings, Inc",Technology services
+HOVR,New Horizon Aircraft Ltd.,Electronic technology
+XTIA,"XTI Aerospace, Inc.",Technology services
+LIDR,"AEye, Inc.",Technology services
+PLCE,"Children's Place, Inc. (The)",Retail trade
+BLNE,"Beeline Holdings, Inc.",Commercial services
+MERC,Mercer International Inc.,Process industries
+AGH,Aureus Greenway Holdings Inc.,Consumer services
+OMEX,"Odyssey Marine Exploration, Inc.",Process industries
+ONEG,OneConstruction Group Limited,Industrial services
+SPWH,"Sportsman's Warehouse Holdings, Inc.",Retail trade
+ASTI,"Ascent Solar Technologies, Inc",Electronic technology
+KSCP,"Knightscope, Inc.",Producer manufacturing
+CDLX,"Cardlytics, Inc. Common Stock",Technology services
+AMPG,"Amplitech Group, Inc.",Electronic technology
+SNBR,Sleep Number Corporation,Consumer durables
+SKIL,Skillsoft Corp.,Technology services
+EHTH,"eHealth, Inc.",Finance
+HOLO,MicroCloud Hologram Inc.,Electronic technology
+FUSE,Fusemachines Inc.,Technology services
+BTM,Bitcoin Depot Inc.,Finance
+BENF,Beneficient,Finance
+SKYQ,Sky Quarry Inc.,Energy minerals
+MNTS,Momentus Inc.,Electronic technology
+ARAI,Arrive AI Inc.,Technology services
+AHMA,Ambitions Enterprise Management Co. L.L.C,Commercial services
+BCG,"Binah Capital Group, Inc.",Finance
+MIGI,Mawson Infrastructure Group Inc.,Technology services
+LASE,Laser Photonics Corporation,Electronic technology
+MOBX,"Mobix Labs, Inc.",Electronic technology
+MAXN,"Maxeon Solar Technologies, Ltd.",Utilities
+SMX,SMX (Security Matters) Public Limited Company,Technology services
+BBGI,"Beasley Broadcast Group, Inc.",Consumer services
+TURB,"Turbo Energy, S.A.",Technology services
+BIRD,"Allbirds, Inc.",Retail trade
+RECT,Rectitude Holdings Ltd,Distribution services
+HUIZ,Huize Holding Limited,Finance
+RIME,"Algorhythm Holdings, Inc.",Consumer services
+YYGH,YY Group Holding Limited,Commercial services
+DBGI,"Digital Brands Group, Inc.",Consumer non-durables
+AIXI,XIAO-I Corporation,Technology services
+RBNE,Robin Energy Ltd.,Transportation
+NVNI,Nvni Group Limited,Finance
+CETX,Cemtrex Inc.,Electronic technology
+RETO,"ReTo Eco-Solutions, Inc.",Non-energy minerals
+GXAI,Gaxos.ai Inc.,Technology services
+BTBD,"BT Brands, Inc.",Consumer services
+UGRO,"urban-gro, Inc.",Distribution services
+RMSG,Real Messenger Corporation,Technology services
+CLIK,Click Holdings Limited,Commercial services
+HKIT,Hitek Global Inc.,Technology services
+IQST,iQSTEL Inc.,Communications
+CYCU,"Cycurion, Inc.",Technology services
+IOTR,iOThree Limited,Technology services
+RENX,RenX Enterprises Corp.,Finance
+MYSE,"Myseum, Inc.",Technology services
+HCAI,"Huachen AI Parking Management Technology Holding Co., Ltd.",Producer manufacturing
+CIIT,"Tianci International, Inc.",Transportation
+SQFT,"Presidio Property Trust, Inc.",Finance
+MLEC,Moolec Science SA,Commercial services
+ASTC,Astrotech Corporation,Electronic technology
+GVH,Globavend Holdings Limited - Ord Shares,Transportation
+JTAI,Jet.AI Inc.,Transportation
+WBUY,WEBUY GLOBAL LTD.,Retail trade
+UCAR,U Power Limited,Consumer durables
+LNKS,Linkers Industries Limited,Electronic technology
+HCTI,"Healthcare Triangle, Inc.",Technology services
+ELPW,Elong Power Holding Limited,Producer manufacturing
+FCUV,Focus Universal Inc.,Commercial services
+JEM,707 Cayman Holdings Limited,Distribution services
+KIDZ,"Classover Holdings, Inc.",Technology services
+MASK,3 E Network Technology Group Ltd,Technology services
+NCT,Intercont (Cayman) Limited,Transportation
+RDGT,"Ridgetech, Inc.",Distribution services
+JDZG,JIADE LIMITED,Commercial services
+FCHL,Fitness Champs Holdings Limited,Commercial services
+IPW,iPower Inc.,Retail trade
+BOXL,Boxlight Corporation,Electronic technology
+UMDD,UltraPro MidCap400,3X
+WEBL,Direxion Daily Dow Jones Internet Bull 3X ETF,3X
+FAS,Direxion Financial Bull 3X ETF,3X
+TPOR,Direxion Daily Transportation Bull 3X ETF,3X
+YSPY,GraniteShares YieldBOOST SPY ETF,3X
+HIBL,Direxion Daily S&P 500 High Beta Bull 3X ETF,3X
+UDOW,ProShares UltraPro Dow30,3X
+SPXL,Direxion Daily S&P 500 Bull 3X ETF,3X
+UPRO,ProShares UltraPro S&P 500,3X
+DPST,Direxion Daily Regional Banks Bull 3X ETF,3X
+TQQQ,ProShares UltraPro QQQ,3X
+TECL,Direxion Daily S&P 500 Bear 3X ETF,3X
+SEMY,GraniteShares YieldBOOST Semiconductor ETF,3X
+URTY,ProShares UltraPro Russell2000,3X
+DUSL,Direxion Daily Industrials Bull 3X ETF,3X
+TNA,Direxion Small Cap Bull 3X ETF,3X
+MEXX,Direxion Daily MSCI Mexico Bull 3X ETF,3X
+RETL,Direxion Daily Retail Bull 3X ETF,3X
+DFEN,Direxion Daily Aerospace & Defense Bull 3X ETF,3X
+NAIL,Direxion Daily Homebuilders & Supplies Bull 3X ETF,3X
+TMF,Direxion Daily 20-Yr Treasury Bull 3x Shrs,3X
+SOXL,Direxion Daily Semiconductor Bull 3X ETF,3X
+DRN,Direxion Daily Real Estate Bull 3X ETF,3X
+EDC,Direxion Emerging Markets Bull 3X ETF,3X
+YINN,Direxion Daily FTSE China Bull 3X ETF,3X
+KORU,Direxion Daily South Korea Bull 3X ETF,3X
+WANT,Direxion Daily Consumer Discretionary Bull 3X ETF,3X
+EURL,Direxion Daily FTSE Europe Bull 3X ETF,3X
+TQQY,GraniteShares YieldBOOST QQQ ETF,3X
+UTSL,Direxion Daily Utilities Bull 3X ETF,3X
+MIDU,Direxion Mid Cap Bull 3X ETF,3X
+TYD,Direxion Daily 10-Yr Treasury Bull 3x Shrs,3X
