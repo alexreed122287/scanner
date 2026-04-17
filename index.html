@@ -572,6 +572,9 @@ tr.sel-row td{background:var(--blu3);}
     <div class="stat-box"><div class="stat-label">TOP SECTOR</div><div class="stat-val amb" id="bs-sect">--</div></div>
     <div class="stat-box"><div class="stat-label">SECTOR GOs</div><div class="stat-val amb" id="bs-pf">--</div></div>
     <div class="stat-box"><div class="stat-label">SCANNED</div><div class="stat-val amb" id="bs-scan">--</div></div>
+    <div class="stat-box" style="flex:0 0 auto;display:flex;align-items:center;padding:6px 10px;border-left:1px solid var(--bg3);">
+      <button class="btn grn" style="font-size:11px;padding:6px 10px;white-space:nowrap;" onclick="exportGoTickers('bs')" title="Copy a comma-separated list of all GO-signal tickers to the clipboard">▲ EXPORT GOs</button>
+    </div>
   </div>
   <div class="split">
     <div class="split-l">
@@ -664,6 +667,11 @@ tr.sel-row td{background:var(--blu3);}
     </div>
   </div>
   </div><!-- /#sc-filter-bars -->
+  <!-- Export row (always visible, not part of collapsible filters) -->
+  <div class="flt-bar" style="gap:8px;border-top:1px solid var(--bg3);">
+    <button class="btn grn" style="font-size:11px;" onclick="exportGoTickers('sc')" title="Copy a comma-separated list of all GO-signal tickers from current filtered results">▲ EXPORT GOs</button>
+    <span id="sc-export-hint" style="color:var(--gry);font-size:10px;font-family:var(--ff-mono);align-self:center;"></span>
+  </div>
   <!-- Progress bar -->
   <div id="sc-progress-wrap" style="display:none;padding:6px 12px;background:var(--bg1);border-bottom:1px solid var(--bg3);">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
@@ -6325,6 +6333,120 @@ function clearFilters(){
   if(countEl) countEl.textContent = '';
   G.filtered = excludedFilteredResults();
   renderScan();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  EXPORT GO TICKERS — comma-separated list of all "GO" signals
+//  Source 'bs' = buy signals (uses G.results, respects sector exclusion)
+//  Source 'sc' = scanner (uses G.filtered, respects all active filters)
+//  Copies to clipboard, shows a modal with the list so you can also
+//  copy manually if clipboard permission is denied.
+// ═══════════════════════════════════════════════════════════════════════════
+function exportGoTickers(source){
+  source = source || 'bs';
+  var pool;
+  if(source === 'sc'){
+    // Scanner: export from currently filtered/visible results
+    pool = (G.filtered || []).slice();
+  } else {
+    // Buy signals: all scan results minus the hard sector exclusion
+    pool = excludedFilteredResults();
+  }
+  var gos = pool.filter(function(r){ return r.isGo; });
+  // Sort by score descending so the strongest come first in the paste
+  gos.sort(function(a,b){ return (b.score||0) - (a.score||0); });
+  var tickers = gos.map(function(r){ return r.ticker; });
+  var uniq = [];
+  var seen = {};
+  tickers.forEach(function(t){ if(t && !seen[t]){ seen[t] = true; uniq.push(t); } });
+
+  if(uniq.length === 0){
+    toast('No GO signals to export — run a scan first');
+    return;
+  }
+  var csv = uniq.join(',');
+
+  // Copy to clipboard (with fallback for older browsers / missing permission)
+  var copied = false;
+  try{
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(csv).then(function(){
+        toast('Copied '+uniq.length+' GO ticker'+(uniq.length===1?'':'s')+' to clipboard');
+      }, function(){
+        // Fallback: show modal
+        showExportModal(uniq, csv, source);
+      });
+      copied = true;
+    }
+  }catch(e){}
+  // Always show the modal too — lets user verify and recopy if needed
+  showExportModal(uniq, csv, source);
+
+  // Also put a one-liner hint next to the scanner button
+  var hint = eid('sc-export-hint');
+  if(hint && source === 'sc'){
+    hint.textContent = '✓ '+uniq.length+' GO ticker'+(uniq.length===1?'':'s')+' copied';
+    hint.style.color = 'var(--grn)';
+    setTimeout(function(){ try{ hint.textContent = ''; }catch(e){} }, 5000);
+  }
+  console.log('[export-gos] ('+source+') '+uniq.length+' tickers: '+csv);
+}
+
+function showExportModal(tickers, csv, source){
+  // Remove any existing modal
+  var existing = document.getElementById('export-gos-modal');
+  if(existing) existing.remove();
+
+  var m = document.createElement('div');
+  m.id = 'export-gos-modal';
+  m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;';
+  m.onclick = function(e){ if(e.target === m){ m.remove(); } };
+
+  var title = (source === 'sc') ? 'SCANNER — GO TICKERS' : 'BUY SIGNALS — GO TICKERS';
+  m.innerHTML =
+    '<div style="background:var(--bg1);border:1px solid var(--amb);border-radius:6px;max-width:700px;width:100%;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 0 40px rgba(0,212,255,0.3);">' +
+      '<div style="background:var(--bg2);border-bottom:1px solid var(--bg3);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;">' +
+        '<span style="color:var(--amb);font-family:var(--ff-brand);font-size:13px;font-weight:700;letter-spacing:2px;">'+title+' ('+tickers.length+')</span>' +
+        '<button onclick="document.getElementById(\'export-gos-modal\').remove()" style="background:none;border:none;color:var(--gry);font-size:20px;cursor:pointer;padding:0 4px;line-height:1;">×</button>' +
+      '</div>' +
+      '<div style="padding:14px;flex:1;overflow:auto;">' +
+        '<div style="color:var(--gry);font-size:11px;margin-bottom:8px;font-family:var(--ff-mono);">Comma-separated list — select all &amp; copy, or click COPY below:</div>' +
+        '<textarea id="export-gos-text" readonly style="width:100%;min-height:120px;background:var(--bg0);border:1px solid var(--bg3);border-radius:4px;color:var(--wht);font-family:var(--ff-mono);font-size:12px;padding:10px;resize:vertical;line-height:1.6;word-break:break-all;" onclick="this.select()">'+csv+'</textarea>' +
+        '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">' +
+          '<button class="btn grn" onclick="copyExportModalText()" style="font-size:12px;">▲ COPY</button>' +
+          '<button class="btn" onclick="document.getElementById(\'export-gos-text\').select()" style="font-size:12px;">SELECT ALL</button>' +
+          '<button class="btn" onclick="document.getElementById(\'export-gos-modal\').remove()" style="font-size:12px;border-color:var(--gry2);color:var(--gry);">CLOSE</button>' +
+          '<span style="align-self:center;color:var(--gry);font-size:10px;margin-left:auto;font-family:var(--ff-mono);">'+tickers.length+' tickers • sorted by score</span>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(m);
+  // Auto-select the text so Cmd/Ctrl+C works immediately
+  setTimeout(function(){
+    var ta = document.getElementById('export-gos-text');
+    if(ta) ta.select();
+  }, 100);
+}
+
+function copyExportModalText(){
+  var ta = document.getElementById('export-gos-text');
+  if(!ta) return;
+  ta.select();
+  try{
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(ta.value).then(function(){
+        toast('Copied to clipboard');
+      }, function(){
+        document.execCommand('copy');
+        toast('Copied (fallback)');
+      });
+    } else {
+      document.execCommand('copy');
+      toast('Copied to clipboard');
+    }
+  }catch(e){
+    toast('Copy failed — select manually and press Cmd/Ctrl+C');
+  }
 }
 
 function sortTable(col){
