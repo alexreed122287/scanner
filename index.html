@@ -192,6 +192,25 @@ tr.sel-row td{background:var(--blu3);}
 .pnl-pos{color:var(--blu);}
 .pnl-neg{color:var(--wrn);}
 .ord-form{max-width:620px;padding:16px;}
+/* ── STOCK vs OPTIONS mode for the Order Ticket ── */
+.ord-form.mode-stock .ord-opt-only{display:none !important;}
+.ord-form.mode-stock .ord-stk-only-opt{}
+.ord-form:not(.mode-stock) .ord-stk-only-opt{display:none;}
+.ord-form.mode-stock #ord-qty-lbl::after{content:'';}
+/* ── MULTI-SELECT SECTOR FILTER ── */
+.sect-wrap{position:relative;display:inline-block;}
+.sect-btn{background:var(--bg2);border:var(--bdr);border-radius:3px;color:var(--wht);font-family:var(--ff);font-size:12px;padding:4px 10px;cursor:pointer;min-width:160px;text-align:left;display:inline-flex;align-items:center;justify-content:space-between;gap:6px;}
+.sect-btn:hover{border-color:var(--amb);}
+.sect-btn .sect-cnt{color:var(--ambb);font-size:10px;}
+.sect-btn .sect-arr{color:var(--gry);font-size:10px;margin-left:4px;}
+.sect-dd{position:absolute;top:calc(100% + 4px);left:0;z-index:1000;background:var(--bg1);border:1px solid var(--amb3);border-radius:3px;padding:6px;max-height:420px;overflow-y:auto;min-width:260px;box-shadow:0 4px 16px rgba(0,0,0,0.7);}
+.sect-dd-hdr{display:flex;gap:6px;padding:2px 4px 6px;border-bottom:1px solid var(--bg3);margin-bottom:4px;flex-wrap:wrap;}
+.sect-dd-hdr .btn{font-size:10px;padding:2px 8px;}
+.sect-dd-search{background:var(--bg2);border:var(--bdr);border-radius:3px;color:var(--wht);font-family:var(--ff);font-size:11px;padding:3px 6px;width:100%;margin-bottom:4px;}
+.sect-opt{display:flex;align-items:center;gap:6px;padding:3px 6px;cursor:pointer;font-size:11px;color:var(--wht);border-radius:2px;}
+.sect-opt:hover{background:var(--bg2);}
+.sect-opt input{margin:0;cursor:pointer;}
+.sect-opt .sect-opt-count{color:var(--gry);font-size:9px;margin-left:auto;}
 .ord-row{display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
 .ord-row label{color:var(--gry);font-size:10px;display:block;margin-bottom:3px;}
 .ord-row input,.ord-row select{background:var(--bg2);border:var(--bdr);border-radius:3px;color:var(--wht);font-family:var(--ff);font-size:12px;padding:5px 8px;width:100%;}
@@ -451,7 +470,25 @@ tr.sel-row td{background:var(--blu3);}
     <span id="strategy-desc-sc" style="font-family:var(--ff-mono);font-size:10px;color:var(--gry);margin-left:4px;font-style:italic;"></span>
   </div>
   <div class="flt-bar" style="flex-wrap:wrap;gap:8px;">
-    <label>Sector <select id="sc-sect"><option value="">All</option></select></label>
+    <label>Sectors
+      <span class="sect-wrap">
+        <button type="button" id="sc-sect-btn" class="sect-btn" onclick="toggleSectorDropdown(event)">
+          <span id="sc-sect-label">All</span>
+          <span class="sect-arr">▾</span>
+        </button>
+        <div id="sc-sect-dd" class="sect-dd" style="display:none;" onclick="event.stopPropagation();">
+          <div class="sect-dd-hdr">
+            <button type="button" class="btn" onclick="selectAllSectors(true)">ALL</button>
+            <button type="button" class="btn" onclick="selectAllSectors(false)">NONE</button>
+            <button type="button" class="btn blu" onclick="closeSectorDropdown()">APPLY</button>
+          </div>
+          <input type="text" class="sect-dd-search" id="sc-sect-search" placeholder="Search sectors..." oninput="filterSectorOptions()">
+          <div id="sc-sect-opts"></div>
+        </div>
+      </span>
+      <!-- Hidden legacy select kept for any untouched references -->
+      <select id="sc-sect" style="display:none;"><option value="">All</option></select>
+    </label>
     <label>Signal <select id="sc-sig"><option value="">All</option><option value="GO" selected>GO</option><option value="NO-GO">NO-GO</option></select></label>
     <label>Min Score <input type="number" id="sc-minscore" value="120" style="width:60px;"></label>
     <button class="btn" onclick="applyFilters()">FILTER</button>
@@ -623,10 +660,10 @@ tr.sel-row td{background:var(--blu3);}
         </div>
         <div class="ord-field">
           <label>TYPE</label>
-          <select id="ord-type" onchange="onSymbolChange()">
+          <select id="ord-type" onchange="onOrderTypeChange();onSymbolChange()">
             <option value="CALL">CALL</option>
             <option value="PUT">PUT</option>
-            <option value="STOCK">STOCK</option>
+            <option value="STOCK">STOCK / ETF</option>
           </select>
         </div>
       </div>
@@ -665,14 +702,14 @@ tr.sel-row td{background:var(--blu3);}
         </div>
       </div>
 
-      <!-- STRIKE + EXPIRY -->
-      <div class="ord-row">
+      <!-- STRIKE + EXPIRY (options only) -->
+      <div class="ord-row ord-opt-only">
         <div class="ord-field"><label>STRIKE</label><input id="ord-strike" type="number" placeholder="150.00" onchange="updateOrdChart()" oninput="updateOrdChart()"></div>
         <div class="ord-field"><label>EXPIRY (YYYY-MM-DD)</label><input id="ord-exp" type="date" onchange="updateOrdChart()"></div>
       </div>
 
-      <!-- ── AUTO-SELECT CONTRACT — sits below strike/expiry so it stays visible ── -->
-      <div class="auto-sel-box">
+      <!-- ── AUTO-SELECT CONTRACT — options only ── -->
+      <div class="auto-sel-box ord-opt-only">
         <div class="auto-sel-hdr">
           <span style="color:var(--blub);font-size:10px;font-weight:700;letter-spacing:.5px;">&#9650; AUTO-SELECT CONTRACT</span>
           <select id="asr-month" style="font-size:10px;padding:2px 6px;background:var(--bg2);color:var(--gry);border:1px solid var(--bg3);border-radius:3px;cursor:pointer;" onchange="updateAsrMonthLabel()">
@@ -708,7 +745,7 @@ tr.sel-row td{background:var(--blu3);}
             <option value="SELL">SELL</option>
           </select>
         </div>
-        <div class="ord-field"><label>QTY (CONTRACTS)</label><input id="ord-qty" type="number" value="1" min="1" onchange="updateOrdChart();clearBudget()" oninput="updateOrdChart();clearBudget()"></div>
+        <div class="ord-field"><label id="ord-qty-lbl">QTY (CONTRACTS)</label><input id="ord-qty" type="number" value="1" min="1" onchange="updateOrdChart();clearBudget()" oninput="updateOrdChart();clearBudget()"></div>
         <div class="ord-field">
           <label>UP TO $ <span style="color:var(--gry);font-size:9px;" id="ord-budget-hint"></span></label>
           <input id="ord-budget" type="number" placeholder="e.g. 500" min="0" step="50"
@@ -720,21 +757,68 @@ tr.sel-row td{background:var(--blu3);}
       <!-- ORDER TYPE + LIMIT -->
       <div class="ord-row">
         <div class="ord-field"><label>ORDER TYPE</label>
-          <select id="ord-otype">
+          <select id="ord-otype" onchange="onOrderOtypeChange();updateOrdChart()">
             <option value="market">MARKET</option>
             <option value="limit" selected>LIMIT</option>
             <option value="stop">STOP</option>
+            <option value="stop_limit" class="ord-stk-only-opt">STOP LIMIT</option>
+            <option value="trailing_stop" class="ord-stk-only-opt">TRAILING STOP (GTC)</option>
+            <option value="trailing_stop_limit" class="ord-stk-only-opt">TRAILING STOP LIMIT (GTC)</option>
           </select>
         </div>
         <div class="ord-field">
           <label>LIMIT PRICE <span id="lmt-hint" style="color:var(--grn);font-size:9px;"></span></label>
           <input id="ord-lmt" type="number" placeholder="0.00" step="0.01" onchange="updateOrdChart();calcQtyFromBudget()" oninput="updateOrdChart();calcQtyFromBudget()">
         </div>
+        <div class="ord-field" id="ord-stop-wrap" style="display:none;">
+          <label>STOP PRICE</label>
+          <input id="ord-stop" type="number" placeholder="0.00" step="0.01">
+        </div>
         <div class="ord-field" style="flex:0.5;display:flex;align-items:flex-end;">
           <button class="btn" style="font-size:10px;padding:3px 8px;width:100%;" onclick="setLimitToBid()" title="Set limit price to current bid">SET BID</button>
         </div>
         <div class="ord-field" style="flex:0.5;display:flex;align-items:flex-end;">
           <button class="btn" style="font-size:10px;padding:3px 8px;width:100%;" onclick="setLimitToMid()" title="Set limit price to current mid">SET MID</button>
+        </div>
+      </div>
+
+      <!-- ── DURATION + TRAILING STOP OFFSETS ── -->
+      <div class="ord-row" id="ord-duration-row">
+        <div class="ord-field">
+          <label>DURATION</label>
+          <select id="ord-duration">
+            <option value="day" selected>DAY</option>
+            <option value="gtc">GTC (Good Til Cancelled)</option>
+            <option value="pre">PRE-MARKET</option>
+            <option value="post">POST-MARKET</option>
+          </select>
+        </div>
+        <div class="ord-field" id="ord-trail-wrap" style="display:none;">
+          <label>TRAIL OFFSET <span style="color:var(--gry);font-size:9px;">(from high-water)</span></label>
+          <div style="display:flex;gap:4px;">
+            <input id="ord-trail-val" type="number" step="0.01" min="0" placeholder="0.50" style="flex:1;">
+            <select id="ord-trail-unit" style="width:60px;">
+              <option value="pct" selected>%</option>
+              <option value="dol">$</option>
+            </select>
+          </div>
+        </div>
+        <div class="ord-field" id="ord-trail-lmt-wrap" style="display:none;">
+          <label>LIMIT OFFSET <span style="color:var(--gry);font-size:9px;">(below stop)</span></label>
+          <div style="display:flex;gap:4px;">
+            <input id="ord-trail-lmt-val" type="number" step="0.01" min="0" placeholder="0.10" style="flex:1;">
+            <select id="ord-trail-lmt-unit" style="width:60px;">
+              <option value="pct" selected>%</option>
+              <option value="dol">$</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="ord-row" id="ord-trail-hint-row" style="display:none;">
+        <div style="color:var(--gry);font-size:10px;background:var(--bg2);padding:6px 10px;border-left:2px solid var(--amb3);border-radius:2px;width:100%;">
+          <b style="color:var(--ambb);">▲ TRAILING STOP</b> — Initial GTC stop is placed at Tradier at the current price minus your offset.
+          A client-side monitor walks the stop up (cancel &amp; replace) as the share price makes new highs.
+          Requires this dashboard to remain open or periodically loaded for the trail to advance; the stop itself survives close-out since it's GTC on the broker.
         </div>
       </div>
 
@@ -2570,6 +2654,66 @@ var UNIVERSE_FULL=[
   {t:'TQQY',s:'Leveraged ETF'},{t:'UTSL',s:'Leveraged ETF'},{t:'MIDU',s:'Leveraged ETF'},{t:'TYD',s:'Leveraged ETF'}
 ];
 
+// ═══════════════════════════════════════════════════════════════════════════
+//  TICKER CSV LOADER — reads ticker416.csv at runtime from same folder
+//  Replaces UNIVERSE_FULL on success; falls back to embedded array on failure.
+//  CSV format: Symbol,Description,Price,Price - Currency,Sector (header row required)
+// ═══════════════════════════════════════════════════════════════════════════
+function _parseCsvLine(line){
+  var out=[],cur='',q=false;
+  for(var i=0;i<line.length;i++){
+    var c=line[i];
+    if(q){
+      if(c==='"'){ if(line[i+1]==='"'){ cur+='"'; i++; } else q=false; }
+      else cur+=c;
+    } else {
+      if(c==='"') q=true;
+      else if(c===','){ out.push(cur); cur=''; }
+      else cur+=c;
+    }
+  }
+  out.push(cur);
+  return out;
+}
+async function loadTickerCSV(filename){
+  filename = filename || 'ticker416.csv';
+  try{
+    var resp = await fetch(filename, {cache:'no-cache'});
+    if(!resp.ok) throw new Error('HTTP '+resp.status);
+    var txt = await resp.text();
+    var lines = txt.split(/\r?\n/).filter(function(l){return l.trim().length>0;});
+    if(lines.length < 2) throw new Error('CSV has no data rows');
+    var head = _parseCsvLine(lines[0]).map(function(s){return s.trim().toLowerCase();});
+    var symCol  = head.indexOf('symbol');
+    var sectCol = head.indexOf('sector');
+    if(symCol  < 0) symCol  = 0;
+    if(sectCol < 0) sectCol = head.length > 1 ? head.length - 1 : 0;
+    var seen = {}, arr = [];
+    for(var i=1;i<lines.length;i++){
+      var cols = _parseCsvLine(lines[i]);
+      var t = (cols[symCol]||'').trim().toUpperCase();
+      var s = (cols[sectCol]||'Unknown').trim() || 'Unknown';
+      if(!t || seen[t]) continue;
+      if(!/^[A-Z][A-Z0-9.\-]{0,9}$/.test(t)) continue; // skip malformed
+      seen[t] = true;
+      arr.push({t:t, s:s});
+    }
+    if(arr.length === 0) throw new Error('no valid rows parsed');
+    UNIVERSE_FULL = arr;
+    G._tickerSource = filename+' ('+arr.length+' tickers)';
+    console.log('[ticker-csv] Loaded '+arr.length+' tickers from '+filename);
+    try{
+      var el = document.getElementById('sc-universe-label');
+      if(el && !G.scanRunning) el.textContent = filename.toUpperCase()+' — '+arr.length+' tickers (ready)';
+    }catch(e){}
+    return arr.length;
+  }catch(e){
+    console.log('[ticker-csv] Using embedded fallback ('+UNIVERSE_FULL.length+' tickers). Reason: '+e.message);
+    G._tickerSource = 'embedded ('+UNIVERSE_FULL.length+' tickers)';
+    return 0;
+  }
+}
+
 // Static fallback (original 37) used when no API key
 var UNIVERSE=[
   {t:'AAPL',s:'Technology'},{t:'MSFT',s:'Technology'},{t:'GOOG',s:'Technology'},
@@ -2591,7 +2735,18 @@ var G={results:[],filtered:[],gexData:[],wlTickers:[],positions:[],alerts:[],
   sortCol:'score',sortDir:-1,selTicker:null,scanRunning:false,acctId:'',detailOpt:null,
   liveQuote:null,stepFillActive:false,stepFillCancel:false,quoteRefreshTimer:null,
   tsActive:false,tsTimer:null,tsState:{},tsTriggered:{},tsConfig:{},posRefreshTimer:null,
+  selectedSectors:(function(){try{var s=JSON.parse(localStorage.getItem('rrjcar_sel_sectors')||'[]');return new Set(s);}catch(e){return new Set();}}()),
+  knownSectors:new Set(),
+  equityTrail:(function(){try{return JSON.parse(localStorage.getItem('rrjcar_eq_trail')||'{}');}catch(e){return {};}}()),
+  equityTrailTimer:null,
   posOpenData:(function(){try{return JSON.parse(localStorage.getItem('rrjcar_pos_open')||'{}')}catch(e){return {}}}())};
+
+function saveSelectedSectors(){
+  try{ localStorage.setItem('rrjcar_sel_sectors', JSON.stringify(Array.from(G.selectedSectors))); }catch(e){}
+}
+function saveEquityTrail(){
+  try{ localStorage.setItem('rrjcar_eq_trail', JSON.stringify(G.equityTrail)); }catch(e){}
+}
 
 function eid(id){return document.getElementById(id);}
 function fmt2(n){return isNaN(n)?'--':(+n).toFixed(2);}
@@ -2605,6 +2760,148 @@ function toast(msg,d){
   var t=eid('toast');t.textContent=msg;t.classList.add('show');
   setTimeout(function(){t.classList.remove('show');},d||2200);
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  MULTI-SELECT SECTOR FILTER
+//  G.selectedSectors = Set of sector names. Empty set = "all sectors"
+//  G.knownSectors    = Set of all sectors ever seen (from UNIVERSE_FULL + scan results)
+// ═══════════════════════════════════════════════════════════════════════════
+function gatherKnownSectors(){
+  try{
+    if(typeof UNIVERSE_FULL !== 'undefined' && UNIVERSE_FULL.length){
+      UNIVERSE_FULL.forEach(function(u){ if(u.s) G.knownSectors.add(u.s); });
+    }
+  }catch(e){}
+  try{
+    (G.results||[]).forEach(function(r){ if(r.sector) G.knownSectors.add(r.sector); });
+  }catch(e){}
+}
+function sectorCounts(){
+  var c = {};
+  try{
+    if(typeof UNIVERSE_FULL !== 'undefined'){
+      UNIVERSE_FULL.forEach(function(u){ if(u.s){ c[u.s] = (c[u.s]||0)+1; } });
+    }
+  }catch(e){}
+  return c;
+}
+function populateSectorCheckboxes(){
+  gatherKnownSectors();
+  var box = eid('sc-sect-opts');
+  if(!box) return;
+  var sectors = Array.from(G.knownSectors).sort(function(a,b){return a.localeCompare(b);});
+  var counts = sectorCounts();
+  var html = '';
+  sectors.forEach(function(s){
+    var checked = G.selectedSectors.size === 0 || G.selectedSectors.has(s);
+    var safe = s.replace(/"/g,'&quot;');
+    var cnt = counts[s] ? ' <span class="sect-opt-count">('+counts[s]+')</span>' : '';
+    html += '<label class="sect-opt" data-sect="'+safe+'">'
+          + '<input type="checkbox" class="sc-sect-cb" value="'+safe+'"'+(checked?' checked':'')+' onchange="onSectorCheckboxChange()">'
+          + '<span>'+s+'</span>'+cnt+'</label>';
+  });
+  box.innerHTML = html || '<div style="color:var(--gry);font-size:11px;padding:4px;">No sectors yet — run a scan</div>';
+  updateSectorLabel();
+}
+function updateSectorLabel(){
+  var lbl = eid('sc-sect-label');
+  if(!lbl) return;
+  gatherKnownSectors();
+  var totalKnown = G.knownSectors.size;
+  var n = G.selectedSectors.size;
+  if(n === 0 || n === totalKnown){
+    lbl.innerHTML = 'All <span class="sect-cnt">('+totalKnown+')</span>';
+  } else if(n === 1){
+    var only = Array.from(G.selectedSectors)[0];
+    lbl.innerHTML = (only.length>20?only.slice(0,18)+'…':only);
+  } else {
+    lbl.innerHTML = n+' of '+totalKnown+' <span class="sect-cnt">selected</span>';
+  }
+}
+function toggleSectorDropdown(ev){
+  if(ev){ ev.stopPropagation(); }
+  var dd = eid('sc-sect-dd');
+  if(!dd) return;
+  var open = dd.style.display !== 'none';
+  if(open){
+    dd.style.display = 'none';
+  } else {
+    populateSectorCheckboxes();
+    dd.style.display = 'block';
+    // outside-click-to-close
+    setTimeout(function(){
+      document.addEventListener('click', _sectDDOutsideClick, {once:true});
+    }, 0);
+  }
+}
+function _sectDDOutsideClick(e){
+  var dd = eid('sc-sect-dd');
+  var btn = eid('sc-sect-btn');
+  if(!dd) return;
+  if(dd.style.display === 'none') return;
+  if(dd.contains(e.target) || (btn && btn.contains(e.target))) {
+    // re-attach if clicked inside
+    setTimeout(function(){
+      document.addEventListener('click', _sectDDOutsideClick, {once:true});
+    },0);
+    return;
+  }
+  closeSectorDropdown();
+}
+function closeSectorDropdown(){
+  var dd = eid('sc-sect-dd');
+  if(dd) dd.style.display = 'none';
+  applyFilters();
+}
+function selectAllSectors(selectAll){
+  gatherKnownSectors();
+  if(selectAll){
+    G.selectedSectors = new Set(G.knownSectors); // all
+  } else {
+    G.selectedSectors = new Set(); // treated as "none selected" — but we want "none means nothing shows"
+    // Semantics: empty = all. To represent "none" we need a sentinel. Use a marker:
+    G.selectedSectors = new Set(['__NONE__']);
+  }
+  saveSelectedSectors();
+  // refresh checkboxes
+  var boxes = document.querySelectorAll('.sc-sect-cb');
+  boxes.forEach(function(cb){ cb.checked = selectAll; });
+  updateSectorLabel();
+}
+function onSectorCheckboxChange(){
+  var boxes = document.querySelectorAll('.sc-sect-cb');
+  var picked = [];
+  boxes.forEach(function(cb){ if(cb.checked) picked.push(cb.value); });
+  gatherKnownSectors();
+  var total = G.knownSectors.size;
+  if(picked.length === 0){
+    // all unchecked → treat as "show nothing"
+    G.selectedSectors = new Set(['__NONE__']);
+  } else if(picked.length === total){
+    // all checked → treat as "all" (empty set)
+    G.selectedSectors = new Set();
+  } else {
+    G.selectedSectors = new Set(picked);
+  }
+  saveSelectedSectors();
+  updateSectorLabel();
+}
+function filterSectorOptions(){
+  var q = (eid('sc-sect-search').value||'').toLowerCase();
+  var opts = document.querySelectorAll('#sc-sect-opts .sect-opt');
+  opts.forEach(function(o){
+    var s = (o.getAttribute('data-sect')||'').toLowerCase();
+    o.style.display = (!q || s.indexOf(q) !== -1) ? '' : 'none';
+  });
+}
+// Check whether a sector passes the current filter selection
+function sectorAllowed(sec){
+  if(!sec) sec = 'Unknown';
+  if(G.selectedSectors.size === 0) return true; // empty = all
+  if(G.selectedSectors.has('__NONE__')) return false;
+  return G.selectedSectors.has(sec);
+}
+
 function addAlert(tk,msg,type){
   G.alerts.unshift({tk:tk,msg:msg,type:type,ts:new Date().toLocaleTimeString()});
   if(G.alerts.length>50)G.alerts.pop();
@@ -3393,6 +3690,8 @@ function previewOrder(){
   var expRaw=eid('ord-exp').value;
   var otype=eid('ord-otype').value;
   var lmt=eid('ord-lmt').value;
+  var stop=(eid('ord-stop')||{}).value||'';
+  var duration=(eid('ord-duration')&&eid('ord-duration').value)||'day';
   var occSym=buildOccSym(sym,type,strike,expRaw);
   var sideMap={'BUY_TO_OPEN':'buy_to_open','SELL_TO_OPEN':'sell_to_open','BUY_TO_CLOSE':'buy_to_close','SELL_TO_CLOSE':'sell_to_close','BUY':'buy','SELL':'sell'};
   var side=sideMap[action]||action.toLowerCase();
@@ -3406,9 +3705,38 @@ function previewOrder(){
   var fallbackEl2=eid('sf-fallback');
   var fallbackVal=fallbackEl2?fallbackEl2.value:'none';
   var stepInfo=stepOn?('<br><b>'+(closing?'\u25bc STEP FILL CLOSE':'\u25b2 STEP FILL OPEN')+'</b> \u2014 start: '+(eid('sf-start').value)+' | step: $'+fmt2(effStep)+' ('+eid('sf-coverage').value+'% of spread) | max: '+eid('sf-max').value+' | wait: '+eid('sf-delay').value+'s/attempt | fallback: '+(fallbackVal==='market'?'MARKET ORDER':'give up')):'';
+
+  var line1, line2;
+  if(type === 'STOCK'){
+    line1 = 'Security: <b>'+sym+' (shares)</b>';
+    var bits = [side, 'x'+qty, otype];
+    if(otype==='trailing_stop' || otype==='trailing_stop_limit'){
+      var tv = (eid('ord-trail-val')||{}).value||'0';
+      var tu = (eid('ord-trail-unit')||{}).value||'pct';
+      var refPx = (G.liveQuote && (G.liveQuote.last||G.liveQuote.mid||G.liveQuote.bid))||0;
+      var calc = computeTrailInitialStop(refPx, parseFloat(tv)||0, tu);
+      bits.push('trail:'+tv+(tu==='pct'?'%':'$'));
+      bits.push('initial-stop:$'+fmt2(calc));
+      if(otype==='trailing_stop_limit'){
+        var lv = (eid('ord-trail-lmt-val')||{}).value||'0';
+        var lu = (eid('ord-trail-lmt-unit')||{}).value||'pct';
+        bits.push('lmt-offset:'+lv+(lu==='pct'?'%':'$'));
+      }
+      bits.push('duration:GTC (enforced)');
+    } else {
+      if(lmt)  bits.push('lmt:$'+lmt);
+      if(stop) bits.push('stop:$'+stop);
+      bits.push('duration:'+duration.toUpperCase());
+    }
+    line2 = bits.join(' ') + ' (stock)';
+  } else {
+    line1 = 'Contract: <b>'+occSym+'</b>';
+    line2 = side+' x'+qty+' '+otype+(lmt?' lmt:$'+lmt:'')+' duration:'+duration.toUpperCase()+' (option)';
+  }
+
   res.innerHTML='<b>PREVIEW</b><br>'
-    +'Contract: <b>'+occSym+'</b><br>'
-    +side+' x'+qty+' '+otype+(lmt?' lmt:$'+lmt:'')+(type==='STOCK'?' (stock)':' (option)')+'<br>'
+    +line1+'<br>'
+    +line2+'<br>'
     +'Acct: '+acctVal
     +stepInfo;
   res.className='ord-result show';
@@ -3500,18 +3828,160 @@ function submitOrder(){
     return;
   }
 
-  // \u2500\u2500 STANDARD SUBMIT PATH \u2500\u2500
-  var body='class=option'
-    +'&symbol='+encodeURIComponent(sym)
-    +'&option_symbol='+encodeURIComponent(occSym)
-    +'&side='+encodeURIComponent(side)
-    +'&quantity='+qty
-    +'&type='+otype
-    +'&duration=day';
-  if(otype==='limit'&&lmt)body+='&price='+lmt;
-  if(otype==='stop'&&lmt)body+='&stop='+lmt;
+  // ── STANDARD SUBMIT PATH ──
   var res=eid('ord-result');
+  var duration=(eid('ord-duration')&&eid('ord-duration').value)||'day';
+  var stop=parseFloat((eid('ord-stop')||{}).value||'0')||0;
+
+  // Safety: for options, only day/gtc are valid (pre/post are equity extended hours)
+  if(type!=='STOCK' && (duration==='pre' || duration==='post')){
+    duration='day';
+  }
+
+  var body;
+
+  // ══════════════ STOCK / ETF PATH ══════════════
+  if(type === 'STOCK'){
+    var eqSide = (side === 'buy' || side === 'sell') ? side
+                : (side.indexOf('buy') === 0 ? 'buy' : 'sell');
+
+    // Trailing stops — Tradier has no native type, so we submit a GTC stop
+    // (or stop_limit) at a computed initial price and register with the
+    // client-side equity-trailing engine to walk it up as price makes new highs.
+    if(otype === 'trailing_stop' || otype === 'trailing_stop_limit'){
+      if(eqSide !== 'sell'){
+        res.innerHTML='<span style="color:var(--wrn)">Trailing stops only apply to SELL orders.</span>';
+        res.className='ord-result show';res.style.borderColor='var(--wrn)';return;
+      }
+      var trailVal  = parseFloat((eid('ord-trail-val')||{}).value||'0')||0;
+      var trailUnit = (eid('ord-trail-unit')||{}).value||'pct';
+      if(trailVal <= 0){
+        res.innerHTML='<span style="color:var(--wrn)">Enter a positive TRAIL OFFSET value.</span>';
+        res.className='ord-result show';res.style.borderColor='var(--wrn)';return;
+      }
+      var refPrice = (G.liveQuote && (G.liveQuote.last || G.liveQuote.mid || G.liveQuote.bid)) || 0;
+      if(!refPrice){
+        res.innerHTML='<span style="color:var(--wrn)">No live quote — click REFRESH on the quote panel first.</span>';
+        res.className='ord-result show';res.style.borderColor='var(--wrn)';return;
+      }
+      var initialStop = computeTrailInitialStop(refPrice, trailVal, trailUnit);
+      if(!initialStop || initialStop <= 0){
+        res.innerHTML='<span style="color:var(--wrn)">Could not compute initial stop price.</span>';
+        res.className='ord-result show';res.style.borderColor='var(--wrn)';return;
+      }
+
+      var trailType = (otype === 'trailing_stop_limit') ? 'stop_limit' : 'stop';
+      body = 'class=equity'
+           + '&symbol=' + encodeURIComponent(sym)
+           + '&side=' + eqSide
+           + '&quantity=' + qty
+           + '&type=' + trailType
+           + '&duration=gtc'
+           + '&stop=' + initialStop.toFixed(2);
+
+      if(trailType === 'stop_limit'){
+        var lmtOffVal  = parseFloat((eid('ord-trail-lmt-val')||{}).value||'0')||0;
+        var lmtOffUnit = (eid('ord-trail-lmt-unit')||{}).value||'pct';
+        if(lmtOffVal <= 0){
+          res.innerHTML='<span style="color:var(--wrn)">Enter a positive LIMIT OFFSET for trailing stop limit.</span>';
+          res.className='ord-result show';res.style.borderColor='var(--wrn)';return;
+        }
+        var initialLimit = (lmtOffUnit === 'pct')
+          ? initialStop * (1 - lmtOffVal/100)
+          : initialStop - lmtOffVal;
+        initialLimit = +initialLimit.toFixed(2);
+        if(initialLimit <= 0){
+          res.innerHTML='<span style="color:var(--wrn)">Limit offset too large — would produce a non-positive limit price.</span>';
+          res.className='ord-result show';res.style.borderColor='var(--wrn)';return;
+        }
+        body += '&price=' + initialLimit.toFixed(2);
+      }
+
+      res.innerHTML='Submitting trailing '+(trailType==='stop_limit'?'stop limit':'stop')
+        +' (initial stop $'+initialStop.toFixed(2)+' from ref $'+refPrice.toFixed(2)+')...';
+      res.className='ord-result show';res.style.borderColor='var(--amb)';
+
+      fetch(host+'/v1/accounts/'+acct+'/orders',{
+        method:'POST',
+        headers:{Authorization:'Bearer '+key,Accept:'application/json','Content-Type':'application/x-www-form-urlencoded'},
+        body:body
+      }).then(function(r){var s=r.status;return r.text().then(function(t){return{s:s,t:t};});})
+      .then(function(resp){
+        try{
+          var data=JSON.parse(resp.t);
+          if(data.order && data.order.id){
+            var oid = String(data.order.id);
+            // Register trailing state
+            G.equityTrail[oid] = {
+              orderId:    oid,
+              symbol:     sym,
+              side:       'sell',
+              quantity:   parseInt(qty)||1,
+              trailVal:   trailVal,
+              trailUnit:  trailUnit,
+              lmtOffVal:  (trailType==='stop_limit') ? parseFloat((eid('ord-trail-lmt-val')||{}).value||'0') : 0,
+              lmtOffUnit: (trailType==='stop_limit') ? (eid('ord-trail-lmt-unit')||{}).value||'pct' : null,
+              orderKind:  trailType, // 'stop' or 'stop_limit'
+              highWater:  refPrice,
+              currentStop: initialStop,
+              placedAt:   Date.now(),
+              status:     'active'
+            };
+            saveEquityTrail();
+            startEquityTrailPoller();
+            res.innerHTML='<span style="color:var(--blub)">GTC trailing '+trailType+' submitted! Order ID: '+oid
+              +'<br>Initial stop: $'+initialStop.toFixed(2)+' — trails '+trailVal+(trailUnit==='pct'?'%':'$')+' below high-water.</span>';
+            res.style.borderColor='var(--blu)';
+            addAlert(sym,'Trailing '+trailType+' GTC: sell x'+qty+' @ stop $'+initialStop.toFixed(2)+' (trail '+trailVal+(trailUnit==='pct'?'%':'$')+')','go');
+            toast('Trailing stop armed: '+oid);
+            setTimeout(function(){ if(G.acctId) fetchPositions(); }, 3000);
+          } else if(data.errors){
+            var errs=data.errors.error;if(!Array.isArray(errs))errs=[errs];
+            res.innerHTML='<span style="color:var(--wrn)">Error: '+errs.join(' | ')+'</span>';
+            res.style.borderColor='var(--wrn)';
+          } else {
+            res.innerHTML='<span style="color:var(--wrn)">Response: '+JSON.stringify(data).slice(0,240)+'</span>';
+            res.style.borderColor='var(--wrn)';
+          }
+        }catch(e){
+          res.innerHTML='<span style="color:var(--wrn)">Error (HTTP '+resp.s+'): '+resp.t.slice(0,240)+'</span>';
+          res.style.borderColor='var(--wrn)';
+        }
+      }).catch(function(e){
+        res.innerHTML='<span style="color:var(--wrn)">Error: '+e.message+'</span>';
+        res.style.borderColor='var(--wrn)';
+      });
+      return;
+    }
+
+    // Non-trailing stock order (market / limit / stop / stop_limit)
+    body = 'class=equity'
+         + '&symbol=' + encodeURIComponent(sym)
+         + '&side=' + eqSide
+         + '&quantity=' + qty
+         + '&type=' + otype
+         + '&duration=' + duration;
+    if(otype === 'limit' && lmt)      body += '&price=' + lmt;
+    if(otype === 'stop' && stop)      body += '&stop=' + stop;
+    if(otype === 'stop_limit'){
+      if(lmt)  body += '&price=' + lmt;
+      if(stop) body += '&stop='  + stop;
+    }
+  }
+  // ══════════════ OPTIONS PATH (unchanged behavior + duration) ══════════════
+  else {
+    body='class=option'
+      +'&symbol='+encodeURIComponent(sym)
+      +'&option_symbol='+encodeURIComponent(occSym)
+      +'&side='+encodeURIComponent(side)
+      +'&quantity='+qty
+      +'&type='+otype
+      +'&duration='+duration;
+    if(otype==='limit'&&lmt)body+='&price='+lmt;
+    if(otype==='stop'&&lmt)body+='&stop='+lmt;
+  }
   res.innerHTML='Submitting...';res.className='ord-result show';res.style.borderColor='var(--amb)';
+  var _orderLabel = (type==='STOCK') ? (sym+' shares') : occSym;
   fetch(host+'/v1/accounts/'+acct+'/orders',{
     method:'POST',
     headers:{Authorization:'Bearer '+key,Accept:'application/json','Content-Type':'application/x-www-form-urlencoded'},
@@ -3523,14 +3993,14 @@ function submitOrder(){
       if(data.order&&data.order.id){
         res.innerHTML='<span style="color:var(--blub)">Order submitted! ID: '+data.order.id+' Status: '+data.order.status+'</span>';
         res.style.borderColor='var(--blu)';
-        addAlert(sym,'Order: '+side+' x'+qty+' '+occSym,'go');
+        addAlert(sym,'Order: '+side+' x'+qty+' '+_orderLabel+' ('+otype+', '+duration+')','go');
         toast('Order submitted: '+data.order.id);
         // Auto-refresh positions after broker processes the order
         setTimeout(function(){ if(G.acctId) fetchPositions(); }, 3000);
       } else if(data.errors){
         var errs=data.errors.error;if(!Array.isArray(errs))errs=[errs];
         res.innerHTML='<span style="color:var(--wrn)">Error: '+errs.join(' | ')+
-          (errs.join('').toLowerCase().includes('undefined symbol')?
+          (errs.join('').toLowerCase().includes('undefined symbol') && type!=='STOCK' ?
             '<br><small>Tip: The option '+occSym+' may not exist. Check the expiry date matches a standard Friday expiration.</small>':'')+'</span>';
         res.style.borderColor='var(--wrn)';
       } else {
@@ -3550,6 +4020,9 @@ function submitOrder(){
 function clearOrder(){
   ['ord-sym','ord-strike','ord-exp','ord-lmt'].forEach(function(id){eid(id).value='';});
   eid('ord-qty').value='1';
+  if(eid('ord-stop')) eid('ord-stop').value='';
+  if(eid('ord-trail-val')) eid('ord-trail-val').value='';
+  if(eid('ord-trail-lmt-val')) eid('ord-trail-lmt-val').value='';
   if(eid('ord-budget')){ eid('ord-budget').value=''; }
   if(eid('ord-budget-hint')){ eid('ord-budget-hint').textContent=''; }
   eid('ord-result').className='ord-result';
@@ -3559,6 +4032,311 @@ function clearOrder(){
   eid('asr-result').classList.remove('show');
   eid('asr-status').textContent='Enter symbol & type, then click FIND BEST';
   resetQuotePanel();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  ORDER TICKET MODE — stock vs options + trailing-stop UI wiring
+// ═══════════════════════════════════════════════════════════════════════════
+function onOrderTypeChange(){
+  var type = (eid('ord-type')||{}).value || 'CALL';
+  var form = document.querySelector('.ord-form');
+  var isStock = (type === 'STOCK');
+  if(form){ form.classList.toggle('mode-stock', isStock); }
+
+  // Update QTY label
+  var qtyLbl = eid('ord-qty-lbl');
+  if(qtyLbl) qtyLbl.textContent = isStock ? 'QTY (SHARES)' : 'QTY (CONTRACTS)';
+
+  // Update budget-per-unit hint (stocks = price, options = price * 100)
+  var hint = eid('ord-budget-hint');
+  if(hint){ hint.textContent = isStock ? '(shares = $ / price)' : '(contracts = $ / (price×100))'; }
+
+  // Rebuild ACTION dropdown based on type
+  var actEl = eid('ord-action');
+  if(actEl){
+    var cur = actEl.value;
+    if(isStock){
+      actEl.innerHTML =
+        '<option value="BUY">BUY</option>' +
+        '<option value="SELL">SELL</option>';
+      if(cur !== 'BUY' && cur !== 'SELL') actEl.value = 'BUY';
+    } else {
+      actEl.innerHTML =
+        '<option value="BUY_TO_OPEN">BUY TO OPEN</option>' +
+        '<option value="SELL_TO_OPEN">SELL TO OPEN</option>' +
+        '<option value="BUY_TO_CLOSE">BUY TO CLOSE</option>' +
+        '<option value="SELL_TO_CLOSE">SELL TO CLOSE</option>';
+      if(!cur || ['BUY','SELL'].indexOf(cur) !== -1) actEl.value = 'BUY_TO_OPEN';
+      else actEl.value = cur;
+    }
+  }
+
+  // If switching away from stock, reset any stock-only otype
+  var otype = eid('ord-otype');
+  if(otype && !isStock){
+    if(['stop_limit','trailing_stop','trailing_stop_limit'].indexOf(otype.value) !== -1){
+      otype.value = 'limit';
+    }
+  }
+  // Force re-eval of order-type-dependent field visibility
+  onOrderOtypeChange();
+  // Duration: pre/post only make sense for stocks
+  var dur = eid('ord-duration');
+  if(dur){
+    // Disable pre/post if it's options; reset to day
+    Array.from(dur.options).forEach(function(o){
+      if(o.value === 'pre' || o.value === 'post'){
+        o.disabled = !isStock;
+      }
+    });
+    if(!isStock && (dur.value === 'pre' || dur.value === 'post')) dur.value = 'day';
+  }
+  if(typeof updateStepFillMode === 'function'){ try{ updateStepFillMode(); }catch(e){} }
+}
+
+function onOrderOtypeChange(){
+  var otype = (eid('ord-otype')||{}).value || 'limit';
+  var stopWrap = eid('ord-stop-wrap');
+  var trailWrap = eid('ord-trail-wrap');
+  var trailLmtWrap = eid('ord-trail-lmt-wrap');
+  var hintRow = eid('ord-trail-hint-row');
+  var isTrail = (otype === 'trailing_stop' || otype === 'trailing_stop_limit');
+  var needsStop = (otype === 'stop' || otype === 'stop_limit');
+
+  if(stopWrap) stopWrap.style.display = needsStop ? '' : 'none';
+  if(trailWrap) trailWrap.style.display = isTrail ? '' : 'none';
+  if(trailLmtWrap) trailLmtWrap.style.display = (otype === 'trailing_stop_limit') ? '' : 'none';
+  if(hintRow) hintRow.style.display = isTrail ? '' : 'none';
+
+  // Trailing stops are GTC by design — auto-switch duration to GTC and lock it
+  var dur = eid('ord-duration');
+  if(dur){
+    if(isTrail){
+      dur.value = 'gtc';
+      dur.dataset.lockedByTrail = '1';
+      dur.setAttribute('title', 'Trailing stops are always GTC');
+    } else if(dur.dataset.lockedByTrail === '1'){
+      dur.dataset.lockedByTrail = '';
+      dur.removeAttribute('title');
+    }
+    dur.disabled = isTrail;
+  }
+}
+
+// Compute initial stop price for a trailing stop based on current quote
+function computeTrailInitialStop(currentPrice, offsetVal, offsetUnit){
+  if(!currentPrice || !offsetVal || offsetVal <= 0) return 0;
+  var stopPrice;
+  if(offsetUnit === 'pct'){
+    stopPrice = currentPrice * (1 - offsetVal / 100);
+  } else {
+    stopPrice = currentPrice - offsetVal;
+  }
+  return +stopPrice.toFixed(2);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  EQUITY TRAILING STOP ENGINE
+//  Tradier's REST API has no native trailing_stop type for equities, so
+//  this poller monitors the high-water mark and cancels + replaces the
+//  broker-side GTC stop (or stop_limit) as price advances.
+//
+//  - Stops never move DOWN (only trail up)
+//  - Only fires a cancel+replace when the new stop is materially higher
+//    (> $0.05 improvement) to avoid churning orders
+//  - Persists state to localStorage so it survives page refreshes
+// ═══════════════════════════════════════════════════════════════════════════
+function getTradierCredsQuick(){
+  var key='';try{key=localStorage.getItem('rrjcar_tradier')||'';}catch(e){}
+  var mode='sandbox';try{mode=localStorage.getItem('rrjcar_mode')||'sandbox';}catch(e){}
+  var host=mode==='live'?'https://api.tradier.com':'https://sandbox.tradier.com';
+  var acct=G.acctId||localStorage.getItem('rrjcar_acct')||'';
+  if(!key || !acct) return null;
+  return {key:key, host:host, acct:acct};
+}
+
+function startEquityTrailPoller(){
+  if(G.equityTrailTimer) return;
+  var active = Object.keys(G.equityTrail||{}).some(function(k){
+    return G.equityTrail[k] && G.equityTrail[k].status === 'active';
+  });
+  if(!active) return;
+  console.log('[eq-trail] Starting poller — '+Object.keys(G.equityTrail).length+' entries');
+  // Run once immediately, then every 30s
+  runEquityTrailCheck();
+  G.equityTrailTimer = setInterval(runEquityTrailCheck, 30000);
+}
+
+function stopEquityTrailPoller(){
+  if(G.equityTrailTimer){ clearInterval(G.equityTrailTimer); G.equityTrailTimer = null; }
+}
+
+async function runEquityTrailCheck(){
+  var creds = getTradierCredsQuick();
+  if(!creds){ return; }
+  var ids = Object.keys(G.equityTrail||{});
+  var activeIds = ids.filter(function(id){ return G.equityTrail[id] && G.equityTrail[id].status === 'active'; });
+  if(activeIds.length === 0){ stopEquityTrailPoller(); return; }
+
+  // Batch-fetch quotes for all tracked symbols
+  var symbols = {};
+  activeIds.forEach(function(id){ symbols[G.equityTrail[id].symbol] = true; });
+  var symList = Object.keys(symbols).join(',');
+  var quoteMap = {};
+  try{
+    var qr = await fetch(creds.host + '/v1/markets/quotes?symbols=' + encodeURIComponent(symList), {
+      headers:{Authorization:'Bearer '+creds.key, Accept:'application/json'}
+    });
+    var qd = await qr.json();
+    var qq = qd && qd.quotes && qd.quotes.quote;
+    if(qq){
+      var qarr = Array.isArray(qq) ? qq : [qq];
+      qarr.forEach(function(q){
+        if(q && q.symbol){
+          var last = parseFloat(q.last) || parseFloat(q.prevclose) || 0;
+          quoteMap[q.symbol] = last;
+        }
+      });
+    }
+  }catch(e){
+    console.warn('[eq-trail] quote fetch failed:', e.message);
+    return;
+  }
+
+  // Check each active trailing order
+  for(var i=0; i<activeIds.length; i++){
+    var id = activeIds[i];
+    var t = G.equityTrail[id];
+    if(!t) continue;
+    var px = quoteMap[t.symbol];
+    if(!px || px <= 0) continue;
+
+    // Verify order is still open at the broker
+    var orderStatus = await fetchTradierOrderStatus(creds, id);
+    if(!orderStatus){
+      // Couldn't verify — skip this pass
+      continue;
+    }
+    if(orderStatus === 'filled' || orderStatus === 'canceled' || orderStatus === 'expired' || orderStatus === 'rejected'){
+      console.log('[eq-trail] '+t.symbol+' order '+id+' is '+orderStatus+' — deactivating');
+      t.status = orderStatus;
+      saveEquityTrail();
+      try{ addAlert(t.symbol, 'Trailing stop '+id+' '+orderStatus.toUpperCase(), orderStatus==='filled'?'go':'nogo'); }catch(e){}
+      continue;
+    }
+
+    // Update high-water mark
+    if(px > t.highWater){ t.highWater = px; }
+
+    // Compute the ideal stop price based on the high-water mark
+    var idealStop = computeTrailInitialStop(t.highWater, t.trailVal, t.trailUnit);
+    if(idealStop <= 0) continue;
+
+    // Only walk the stop UP, and only if improvement is material (> $0.05)
+    if(idealStop > (t.currentStop || 0) + 0.05){
+      var oldStop = t.currentStop;
+      var newLimit = 0;
+      if(t.orderKind === 'stop_limit' && t.lmtOffVal > 0){
+        newLimit = (t.lmtOffUnit === 'pct')
+          ? idealStop * (1 - t.lmtOffVal/100)
+          : idealStop - t.lmtOffVal;
+        newLimit = +newLimit.toFixed(2);
+        if(newLimit <= 0) continue;
+      }
+      // Cancel + replace
+      var replaced = await replaceEquityTrailingStop(creds, t, idealStop, newLimit);
+      if(replaced && replaced.newOrderId){
+        console.log('[eq-trail] '+t.symbol+' stop walked $'+oldStop.toFixed(2)+' → $'+idealStop.toFixed(2)+' (new order '+replaced.newOrderId+')');
+        try{ addAlert(t.symbol, 'Trail stop walked: $'+oldStop.toFixed(2)+' → $'+idealStop.toFixed(2), 'go'); }catch(e){}
+        // Re-key under the new order ID
+        delete G.equityTrail[id];
+        t.orderId = replaced.newOrderId;
+        t.currentStop = idealStop;
+        G.equityTrail[replaced.newOrderId] = t;
+      }
+      saveEquityTrail();
+    } else {
+      // Nothing to do — just persist the possibly-updated highWater
+      saveEquityTrail();
+    }
+  }
+}
+
+async function fetchTradierOrderStatus(creds, orderId){
+  try{
+    var r = await fetch(creds.host + '/v1/accounts/' + creds.acct + '/orders/' + encodeURIComponent(orderId), {
+      headers:{Authorization:'Bearer '+creds.key, Accept:'application/json'}
+    });
+    var d = await r.json();
+    if(d && d.order && d.order.status){
+      return String(d.order.status).toLowerCase();
+    }
+  }catch(e){
+    console.warn('[eq-trail] order status fetch failed for '+orderId+':', e.message);
+  }
+  return null;
+}
+
+async function replaceEquityTrailingStop(creds, trailState, newStop, newLimit){
+  // Cancel existing order
+  try{
+    await fetch(creds.host + '/v1/accounts/' + creds.acct + '/orders/' + encodeURIComponent(trailState.orderId), {
+      method: 'DELETE',
+      headers:{Authorization:'Bearer '+creds.key, Accept:'application/json'}
+    });
+  }catch(e){
+    console.warn('[eq-trail] cancel failed:', e.message);
+    return null;
+  }
+  // Brief delay so cancel settles before placement
+  await new Promise(function(r){ setTimeout(r, 600); });
+  // Submit replacement
+  var body = 'class=equity'
+    + '&symbol=' + encodeURIComponent(trailState.symbol)
+    + '&side=' + trailState.side
+    + '&quantity=' + trailState.quantity
+    + '&type=' + trailState.orderKind
+    + '&duration=gtc'
+    + '&stop=' + newStop.toFixed(2);
+  if(trailState.orderKind === 'stop_limit' && newLimit > 0){
+    body += '&price=' + newLimit.toFixed(2);
+  }
+  try{
+    var r2 = await fetch(creds.host + '/v1/accounts/' + creds.acct + '/orders', {
+      method: 'POST',
+      headers:{Authorization:'Bearer '+creds.key, Accept:'application/json', 'Content-Type':'application/x-www-form-urlencoded'},
+      body: body
+    });
+    var d2 = await r2.json();
+    if(d2 && d2.order && d2.order.id){
+      return { newOrderId: String(d2.order.id) };
+    } else {
+      console.warn('[eq-trail] replace failed — response:', JSON.stringify(d2).slice(0,200));
+      // Preserve state so a later pass can retry; keep the (now-canceled) order id flagged
+      trailState.status = 'replace_failed';
+      try{ addAlert(trailState.symbol, 'Trail replace FAILED — old stop canceled, no new stop!', 'nogo'); }catch(e){}
+    }
+  }catch(e){
+    console.warn('[eq-trail] replace submission failed:', e.message);
+  }
+  return null;
+}
+
+// Manual "cancel this trailing stop" helper (useful for UI / debugging)
+async function cancelEquityTrail(orderId){
+  var t = G.equityTrail[orderId];
+  if(!t) return;
+  var creds = getTradierCredsQuick();
+  if(creds){
+    try{
+      await fetch(creds.host + '/v1/accounts/' + creds.acct + '/orders/' + encodeURIComponent(orderId), {
+        method:'DELETE',
+        headers:{Authorization:'Bearer '+creds.key, Accept:'application/json'}
+      });
+    }catch(e){ console.warn('[eq-trail] cancel failed:', e.message); }
+  }
+  delete G.equityTrail[orderId];
+  saveEquityTrail();
 }
 
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
@@ -4792,9 +5570,17 @@ async function fetchDynamicUniverse(key, mode){
   var allTickers = UNIVERSE_FULL.filter(function(u){
     if(seen[u.t]) return false;
     seen[u.t] = true;
+    // Respect the multi-select sector filter — only scan selected sectors.
+    // Empty G.selectedSectors = "all sectors".
+    if(!sectorAllowed(u.s)) return false;
     return true;
   });
+  // Always include SPY as a market reference, regardless of sector filter
   if(!seen['SPY']) allTickers.push({t:'SPY', s:'ETF'});
+  if(allTickers.length === 0){
+    console.warn('[scan] No tickers match current sector selection');
+    return [];
+  }
   var BATCH_SIZE = 400;
   var allQuotes = [];
   var totalBatches = Math.ceil(allTickers.length / BATCH_SIZE);
@@ -4953,9 +5739,15 @@ async function fetchDynamicUniverse(key, mode){
   }
   return passed;
 }
-function runScan(){
+async function runScan(){
   if(G.scanRunning) return;
   G.scanRunning = true;
+
+  // Wait for ticker416.csv to finish loading if still in flight
+  if(G._tickerLoadPromise){
+    try{ await G._tickerLoadPromise; }catch(e){}
+    G._tickerLoadPromise = null;
+  }
 
   var key = ''; try{ key = localStorage.getItem('rrjcar_tradier') || ''; }catch(e){}
   var mode = localStorage.getItem('rrjcar_mode') || 'sandbox';
@@ -4966,8 +5758,8 @@ function runScan(){
   if(wrap) wrap.style.display = 'block';
   setScanProgress(0, 'Starting scan...');
 
-  var sc = eid('sc-sect');
-  sc.innerHTML = '<option value="">All</option>';
+  // NOTE: Sector selections are preserved across scans — the multi-select
+  // checkbox dropdown is rebuilt from UNIVERSE_FULL + new results in finishScan().
 
   if(!key){
     // No API key \u2014 use static universe with simulated data
@@ -5059,14 +5851,22 @@ function runScan(){
 }
 
 function finishScan(){
-  // Rebuild sector dropdown from actual results
+  // Rebuild known-sectors set from actual results + universe
+  G.results.forEach(function(r){ if(r.sector) G.knownSectors.add(r.sector); });
+  gatherKnownSectors();
+  // Keep the hidden legacy select in sync (some other code still reads it)
   var sc = eid('sc-sect');
-  var sectors = [...new Set(G.results.map(function(r){ return r.sector; }))].sort();
-  sectors.forEach(function(s){
-    var o = document.createElement('option');
-    o.value = s; o.textContent = s;
-    sc.appendChild(o);
-  });
+  if(sc){
+    sc.innerHTML = '<option value="">All</option>';
+    Array.from(G.knownSectors).sort().forEach(function(s){
+      var o = document.createElement('option');
+      o.value = s; o.textContent = s;
+      sc.appendChild(o);
+    });
+  }
+  // Refresh the multi-select UI (preserves G.selectedSectors)
+  populateSectorCheckboxes();
+  updateSectorLabel();
 
   G.results.sort(function(a,b){ return b.score - a.score; });
   G.filtered = G.results.slice();
@@ -5191,7 +5991,6 @@ function finishScan(){
 function getIndFilter(id){ var el=eid(id); return el?el.checked:false; }
 
 function applyFilters(){
-  var sect    = eid('sc-sect').value;
   var sig     = eid('sc-sig').value;
   var minsc   = +eid('sc-minscore').value||0;
   var maxOptPr= parseFloat(eid('sc-maxoptprice') ? eid('sc-maxoptprice').value : 0) || 0;
@@ -5215,8 +6014,8 @@ function applyFilters(){
   }
 
   G.filtered = G.results.filter(function(r){
-    // Standard filters
-    if(sect && r.sector !== sect) return false;
+    // Multi-select sector filter
+    if(!sectorAllowed(r.sector)) return false;
     if(sig === 'GO' && !r.isGo) return false;
     if(sig === 'NO-GO' && r.isGo) return false;
     if(r.score < minsc) return false;
@@ -5269,6 +6068,11 @@ function clearFilters(){
   if(eid('sc-sig'))         eid('sc-sig').value  = 'GO';
   if(eid('sc-minscore'))    eid('sc-minscore').value = '120';
   if(eid('sc-maxoptprice')) eid('sc-maxoptprice').value = '';
+  // Reset sector multi-select to "all"
+  G.selectedSectors = new Set();
+  saveSelectedSectors();
+  populateSectorCheckboxes();
+  updateSectorLabel();
   // Uncheck all indicator filters
   ['filt-analyst','filt-insider','filt-gex','filt-proven',
    'filt-52hi','filt-rs','filt-macd','filt-tf','filt-ema200','filt-vol'].forEach(function(id){
@@ -10306,6 +11110,19 @@ function init(){
   loadAutoTraderSettings();
   loadAutoTraderState();
   loadPortfolio();
+  // ── Load ticker universe from ticker416.csv (same folder) ─────────
+  // Non-blocking: succeeds → replaces UNIVERSE_FULL; fails → keeps embedded
+  G._tickerLoadPromise = loadTickerCSV('ticker416.csv').then(function(){
+    // Once the CSV is loaded, populate the sector checkboxes
+    try{ gatherKnownSectors(); populateSectorCheckboxes(); updateSectorLabel(); }catch(e){}
+  });
+  // Also populate immediately from embedded universe so the dropdown
+  // works before the CSV round-trip finishes.
+  try{ gatherKnownSectors(); populateSectorCheckboxes(); updateSectorLabel(); }catch(e){}
+  // Resume any GTC trailing stops from a previous session
+  try{ startEquityTrailPoller(); }catch(e){}
+  // Initialize order ticket UI mode (stock vs options field visibility)
+  try{ onOrderTypeChange(); onOrderOtypeChange(); }catch(e){}
   updateClock();
   setInterval(updateClock, 1000);
   setInterval(saveAppSettings, 60000);
