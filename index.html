@@ -1357,6 +1357,12 @@ tr.sel-row td{background:var(--blu3);}
         <button class="btn wrn" onclick="clearKeys()">CLEAR KEYS</button>
         <button class="btn" style="border-color:var(--gry2);color:var(--gry);" onclick="clearFmpCache()" title="Clear the 24-hour FMP data cache — forces fresh API calls on next ticker click">CLEAR FMP CACHE</button>
       </div>
+      <div class="ord-row" style="margin-top:10px;border-top:1px solid var(--bg3);padding-top:10px;">
+        <button class="btn grn" onclick="testBothApis()" title="Ping both APIs to verify keys + connectivity">▲ TEST BOTH APIS</button>
+        <button class="btn" onclick="testTradierApi()" title="Just Tradier — verifies key, fetches profile + a sample quote">TEST TRADIER</button>
+        <button class="btn" onclick="testFmpApi()" title="Just FMP — verifies key, fetches a sample quote">TEST FMP</button>
+      </div>
+      <div id="api-test-result" style="margin-top:10px;font-family:var(--ff-mono);font-size:11px;line-height:1.7;background:var(--bg0);border:1px solid var(--bg3);border-radius:4px;padding:10px 12px;display:none;white-space:pre-wrap;word-break:break-word;"></div>
       <div class="api-note">Keys stored only in your browser localStorage — never leave your device.<br>
         FMP: <a href="https://financialmodelingprep.com" target="_blank">financialmodelingprep.com</a> &nbsp;|&nbsp;
         Tradier: <a href="https://developer.tradier.com" target="_blank">developer.tradier.com</a>
@@ -9667,6 +9673,182 @@ function clearKeys(){
   eid('tr-status').textContent='Cleared';eid('tr-status').className='api-status miss';
   eid('acct-status').textContent='Cleared';eid('acct-status').className='api-status miss';
   toast('API keys cleared');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  API CONNECTIVITY TEST — verifies keys work end-to-end
+//  Pings Tradier (user profile + sample quote) and FMP (sample quote).
+//  Output goes to #api-test-result and console.
+// ═══════════════════════════════════════════════════════════════════════════
+function _apiTestAppend(html, ok){
+  var box = eid('api-test-result');
+  if(!box) return;
+  box.style.display = 'block';
+  var color = ok === true ? 'var(--grn)' : ok === false ? 'var(--wrn)' : 'var(--gry)';
+  box.innerHTML += '<span style="color:'+color+'">'+html+'</span>\n';
+}
+function _apiTestReset(){
+  var box = eid('api-test-result');
+  if(!box) return;
+  box.innerHTML = '';
+  box.style.display = 'block';
+  _apiTestAppend('▲ Running API tests...\n', null);
+}
+
+async function testTradierApi(){
+  _apiTestReset();
+  var key = '';
+  try{ key = localStorage.getItem('rrjcar_tradier') || ''; }catch(e){}
+  if(!key){
+    _apiTestAppend('✗ TRADIER: no key saved. Enter key above and click SAVE KEYS first.', false);
+    return false;
+  }
+  var mode = 'sandbox';
+  try{ mode = localStorage.getItem('rrjcar_mode') || 'sandbox'; }catch(e){}
+  var host = mode === 'live' ? 'https://api.tradier.com' : 'https://sandbox.tradier.com';
+  _apiTestAppend('→ TRADIER: mode='+mode.toUpperCase()+' host='+host, null);
+  _apiTestAppend('→ TRADIER: key length='+key.length+' (hidden)', null);
+
+  // Test 1 — user profile (verifies auth)
+  try{
+    var t0 = performance.now();
+    var r = await fetch(host + '/v1/user/profile', {
+      headers: { Authorization: 'Bearer ' + key, Accept: 'application/json' }
+    });
+    var ms = Math.round(performance.now() - t0);
+    if(!r.ok){
+      var body = await r.text();
+      _apiTestAppend('✗ TRADIER /user/profile: HTTP '+r.status+' ('+ms+'ms)\n  '+body.slice(0,200), false);
+      return false;
+    }
+    var d = await r.json();
+    var accounts = d && d.profile && d.profile.account;
+    var acctList = accounts ? (Array.isArray(accounts) ? accounts : [accounts]) : [];
+    _apiTestAppend('✓ TRADIER /user/profile: OK ('+ms+'ms) — '+acctList.length+' account(s) visible', true);
+    acctList.slice(0, 3).forEach(function(a){
+      _apiTestAppend('    • '+(a.account_number||'?')+'  '+(a.type||'')+'  '+(a.status||''), null);
+    });
+  }catch(e){
+    _apiTestAppend('✗ TRADIER /user/profile: network error — '+e.message, false);
+    return false;
+  }
+
+  // Test 2 — sample quote (verifies market-data endpoint)
+  try{
+    var t1 = performance.now();
+    var r2 = await fetch(host + '/v1/markets/quotes?symbols=SPY', {
+      headers: { Authorization: 'Bearer ' + key, Accept: 'application/json' }
+    });
+    var ms2 = Math.round(performance.now() - t1);
+    if(!r2.ok){
+      _apiTestAppend('✗ TRADIER /markets/quotes: HTTP '+r2.status+' ('+ms2+'ms)', false);
+      return false;
+    }
+    var d2 = await r2.json();
+    var q = d2 && d2.quotes && d2.quotes.quote;
+    if(!q){
+      _apiTestAppend('✗ TRADIER /markets/quotes: response has no quote data', false);
+      return false;
+    }
+    _apiTestAppend('✓ TRADIER /markets/quotes: SPY last=$'+(q.last||q.prevclose||'?')+' ('+ms2+'ms)', true);
+  }catch(e){
+    _apiTestAppend('✗ TRADIER /markets/quotes: network error — '+e.message, false);
+    return false;
+  }
+
+  // Test 3 — clock (free / always available)
+  try{
+    var r3 = await fetch(host + '/v1/markets/clock', {
+      headers: { Authorization: 'Bearer ' + key, Accept: 'application/json' }
+    });
+    var d3 = await r3.json();
+    var clk = d3 && d3.clock;
+    if(clk){
+      _apiTestAppend('✓ TRADIER market clock: '+clk.state+' — '+(clk.description||''), true);
+    }
+  }catch(e){}
+
+  _apiTestAppend('✓ TRADIER: all checks passed.\n', true);
+  return true;
+}
+
+async function testFmpApi(){
+  if(!eid('api-test-result') || !eid('api-test-result').innerHTML.includes('FMP')){
+    _apiTestReset();
+  }
+  var key = '';
+  try{ key = localStorage.getItem('rrjcar_fmp') || ''; }catch(e){}
+  if(!key){
+    _apiTestAppend('✗ FMP: no key saved. Enter key above and click SAVE KEYS first.', false);
+    return false;
+  }
+  _apiTestAppend('→ FMP: key length='+key.length+' (hidden)', null);
+
+  // FMP's /stable/quote endpoint — what the dashboard actually uses
+  try{
+    var t0 = performance.now();
+    var url = 'https://financialmodelingprep.com/stable/quote?symbol=AAPL&apikey=' + encodeURIComponent(key);
+    var r = await fetch(url);
+    var ms = Math.round(performance.now() - t0);
+    if(!r.ok){
+      var body = await r.text();
+      _apiTestAppend('✗ FMP /stable/quote: HTTP '+r.status+' ('+ms+'ms)\n  '+body.slice(0,300), false);
+      if(r.status === 401 || r.status === 403){
+        _apiTestAppend('  Hint: key is rejected — bad/expired key, or plan doesn\'t include this endpoint', false);
+      } else if(r.status === 429){
+        _apiTestAppend('  Hint: rate-limited — free tier allows ~250 calls/day', false);
+      }
+      return false;
+    }
+    var d = await r.json();
+    // FMP returns either an array or an object with "Error Message"
+    if(d && d['Error Message']){
+      _apiTestAppend('✗ FMP: API error — '+d['Error Message'], false);
+      return false;
+    }
+    var q = Array.isArray(d) ? d[0] : d;
+    if(!q || !q.symbol){
+      _apiTestAppend('✗ FMP: unexpected response shape — '+JSON.stringify(d).slice(0, 200), false);
+      return false;
+    }
+    _apiTestAppend('✓ FMP /stable/quote: AAPL price=$'+(q.price||'?')+' ('+ms+'ms)', true);
+  }catch(e){
+    _apiTestAppend('✗ FMP /stable/quote: network error — '+e.message, false);
+    return false;
+  }
+
+  // Check if we're in a self-imposed cooldown (circuit breaker)
+  try{
+    var quotaKey = window._FMP_QUOTA_KEY || 'rrjcar_fmp_quota_exhausted_until';
+    var ttl = parseInt(localStorage.getItem(quotaKey) || '0', 10);
+    if(ttl && ttl > Date.now()){
+      var mins = Math.ceil((ttl - Date.now()) / 60000);
+      _apiTestAppend('⚠ FMP: client-side cooldown active — '+mins+'min remaining before dashboard will retry', false);
+    }
+  }catch(e){}
+
+  _apiTestAppend('✓ FMP: key valid, endpoint reachable.\n', true);
+  return true;
+}
+
+async function testBothApis(){
+  _apiTestReset();
+  _apiTestAppend('═══ TRADIER ═══', null);
+  var t = await testTradierApi();
+  _apiTestAppend('', null);
+  _apiTestAppend('═══ FMP ═══', null);
+  var f = await testFmpApi();
+  _apiTestAppend('', null);
+  if(t && f){
+    _apiTestAppend('▲ BOTH APIS OK — you\'re good to go.', true);
+    toast('Both APIs OK');
+  } else if(t || f){
+    _apiTestAppend('⚠ Partial success — '+(t?'Tradier OK':'Tradier FAILED')+', '+(f?'FMP OK':'FMP FAILED'), false);
+    toast((t?'Tradier':'FMP')+' only');
+  } else {
+    _apiTestAppend('✗ Both APIs failed — see details above', false);
+    toast('Both APIs failed');
+  }
 }
 
 function loadKeys(){
