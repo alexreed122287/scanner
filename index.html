@@ -2804,7 +2804,7 @@ var UNIVERSE_FULL=[
 ];
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  TICKER CSV LOADER — reads ticker416.csv at runtime from same folder
+//  TICKER CSV LOADER — reads alex_tickers.csv at runtime from same folder
 //  Replaces UNIVERSE_FULL on success; falls back to embedded array on failure.
 //  CSV format: Symbol,Description,Price,Price - Currency,Sector (header row required)
 // ═══════════════════════════════════════════════════════════════════════════
@@ -2825,7 +2825,7 @@ function _parseCsvLine(line){
   return out;
 }
 async function loadTickerCSV(filename){
-  filename = filename || 'ticker416.csv';
+  filename = filename || 'alex_tickers.csv';
   // Cache-bust with a version param so stale browser caches don't serve
   // an old 404. The timestamp granularity (hourly) keeps CDN-friendly
   // caching without letting a stale 404 persist for days.
@@ -2879,12 +2879,12 @@ async function loadTickerCSV(filename){
     try{
       var el2 = document.getElementById('sc-universe-label');
       if(el2 && !G.scanRunning){
-        el2.textContent = '⚠ ticker416.csv not loaded — using embedded ' + UNIVERSE_FULL.length + ' (' + e.message + ')';
+        el2.textContent = '⚠ alex_tickers.csv not loaded — using embedded ' + UNIVERSE_FULL.length + ' (' + e.message + ')';
         el2.style.color = 'var(--wrn)';
       }
       // Also surface a toast so the user sees it without checking DevTools
       if(typeof toast === 'function'){
-        setTimeout(function(){ toast('ticker416.csv not loaded — using embedded universe', 4000); }, 500);
+        setTimeout(function(){ toast('alex_tickers.csv not loaded — using embedded universe', 4000); }, 500);
       }
     }catch(e2){}
     return 0;
@@ -5992,7 +5992,7 @@ async function runScan(){
   if(G.scanRunning) return;
   G.scanRunning = true;
 
-  // Wait for ticker416.csv to finish loading if still in flight
+  // Wait for alex_tickers.csv to finish loading if still in flight
   if(G._tickerLoadPromise){
     try{ await G._tickerLoadPromise; }catch(e){}
     G._tickerLoadPromise = null;
@@ -11651,9 +11651,9 @@ function init(){
   loadAutoTraderSettings();
   loadAutoTraderState();
   loadPortfolio();
-  // ── Load ticker universe from ticker416.csv (same folder) ─────────
+  // ── Load ticker universe from alex_tickers.csv (same folder) ─────────
   // Non-blocking: succeeds → replaces UNIVERSE_FULL; fails → keeps embedded
-  G._tickerLoadPromise = loadTickerCSV('ticker416.csv').then(function(){
+  G._tickerLoadPromise = loadTickerCSV('alex_tickers.csv').then(function(){
     // Once the CSV is loaded, populate the sector checkboxes
     try{ gatherKnownSectors(); populateSectorCheckboxes(); updateSectorLabel(); }catch(e){}
   });
