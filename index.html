@@ -34,6 +34,31 @@
   --glow-cyan:0 0 18px rgba(0,212,255,.5);
   --glow-pink:0 0 18px rgba(255,0,230,.5);
 }
+/* ── LIGHT MODE (colorblind-friendly: Okabe-Ito-inspired, WCAG AA on white) ── */
+body.light-mode{
+  --bg0:#ffffff;--bg1:#f5f5f5;--bg2:#ebebeb;--bg3:#d9d9d9;
+  --amb:#005bbb;--ambb:#0072b2;--amb3:rgba(0,91,187,.1);
+  --blu:#005bbb;--blub:#0072b2;--blu3:rgba(0,91,187,.12);
+  --ngo:#cc79a7;--wrn:#d55e00;--wrn3:rgba(213,94,0,.15);
+  --wht:#111111;--gry:#555555;--gry2:#888888;
+  --lvb:#ffffff;--grn:#117733;--grn3:rgba(17,119,51,.12);
+  --bdr:1px solid #cccccc;
+  --glow-cyan:0 0 0 transparent;--glow-pink:0 0 0 transparent;
+}
+body.light-mode{background-image:none !important;}
+body.light-mode #hdr,body.light-mode #nav{background:var(--bg1) !important;border-bottom:1px solid #bbb !important;}
+body.light-mode #hdr-logo{text-shadow:none !important;}
+body.light-mode .ntab.active{text-shadow:none !important;}
+body.light-mode .ntab:hover{color:#000 !important;}
+body.light-mode .card,body.light-mode .tbl-wrap,body.light-mode .sig-card,body.light-mode .stats-bar,body.light-mode .stat-box,body.light-mode .flt-bar{background:var(--bg1) !important;}
+body.light-mode .badge.go,body.light-mode .sc.go{background:var(--grn3) !important;color:var(--grn) !important;border-color:var(--grn) !important;}
+body.light-mode .badge.nogo,body.light-mode .sc.nogo{background:var(--wrn3) !important;color:var(--wrn) !important;border-color:var(--wrn) !important;}
+body.light-mode .pnl-pos{color:var(--grn) !important;}
+body.light-mode .pnl-neg{color:var(--wrn) !important;}
+body.light-mode input,body.light-mode select,body.light-mode textarea{background:#fff !important;color:#111 !important;border:1px solid #bbb !important;}
+body.light-mode table th{background:var(--bg2) !important;color:#111 !important;}
+body.light-mode table tbody tr:hover{background:var(--amb3) !important;}
+body.light-mode{font-weight:600;}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{
   background:var(--bg0);color:var(--wht);font-family:var(--ff);
@@ -544,6 +569,7 @@ tr.sel-row td{background:var(--blu3);}
     <span class="htick"><span class="ts">SPX </span><span class="tv" id="h-spx">--</span> <span class="tc" id="h-spx-c"></span></span>
   </div>
   <div id="hdr-right">
+    <button id="theme-toggle" onclick="toggleLightMode()" title="Toggle light / dark mode" style="background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.25);border-radius:3px;padding:2px 8px;font-size:10px;font-family:var(--ff-mono);color:var(--amb);letter-spacing:.5px;cursor:pointer;">&#9788; LIGHT</button>
     <span id="clk">--:--:--</span>
     <span id="mkt-status">--</span>
     <span id="mode-badge">SANDBOX</span>
@@ -561,7 +587,7 @@ tr.sel-row td{background:var(--blu3);}
   <button class="ntab" onclick="switchTab('closed')">CLOSED POSITIONS</button>
   <button class="ntab" onclick="switchTab('api')">&#9881; API</button>
   <button class="ntab" onclick="switchTab('pf')">PORTFOLIO</button>
-  <button class="ntab" onclick="switchTab('cw')">&#9734; WATCHLIST</button>
+  <button class="ntab" onclick="switchTab('cw')">&#9734; OPTIONS WATCHLIST</button>
 </div>
 <div id="app">
 <div class="tab-pane active" id="tab-bs">
@@ -575,6 +601,9 @@ tr.sel-row td{background:var(--blu3);}
     <div class="stat-box" style="flex:0 0 auto;display:flex;align-items:center;padding:6px 10px;border-left:1px solid var(--bg3);">
       <button class="btn grn" style="font-size:11px;padding:6px 10px;white-space:nowrap;" onclick="exportGoTickers('bs')" title="Copy a comma-separated list of all GO-signal tickers to the clipboard">▲ EXPORT GOs</button>
     </div>
+  </div>
+  <div class="flt-bar" style="padding:4px 10px;gap:8px;">
+    <input type="text" id="bs-search" placeholder="&#128269; Search ticker..." oninput="onBsSearch()" style="flex:1;min-width:160px;font-family:var(--ff-mono);font-size:11px;padding:5px 10px;background:var(--bg1);border:1px solid var(--bg3);border-radius:3px;color:var(--amb);">
   </div>
   <div class="split">
     <div class="split-l">
@@ -602,7 +631,6 @@ tr.sel-row td{background:var(--blu3);}
     <button class="btn blu" style="font-size:11px;" onclick="applyStrategyMode('highConviction')">&#9733; HIGH CONVICTION</button>
     <button class="btn" style="font-size:11px;" onclick="applyStrategyMode('breakout')">&#9650; BREAKOUT</button>
     <button class="btn" style="font-size:11px;" onclick="applyStrategyMode('momentum')">&#9654; MOMENTUM</button>
-    <button class="btn" style="font-size:11px;" onclick="applyStrategyMode('institutional')">&#9670; INSTITUTIONAL</button>
     <button class="btn" style="font-size:11px;border-color:var(--gry2);color:var(--gry);" onclick="applyStrategyMode('clear')">&#10005; CLEAR</button>
     <span id="strategy-desc-sc" style="font-family:var(--ff-mono);font-size:10px;color:var(--gry);margin-left:4px;font-style:italic;"></span>
   </div>
@@ -635,7 +663,6 @@ tr.sel-row td{background:var(--blu3);}
   <div class="flt-bar" style="flex-wrap:wrap;gap:6px;border-top:1px solid var(--bg3);padding:6px 10px;">
     <span style="font-family:var(--ff-mono);font-size:10px;color:var(--amb);letter-spacing:.5px;margin-right:4px;">MUST PASS:</span>
     <label class="ind-filter-lbl"><input type="checkbox" class="ind-filter" id="filt-analyst" onchange="applyFilters()"> <span>Analyst Revisions &#8593;</span></label>
-    <label class="ind-filter-lbl"><input type="checkbox" class="ind-filter" id="filt-insider" onchange="applyFilters()"> <span>Insider Buying</span></label>
     <label class="ind-filter-lbl"><input type="checkbox" class="ind-filter" id="filt-gex" onchange="applyFilters()"> <span>GEX Call Heavy</span></label>
     <label class="ind-filter-lbl"><input type="checkbox" class="ind-filter" id="filt-proven" onchange="applyFilters()"> <span>PROVEN Ticker</span></label>
     <label class="ind-filter-lbl"><input type="checkbox" class="ind-filter" id="filt-52hi" onchange="applyFilters()"> <span>52Wk Hi &lt;15%</span></label>
@@ -644,7 +671,12 @@ tr.sel-row td{background:var(--blu3);}
     <label class="ind-filter-lbl"><input type="checkbox" class="ind-filter" id="filt-tf" onchange="applyFilters()"> <span>TF Aligned 2/3</span></label>
     <label class="ind-filter-lbl"><input type="checkbox" class="ind-filter" id="filt-ema200" onchange="applyFilters()"> <span>Above EMA200</span></label>
     <label class="ind-filter-lbl"><input type="checkbox" class="ind-filter" id="filt-vol" onchange="applyFilters()"> <span>Vol &gt; Avg</span></label>
-    <span id="sc-filter-count" style="font-family:var(--ff-mono);font-size:10px;color:var(--gry);margin-left:auto;"></span>
+    <label class="ind-filter-lbl" title="LuxAlgo SMC: nearest bearish order block ≥5% above price (daily)"><input type="checkbox" class="ind-filter" id="filt-obclear" onchange="onOBFilterChange()"> <span>Clear Bear OB &#8805;5% (SMC)</span></label>
+    <label class="ind-filter-lbl" title="LuxAlgo SMC: price at or within 1% above an active bullish support OB (daily)"><input type="checkbox" class="ind-filter" id="filt-obsupport" onchange="onOBFilterChange()"> <span>At Bull OB &#8804;1% (SMC)</span></label>
+    <label class="ind-filter-lbl" title="LuxAlgo Institutional Order Flow: nearest bearish OB ≥5% above price (daily)"><input type="checkbox" class="ind-filter" id="filt-inst-obclear" onchange="onOBFilterChange()"> <span>Clear Bear OB &#8805;5% (Inst)</span></label>
+    <label class="ind-filter-lbl" title="LuxAlgo Institutional Order Flow: price at or within 1% above an active bullish support OB (daily)"><input type="checkbox" class="ind-filter" id="filt-inst-obsupport" onchange="onOBFilterChange()"> <span>At Bull OB &#8804;1% (Inst)</span></label>
+    <input type="text" id="sc-search" placeholder="&#128269; Search ticker..." oninput="onScSearch()" style="margin-left:auto;font-family:var(--ff-mono);font-size:11px;padding:3px 8px;background:var(--bg1);border:1px solid var(--bg3);border-radius:3px;color:var(--amb);width:160px;">
+    <span id="sc-filter-count" style="font-family:var(--ff-mono);font-size:10px;color:var(--gry);"></span>
   </div>
   <div class="flt-bar" style="flex-wrap:wrap;gap:6px;">
     <button class="btn blu" id="sc-run-btn" onclick="runScan()">↻ SCAN</button>
@@ -1284,7 +1316,6 @@ tr.sel-row td{background:var(--blu3);}
         <button class="btn blu" style="font-size:11px;" onclick="applyStrategyMode('highConviction')">&#9733; HIGH CONVICTION</button>
         <button class="btn" style="font-size:11px;" onclick="applyStrategyMode('breakout')">&#9650; BREAKOUT</button>
         <button class="btn" style="font-size:11px;" onclick="applyStrategyMode('momentum')">&#9654; MOMENTUM</button>
-        <button class="btn" style="font-size:11px;" onclick="applyStrategyMode('institutional')">&#9670; INSTITUTIONAL</button>
         <button class="btn" style="font-size:11px;border-color:var(--gry2);color:var(--gry);" onclick="applyStrategyMode('clear')">CLEAR ALL</button>
       </div>
       <div id="strategy-desc" style="font-family:var(--ff-mono);font-size:10px;color:var(--gry);line-height:1.7;min-height:32px;"></div>
@@ -1393,7 +1424,7 @@ tr.sel-row td{background:var(--blu3);}
 <!-- moved #app close to after tab-pf -->
 <div class="tab-pane" id="tab-cw">
   <div class="flt-bar" style="justify-content:space-between;align-items:center;">
-    <span style="font-family:var(--ff-brand);font-size:12px;color:var(--amb);letter-spacing:2px;">CONTRACT WATCHLIST</span>
+    <span style="font-family:var(--ff-brand);font-size:12px;color:var(--amb);letter-spacing:2px;">OPTIONS WATCHLIST</span>
     <div style="display:flex;gap:8px;align-items:center;">
       <span style="color:var(--gry);font-size:10px;" id="cw-last-update"></span>
       <button class="btn" style="font-size:10px;padding:3px 10px;" onclick="cwRefreshAll()">&#8635; REFRESH ALL</button>
@@ -1428,6 +1459,11 @@ tr.sel-row td{background:var(--blu3);}
     <div class="stat-box"><div class="stat-label">TOP SECTOR</div><div class="stat-val" id="pf-top-sector">--</div></div>
   </div>
 
+  <!-- Columns horizontal scroll -->
+  <div id="pf-cols-wrap" style="display:flex;gap:10px;padding:8px 10px;overflow-x:auto;align-items:flex-start;min-height:400px;">
+    <!-- columns rendered dynamically by renderPortfolio() -->
+  </div>
+
   <!-- Master charts row -->
   <div style="display:flex;gap:10px;padding:8px 10px;flex-wrap:wrap;">
     <div style="flex:1;min-width:300px;background:var(--bg1);border:var(--bdr);border-radius:4px;padding:10px;">
@@ -1438,11 +1474,6 @@ tr.sel-row td{background:var(--blu3);}
       <div style="font-family:var(--ff-brand);font-size:10px;color:var(--amb);letter-spacing:2px;margin-bottom:6px;">ALLOCATION BY SECTOR</div>
       <div style="position:relative;height:240px;"><canvas id="pf-chart-sector"></canvas></div>
     </div>
-  </div>
-
-  <!-- Columns horizontal scroll -->
-  <div id="pf-cols-wrap" style="display:flex;gap:10px;padding:8px 10px;overflow-x:auto;align-items:flex-start;min-height:400px;">
-    <!-- columns rendered dynamically by renderPortfolio() -->
   </div>
 
   <!-- Robinhood paste modal -->
@@ -2876,15 +2907,13 @@ async function loadTickerCSV(filename){
     G._tickerLoadStatus = 'fallback';
     G._tickerLoadError = e.message;
     console.warn('[ticker-csv] ✗ CSV load FAILED — using embedded fallback ('+UNIVERSE_FULL.length+' tickers). Reason: '+e.message);
+    // Silent fallback \u2014 embedded universe is always sufficient for scanning.
+    // Reason surfaced only in the small label + devtools console; no toast.
     try{
       var el2 = document.getElementById('sc-universe-label');
       if(el2 && !G.scanRunning){
-        el2.textContent = '⚠ alex_tickers.csv not loaded — using embedded ' + UNIVERSE_FULL.length + ' (' + e.message + ')';
-        el2.style.color = 'var(--wrn)';
-      }
-      // Also surface a toast so the user sees it without checking DevTools
-      if(typeof toast === 'function'){
-        setTimeout(function(){ toast('alex_tickers.csv not loaded — using embedded universe', 4000); }, 500);
+        el2.textContent = 'Universe: embedded (' + UNIVERSE_FULL.length + ')';
+        el2.style.color = 'var(--gry)';
       }
     }catch(e2){}
     return 0;
@@ -4828,6 +4857,388 @@ async function fetchIndicatorHistory(ticker){
   } catch(e){ return null; }
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+//  LUXALGO SMC — BEARISH ORDER BLOCK DETECTION (Internal OBs, pivot size 5)
+//  Port of LuxAlgo "Smart Money Concepts" v5 (CC BY-NC-SA 4.0)
+//  Separate 260-day daily cache; 24hr TTL. Used by "Clear Bearish OB ≥5%" filter.
+// ═══════════════════════════════════════════════════════════════════════════
+
+var G_OB_CACHE = {};            // ticker → array of daily bars
+var G_OB_RESULT = {};           // ticker → {pct, obLow, obHigh, hasOB, insideOB}
+var G_OB_FETCHING = {};         // ticker → true while in-flight
+var OB_HIST_DAYS = 260;         // enough for ATR(200) + pivot buffer
+
+function obCacheKey(ticker){ return 'rrjcar_ob_hist_' + ticker; }
+
+function loadOBCache(ticker){
+  try{
+    var raw = localStorage.getItem(obCacheKey(ticker));
+    if(!raw) return null;
+    var obj = JSON.parse(raw);
+    if(Date.now() - (obj.ts||0) > 86400000) return null;
+    return obj.days;
+  } catch(e){ return null; }
+}
+
+function saveOBCache(ticker, days){
+  try{
+    localStorage.setItem(obCacheKey(ticker), JSON.stringify({days:days, ts:Date.now()}));
+    G_OB_CACHE[ticker] = days;
+  } catch(e){}
+}
+
+async function fetchOBHistory(ticker){
+  if(G_OB_CACHE[ticker]) return G_OB_CACHE[ticker];
+  var cached = loadOBCache(ticker);
+  if(cached){ G_OB_CACHE[ticker] = cached; return cached; }
+  var key='';try{key=localStorage.getItem('rrjcar_tradier')||'';}catch(e){}
+  if(!key) return null;
+  var mode=localStorage.getItem('rrjcar_mode')||'sandbox';
+  var host=mode==='live'?'https://api.tradier.com':'https://sandbox.tradier.com';
+  var end  = new Date().toISOString().split('T')[0];
+  var start= new Date(Date.now()-(OB_HIST_DAYS+20)*864e5).toISOString().split('T')[0]; // buffer for weekends/holidays
+  try{
+    var r = await fetch(host+'/v1/markets/history?symbol='+ticker+'&interval=daily&start='+start+'&end='+end,
+      {headers:{Authorization:'Bearer '+key,Accept:'application/json'}});
+    var d = await r.json();
+    var days = d.history && d.history.day ? d.history.day : [];
+    if(!Array.isArray(days)) days = [days];
+    if(days.length < 50) return null;
+    saveOBCache(ticker, days);
+    return days;
+  } catch(e){ return null; }
+}
+
+// @returns {bullish:[], bearish:[]} active order blocks, each {barHigh, barLow, barTime, createdIdx}
+function detectOrderBlocks(days, opts){
+  opts = opts || {};
+  var pivotSize = opts.pivotSize || 5;
+  var maxShow   = opts.maxShow   || 5;
+  var mitigation= opts.mitigation || 'highlow';   // 'highlow' or 'close'
+  var filter    = opts.filter    || 'atr';         // 'atr' or 'range'
+
+  if(!days || days.length < pivotSize + 10) return {bullish:[], bearish:[]};
+  var n = days.length;
+  var highs=[], lows=[], closes=[], times=[];
+  for(var i=0; i<n; i++){
+    highs.push(+days[i].high);
+    lows.push(+days[i].low);
+    closes.push(+days[i].close);
+    times.push(days[i].date);
+  }
+
+  // ATR(200) with Wilder smoothing (Pine's ta.atr = RMA of TR)
+  var atrLen = 200, atrArr = new Array(n), trSum = 0, crSum = 0;
+  for(var i=0; i<n; i++){
+    var tr = i===0 ? highs[i]-lows[i]
+           : Math.max(highs[i]-lows[i], Math.abs(highs[i]-closes[i-1]), Math.abs(lows[i]-closes[i-1]));
+    crSum += tr;
+    if(i < atrLen){
+      trSum += tr;
+      atrArr[i] = trSum / (i+1);
+    } else {
+      atrArr[i] = (atrArr[i-1]*(atrLen-1) + tr) / atrLen;
+    }
+    if(filter === 'range') atrArr[i] = crSum / (i+1);
+  }
+
+  // Parsed H/L (LuxAlgo's volatility filter — swaps H/L on high-volatility bars)
+  var parsedHighs = new Array(n), parsedLows = new Array(n);
+  for(var i=0; i<n; i++){
+    var highVol = (highs[i]-lows[i]) >= 2*atrArr[i];
+    parsedHighs[i] = highVol ? lows[i]  : highs[i];
+    parsedLows[i]  = highVol ? highs[i] : lows[i];
+  }
+
+  // Leg state machine — pivot(size) detection
+  var leg = 0;                // 0 = bearish, 1 = bullish
+  var pivotHighLevel = NaN, pivotHighIdx = -1, pivotHighCrossed = false;
+  var pivotLowLevel  = NaN, pivotLowIdx  = -1, pivotLowCrossed  = false;
+  var bearishOBs = [], bullishOBs = [];
+
+  for(var i = pivotSize; i < n; i++){
+    var refHigh = highs[i - pivotSize], refLow = lows[i - pivotSize];
+    var winHigh = -Infinity, winLow = Infinity;
+    for(var k = i - pivotSize + 1; k <= i; k++){
+      if(highs[k] > winHigh) winHigh = highs[k];
+      if(lows[k]  < winLow)  winLow  = lows[k];
+    }
+    var prevLeg = leg;
+    if(refHigh > winHigh)      leg = 0; // new bearish leg confirmed at i-pivotSize
+    else if(refLow  < winLow)  leg = 1; // new bullish leg confirmed at i-pivotSize
+    var newLegStart = leg !== prevLeg;
+
+    if(newLegStart && leg === 0){
+      pivotHighLevel   = refHigh;
+      pivotHighIdx     = i - pivotSize;
+      pivotHighCrossed = false;
+    }
+    if(newLegStart && leg === 1){
+      pivotLowLevel   = refLow;
+      pivotLowIdx     = i - pivotSize;
+      pivotLowCrossed = false;
+    }
+
+    // Bullish OB: close crosses OVER pivot high → find bar with MIN parsedLow in [pivotHighIdx..i]
+    if(!isNaN(pivotHighLevel) && !pivotHighCrossed && i >= 1){
+      if(closes[i-1] <= pivotHighLevel && closes[i] > pivotHighLevel){
+        pivotHighCrossed = true;
+        var minIdx = pivotHighIdx, minVal = parsedLows[pivotHighIdx];
+        for(var k = pivotHighIdx + 1; k <= i; k++){
+          if(parsedLows[k] < minVal){ minVal = parsedLows[k]; minIdx = k; }
+        }
+        bullishOBs.unshift({
+          barHigh:    parsedHighs[minIdx],
+          barLow:     parsedLows[minIdx],
+          barTime:    times[minIdx],
+          createdIdx: i
+        });
+      }
+    }
+
+    // Bearish OB: close crosses UNDER pivot low → find bar with MAX parsedHigh in [pivotLowIdx..i]
+    if(!isNaN(pivotLowLevel) && !pivotLowCrossed && i >= 1){
+      if(closes[i-1] >= pivotLowLevel && closes[i] < pivotLowLevel){
+        pivotLowCrossed = true;
+        var maxIdx = pivotLowIdx, maxVal = parsedHighs[pivotLowIdx];
+        for(var k = pivotLowIdx + 1; k <= i; k++){
+          if(parsedHighs[k] > maxVal){ maxVal = parsedHighs[k]; maxIdx = k; }
+        }
+        bearishOBs.unshift({
+          barHigh:    parsedHighs[maxIdx],
+          barLow:     parsedLows[maxIdx],
+          barTime:    times[maxIdx],
+          createdIdx: i
+        });
+      }
+    }
+  }
+
+  // Mitigation: bearish OB broken when price rises ABOVE barHigh; bullish OB broken when price drops BELOW barLow
+  var activeBearish = bearishOBs.filter(function(ob){
+    for(var k = ob.createdIdx + 1; k < n; k++){
+      var src = mitigation === 'close' ? closes[k] : highs[k];
+      if(src > ob.barHigh) return false;
+    }
+    return true;
+  });
+  var activeBullish = bullishOBs.filter(function(ob){
+    for(var k = ob.createdIdx + 1; k < n; k++){
+      var src = mitigation === 'close' ? closes[k] : lows[k];
+      if(src < ob.barLow) return false;
+    }
+    return true;
+  });
+
+  return { bullish: activeBullish.slice(0, maxShow), bearish: activeBearish.slice(0, maxShow) };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  LUXALGO INSTITUTIONAL ORDER FLOW STRENGTH CLASSIFIER — second detector
+//  Port of LuxAlgo v6 (CC BY-NC-SA 4.0). Two-sided pivots, up/down candle
+//  selection, volume-weighted strength score (0-100%).
+// ═══════════════════════════════════════════════════════════════════════════
+function detectInstitutionalOBs(days, opts){
+  opts = opts || {};
+  var pivotLen = opts.pivotLen || 5;
+  var maxOBs   = opts.maxOBs   || 5;
+
+  if(!days || days.length < pivotLen*2 + 2) return {bullish:[], bearish:[]};
+  var n = days.length;
+  var highs=[], lows=[], closes=[], opens=[], volumes=[], times=[];
+  for(var i=0; i<n; i++){
+    highs.push(+days[i].high);
+    lows.push(+days[i].low);
+    closes.push(+days[i].close);
+    opens.push(+days[i].open);
+    volumes.push(+(days[i].volume||0));
+    times.push(days[i].date);
+  }
+
+  // Volume SMA(20) for strength calc
+  var volSMA = new Array(n);
+  for(var i=0; i<n; i++){
+    var sum = 0, cnt = 0;
+    for(var j = Math.max(0, i-19); j<=i; j++){ sum += volumes[j]; cnt++; }
+    volSMA[i] = cnt > 0 ? sum / cnt : 0;
+  }
+
+  var bullishOBs = [], bearishOBs = [];
+  var lastHiLevel = NaN, lastHiIdx = -1;
+  var lastLoLevel = NaN, lastLoIdx = -1;
+
+  for(var i = 2*pivotLen; i < n; i++){
+    // Pine ta.pivothigh(len, len): pivot confirmed len bars back when high[i-len] is
+    // the strict max over high[i-2*len .. i] (excluding itself).
+    var pivotIdx = i - pivotLen;
+    var pHi = highs[pivotIdx], pLo = lows[pivotIdx];
+    var isPivotHigh = true, isPivotLow = true;
+    for(var k = i - 2*pivotLen; k <= i; k++){
+      if(k === pivotIdx) continue;
+      if(highs[k] >= pHi) isPivotHigh = false;
+      if(lows[k]  <= pLo) isPivotLow  = false;
+    }
+    if(isPivotHigh){ lastHiLevel = pHi; lastHiIdx = pivotIdx; }
+    if(isPivotLow ){ lastLoLevel = pLo; lastLoIdx = pivotIdx; }
+
+    // BOS detection — close crosses last pivot
+    var bullBOS = false, bearBOS = false;
+    if(!isNaN(lastHiLevel) && i >= 1 && closes[i-1] <= lastHiLevel && closes[i] > lastHiLevel) bullBOS = true;
+    if(!isNaN(lastLoLevel) && i >= 1 && closes[i-1] >= lastLoLevel && closes[i] < lastLoLevel) bearBOS = true;
+
+    if(bullBOS || bearBOS){
+      var refIdx = bullBOS ? lastHiIdx : lastLoIdx;
+      var searchLen = i - refIdx;
+      var obTop = NaN, obBtm = NaN, obIdx = -1, obVol = 0;
+
+      if(bullBOS){
+        // Bullish OB: lowest low among DOWN candles (close < open) in the displacement
+        var minLow = NaN;
+        for(var k = 1; k <= searchLen; k++){
+          var idx = i - k;
+          if(idx < 0) break;
+          if(closes[idx] < opens[idx]){
+            if(isNaN(minLow) || lows[idx] < minLow){
+              minLow = lows[idx];
+              obTop = highs[idx]; obBtm = lows[idx]; obIdx = idx; obVol = volumes[idx];
+            }
+          }
+        }
+        lastHiLevel = NaN;
+      } else {
+        // Bearish OB: highest high among UP candles (close > open)
+        var maxHigh = NaN;
+        for(var k = 1; k <= searchLen; k++){
+          var idx = i - k;
+          if(idx < 0) break;
+          if(closes[idx] > opens[idx]){
+            if(isNaN(maxHigh) || highs[idx] > maxHigh){
+              maxHigh = highs[idx];
+              obTop = highs[idx]; obBtm = lows[idx]; obIdx = idx; obVol = volumes[idx];
+            }
+          }
+        }
+        lastLoLevel = NaN;
+      }
+
+      if(obIdx >= 0){
+        var obHeight = obTop - obBtm;
+        var breakoutDist = bullBOS ? (closes[i] - obTop) : (obBtm - closes[i]);
+        var avgVol = volSMA[obIdx] || 0;
+        var relVol = avgVol > 0 ? (obVol / avgVol) : 0;
+        var dispFactor = obHeight > 0 ? Math.min(breakoutDist / (obHeight * 5), 1.0) : 0;
+        var volFactor  = Math.min(relVol / 2.0, 1.0);
+        var strength   = Math.round(((dispFactor*0.6) + (volFactor*0.4)) * 100 * 10) / 10;
+        var ob = { barHigh:obTop, barLow:obBtm, barTime:times[obIdx], createdIdx:i, strength:strength };
+        if(bullBOS) bullishOBs.unshift(ob);
+        else        bearishOBs.unshift(ob);
+      }
+    }
+  }
+
+  // Mitigation (Inst Classifier spec: bullish broken when low < bottom; bearish when high > top)
+  var activeBear = bearishOBs.filter(function(ob){
+    for(var k = ob.createdIdx + 1; k < n; k++) if(highs[k] > ob.barHigh) return false;
+    return true;
+  });
+  var activeBull = bullishOBs.filter(function(ob){
+    for(var k = ob.createdIdx + 1; k < n; k++) if(lows[k]  < ob.barLow)  return false;
+    return true;
+  });
+  return { bullish: activeBull.slice(0, maxOBs), bearish: activeBear.slice(0, maxOBs) };
+}
+
+// ── Shared distance math: overhead (bearish resistance above) / support (bullish below) ──
+function _overheadFromObs(obs, price){
+  var nearest = null;
+  for(var i=0; i<obs.length; i++){
+    var ob = obs[i];
+    if(price >= ob.barLow && price <= ob.barHigh){
+      return {pct:0, obLow:ob.barLow, obHigh:ob.barHigh, hasOB:true, insideOB:true};
+    }
+    if(ob.barLow > price){
+      if(!nearest || ob.barLow < nearest.barLow) nearest = ob;
+    }
+  }
+  if(!nearest) return {pct:Infinity, obLow:null, obHigh:null, hasOB:false, insideOB:false};
+  return {
+    pct:      (nearest.barLow - price) / price * 100,
+    obLow:    nearest.barLow,
+    obHigh:   nearest.barHigh,
+    hasOB:    true,
+    insideOB: false
+  };
+}
+function _supportFromObs(obs, price){
+  var nearest = null;
+  for(var i=0; i<obs.length; i++){
+    var ob = obs[i];
+    if(price >= ob.barLow && price <= ob.barHigh){
+      return {pct:0, obLow:ob.barLow, obHigh:ob.barHigh, hasOB:true, insideOB:true};
+    }
+    if(ob.barHigh < price){
+      if(!nearest || ob.barHigh > nearest.barHigh) nearest = ob;
+    }
+  }
+  if(!nearest) return {pct:Infinity, obLow:null, obHigh:null, hasOB:false, insideOB:false};
+  return {
+    pct:      (price - nearest.barHigh) / price * 100,
+    obLow:    nearest.barLow,
+    obHigh:   nearest.barHigh,
+    hasOB:    true,
+    insideOB: false
+  };
+}
+
+// SMC (internal) detector distances
+function overheadOBDistance(ticker, price){
+  var days = G_OB_CACHE[ticker]; if(!days) return null;
+  return _overheadFromObs(detectOrderBlocks(days, {pivotSize:5, maxShow:5, mitigation:'highlow', filter:'atr'}).bearish, price);
+}
+function supportOBDistance(ticker, price){
+  var days = G_OB_CACHE[ticker]; if(!days) return null;
+  return _supportFromObs(detectOrderBlocks(days, {pivotSize:5, maxShow:5, mitigation:'highlow', filter:'atr'}).bullish, price);
+}
+// Institutional (volume-weighted) detector distances
+function overheadInstOBDistance(ticker, price){
+  var days = G_OB_CACHE[ticker]; if(!days) return null;
+  return _overheadFromObs(detectInstitutionalOBs(days, {pivotLen:5, maxOBs:5}).bearish, price);
+}
+function supportInstOBDistance(ticker, price){
+  var days = G_OB_CACHE[ticker]; if(!days) return null;
+  return _supportFromObs(detectInstitutionalOBs(days, {pivotLen:5, maxOBs:5}).bullish, price);
+}
+
+// Batch-fetch OB history for a list of tickers. Calls onProgress(doneCount, total, ticker)
+// after each completion, onDone() at the end. Skips tickers already cached or in-flight.
+async function batchFetchOBHistory(tickers, onProgress, onDone){
+  var queue = tickers.filter(function(t){ return !G_OB_CACHE[t] && !G_OB_FETCHING[t]; });
+  var total = queue.length, done = 0;
+  if(total === 0){ if(onDone) onDone(0); return; }
+  var CONCURRENCY = 4;
+  var idx = 0;
+  function next(){
+    if(idx >= queue.length) return Promise.resolve();
+    var t = queue[idx++];
+    G_OB_FETCHING[t] = true;
+    return fetchOBHistory(t).then(function(days){
+      delete G_OB_FETCHING[t];
+      done++;
+      if(onProgress) onProgress(done, total, t);
+      return next();
+    }).catch(function(){
+      delete G_OB_FETCHING[t];
+      done++;
+      if(onProgress) onProgress(done, total, t);
+      return next();
+    });
+  }
+  var workers = [];
+  for(var w = 0; w < Math.min(CONCURRENCY, queue.length); w++) workers.push(next());
+  await Promise.all(workers);
+  if(onDone) onDone(total);
+}
+
 function calcRSIatIndex(days, period, idx){
   if(idx < period) return 50;
   var gains=0, losses=0;
@@ -4943,13 +5354,10 @@ async function fetchFmpData(ticker){
       revisionsUp:        revisionsUp,
       upgradesLast30:     upgradesLast30,
       numAnalysts:        (estRes && estRes[0]) ? (estRes[0].numAnalystsEps || 0) : 0,
-      insiderBuyValue:    0,
-      insiderSellValue:   0,
       analystRevisionsOk: revisionsUp >= 2,
       ptConsensus:        (Array.isArray(ptRes) && ptRes[0]) ? ptRes[0].targetConsensus : null,
       ptHigh:             (Array.isArray(ptRes) && ptRes[0]) ? ptRes[0].targetHigh : null,
-      ptUpsideOk:         (Array.isArray(ptRes) && ptRes[0] && ptRes[0].targetConsensus > 0),
-      insiderBuyingOk:    false
+      ptUpsideOk:         (Array.isArray(ptRes) && ptRes[0] && ptRes[0].targetConsensus > 0)
     };
     saveFmpCache(ticker, data);
     return data;
@@ -5016,7 +5424,6 @@ function scoreIt(ticker, ind, opt){
 
   // \u2500\u2500 SECTION B: FMP Daily Signals (2 rules, 20 pts) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
   var analystOk = fmp ? fmp.analystRevisionsOk : false;
-  var insiderOk = fmp ? fmp.insiderBuyingOk    : false;
   var ptOk      = fmp ? fmp.ptUpsideOk         : false;
 
   var _hasFmpKey = false;
@@ -5280,6 +5687,21 @@ function renderTickerChart(ticker) {
       {yAxis:z.hi}
     ];});
 
+    // LuxAlgo SMC order blocks (internal, pivot 5) \u2014 use 260-day cache if present, else 120d
+    var obBearAreas=[], obBullAreas=[];
+    try{
+      var obDays = G_OB_CACHE[ticker] || days;
+      var obs = detectOrderBlocks(obDays, {pivotSize:5, maxShow:5, mitigation:'highlow', filter:'atr'});
+      obBearAreas = (obs.bearish||[]).map(function(ob){ return [
+        {yAxis:ob.barLow,  itemStyle:{color:'rgba(247,124,128,0.28)', borderColor:'rgba(247,124,128,0.75)', borderWidth:1}},
+        {yAxis:ob.barHigh}
+      ]; });
+      obBullAreas = (obs.bullish||[]).map(function(ob){ return [
+        {yAxis:ob.barLow,  itemStyle:{color:'rgba(49,121,245,0.22)',  borderColor:'rgba(49,121,245,0.75)', borderWidth:1}},
+        {yAxis:ob.barHigh}
+      ]; });
+    }catch(e){}
+
     // Default zoom: show last ~22 trading days (1 month)
     var zoomStart = Math.max(0, Math.round(((days.length-22)/days.length)*100));
 
@@ -5312,7 +5734,7 @@ function renderTickerChart(ticker) {
       series:[
         {name:'Price',type:'candlestick',data:days.map(function(d){return[d.open,d.close,d.low,d.high];}),
           itemStyle:{color:'#1D9E75',color0:'#D85A30',borderColor:'#1D9E75',borderColor0:'#D85A30',borderWidth:1},
-          barMaxWidth:10,markArea:{silent:true,data:resAreas.concat(supAreas)}},
+          barMaxWidth:10,markArea:{silent:true,data:resAreas.concat(supAreas).concat(obBearAreas).concat(obBullAreas)}},
         {name:'EMA10',type:'line',data:ema10,smooth:false,lineStyle:{color:'#00e676',width:1.5},symbol:'none',connectNulls:false},
         {name:'EMA20',type:'line',data:ema20,smooth:false,lineStyle:{color:'#ffd740',width:1.5},symbol:'none',connectNulls:false},
         {name:'EMA50',type:'line',data:ema50,smooth:false,lineStyle:{color:'#ff5252',width:2},symbol:'none',connectNulls:false}
@@ -5710,10 +6132,54 @@ function viewDetail(ticker,detId,emptyId){
  }
 }
 
+// Shared helpers for search + watchlist star (Buy Signals + Full Scanner)
+function inWatchlist(t){ return G.wlTickers && G.wlTickers.indexOf(t) >= 0; }
+function toggleWatchlistTicker(t){
+  if(!t) return;
+  if(!G.wlTickers) G.wlTickers = [];
+  var i = G.wlTickers.indexOf(t);
+  if(i >= 0){ G.wlTickers.splice(i,1); toast('Removed '+t+' from watchlist'); }
+  else      { G.wlTickers.unshift(t);   toast('Added '+t+' to watchlist'); }
+  try{ if(typeof saveWL === 'function') saveWL(); }catch(e){}
+  renderBuySig();
+  if(G.filtered && G.filtered.length) renderScan();
+  if(typeof refreshWL === 'function') refreshWL();
+}
+function starHTML(ticker, size){
+  size = size || 13;
+  var on = inWatchlist(ticker);
+  var color = on ? 'var(--amb)' : 'var(--gry2)';
+  var ch = on ? '\u2605' : '\u2606';
+  return '<span class="wl-star" data-ticker="'+ticker+'" onclick="event.stopPropagation();toggleWatchlistTicker(this.dataset.ticker)" '
+    +'title="'+(on?'Remove from':'Add to')+' Watchlist" '
+    +'style="cursor:pointer;color:'+color+';font-size:'+size+'px;padding:0 4px;user-select:none;">'+ch+'</span>';
+}
+function onBsSearch(){ G.bsQuery = (eid('bs-search') && eid('bs-search').value || '').trim().toUpperCase(); renderBuySig(); }
+function onScSearch(){ G.scQuery = (eid('sc-search') && eid('sc-search').value || '').trim().toUpperCase(); renderScan(); }
+
+// Light / dark mode toggle \u2014 persists to localStorage
+function applyTheme(isLight){
+  document.body.classList.toggle('light-mode', !!isLight);
+  var btn = eid('theme-toggle');
+  if(btn) btn.innerHTML = isLight ? '&#9790; DARK' : '&#9788; LIGHT';
+}
+function toggleLightMode(){
+  var isLight = !document.body.classList.contains('light-mode');
+  try{ localStorage.setItem('rrjcar_theme', isLight ? 'light' : 'dark'); }catch(e){}
+  applyTheme(isLight);
+}
+(function initTheme(){
+  try{
+    var saved = localStorage.getItem('rrjcar_theme');
+    if(saved === 'light') applyTheme(true);
+  }catch(e){}
+})();
+
 function renderBuySig(){
   var goList=eid('bs-go-list'),noList=eid('bs-nogo-list');
   goList.innerHTML='';noList.innerHTML='';
   var goCount=0,noCount=0,scoreSum=0;
+  var q = (G.bsQuery||'');
 
   // Derive top sector from actual GO signals \u2014 matches Market Breadth
   var sectorGoCounts={}, sectorAllCounts={};
@@ -5724,10 +6190,12 @@ function renderBuySig(){
     scoreSum += r.score;
     sectorAllCounts[r.sector] = (sectorAllCounts[r.sector]||0) + 1;
     if(r.isGo) sectorGoCounts[r.sector] = (sectorGoCounts[r.sector]||0) + 1;
+    // Text search filter \u2014 counts/stats stay accurate, card list is filtered
+    if(q && r.ticker.indexOf(q) < 0) return;
     var card=document.createElement('div');
     card.className='sig-card'+(r.isGo?'':' nogo-card');card.dataset.ticker=r.ticker;
     var tk=r.ticker;
-    card.innerHTML='<div class="sc-l"><div class="tk">'+tk+'<button class="bs-buy-btn" data-ticker="'+tk+'" title="View all call contracts" style="font-size:9px;padding:2px 7px;margin-left:8px;border:1px solid var(--amb);color:var(--amb);background:var(--amb3);border-radius:3px;cursor:pointer;vertical-align:middle;font-family:var(--ff);">▲ BUY</button></div>'
+    card.innerHTML='<div class="sc-l"><div class="tk">'+starHTML(tk,14)+tk+'<button class="bs-buy-btn" data-ticker="'+tk+'" title="View all call contracts" style="font-size:9px;padding:2px 7px;margin-left:8px;border:1px solid var(--amb);color:var(--amb);background:var(--amb3);border-radius:3px;cursor:pointer;vertical-align:middle;font-family:var(--ff);">▲ BUY</button></div>'
       +'<div class="sc '+(r.isGo?'go':'nogo')+'">'+r.score+'</div>'
       +'<div class="sect">'+r.sector+'</div></div>'
       +'<div class="sc-r"><div class="pr">$'+fmt2(r.price)+'</div>'
@@ -6246,7 +6714,6 @@ function applyFilters(){
 
   // Indicator filter checkboxes
   var needAnalyst = getIndFilter('filt-analyst');
-  var needInsider = getIndFilter('filt-insider');
   var needGex     = getIndFilter('filt-gex');
   var needProven  = getIndFilter('filt-proven');
   var need52hi    = getIndFilter('filt-52hi');
@@ -6255,6 +6722,10 @@ function applyFilters(){
   var needTF      = getIndFilter('filt-tf');
   var needEma200  = getIndFilter('filt-ema200');
   var needVol     = getIndFilter('filt-vol');
+  var needOBClear     = getIndFilter('filt-obclear');
+  var needOBSup       = getIndFilter('filt-obsupport');
+  var needInstOBClear = getIndFilter('filt-inst-obclear');
+  var needInstOBSup   = getIndFilter('filt-inst-obsupport');
 
   // Build GEX lookup
   var gexMap = {};
@@ -6273,8 +6744,35 @@ function applyFilters(){
     // Max option price filter \u2014 uses last known option price from scan or detail fetch
     if(maxOptPr > 0 && r.opt && r.opt.optPr > 0 && r.opt.optPr > maxOptPr) return false;
 
+    // OB filters (SMC + Institutional) \u2014 require cached daily bars
+    if(needOBClear || needOBSup || needInstOBClear || needInstOBSup){
+      var cached = G_OB_CACHE[r.ticker] || loadOBCache(r.ticker);
+      if(cached){
+        if(!G_OB_CACHE[r.ticker]) G_OB_CACHE[r.ticker] = cached;
+        if(needOBClear){
+          var distUp = overheadOBDistance(r.ticker, r.price);
+          if(distUp && distUp.pct < 5) return false;
+        }
+        if(needOBSup){
+          var distDn = supportOBDistance(r.ticker, r.price);
+          if(!distDn || !distDn.hasOB) return false;
+          if(!distDn.insideOB && distDn.pct > 1) return false;
+        }
+        if(needInstOBClear){
+          var distInstUp = overheadInstOBDistance(r.ticker, r.price);
+          if(distInstUp && distInstUp.pct < 5) return false;
+        }
+        if(needInstOBSup){
+          var distInstDn = supportInstOBDistance(r.ticker, r.price);
+          if(!distInstDn || !distInstDn.hasOB) return false;
+          if(!distInstDn.insideOB && distInstDn.pct > 1) return false;
+        }
+      }
+      // Uncached: optimistically include; re-apply once batch fetch completes
+    }
+
     // Indicator filters \u2014 check rule scorecards
-    if(needAnalyst || needInsider || needGex || needProven ||
+    if(needAnalyst || needGex || needProven ||
        need52hi || needRS || needMacd || needTF || needEma200 || needVol){
 
       // Build a quick lookup of which rules passed for this ticker
@@ -6285,7 +6783,6 @@ function applyFilters(){
 
       // Check each active filter against the rule scorecard
       if(needAnalyst && !passed['Analyst Revisions \u2191']) return false;
-      if(needInsider && !passed['Insider Buying'])          return false;
       if(needGex     && !passed['GEX Call Heavy'])          return false;
       if(needProven  && !passed['PROVEN ticker'])           return false;
       if(need52hi    && !passed['52Wk Hi Prox <15%'])       return false;
@@ -6302,8 +6799,9 @@ function applyFilters(){
   // Update filter count label
   var total = G.results.length;
   var shown = G.filtered.length;
-  var activeFilters = [needAnalyst,needInsider,needGex,needProven,
-    need52hi,needRS,needMacd,needTF,needEma200,needVol].filter(Boolean).length;
+  var activeFilters = [needAnalyst,needGex,needProven,
+    need52hi,needRS,needMacd,needTF,needEma200,needVol,
+    needOBClear,needOBSup,needInstOBClear,needInstOBSup].filter(Boolean).length;
   var countEl = eid('sc-filter-count');
   if(countEl){
     countEl.textContent = shown + ' / ' + total + (activeFilters > 0 ? ' (' + activeFilters + ' filter' + (activeFilters>1?'s':'')+' active)' : '');
@@ -6325,14 +6823,55 @@ function clearFilters(){
   populateSectorCheckboxes();
   updateSectorLabel();
   // Uncheck all indicator filters
-  ['filt-analyst','filt-insider','filt-gex','filt-proven',
-   'filt-52hi','filt-rs','filt-macd','filt-tf','filt-ema200','filt-vol'].forEach(function(id){
+  ['filt-analyst','filt-gex','filt-proven',
+   'filt-52hi','filt-rs','filt-macd','filt-tf','filt-ema200','filt-vol',
+   'filt-obclear','filt-obsupport','filt-inst-obclear','filt-inst-obsupport'].forEach(function(id){
     var el = eid(id); if(el) el.checked = false;
   });
   var countEl = eid('sc-filter-count');
   if(countEl) countEl.textContent = '';
   G.filtered = excludedFilteredResults();
   renderScan();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  Clear Bearish OB filter — toggles on/off and manages async OB history fetch
+// ═══════════════════════════════════════════════════════════════════════════
+function onOBFilterChange(){
+  var checked = getIndFilter('filt-obclear') || getIndFilter('filt-obsupport')
+             || getIndFilter('filt-inst-obclear') || getIndFilter('filt-inst-obsupport');
+  applyFilters();
+  if(!checked) return;
+
+  // Kick off batch fetch for tickers in the current scan that don't have OB data yet
+  var tickers = (G.results || []).map(function(r){ return r.ticker; });
+  if(!tickers.length){ return; }
+  var need = tickers.filter(function(t){
+    if(G_OB_CACHE[t]) return false;
+    var cached = loadOBCache(t);
+    if(cached){ G_OB_CACHE[t] = cached; return false; }
+    return true;
+  });
+  if(!need.length){
+    applyFilters();
+    return;
+  }
+  addAlert('OB', 'Fetching 260d daily bars for '+need.length+' tickers...', 'warn');
+  toast('OB scan: 0/'+need.length);
+  batchFetchOBHistory(
+    need,
+    function(done, total, tk){
+      // Re-apply filter every 5 completions to keep the UI updating
+      if(done % 5 === 0 || done === total){
+        toast('OB scan: '+done+'/'+total);
+        if(getIndFilter('filt-obclear') || getIndFilter('filt-obsupport') || getIndFilter('filt-inst-obclear') || getIndFilter('filt-inst-obsupport')) applyFilters();
+      }
+    },
+    function(total){
+      addAlert('OB', 'OB scan complete ('+total+' tickers)', 'ok');
+      if(getIndFilter('filt-obclear') || getIndFilter('filt-obsupport')) applyFilters();
+    }
+  );
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -6470,6 +7009,11 @@ function renderScan(){
   var wrap=eid('sc-tbl-wrap');
   if(!G.filtered.length){wrap.innerHTML='<div class="empty-det" style="min-height:200px;"><div class="ei">\u25a0</div><p>No results \u2014 run a scan first</p></div>';return;}
 
+  // Apply text search (post-filter layer so it composes with all filters)
+  var q = (G.scQuery||'');
+  var rowSrc = q ? G.filtered.filter(function(r){ return r.ticker.indexOf(q) >= 0; }) : G.filtered;
+  if(!rowSrc.length){ wrap.innerHTML='<div class="empty-det" style="min-height:200px;"><div class="ei">\u25a0</div><p>No tickers match &ldquo;'+q+'&rdquo;</p></div>'; return; }
+
   // Build GEX lookup from G.gexData if available
   var gexMap = {};
   if(G.gexData && G.gexData.length > 0){
@@ -6478,6 +7022,7 @@ function renderScan(){
   var hasGex = Object.keys(gexMap).length > 0;
 
   var cols=[
+    {k:'_star',l:''},
     {k:'ticker',l:'SYMBOL'},
     {k:'score',l:'SCORE'},
     {k:'isGo',l:'SIGNAL'},
@@ -6495,6 +7040,10 @@ function renderScan(){
 
   var th='';
   cols.forEach(function(c){
+    if(c.k === '_star'){
+      th+='<th style="cursor:default;width:24px;"></th>';
+      return;
+    }
     var arr=G.sortCol===c.k?(G.sortDir>0?' \u25b2':' \u25bc'):'';
     th+='<th data-col="'+c.k+'" onclick="sortTable(this.dataset.col)">'+c.l+arr+'</th>';
     var lbl=(c.l||'').toUpperCase();
@@ -6504,7 +7053,7 @@ function renderScan(){
   });
 
   var rows='';
-  G.filtered.forEach(function(r){
+  rowSrc.forEach(function(r){
     var sigBadge=r.isGo?'<span class="badge go">GO</span>':'<span class="badge nogo">NO-GO</span>';
     var chgCls=r.changePct>=0?'pnl-pos':'pnl-neg';
     var tk=r.ticker;
@@ -6524,6 +7073,7 @@ function renderScan(){
     var fundCls=fund>=15?'pnl-pos':fund>=8?'':'pnl-neg';
 
     rows+='<tr data-ticker="'+tk+'" onclick="viewDetail(this.dataset.ticker,\'sc-detail\',\'sc-det-empty\')">'
+      +'<td style="text-align:center;padding:0;">'+starHTML(tk,14)+'</td>'
       +'<td><b>'+tk+'</b></td>'
       +'<td>'+scoreBar+'</td>'
       +'<td>'+sigBadge+'</td>'
@@ -9686,11 +10236,6 @@ var STRATEGY_MODES = {
     label: '\u25b6 MOMENTUM',
     desc: 'MACD + + Above EMA200 + Vol > Avg + RS > SPY \u2014 strong trending stocks with volume confirmation',
     filters: {sig:'GO', minScore:89, macd:true, ema200:true, vol:true, rs:true}
-  },
-  institutional: {
-    label: '\u25c6 INSTITUTIONAL',
-    desc: 'Analyst Revisions \u2191 + Insider Buying + PROVEN ticker \u2014 smart money signals active',
-    filters: {sig:'GO', minScore:89, analyst:true, insider:true, proven:true}
   }
 };
 
@@ -9711,7 +10256,7 @@ function applyStrategyMode(mode){
   if(eid('sc-minscore')) eid('sc-minscore').value = sm.filters.minScore || 72;
 
   // Clear all indicator checkboxes first
-  ['filt-analyst','filt-insider','filt-gex','filt-proven',
+  ['filt-analyst','filt-gex','filt-proven',
    'filt-52hi','filt-rs','filt-macd','filt-tf','filt-ema200','filt-vol'].forEach(function(id){
     var el = eid(id); if(el) el.checked = false;
   });
@@ -9719,7 +10264,6 @@ function applyStrategyMode(mode){
   // Apply strategy-specific checkboxes
   var f = sm.filters;
   if(f.analyst  && eid('filt-analyst'))  eid('filt-analyst').checked  = true;
-  if(f.insider  && eid('filt-insider'))  eid('filt-insider').checked  = true;
   if(f.gex      && eid('filt-gex'))      eid('filt-gex').checked      = true;
   if(f.proven   && eid('filt-proven'))   eid('filt-proven').checked   = true;
   if(f.hi52     && eid('filt-52hi'))     eid('filt-52hi').checked     = true;
