@@ -11138,7 +11138,8 @@ function pfRenderRow(col, row){
   html += '<div style="display:flex;gap:4px;align-items:center;">';
   html +=   '<input type="text" value="'+pfEsc(row.ticker||'')+'" placeholder="TICK" maxlength="6" '+
             'style="width:60px;background:var(--bg0);border:var(--bdr);color:var(--amb);font-family:var(--ff-mono);font-size:11px;font-weight:700;padding:3px 5px;border-radius:2px;text-transform:uppercase;" '+
-            'onblur="pfTickerChanged(\''+col.id+'\',\''+rid+'\',this.value)">';
+            'onblur="pfTickerChanged(\''+col.id+'\',\''+rid+'\',this.value)" '+
+            'onkeydown="if(event.key===\'Enter\'){event.preventDefault();pfTickerChanged(\''+col.id+'\',\''+rid+'\',this.value);this.blur();}">';
   // Kind toggle: OPT ⇄ SHR
   html +=   '<select title="Position kind — OPT = options contract, SHR = common shares" style="background:var(--bg0);border:var(--bdr);color:'+(isShares?'var(--ambb)':'var(--amb)')+';font-size:10px;padding:3px;border-radius:2px;" onchange="pfRowField(\''+col.id+'\',\''+rid+'\',\'kind\',this.value)">';
   html +=     '<option value="option"'+(!isShares?' selected':'')+'>OPT</option>';
@@ -11334,6 +11335,12 @@ function pfTickerChanged(colId, rowId, tickerVal){
     });
     PF_CHAIN_CACHE[t] = { expirations: exps, strikesByExp: {}, spot: spot, ts: Date.now() };
     pfPopulateExpiries(rowId, PF_CHAIN_CACHE[t]);
+    if(!exps.length){
+      var msg = creds.mode === 'sandbox'
+        ? t+': no expirations in sandbox — switch to LIVE in API tab for full chain'
+        : t+': no option expirations returned — ticker may not have listed options';
+      toast(msg);
+    }
   }).catch(function(e){
     toast('Chain fetch failed: '+e.message);
   });
@@ -11372,13 +11379,17 @@ function pfLoadStrikesFor(colId, rowId){
   var spot = chain.spot || 100;
 
   // Already cached strikes for this expiry?
-  if(chain.strikesByExp[row.exp]){
+  if(chain.strikesByExp[row.exp] && chain.strikesByExp[row.exp].length){
     pfPopulateStrikes(rowId, chain.strikesByExp[row.exp], spot);
     return;
   }
 
   var creds = getTradierCreds(); if(!creds) return;
-  fetch(creds.host+'/v1/markets/options/strikes?symbol='+row.ticker+'&expiration='+row.exp,
+  var ticker = row.ticker, exp = row.exp, mode = creds.mode;
+
+  // Attempt 1: /options/strikes with includeAllRoots (covers mini-options,
+  // adjusted symbols, and tickers with multiple historical roots)
+  fetch(creds.host+'/v1/markets/options/strikes?symbol='+encodeURIComponent(ticker)+'&expiration='+encodeURIComponent(exp)+'&includeAllRoots=true',
     {headers:{Authorization:'Bearer '+creds.key, Accept:'application/json'}})
     .then(function(r){ return r.ok?r.json():null; })
     .then(function(data){
@@ -11388,9 +11399,53 @@ function pfLoadStrikesFor(colId, rowId){
         if(Array.isArray(raw)) strikes = raw;
         else if(raw != null) strikes = [raw];
       } catch(e){}
-      chain.strikesByExp[row.exp] = strikes;
-      pfPopulateStrikes(rowId, strikes, spot);
-    }).catch(function(e){ toast('Strike fetch failed: '+e.message); });
+      strikes = strikes.map(function(s){ return +s; }).filter(function(s){ return s>0; });
+
+      if(strikes.length){
+        chain.strikesByExp[exp] = strikes;
+        pfPopulateStrikes(rowId, strikes, spot);
+        return;
+      }
+
+      // Attempt 2: fall back to /options/chains and extract strikes. Some
+      // symbol/expiry combinations return empty from /strikes but populated
+      // from /chains — particularly in sandbox for low-volume names.
+      fetch(creds.host+'/v1/markets/options/chains?symbol='+encodeURIComponent(ticker)+'&expiration='+encodeURIComponent(exp)+'&greeks=false',
+        {headers:{Authorization:'Bearer '+creds.key, Accept:'application/json'}})
+        .then(function(r){ return r.ok?r.json():null; })
+        .then(function(cd){
+          var opts = [];
+          try {
+            var rawC = cd && cd.options && cd.options.option;
+            if(Array.isArray(rawC)) opts = rawC;
+            else if(rawC) opts = [rawC];
+          } catch(e){}
+          var seen = {};
+          opts.forEach(function(o){
+            var s = +o.strike; if(s>0 && !seen[s]){ seen[s] = true; strikes.push(s); }
+          });
+          strikes.sort(function(a,b){ return a-b; });
+
+          if(strikes.length){
+            chain.strikesByExp[exp] = strikes;
+            pfPopulateStrikes(rowId, strikes, spot);
+          } else {
+            // Surface a specific, actionable message so the user understands
+            // why the dropdown is empty instead of silently failing.
+            var msg = mode === 'sandbox'
+              ? ticker+': no strikes in sandbox for '+exp+' — try LIVE mode (API tab) for full chain'
+              : ticker+': no strikes returned for '+exp+' — this expiration may not list options';
+            toast(msg);
+            // Also populate the dropdown with the "empty state" so it's obvious
+            var sel = eid('pf-str-'+rowId);
+            if(sel){ sel.innerHTML = '<option value="">-- no strikes available --</option>'; }
+          }
+        })
+        .catch(function(e){
+          toast(ticker+': chain fallback failed — '+e.message);
+        });
+    })
+    .catch(function(e){ toast('Strike fetch failed: '+e.message); });
 }
 
 function pfPopulateStrikes(rowId, strikes, spot){
@@ -11433,6 +11488,44 @@ function pfPopulateStrikes(rowId, strikes, spot){
     if(currentVal && Math.abs(s-currentVal) < 0.01) opt.selected = true;
     sel.appendChild(opt);
   });
+  // Always offer a manual-entry escape hatch so the user can type a strike
+  // the API didn't return (sandbox missing data, illiquid expirations, etc).
+  var manual = document.createElement('option');
+  manual.value = '__CUSTOM__';
+  manual.textContent = '✎ Enter custom strike…';
+  sel.appendChild(manual);
+  // Intercept the custom-strike choice
+  sel.onchange = function(){
+    if(sel.value === '__CUSTOM__'){
+      var v = prompt('Enter strike price (e.g. 1, 2.5, 8):', currentVal || '');
+      var num = parseFloat(v);
+      if(isNaN(num) || num <= 0){
+        sel.value = currentVal != null ? currentVal : '';
+        return;
+      }
+      // Add the custom strike as a new selected option and pick it
+      var custOpt = document.createElement('option');
+      custOpt.value = num;
+      custOpt.textContent = '$'+fmt2(num)+' (custom)';
+      custOpt.selected = true;
+      // Insert before the manual entry so "Enter custom…" stays at the bottom
+      sel.insertBefore(custOpt, manual);
+      sel.value = num;
+      // Propagate through the existing row-field path so it saves and refreshes
+      var rowEl = sel.closest('.pf-row');
+      var rid = rowEl ? rowEl.getAttribute('data-row-id') : null;
+      var colEl = sel.closest('.pf-col');
+      var cid = colEl ? colEl.getAttribute('data-col-id') : null;
+      if(cid && rid){ pfRowField(cid, rid, 'strike', num); }
+    } else {
+      // Normal selection — route through pfRowField the way the inline onchange did
+      var rowEl = sel.closest('.pf-row');
+      var rid = rowEl ? rowEl.getAttribute('data-row-id') : null;
+      var colEl = sel.closest('.pf-col');
+      var cid = colEl ? colEl.getAttribute('data-col-id') : null;
+      if(cid && rid){ pfRowField(cid, rid, 'strike', sel.value); }
+    }
+  };
 }
 
 // ── Refresh single row (fetch current mid from Tradier) ─────────────────────
