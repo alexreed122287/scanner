@@ -1514,14 +1514,19 @@ tr.sel-row td{background:var(--blu3);}
           <summary style="cursor:pointer;font-family:var(--ff-brand);font-size:11px;color:var(--gry);letter-spacing:2px;">&#128203; METHOD 3 &mdash; PASTE / FREE-FORM (FALLBACK)</summary>
           <div style="padding-top:8px;">
             <p style="color:var(--gry);font-size:10px;line-height:1.5;margin:0 0 6px 0;">
-              Best-effort parser &mdash; Robinhood's clipboard format is inconsistent. If lines fail to parse, use Method 1 or 2.
+              Handles Robinhood's native 2-line paste format. Separate positions with a blank line. Missing years are auto-inferred to the next upcoming M/D.
             </p>
             <p style="color:var(--gry);font-size:10px;margin:0 0 6px 0;">Examples accepted:<br>
-              <code style="color:var(--ambb);">NVDA $150 Call 12/19/2025 x3</code><br>
-              <code style="color:var(--ambb);">AMZN,220,2026-01-16,CALL,2</code><br>
-              <code style="color:var(--ambb);">MU 160C 1/16/26  5 contracts</code>
+              <code style="color:var(--ambb);">CXAI $0.5 Call<br>5/15 · 133 buys</code><br><br>
+              <code style="color:var(--ambb);">VLN $1 Call<br>11/20 · 1 buy</code><br><br>
+              <code style="color:var(--ambb);">AAPL<br>50 shares · Avg $175.42</code><br><br>
+              <code style="color:var(--ambb);">NVDA $150 Call 12/19/2025 x3</code> (single line)<br>
+              <code style="color:var(--ambb);">AMZN,220,2026-01-16,CALL,2</code> (CSV-style)
             </p>
-            <textarea id="pf-paste-text" style="width:100%;height:100px;background:var(--bg0);border:var(--bdr);color:var(--wht);font-family:var(--ff-mono);font-size:11px;padding:8px;border-radius:3px;" placeholder="Paste positions here..."></textarea>
+            <p style="color:var(--amb);font-size:9px;margin:0 0 6px 0;font-style:italic;">
+              Note: Robinhood shows "N buys" — this is purchase count, NOT contract qty. Parsed positions default to qty=1; adjust after import.
+            </p>
+            <textarea id="pf-paste-text" style="width:100%;height:140px;background:var(--bg0);border:var(--bdr);color:var(--wht);font-family:var(--ff-mono);font-size:11px;padding:8px;border-radius:3px;" placeholder="Paste positions here..."></textarea>
             <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:6px;">
               <button class="btn" style="font-size:11px;padding:5px 12px;" onclick="pfParsePreview()">&#128270; PREVIEW PARSE</button>
             </div>
@@ -11003,11 +11008,56 @@ var PF_PALETTE = [
 
 function pfColor(i){ return PF_PALETTE[i % PF_PALETTE.length]; }
 
+// Canonical default names for built-in columns. If a column's `id` matches
+// a key here but the stored `name` has drifted (e.g. keystrokes landed in
+// the header input by accident), we restore the canonical name on load.
+var PF_CANONICAL_NAMES = {
+  tradier: 'Tradier',
+  joint: 'Joint',
+  alex: 'Alex',
+  bianca: 'Bianca',
+  individual: 'Individual'
+};
+
 // ── Data layer ─────────────────────────────────────────────────────────────
 function pfLoad(){
   try {
     var raw = localStorage.getItem(PF_STORAGE_KEY);
-    if(raw){ var o = JSON.parse(raw); if(o && Array.isArray(o.columns)) return o; }
+    if(raw){
+      var o = JSON.parse(raw);
+      if(o && Array.isArray(o.columns)){
+        // Repair mangled built-in column names. A column qualifies for
+        // repair if its id is still the canonical one but its name doesn't
+        // equal the canonical name AND isn't a plausible user-chosen rename
+        // (i.e., it starts with the canonical name's first letter and is
+        // within 3 chars of the canonical length → treat as accidental).
+        var repaired = false;
+        o.columns.forEach(function(c){
+          if(c && c.id && PF_CANONICAL_NAMES[c.id]){
+            var canonical = PF_CANONICAL_NAMES[c.id];
+            if(c.name !== canonical){
+              var name = String(c.name||'');
+              // Heuristic: likely a typo / stray keystroke if first letter
+              // matches (case-insensitive) AND the name contains fragments
+              // of the canonical name. Conservative — don't nuke deliberate
+              // renames like "Alex-IRA" or "Tradier Live".
+              var looksMangled = name.length > 0
+                && name.charAt(0).toLowerCase() === canonical.charAt(0).toLowerCase()
+                && name.length < canonical.length + 5
+                && name.toLowerCase().indexOf(canonical.toLowerCase()) < 0;
+              if(looksMangled){
+                c.name = canonical;
+                repaired = true;
+              }
+            }
+          }
+        });
+        if(repaired){
+          try { localStorage.setItem(PF_STORAGE_KEY, JSON.stringify(o)); } catch(_e){}
+        }
+        return o;
+      }
+    }
   } catch(e){}
   // default
   return {
@@ -12113,11 +12163,24 @@ function pfUploadCSV(inputEl){
 function pfClosePasteModal(){ eid('pf-paste-modal').style.display = 'none'; }
 
 // Parses one line → {ticker, strike, exp, type, qty} | null
+// Infer year for a bare M/D date (no year given). Pick the next occurrence
+// of that month/day from today — i.e. if it hasn't happened this year, use
+// this year; otherwise use next year.
+function pfInferYear(month, day){
+  var today = new Date(); today.setHours(0,0,0,0);
+  var thisYear = today.getFullYear();
+  var candidate = new Date(thisYear, month-1, day);
+  candidate.setHours(0,0,0,0);
+  // Give a 2-day grace window so "today" doesn't flip to next year
+  if(candidate.getTime() >= today.getTime() - 2*86400000) return thisYear;
+  return thisYear + 1;
+}
+
 function pfParseLine(line){
   if(!line || !line.trim()) return null;
   var s = line.trim().replace(/\t+/g, ' ').replace(/ +/g,' ');
 
-  // Try CSV-style first: TICKER,STRIKE,EXP,TYPE,QTY
+  // Try CSV-style first: TICKER,STRIKE,EXP,TYPE,QTY  (or with optional KIND prefix)
   if(s.indexOf(',') >= 0){
     var parts = s.split(',').map(function(p){ return p.trim(); });
     if(parts.length >= 4){
@@ -12126,28 +12189,21 @@ function pfParseLine(line){
       var exp = pfNormalizeDate(parts[2]);
       var typ = (parts[3]||'').toUpperCase().indexOf('P')>=0 ? 'PUT' : 'CALL';
       var qty = parseInt(parts[4]||'1') || 1;
-      if(t && strike && exp) return { ticker:t, strike:strike, exp:exp, type:typ, qty:qty };
+      if(t && strike && exp) return { kind:'option', ticker:t, strike:strike, exp:exp, type:typ, qty:qty };
     }
   }
 
-  // Free-form: "NVDA $150 Call 12/19/2025 x3"
-  // Find ticker: 1-5 uppercase letters (optionally followed by digits for some symbols)
+  // Free-form single-line: "NVDA $150 Call 12/19/2025 x3"
   var tickerM = s.match(/\b([A-Z]{1,5}[A-Z0-9]{0,2})\b/);
-  // Find strike: $NNN or NNNNC or NNNNP
   var strikeM = s.match(/\$?(\d+(?:\.\d+)?)[CP]?\b/g);
-  // Find date: MM/DD/YY(YY) or YYYY-MM-DD
-  var dateM = s.match(/(\d{1,2}\/\d{1,2}\/\d{2,4})|(\d{4}-\d{1,2}-\d{1,2})/);
-  // Find type
-  var typeM = /\bP(UT)?\b|\bPUTS?\b/i.test(s) ? 'PUT' : 'CALL';
-  // Find qty: "x3" or "3 contracts" or leading count
-  var qtyM = s.match(/[xX×](\d+)|\b(\d+)\s*(?:contracts?|ct|qty|shares)?\b\s*$/);
-  var qty = 1;
-  if(qtyM){ qty = parseInt(qtyM[1] || qtyM[2]) || 1; }
+  var dateM   = s.match(/(\d{1,2}\/\d{1,2}\/\d{2,4})|(\d{4}-\d{1,2}-\d{1,2})/);
+  var typeM   = /\bP(UT)?\b|\bPUTS?\b/i.test(s) ? 'PUT' : 'CALL';
+  var qtyM    = s.match(/[xX×](\d+)|\b(\d+)\s*(?:contracts?|ct|qty|shares)?\b\s*$/);
+  var qty = qtyM ? (parseInt(qtyM[1] || qtyM[2]) || 1) : 1;
 
   if(!tickerM || !strikeM || !dateM) return null;
   var ticker = tickerM[1];
 
-  // Pick the strike: prefer one not inside the date
   var strikeVal = null;
   for(var i=0;i<strikeM.length;i++){
     var v = parseFloat(strikeM[i].replace(/[^\d.]/g,''));
@@ -12158,7 +12214,119 @@ function pfParseLine(line){
   var exp = pfNormalizeDate(dateM[0]);
   if(!exp) return null;
 
-  return { ticker:ticker, strike:strikeVal, exp:exp, type:typeM, qty:qty };
+  return { kind:'option', ticker:ticker, strike:strikeVal, exp:exp, type:typeM, qty:qty };
+}
+
+// Multi-line Robinhood block parser. Handles the format shown in the
+// Robinhood mobile app, e.g.:
+//
+//   CXAI $0.5 Call
+//   5/15 · 133 buys
+//
+//   VLN $1 Call
+//   11/20 · 1 buy
+//
+// Also handles shares-only blocks like:
+//
+//   AAPL
+//   50 shares · Avg $175.42
+//
+// Strategy: break input into blocks on blank lines, then try to classify
+// each block as either an options position (header line has $ and CALL/PUT)
+// or a shares position (header line is just a ticker with no strike/type).
+function pfParseBlock(block){
+  if(!block) return null;
+  // Normalize weirdness: replace middot/bullet/hyphen separators with spaces
+  var cleaned = block.replace(/[·•∙—–]/g, ' ').replace(/\s+/g, ' ').trim();
+  if(!cleaned) return null;
+
+  var lines = block.split(/\r?\n/).map(function(l){ return l.trim(); }).filter(function(l){ return l.length > 0; });
+  if(!lines.length) return null;
+
+  // Pull ticker from the first line — strict: 1-5 uppercase letters at start
+  var firstLine = lines[0];
+  var tkM = firstLine.match(/^([A-Z]{1,5}(?:\.[A-Z])?)\b/);
+  if(!tkM) return null;
+  var ticker = tkM[1].replace('.','');
+
+  // Is this a CALL/PUT line?
+  var hasType = /\b(call|put)s?\b/i.test(cleaned);
+  var hasStrike = /\$\d/.test(cleaned);
+
+  // Collect candidate dates from ALL lines in the block.
+  // Accept MM/DD/YYYY, YYYY-MM-DD, and bare MM/DD (with year inferred).
+  var dates = [];
+  lines.forEach(function(ln){
+    var md;
+    // CRITICAL: the regex literal MUST be assigned to a variable before the
+    // while-loop; declaring it inline in the while() condition creates a new
+    // RegExp per iteration with lastIndex=0, causing an infinite loop.
+    var fullSlashRe = /(\d{1,2})\/(\d{1,2})\/(\d{2,4})/g;
+    while((md = fullSlashRe.exec(ln)) !== null){
+      dates.push({m:+md[1], d:+md[2], y:md[3].length===2 ? (2000 + +md[3]) : +md[3], str:md[0]});
+      if(md.index === fullSlashRe.lastIndex) fullSlashRe.lastIndex++; // safety
+    }
+    var fullIsoRe = /(\d{4})-(\d{1,2})-(\d{1,2})/g;
+    while((md = fullIsoRe.exec(ln)) !== null){
+      dates.push({m:+md[2], d:+md[3], y:+md[1], str:md[0]});
+      if(md.index === fullIsoRe.lastIndex) fullIsoRe.lastIndex++;
+    }
+    // Bare M/D — strip full dates first so we don't match fragments inside them
+    var scrubbed = ln
+      .replace(/\d{1,2}\/\d{1,2}\/\d{2,4}/g, ' ')
+      .replace(/\d{4}-\d{1,2}-\d{1,2}/g, ' ');
+    var bareRe = /(?:^|[^\d\/])(\d{1,2})\/(\d{1,2})(?!\/)(?=\D|$)/g;
+    while((md = bareRe.exec(scrubbed)) !== null){
+      var mm = +md[1], dd = +md[2];
+      if(mm >= 1 && mm <= 12 && dd >= 1 && dd <= 31){
+        var already = dates.some(function(d){ return d.m===mm && d.d===dd; });
+        if(!already) dates.push({m:mm, d:dd, y:null, str:md[0]});
+      }
+      if(md.index === bareRe.lastIndex) bareRe.lastIndex++;
+    }
+  });
+
+  // OPTIONS PATH
+  if(hasType && hasStrike){
+    // Strike: first $-prefixed number
+    var strikeM = cleaned.match(/\$(\d+(?:\.\d+)?)/);
+    if(!strikeM) return null;
+    var strike = parseFloat(strikeM[1]);
+    if(!(strike > 0)) return null;
+
+    // Type: PUT > CALL precedence (CALL is default)
+    var type = /\bput\b/i.test(cleaned) ? 'PUT' : 'CALL';
+
+    // Expiration: first plausible date
+    if(!dates.length) return null;
+    var d0 = dates[0];
+    if(d0.y == null) d0.y = pfInferYear(d0.m, d0.d);
+    var exp = d0.y + '-' + ('0'+d0.m).slice(-2) + '-' + ('0'+d0.d).slice(-2);
+
+    // Qty: Robinhood's "N buys" is NOT contract qty, so ignore it. Look for
+    // explicit quantity markers only: "xN", "N contracts", "qty N".
+    var qty = 1;
+    var qtyM = cleaned.match(/[xX×]\s*(\d+)\b|\b(\d+)\s*contracts?\b|\bqty\s*[:=]?\s*(\d+)\b/);
+    if(qtyM){ qty = parseInt(qtyM[1] || qtyM[2] || qtyM[3]) || 1; }
+
+    return { kind:'option', ticker:ticker, strike:strike, exp:exp, type:type, qty:qty };
+  }
+
+  // SHARES PATH
+  // Patterns:
+  //   "N shares" anywhere in block → qty
+  //   "Avg $X.XX" or "Avg Cost $X.XX" → avgPrice
+  var sharesM = cleaned.match(/(\d+(?:\.\d+)?)\s*shares?\b/i);
+  if(sharesM){
+    var qtyS = parseFloat(sharesM[1]);
+    if(qtyS > 0){
+      var avgM = cleaned.match(/(?:avg|average|cost|avg\s*cost)[^\d]*\$?(\d+(?:\.\d+)?)/i);
+      var avg = avgM ? parseFloat(avgM[1]) : null;
+      return { kind:'shares', ticker:ticker, qty:qtyS, avgPrice: (avg && avg>0) ? avg : null };
+    }
+  }
+
+  return null;
 }
 
 function pfNormalizeDate(s){
@@ -12175,32 +12343,61 @@ function pfNormalizeDate(s){
     var yr = m[3]; if(yr.length===2) yr = (parseInt(yr)>50?'19':'20')+yr;
     return yr+'-'+('0'+m[1]).slice(-2)+'-'+('0'+m[2]).slice(-2);
   }
+  // Bare M/D → infer year
+  var m2 = s.match(/^(\d{1,2})\/(\d{1,2})$/);
+  if(m2){
+    var mm = +m2[1], dd = +m2[2];
+    if(mm>=1 && mm<=12 && dd>=1 && dd<=31){
+      var yy = pfInferYear(mm, dd);
+      return yy+'-'+('0'+mm).slice(-2)+'-'+('0'+dd).slice(-2);
+    }
+  }
   return null;
 }
 
 function pfParsePreview(){
   var text = eid('pf-paste-text').value;
-  var lines = text.split('\n');
-  var good = 0, bad = 0, badLines = [];
-  lines.forEach(function(ln, idx){
-    if(!ln.trim()) return;
-    var parsed = pfParseLine(ln);
-    if(parsed){
-      good++;
-      PF_PASTE_STAGED.push(parsed);
-    } else {
+  if(!text.trim()){ toast('Nothing to parse'); return; }
+
+  // Split the input into blocks on blank lines. A Robinhood paste looks like:
+  //   CXAI $0.5 Call
+  //   5/15 · 133 buys
+  //   <blank>
+  //   VLN $1 Call
+  //   11/20 · 1 buy
+  // Each block is 1–3 non-empty lines describing ONE position.
+  var rawBlocks = text.split(/\r?\n\s*\r?\n/);
+  var good = 0, bad = 0, badBlocks = [];
+
+  rawBlocks.forEach(function(blk, idx){
+    if(!blk.trim()) return;
+
+    // Try multi-line block parse first (handles the Robinhood 2-line format)
+    var parsed = pfParseBlock(blk);
+    if(parsed){ PF_PASTE_STAGED.push(parsed); good++; return; }
+
+    // Fall back to per-line parsing (legacy single-line formats)
+    var anyGood = false;
+    blk.split(/\r?\n/).forEach(function(ln){
+      if(!ln.trim()) return;
+      var lp = pfParseLine(ln);
+      if(lp){ PF_PASTE_STAGED.push(lp); good++; anyGood = true; }
+    });
+    if(!anyGood){
       bad++;
-      badLines.push('Line '+(idx+1)+': '+ln.slice(0,60));
+      var preview = blk.replace(/\s+/g,' ').trim().slice(0, 80);
+      badBlocks.push('Block '+(idx+1)+': '+preview);
     }
   });
+
   pfRenderStaged();
   if(bad){
     var cur = eid('pf-paste-preview').innerHTML;
-    var warn = '<div style="color:var(--ngo);margin-top:6px;">'+bad+' unparseable line(s):</div>';
-    badLines.forEach(function(b){ warn += '<div style="color:var(--ngo);">&#10005; '+pfEsc(b)+'</div>'; });
+    var warn = '<div style="color:var(--ngo);margin-top:6px;">'+bad+' unparseable block(s):</div>';
+    badBlocks.forEach(function(b){ warn += '<div style="color:var(--ngo);">&#10005; '+pfEsc(b)+'</div>'; });
     eid('pf-paste-preview').innerHTML = cur + warn;
   }
-  toast('Paste: '+good+' added'+(bad?', '+bad+' skipped':''));
+  toast('Paste: '+good+' parsed'+(bad?', '+bad+' skipped':''));
   eid('pf-paste-text').value = '';
 }
 
