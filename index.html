@@ -12193,21 +12193,72 @@ function pfParseLine(line){
     }
   }
 
-  // Free-form single-line: "NVDA $150 Call 12/19/2025 x3"
+  // Free-form single-line examples this handles:
+  //   "NVDA $150 Call 12/19/2025 x3"
+  //   "ONDS $11 Call 4/24"          (bare M/D)
+  //   "MU 160C 1/16/26 5 contracts"
+  //   "AAPL 50 shares" / "AAPL 50 shares @ $175.42"
+  //   "AAPL 50 shares Avg $175.42"
   var tickerM = s.match(/\b([A-Z]{1,5}[A-Z0-9]{0,2})\b/);
-  var strikeM = s.match(/\$?(\d+(?:\.\d+)?)[CP]?\b/g);
-  var dateM   = s.match(/(\d{1,2}\/\d{1,2}\/\d{2,4})|(\d{4}-\d{1,2}-\d{1,2})/);
-  var typeM   = /\bP(UT)?\b|\bPUTS?\b/i.test(s) ? 'PUT' : 'CALL';
-  var qtyM    = s.match(/[xX×](\d+)|\b(\d+)\s*(?:contracts?|ct|qty|shares)?\b\s*$/);
-  var qty = qtyM ? (parseInt(qtyM[1] || qtyM[2]) || 1) : 1;
-
-  if(!tickerM || !strikeM || !dateM) return null;
+  if(!tickerM) return null;
   var ticker = tickerM[1];
 
+  // Shares single-line: "<TICKER> N shares [avg/ @ $X.XX]"
+  var sharesOnLineM = s.match(/\b(\d+(?:\.\d+)?)\s*shares?\b/i);
+  if(sharesOnLineM && !/\b(call|put)s?\b/i.test(s)){
+    var qtyS = parseFloat(sharesOnLineM[1]);
+    if(qtyS > 0){
+      var avgM = s.match(/(?:avg|average|cost|@)[^\d\-]*\$?(\d+(?:\.\d+)?)/i);
+      var avg = avgM ? parseFloat(avgM[1]) : null;
+      return { kind:'shares', ticker:ticker, qty:qtyS, avgPrice: (avg && avg>0) ? avg : null };
+    }
+  }
+
+  // Options: look for strike, date, type
+  var strikeM = s.match(/\$?(\d+(?:\.\d+)?)[CP]?\b/g);
+  // Date: full M/D/Y or YYYY-MM-DD, or bare M/D (not inside a full date)
+  var dateM = s.match(/\d{1,2}\/\d{1,2}\/\d{2,4}|\d{4}-\d{1,2}-\d{1,2}/);
+  if(!dateM){
+    // Fall back to bare M/D. Scrub any full-date fragments first (none here, but safe).
+    var bare = s.match(/\b(\d{1,2})\/(\d{1,2})(?!\/)(?=\D|$)/);
+    if(bare){
+      var mm = +bare[1], dd = +bare[2];
+      if(mm>=1 && mm<=12 && dd>=1 && dd<=31){
+        dateM = [bare[0]];
+      }
+    }
+  }
+  if(!dateM || !strikeM) return null;
+
+  var typeM = /\bP(UT)?\b|\bPUTS?\b/i.test(s) ? 'PUT' : 'CALL';
+  var qtyM = s.match(/[xX×](\d+)|\b(\d+)\s*(?:contracts?|ct|qty)\b/);
+  var qty = qtyM ? (parseInt(qtyM[1] || qtyM[2]) || 1) : 1;
+
+  // Pick strike: prefer one that appears BEFORE the date in the string, so
+  // "ONDS $11 Call 4/24" → $11 not $24.
+  var dateIdx = s.indexOf(dateM[0]);
   var strikeVal = null;
-  for(var i=0;i<strikeM.length;i++){
-    var v = parseFloat(strikeM[i].replace(/[^\d.]/g,''));
-    if(v > 0 && v < 10000){ strikeVal = v; break; }
+  var strikeRe = /\$?(\d+(?:\.\d+)?)[CP]?\b/g;
+  var m;
+  while((m = strikeRe.exec(s)) !== null){
+    var v = parseFloat(m[1]);
+    // Skip if this match overlaps the date or is obviously a year
+    if(v <= 0 || v >= 10000) continue;
+    if(m.index >= dateIdx && m.index < dateIdx + dateM[0].length) continue;
+    // Require a $ prefix OR a trailing C/P to count as a strike (avoids
+    // grabbing things like "5 contracts" as a $5 strike)
+    var raw = m[0];
+    if(raw.charAt(0) !== '$' && !/[CP]$/.test(raw)) continue;
+    strikeVal = v;
+    break;
+  }
+  if(strikeVal == null){
+    // No $-prefixed or C/P-suffixed strike found; fall back to first numeric
+    // token that isn't the date.
+    for(var i=0;i<strikeM.length;i++){
+      var vv = parseFloat(strikeM[i].replace(/[^\d.]/g,''));
+      if(vv > 0 && vv < 10000) { strikeVal = vv; break; }
+    }
   }
   if(!strikeVal) return null;
 
@@ -12215,6 +12266,29 @@ function pfParseLine(line){
   if(!exp) return null;
 
   return { kind:'option', ticker:ticker, strike:strikeVal, exp:exp, type:typeM, qty:qty };
+}
+
+// Parse a line that contains multiple shares positions separated by spaces.
+// Example: "HOOD 100 shares IREN 125 shares VLN 570 shares DRAM 350 shares"
+// Returns an array of {kind:'shares', ...} or an empty array if none matched.
+function pfParseMultiSharesLine(line){
+  if(!line) return [];
+  // Each segment matches TICKER followed by a quantity and "shares"
+  var re = /\b([A-Z]{1,5}(?:\.[A-Z])?)\s+(\d+(?:\.\d+)?)\s*shares?\b/gi;
+  var out = [];
+  var m;
+  while((m = re.exec(line)) !== null){
+    var tk = m[1].toUpperCase().replace(/\./g,'');
+    var qty = parseFloat(m[2]);
+    if(tk && qty > 0){
+      out.push({ kind:'shares', ticker:tk, qty:qty, avgPrice:null });
+    }
+    if(m.index === re.lastIndex) re.lastIndex++;
+  }
+  // Only return the list if we got 2+ matches — a single "AAPL 50 shares"
+  // is better handled by the normal single-line parser which can capture
+  // an optional avgPrice.
+  return out.length >= 2 ? out : [];
 }
 
 // Multi-line Robinhood block parser. Handles the format shown in the
@@ -12372,18 +12446,30 @@ function pfParsePreview(){
   rawBlocks.forEach(function(blk, idx){
     if(!blk.trim()) return;
 
-    // Try multi-line block parse first (handles the Robinhood 2-line format)
-    var parsed = pfParseBlock(blk);
-    if(parsed){ PF_PASTE_STAGED.push(parsed); good++; return; }
+    var blkLines = blk.split(/\r?\n/).filter(function(l){ return l.trim().length > 0; });
 
-    // Fall back to per-line parsing (legacy single-line formats)
-    var anyGood = false;
-    blk.split(/\r?\n/).forEach(function(ln){
-      if(!ln.trim()) return;
+    // Run BOTH block-parse and line-by-line parse; take whichever yielded more.
+    // This handles both the 2-line Robinhood format AND the one-position-per-line
+    // format where the user pasted everything without blank separators.
+    var blockResult = (blkLines.length <= 3) ? pfParseBlock(blk) : null;
+
+    var lineResults = [];
+    blkLines.forEach(function(ln){
+      var multi = pfParseMultiSharesLine(ln);
+      if(multi.length){ lineResults = lineResults.concat(multi); return; }
       var lp = pfParseLine(ln);
-      if(lp){ PF_PASTE_STAGED.push(lp); good++; anyGood = true; }
+      if(lp){ lineResults.push(lp); }
     });
-    if(!anyGood){
+
+    // Prefer line-by-line if it found MORE positions than block-parse.
+    // Otherwise use block-parse result if it exists.
+    if(lineResults.length > (blockResult ? 1 : 0)){
+      lineResults.forEach(function(p){ PF_PASTE_STAGED.push(p); good++; });
+    } else if(blockResult){
+      PF_PASTE_STAGED.push(blockResult); good++;
+    } else if(lineResults.length === 1){
+      PF_PASTE_STAGED.push(lineResults[0]); good++;
+    } else {
       bad++;
       var preview = blk.replace(/\s+/g,' ').trim().slice(0, 80);
       badBlocks.push('Block '+(idx+1)+': '+preview);
