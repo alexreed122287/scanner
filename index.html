@@ -8391,7 +8391,10 @@ function rollFetchLeg1Quote(){
     rollLog('\u2717 LEG 1 OCC symbol "'+G_roll.occSym+'" is not in standard format.','err');
     return;
   }
-  var url = c.host+'/v1/markets/options/quotes?symbols='+encodeURIComponent(G_roll.occSym)+'&greeks=false';
+  // Tradier uses the same /markets/quotes endpoint for stocks and OCC option symbols.
+  // There is no /markets/options/quotes endpoint (Tradier returns 404). Request greeks
+  // so we can populate LEG 1 delta for the comparison panel.
+  var url = c.host+'/v1/markets/quotes?symbols='+encodeURIComponent(G_roll.occSym)+'&greeks=true';
   rollLog('Fetching LEG 1 quote for '+G_roll.occSym+' ('+c.mode+')...','');
   fetch(url,{
     headers:{Authorization:'Bearer '+c.key,Accept:'application/json'}
