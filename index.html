@@ -1587,7 +1587,8 @@ tr.sel-row td{background:var(--blu3);}
           <div style="font-size:10px;color:var(--gry);margin-bottom:6px;">Current contract (auto-filled)</div>
           <div id="roll-leg1-info" style="font-size:11px;color:var(--wht);margin-bottom:6px;"></div>
           <div style="display:flex;gap:6px;align-items:center;font-size:10px;color:var(--gry);">
-            <span>Qty:</span><input type="number" id="roll-leg1-qty" min="1" step="1" value="1" style="width:50px;background:var(--bg0);border:var(--bdr);color:var(--wht);padding:2px 5px;font-size:11px;">
+            <span>Qty:</span><input type="number" id="roll-leg1-qty" min="1" step="1" value="1" oninput="rollUpdateNet()" style="width:50px;background:var(--bg0);border:var(--bdr);color:var(--wht);padding:2px 5px;font-size:11px;">
+            <button type="button" onclick="rollFetchLeg1Quote()" title="Re-fetch LEG 1 bid/ask from Tradier" style="margin-left:6px;background:rgba(255,0,230,0.12);border:1px solid var(--ngo);border-radius:3px;color:var(--ngo);padding:2px 7px;font-size:10px;font-family:var(--ff-mono);cursor:pointer;">&#8635; REFRESH QUOTE</button>
             <span>Bid: <b id="roll-leg1-bid" style="color:var(--wrn)">--</b></span>
             <span>Ask: <b id="roll-leg1-ask" style="color:var(--amb)">--</b></span>
           </div>
@@ -1628,7 +1629,7 @@ tr.sel-row td{background:var(--blu3);}
           </div>
           <div id="roll-leg2-info" style="font-size:11px;color:var(--wht);margin-bottom:6px;">-- select expiry and pick a contract --</div>
           <div style="display:flex;gap:6px;align-items:center;font-size:10px;color:var(--gry);">
-            <span>Qty:</span><input type="number" id="roll-leg2-qty" min="1" step="1" value="1" style="width:50px;background:var(--bg0);border:var(--bdr);color:var(--wht);padding:2px 5px;font-size:11px;">
+            <span>Qty:</span><input type="number" id="roll-leg2-qty" min="1" step="1" value="1" oninput="rollUpdateNet()" style="width:50px;background:var(--bg0);border:var(--bdr);color:var(--wht);padding:2px 5px;font-size:11px;">
             <span>Bid: <b id="roll-leg2-bid" style="color:var(--wrn)">--</b></span>
             <span>Ask: <b id="roll-leg2-ask" style="color:var(--amb)">--</b></span>
           </div>
@@ -8368,18 +8369,29 @@ function rollGetCreds(){
 
 function rollFetchLeg1Quote(){
   var c=rollGetCreds();
+  if(!c.key){
+    rollLog('\u2717 No Tradier API key \u2014 cannot fetch LEG 1 quote. Enter a key in the API tab.','err');
+    return;
+  }
   fetch(c.host+'/v1/markets/options/quotes?symbols='+encodeURIComponent(G_roll.occSym)+'&greeks=false',{
     headers:{Authorization:'Bearer '+c.key,Accept:'application/json'}
   }).then(function(r){return r.json();})
   .then(function(data){
     var q=(data.options&&data.options.option)?data.options.option:null;
     if(!q){q=(data.quotes&&data.quotes.quote)?data.quotes.quote:null;}
-    if(!q) return;
+    if(!q){
+      rollLog('\u2717 LEG 1 quote response missing for '+G_roll.occSym+' \u2014 Tradier returned no option data (symbol may be invalid or outside market hours).','err');
+      rollUpdateNet();
+      return;
+    }
     if(Array.isArray(q)) q=q[0];
     var bid=+q.bid, ask=+q.ask;
     eid('roll-leg1-bid').textContent='$'+fmt2(bid);
     eid('roll-leg1-ask').textContent='$'+fmt2(ask);
     G_roll.leg1Quote={bid:bid,ask:ask,_delta:q.greeks?q.greeks.delta:null};
+    if(!(ask > 0)){
+      rollLog('\u26a0 LEG 1 ask is $'+fmt2(ask)+' (market closed or illiquid). Roll will abort until a real quote is available.','err');
+    }
     rollUpdateNet();
     // Also fetch current stock price
     var c2=rollGetCreds();
@@ -8395,7 +8407,10 @@ function rollFetchLeg1Quote(){
         if(pe) pe.textContent='$'+fmt2(spot);
       }
     }).catch(function(){});
-  }).catch(function(){});
+  }).catch(function(e){
+    rollLog('\u2717 LEG 1 quote fetch error: '+(e&&e.message?e.message:'network/API failure'),'err');
+    rollUpdateNet();
+  });
 }
 
 // Loaded chain cache for current expiry
@@ -8677,16 +8692,43 @@ function rollFetchBest(){
 }
 
 function rollUpdateNet(){
-  var l1q=G_roll.leg1Quote, l2=G_roll.leg2;
-  if(!l1q||!l2.bid) return;
-  // Sell to close: receive bid of leg1. Buy to open: pay ask of leg2.
-  var receive=l1q.bid, pay=l2.ask;
-  var net=(receive-pay)*100; // per contract
+  var el = eid('roll-net-val'); if(!el) return;
+  var l1q=G_roll.leg1Quote, l2=G_roll.leg2||{};
   var q1=+eid('roll-leg1-qty').value||1, q2=+eid('roll-leg2-qty').value||1;
-  var netTotal=net*Math.min(q1,q2);
-  var isCredit=netTotal>=0;
-  eid('roll-net-val').textContent=(isCredit?'CREDIT ':'DEBIT ')+fmtD(Math.abs(netTotal))+' ('+fmtD(Math.abs(net))+'/contract)';
-  eid('roll-net-val').style.color=isCredit?'var(--grn)':'var(--ngo)';
+
+  // Determine what data is missing so we show a helpful status instead of just '--'
+  var l1Ready = l1q && (l1q.bid>0 || l1q.ask>0);
+  var l2Ready = l2 && l2.occSym && (l2.bid>0 || l2.ask>0);
+
+  if(!l1Ready && !l2Ready){
+    el.textContent='Pending \u2014 fetch LEG 1 quote and pick LEG 2 contract';
+    el.style.color='var(--gry)'; return;
+  }
+  if(!l1Ready){
+    el.textContent='Pending \u2014 LEG 1 quote missing (click \u21bb REFRESH QUOTE)';
+    el.style.color='var(--wrn)'; return;
+  }
+  if(!l2Ready){
+    el.textContent='Pending \u2014 pick LEG 2 contract (click FIND BEST or SELECT)';
+    el.style.color='var(--wrn)'; return;
+  }
+
+  // Sell to close: receive bid of leg1. Buy to open: pay ask of leg2.
+  // Also compute MID-to-MID (realistic fill target) alongside the bid/ask worst case.
+  var receiveWorst=l1q.bid, payWorst=l2.ask;
+  var receiveMid =(l1q.bid+l1q.ask)/2, payMid=(l2.bid+l2.ask)/2;
+  var netWorstPer=(receiveWorst-payWorst)*100;
+  var netMidPer  =(receiveMid  -payMid)  *100;
+  var qty=Math.min(q1,q2);
+  var netWorst=netWorstPer*qty, netMid=netMidPer*qty;
+
+  function label(n){ return (n>=0?'CREDIT ':'DEBIT ')+fmtD(Math.abs(n)); }
+  var midIsCredit = netMid >= 0;
+  el.innerHTML =
+    '<b style="color:'+(midIsCredit?'var(--grn)':'var(--ngo)')+';">MID: '+label(netMid)+'</b>'
+    +' <span style="color:var(--gry);font-size:10px;">('+fmtD(Math.abs(netMidPer))+'/contract \u00d7 '+qty+')</span>'
+    +'<br><span style="color:var(--gry);font-size:10px;">Worst case (bid\u2192ask): '+label(netWorst)+'</span>';
+  el.style.color='inherit';
 }
 
 function cancelRollFill(){
@@ -8718,15 +8760,34 @@ async function submitRoll(){
   var coverage=+eid('roll-sf-coverage').value||100;
   var fallback=eid('roll-sf-fallback').value;
 
-  var l1q=G_roll.leg1Quote||{bid:0,ask:0};
+  var l1q=G_roll.leg1Quote;
   var l2=G_roll.leg2;
+
+  // ── Pre-flight: refuse to submit naked or zero-priced orders ─────────────
+  if(!l1q || !(l1q.ask > 0) || !(l1q.bid >= 0) || l1q.ask < 0.01){
+    rollLog('\u2717 LEG 1 quote is missing or stale ('+(l1q?('bid=$'+fmt2(l1q.bid)+' ask=$'+fmt2(l1q.ask)):'no quote')+'). Click REFRESH QUOTE to retry.','err');
+    rollLog('Not submitting a $0.00 order \u2014 Tradier would reject it.','err');
+    eid('roll-status').textContent='Aborted: LEG 1 quote missing/zero';
+    eid('roll-submit-btn').disabled=false; eid('roll-submit-btn').textContent='\u21bb EXECUTE ROLL';
+    G_roll.rollActive=false;
+    toast('Roll aborted \u2014 LEG 1 quote unavailable. Refresh and retry.');
+    return;
+  }
+  if(!l2 || !l2.ask || !(l2.ask > 0) || l2.ask < 0.01){
+    rollLog('\u2717 LEG 2 ask is $'+fmt2(l2&&l2.ask||0)+' \u2014 cannot price the open leg. Pick a different contract or wait for market hours.','err');
+    eid('roll-status').textContent='Aborted: LEG 2 ask $0.00';
+    eid('roll-submit-btn').disabled=false; eid('roll-submit-btn').textContent='\u21bb EXECUTE ROLL';
+    G_roll.rollActive=false;
+    toast('Roll aborted \u2014 LEG 2 has no ask price.');
+    return;
+  }
 
   // ── LEG 1: SELL TO CLOSE — start at ASK, step DOWN toward BID ────────────
   // Starting at ask gives best chance of quick fill on the close side
   var l1Spread=Math.max(l1q.ask-l1q.bid,0);
   var l1Step=Math.max(+(l1Spread*(coverage/100)/Math.max(maxAtt,1)).toFixed(2),0.01);
   var l1Start=l1q.ask;   // start at ask (aggressive for STC)
-  var l1Limit=l1q.bid;   // step down to bid
+  var l1Limit=Math.max(l1q.bid, 0.01);   // step down to bid, never below $0.01
 
   rollLog('LEG 1 — Sell to Close: '+G_roll.occSym+' x'+q1,'');
   rollLog('Start: $'+fmt2(l1Start)+' | Step: -$'+fmt2(l1Step)+' (ask→bid)','');
@@ -8736,6 +8797,10 @@ async function submitRoll(){
   for(var att=1;att<=maxAtt;att++){
     if(G_roll.rollCancel){rollLog('Cancelled at LEG 1 attempt '+att,'err');break;}
     var price=Math.max(+(l1Price).toFixed(2), l1Limit);
+    if(!(price >= 0.01)){
+      rollLog('\u2717 LEG 1 computed price $'+fmt2(price)+' is below $0.01 \u2014 stopping to avoid Tradier rejection.','err');
+      break;
+    }
     rollLog('LEG 1 attempt '+att+'/'+maxAtt+' @ $'+fmt2(price),'');
     try{
       var res=await submitLimitAtPrice(c,acct,G_roll.occSym,G_roll.ticker,'sell_to_close',q1,'option',price);
@@ -8795,6 +8860,10 @@ async function submitRoll(){
   for(var att2=1;att2<=maxAtt;att2++){
     if(G_roll.rollCancel){rollLog('Cancelled at LEG 2 attempt '+att2,'err');break;}
     var price2=Math.min(+(l2Price).toFixed(2),l2Limit);
+    if(!(price2 >= 0.01)){
+      rollLog('\u2717 LEG 2 computed price $'+fmt2(price2)+' is below $0.01 \u2014 stopping to avoid Tradier rejection.','err');
+      break;
+    }
     rollLog('LEG 2 attempt '+att2+'/'+maxAtt+' @ $'+fmt2(price2),'');
     try{
       var res2=await submitLimitAtPrice(c,acct,l2.occSym,G_roll.ticker,'buy_to_open',q2,'option',price2);
