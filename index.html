@@ -46,8 +46,14 @@ body.light-mode{
   --glow-cyan:0 0 0 transparent;--glow-pink:0 0 0 transparent;
 }
 body.light-mode{background-image:none !important;}
-body.light-mode #hdr,body.light-mode #nav{background:var(--bg1) !important;border-bottom:1px solid #bbb !important;}
-body.light-mode #hdr-logo{text-shadow:none !important;}
+/* Header has no bottom border in light mode \u2014 panda logo overflows the 32px header
+   and any border would cut straight across the pandas. Nav keeps its separator. */
+body.light-mode #hdr{background:var(--bg1) !important;border-bottom:none !important;}
+body.light-mode #nav{background:var(--bg1) !important;border-bottom:1px solid #bbb !important;}
+body.light-mode #hdr-logo{text-shadow:none !important;color:#005bbb !important;}
+/* Clean up the panda logo on white: drop the cyan glow, blend out any halo
+   from the chroma-keyed edges, give it a dark drop-shadow for depth. */
+body.light-mode #hdr-logo .panda-icon{filter:drop-shadow(0 1px 2px rgba(0,0,0,.25)) contrast(1.1) !important;mix-blend-mode:multiply;}
 body.light-mode .ntab.active{text-shadow:none !important;}
 body.light-mode .ntab:hover{color:#000 !important;}
 body.light-mode .card,body.light-mode .tbl-wrap,body.light-mode .sig-card,body.light-mode .stats-bar,body.light-mode .stat-box,body.light-mode .flt-bar{background:var(--bg1) !important;}
@@ -574,7 +580,7 @@ tr.sel-row td{background:var(--blu3);}
   </div>
   <div id="hdr-right">
     <button id="theme-toggle" onclick="toggleLightMode()" title="Toggle light / dark mode" style="background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.25);border-radius:3px;padding:2px 8px;font-size:10px;font-family:var(--ff-mono);color:var(--amb);letter-spacing:.5px;cursor:pointer;">&#9788; LIGHT</button>
-    <button id="push-toggle" onclick="requestPushPerm()" title="Enable browser notifications for order fills, stop-loss triggers, rolls, and share buys" style="background:rgba(255,215,64,0.08);border:1px solid rgba(255,215,64,0.35);border-radius:3px;padding:2px 8px;font-size:10px;font-family:var(--ff-mono);color:var(--wrn);letter-spacing:.5px;cursor:pointer;">\ud83d\udd14 NOTIFY</button>
+    <button id="push-toggle" onclick="requestPushPerm()" title="Enable browser notifications for order fills, stop-loss triggers, rolls, and share buys" style="background:rgba(255,215,64,0.08);border:1px solid rgba(255,215,64,0.35);border-radius:3px;padding:2px 8px;font-size:10px;font-family:var(--ff-mono);color:var(--wrn);letter-spacing:.5px;cursor:pointer;">NOTIFY</button>
     <span id="hdr-opt-bp" title="Option buying power from Tradier \u2014 click to refresh" onclick="fetchBalances()" style="cursor:pointer;background:rgba(0,230,118,0.08);border:1px solid rgba(0,230,118,0.3);border-radius:3px;padding:1px 7px;font-size:10px;font-family:var(--ff-mono);color:var(--grn);letter-spacing:.5px;">OPT BP: --</span>
     <span id="clk">--:--:--</span>
     <span id="mkt-status">--</span>
@@ -729,7 +735,7 @@ tr.sel-row td{background:var(--blu3);}
     <input id="wl-add" placeholder="Add ticker..." style="width:120px;" onkeydown="if(event.key==='Enter')addWL()">
     <button class="btn" onclick="addWL()">ADD</button>
     <button class="btn blu" onclick="refreshWL()">&#8635; REFRESH</button>
-    <button class="btn" style="border-color:var(--amb);color:var(--amb);" onclick="wlCopyTickers()" title="Copy comma-separated list of watchlist tickers">&#128203; COPY TICKERS</button>
+    <button class="btn" style="border-color:var(--amb);color:var(--amb);" onclick="wlCopyTickers()" title="Copy comma-separated list of watchlist tickers">COPY TICKERS</button>
     <button class="btn" style="border-color:var(--ngo);color:var(--ngo);" onclick="wlClearAll()" title="Remove all tickers from watchlist">&#10005; CLEAR ALL</button>
     <span id="wl-chart-tf-toggle" style="margin-left:auto;display:flex;gap:4px;">
       <button class="btn blu" id="wl-tf-d" onclick="wlSetTimeframe('D')" style="font-size:10px;padding:4px 10px;">DAILY</button>
@@ -1443,7 +1449,7 @@ tr.sel-row td{background:var(--blu3);}
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
       <span style="color:var(--gry);font-size:10px;" id="pf-last-update">Not loaded</span>
       <button class="btn blu" style="font-size:10px;padding:3px 10px;" onclick="pfRefreshAll()">&#8635; REFRESH ALL</button>
-      <button class="btn" style="font-size:10px;padding:3px 10px;border-color:var(--amb);color:var(--amb);" onclick="pfCopyAllTickers()" title="Copy comma-separated unique tickers from all columns">&#128203; COPY ALL TICKERS</button>
+      <button class="btn" style="font-size:10px;padding:3px 10px;border-color:var(--amb);color:var(--amb);" onclick="pfCopyAllTickers()" title="Copy comma-separated unique tickers from all columns">COPY ALL TICKERS</button>
       <button class="btn" style="font-size:10px;padding:3px 10px;border-color:var(--grn);color:var(--grn);" onclick="pfAddColumn()">+ ADD COLUMN</button>
       <button class="btn" style="font-size:10px;padding:3px 10px;border-color:var(--wrn);color:var(--wrn);" onclick="pfExportCSV()">&#10515; EXPORT CSV</button>
       <button class="btn" style="font-size:10px;padding:3px 10px;border-color:var(--ngo);color:var(--ngo);" onclick="pfResetAll()">RESET</button>
@@ -5979,10 +5985,10 @@ function pushNotify(title, body, tag){
 }
 function _pushPermBtnUpdate(){
   var b = eid('push-toggle'); if(!b) return;
-  if(!('Notification' in window)){ b.textContent='\ud83d\udd15 N/A'; b.disabled=true; return; }
-  if(Notification.permission === 'granted'){ b.textContent = '\ud83d\udd14 ON'; b.style.color='var(--grn)'; b.style.borderColor='var(--grn)'; }
-  else if(Notification.permission === 'denied'){ b.textContent = '\ud83d\udd15 BLOCKED'; b.style.color='var(--ngo)'; b.style.borderColor='var(--ngo)'; }
-  else { b.textContent = '\ud83d\udd14 NOTIFY'; }
+  if(!('Notification' in window)){ b.textContent='N/A'; b.disabled=true; return; }
+  if(Notification.permission === 'granted'){ b.textContent = 'NOTIFY: ON'; b.style.color='var(--grn)'; b.style.borderColor='var(--grn)'; }
+  else if(Notification.permission === 'denied'){ b.textContent = 'NOTIFY: BLOCKED'; b.style.color='var(--ngo)'; b.style.borderColor='var(--ngo)'; }
+  else { b.textContent = 'NOTIFY'; }
 }
 function requestPushPerm(){
   if(!('Notification' in window)){ toast('This browser does not support notifications'); return; }
