@@ -1489,7 +1489,7 @@ tr.sel-row td{background:var(--blu3);}
   <div id="pf-paste-modal" style="display:none;position:fixed;inset:0;z-index:9200;background:rgba(0,0,0,.82);backdrop-filter:blur(3px);align-items:flex-start;justify-content:center;padding-top:60px;">
     <div style="background:var(--bg1);border:1px solid var(--amb);border-radius:8px;width:640px;max-width:94vw;max-height:80vh;display:flex;flex-direction:column;">
       <div style="background:var(--bg2);border-bottom:var(--bdr);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;">
-        <span style="font-family:var(--ff-brand);font-size:12px;color:var(--amb);letter-spacing:2px;">&#128203; PASTE FROM ROBINHOOD</span>
+        <span style="font-family:var(--ff-brand);font-size:12px;color:var(--amb);letter-spacing:2px;">PASTE FROM ROBINHOOD</span>
         <button class="btn" style="font-size:10px;padding:2px 8px;" onclick="pfClosePasteModal()">&#10005;</button>
       </div>
       <div style="padding:14px 16px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;">
@@ -1538,7 +1538,7 @@ tr.sel-row td{background:var(--blu3);}
 
         <!-- ─── METHOD 3: Paste (best-effort parser, fallback) ─── -->
         <details style="background:var(--bg2);border:1px solid var(--bg3);border-radius:4px;padding:8px;">
-          <summary style="cursor:pointer;font-family:var(--ff-brand);font-size:11px;color:var(--gry);letter-spacing:2px;">&#128203; METHOD 3 &mdash; PASTE / FREE-FORM (FALLBACK)</summary>
+          <summary style="cursor:pointer;font-family:var(--ff-brand);font-size:11px;color:var(--gry);letter-spacing:2px;">METHOD 3 &mdash; PASTE / FREE-FORM (FALLBACK)</summary>
           <div style="padding-top:8px;">
             <p style="color:var(--gry);font-size:10px;line-height:1.5;margin:0 0 6px 0;">
               Handles Robinhood's native 2-line paste format. Separate positions with a blank line. Missing years are auto-inferred to the next upcoming M/D.
@@ -10805,8 +10805,9 @@ function updateHeaderQuotes(){
   }
 
   var host=mode==='live'?'https://api.tradier.com':'https://sandbox.tradier.com';
-  // SPX is the index \u2014 Tradier uses $SPX.X
-  var symbols='SPY,QQQ,DIA,IWM,VIX,GLD,$SPX.X';
+  // Tradier uses plain symbols for cash indices (VIX, SPX, NDX). Legacy "$SPX.X"
+  // syntax is no longer supported and silently returns no quote.
+  var symbols='SPY,QQQ,DIA,IWM,VIX,GLD,SPX';
   fetch(host+'/v1/markets/quotes?symbols='+encodeURIComponent(symbols), {
     headers:{Authorization:'Bearer '+key, Accept:'application/json'}
   })
@@ -10824,16 +10825,23 @@ function updateHeaderQuotes(){
       {sym:'IWM',   id:'iwm'},
       {sym:'VIX',   id:'vix'},
       {sym:'GLD',   id:'gld'},
-      {sym:'$SPX.X',id:'spx'}
+      {sym:'SPX',   id:'spx'}
     ];
     var hqCache={};
     pairs.forEach(function(p){
       var q=qmap[p.sym];
-      if(!q) return;
+      var span = eid('h-'+p.id);
+      var container = span ? span.closest('.htick') : null;
+      if(!q || !(parseFloat(q.last||q.prevclose)>0)){
+        // No data returned (e.g. Tradier sandbox or account plan doesn't
+        // include this index). Hide the ticker slot rather than showing "--".
+        if(container) container.style.display = 'none';
+        return;
+      }
+      if(container) container.style.display = '';
       var price=parseFloat(q.last||q.prevclose)||0;
       var chgPct=parseFloat(q.change_percentage)||0;
-      var el=eid('h-'+p.id);
-      if(el) el.textContent='$'+fmt2(price);
+      if(span) span.textContent='$'+fmt2(price);
       hqCache[p.id]=price;
       var cel=eid('h-'+p.id+'-c');
       if(cel){
@@ -11750,7 +11758,7 @@ function pfRenderColumn(col){
   if(isTradier){
     html += '<button class="btn" style="font-size:9px;padding:3px 8px;border-color:var(--grn);color:var(--grn);flex:1;" onclick="pfAutoPullTradier()">&#8635; PULL TRADIER</button>';
   } else {
-    html += '<button class="btn" style="font-size:9px;padding:3px 8px;flex:1;" onclick="pfOpenPasteModal(\''+col.id+'\')" title="Paste positions from Robinhood">&#128203; PASTE RH</button>';
+    html += '<button class="btn" style="font-size:9px;padding:3px 8px;flex:1;" onclick="pfOpenPasteModal(\''+col.id+'\')" title="Paste positions from Robinhood">PASTE RH</button>';
   }
   html +=   '<button class="btn" style="font-size:9px;padding:3px 8px;border-color:var(--amb);color:var(--amb);flex:1;" onclick="pfAddRow(\''+col.id+'\')">+ ROW</button>';
   html +=   '<button class="btn" style="font-size:9px;padding:3px 8px;border-color:var(--wrn);color:var(--wrn);" onclick="pfClearColumn(\''+col.id+'\')" title="Clear all rows">CLR</button>';
