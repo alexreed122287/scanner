@@ -139,9 +139,27 @@ a{color:var(--blu);text-decoration:none;}
 .det-tv{flex:1;overflow:hidden;min-height:200px;}
 .det-tv iframe{width:100%;height:100%;border:none;}
 .det-scroll{overflow-y:auto;flex:1;min-height:0;}
-.empty-det{align-items:center;color:var(--gry);display:flex;flex-direction:column;height:100%;justify-content:center;gap:8px;}
+.empty-det{align-items:center;color:var(--gry);display:flex;flex-direction:column;height:100%;justify-content:center;gap:8px;padding:20px;}
 .empty-det .ei{color:var(--amb3);font-size:36px;}
 .empty-det p{font-size:12px;}
+/* Large panda hero used in scanner + watchlist empty states. mix-blend-mode:lighten
+   lets the image's own dark-blue backdrop disappear into the dashboard's dark-blue
+   background so no hard edges show. */
+.empty-det-panda{
+  width:clamp(220px, 42%, 460px);
+  max-height:58vh;
+  object-fit:contain;
+  mix-blend-mode:lighten;
+  opacity:.92;
+  margin:0 auto 6px;
+  pointer-events:none;user-select:none;
+  filter:drop-shadow(0 0 24px rgba(0,212,255,.12));
+}
+body.light-mode .empty-det-panda{
+  mix-blend-mode:multiply;
+  opacity:.85;
+  filter:drop-shadow(0 4px 10px rgba(0,0,0,.15));
+}
 .s-hdr{background:var(--bg2);border-bottom:var(--bdr);border-top:var(--bdr);color:var(--amb);font-size:10px;font-weight:700;letter-spacing:1px;padding:5px 12px;text-transform:uppercase;}
 .ind-grid{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:var(--bdr);}
 .ig-cell{border-right:var(--bdr);padding:8px 12px;text-align:center;}
@@ -746,7 +764,7 @@ tr.sel-row td{background:var(--blu3);}
     <div class="split-l"><div class="tbl-wrap" id="wl-tbl-wrap"><div class="empty-det" id="wl-empty" style="min-height:200px;"><div class="ei">&#9632;</div><p>Add tickers to watchlist</p></div></div></div>
     <div class="split-r">
       <div class="det-wrap" style="display:flex;flex-direction:column;height:100%;">
-        <div class="empty-det" id="wl-det-empty"><div class="ei">\u25b3</div><p>Select a ticker to view chart</p></div>
+        <div class="empty-det" id="wl-det-empty"><img src="assets/panda.jpg" alt="" class="empty-det-panda"><p>Select a ticker to view chart</p></div>
         <div id="wl-chart-wrap" style="display:none;flex-direction:column;height:100%;">
           <div style="padding:6px 10px;border-bottom:var(--bdr);font-family:var(--ff-mono);font-size:11px;letter-spacing:1.5px;color:var(--amb);display:flex;justify-content:space-between;align-items:center;">
             <span id="wl-chart-title">--</span>
@@ -6931,7 +6949,7 @@ function sortTable(col){
 
 function renderScan(){
   var wrap=eid('sc-tbl-wrap');
-  if(!G.filtered.length){wrap.innerHTML='<div class="empty-det" style="min-height:200px;"><div class="ei">\u25a0</div><p>No results \u2014 run a scan first</p></div>';return;}
+  if(!G.filtered.length){wrap.innerHTML='<div class="empty-det" style="min-height:400px;"><img src="assets/panda.jpg" alt="" class="empty-det-panda"><p>No results \u2014 run a scan first</p></div>';return;}
 
   // Apply text search (post-filter layer so it composes with all filters)
   var q = (G.scQuery||'');
