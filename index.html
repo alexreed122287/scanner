@@ -1643,7 +1643,7 @@ tr.sel-row td{background:var(--blu3);}
       <div style="background:var(--bg2);border:1px solid var(--grn3);border-radius:4px;padding:8px 12px;margin-bottom:12px;">
         <div style="font-size:10px;color:var(--grn);font-weight:700;letter-spacing:.5px;margin-bottom:6px;">STEP FILL SETTINGS</div>
         <div style="display:flex;gap:12px;flex-wrap:wrap;font-size:10px;color:var(--gry);align-items:center;">
-          <div style="display:flex;flex-direction:column;gap:2px;"><label>Max Attempts</label><input type="number" id="roll-sf-max" value="11" min="1" step="1" style="width:52px;background:var(--bg0);border:var(--bdr);color:var(--wht);padding:2px 4px;font-size:11px;"></div>
+          <div style="display:flex;flex-direction:column;gap:2px;"><label>Max Attempts</label><input type="number" id="roll-sf-max" value="30" min="1" step="1" style="width:52px;background:var(--bg0);border:var(--bdr);color:var(--wht);padding:2px 4px;font-size:11px;"></div>
           <div style="display:flex;flex-direction:column;gap:2px;"><label>Fill Wait (sec)</label><input type="number" id="roll-sf-delay" value="3" min="1" step="1" style="width:52px;background:var(--bg0);border:var(--bdr);color:var(--wht);padding:2px 4px;font-size:11px;"></div>
           <div style="display:flex;flex-direction:column;gap:2px;"><label>Spread Coverage %</label><input type="number" id="roll-sf-coverage" value="100" min="10" max="200" step="5" style="width:60px;background:var(--bg0);border:var(--bdr);color:var(--wht);padding:2px 4px;font-size:11px;"></div>
           <div style="display:flex;flex-direction:column;gap:2px;"><label>If No Fill</label>
@@ -3763,6 +3763,32 @@ function cancelOrder(creds,acct,orderId){
     method:'DELETE',
     headers:{Authorization:'Bearer '+creds.key,Accept:'application/json'}
   }).then(function(r){return r.json();}).catch(function(){return null;});
+}
+
+// Cancel an order and return {ok:bool, msg:string} so the caller can log
+// whether the resting limit was actually pulled from the book. Critical for
+// the step-fill path so we never leave stale orders live in the brokerage.
+async function cancelOrderVerbose(creds,acct,orderId){
+  try{
+    var r = await fetch(creds.host+'/v1/accounts/'+acct+'/orders/'+orderId,{
+      method:'DELETE',
+      headers:{Authorization:'Bearer '+creds.key,Accept:'application/json'}
+    });
+    var d = null; try{ d = await r.json(); }catch(e){}
+    if(!r.ok){
+      return {ok:false, msg:'HTTP '+r.status+' '+(d&&d.errors?JSON.stringify(d.errors):(r.statusText||''))};
+    }
+    if(d && d.order && (d.order.status==='canceled' || d.order.status==='cancelled' || d.order.status==='ok')){
+      return {ok:true, msg:'#'+orderId+' '+(d.order.status||'canceled')};
+    }
+    // Tradier sometimes returns {order:{id, status:'ok'}} for a successful cancel
+    if(d && (d.status==='ok' || d.ok)){
+      return {ok:true, msg:'#'+orderId+' acknowledged'};
+    }
+    return {ok:false, msg:'#'+orderId+' unexpected response: '+(d?JSON.stringify(d).slice(0,120):'empty')};
+  } catch(e){
+    return {ok:false, msg:'#'+orderId+' network: '+(e&&e.message||'unknown')};
+  }
 }
 
 function sleep(ms){return new Promise(function(r){setTimeout(r,ms);});}
@@ -8816,7 +8842,7 @@ async function submitRoll(){
 
   var q1=+eid('roll-leg1-qty').value||1;
   var q2=+eid('roll-leg2-qty').value||1;
-  var maxAtt=+eid('roll-sf-max').value||11;
+  var maxAtt=+eid('roll-sf-max').value||30;
   var delay=+eid('roll-sf-delay').value||3;
   var coverage=+eid('roll-sf-coverage').value||100;
   var fallback=eid('roll-sf-fallback').value;
@@ -8867,12 +8893,20 @@ async function submitRoll(){
       var res=await submitLimitAtPrice(c,acct,G_roll.occSym,G_roll.ticker,'sell_to_close',q1,'option',price);
       rollLog('LEG 1 order #'+res.orderId+' placed','');
       await sleep(delay*1000);
-      if(G_roll.rollCancel){await cancelOrder(c,acct,res.orderId);break;}
+      if(G_roll.rollCancel){
+        var uc = await cancelOrderVerbose(c,acct,res.orderId);
+        rollLog((uc.ok?'\u2713 ':'\u2717 ')+'LEG 1 cancel '+uc.msg, uc.ok?'ok':'err');
+        break;
+      }
       var st=await pollOrderStatus(c,acct,res.orderId);
       rollLog('LEG 1 status: '+st.toUpperCase(),'');
-      if(st==='filled'){rollLog('✓ LEG 1 FILLED @ $'+fmt2(price),'ok');l1Filled=true;break;}
+      if(st==='filled'){rollLog('\u2713 LEG 1 FILLED @ $'+fmt2(price),'ok');l1Filled=true;break;}
       if(st==='pending'||st==='open'||st==='partially_filled'){
-        await cancelOrder(c,acct,res.orderId);
+        var cr = await cancelOrderVerbose(c,acct,res.orderId);
+        rollLog((cr.ok?'\u2713 ':'\u26a0 ')+'LEG 1 cancel '+cr.msg, cr.ok?'':'err');
+        if(!cr.ok){
+          rollLog('\u26a0 CANCEL MAY HAVE FAILED \u2014 verify in brokerage that order #'+res.orderId+' is not still live before retrying','err');
+        }
         // Step DOWN from last attempted price
         l1Price=+(l1Price-l1Step).toFixed(2);
         if(l1Price<l1Limit-l1Step){rollLog('LEG 1 reached price limit','err');break;}
@@ -8930,12 +8964,20 @@ async function submitRoll(){
       var res2=await submitLimitAtPrice(c,acct,l2.occSym,G_roll.ticker,'buy_to_open',q2,'option',price2);
       rollLog('LEG 2 order #'+res2.orderId+' placed','');
       await sleep(delay*1000);
-      if(G_roll.rollCancel){await cancelOrder(c,acct,res2.orderId);break;}
+      if(G_roll.rollCancel){
+        var uc2 = await cancelOrderVerbose(c,acct,res2.orderId);
+        rollLog((uc2.ok?'\u2713 ':'\u2717 ')+'LEG 2 cancel '+uc2.msg, uc2.ok?'ok':'err');
+        break;
+      }
       var st2=await pollOrderStatus(c,acct,res2.orderId);
       rollLog('LEG 2 status: '+st2.toUpperCase(),'');
-      if(st2==='filled'){rollLog('✓ LEG 2 FILLED @ $'+fmt2(price2),'ok');l2Filled=true;break;}
+      if(st2==='filled'){rollLog('\u2713 LEG 2 FILLED @ $'+fmt2(price2),'ok');l2Filled=true;break;}
       if(st2==='pending'||st2==='open'||st2==='partially_filled'){
-        await cancelOrder(c,acct,res2.orderId);
+        var cr2 = await cancelOrderVerbose(c,acct,res2.orderId);
+        rollLog((cr2.ok?'\u2713 ':'\u26a0 ')+'LEG 2 cancel '+cr2.msg, cr2.ok?'':'err');
+        if(!cr2.ok){
+          rollLog('\u26a0 CANCEL MAY HAVE FAILED \u2014 verify in brokerage that order #'+res2.orderId+' is not still live before retrying','err');
+        }
         l2Price=+(l2Price+l2Step).toFixed(2);
         if(l2Price>l2Limit+l2Step){rollLog('LEG 2 reached price limit','err');break;}
       } else {
