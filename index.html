@@ -1610,7 +1610,7 @@ tr.sel-row td{background:var(--blu3);}
               </select>
             </div>
             <button class="btn" style="font-size:10px;padding:3px 10px;border-color:var(--gry2);color:var(--gry);" onclick="rollLoadExpirations()">&#8635; LOAD</button>
-            <button class="btn blu" style="font-size:10px;padding:3px 10px;" onclick="rollSelectBest()">&#9650; BEST</button>
+            <button class="btn blu" style="font-size:10px;padding:3px 10px;" onclick="rollSelectBest(true)">&#9650; BEST</button>
           </div>
           <!-- Contract picker table -->
           <div id="roll-chain-wrap" style="display:none;max-height:160px;overflow-y:auto;margin-bottom:8px;border:1px solid var(--bg3);border-radius:3px;">
@@ -8299,7 +8299,7 @@ function fetchBalances(){
 //  ROLL ENGINE
 // ═══════════════════════════════════════════════════════════════════════════
 
-var G_roll = { ticker:'', type:'', strike:0, exp:'', qty:1, occSym:'', leg2:{}, rollCancel:false, rollActive:false };
+var G_roll = { ticker:'', type:'', strike:0, exp:'', qty:1, occSym:'', leg2:{}, rollCancel:false, rollActive:false, _userSelected:false };
 
 function doRoll(btn){
   var tr = btn.closest('tr');
@@ -8311,6 +8311,7 @@ function doRoll(btn){
   G_roll.occSym  = tr.dataset.sym;
   G_roll.leg2    = {};
   G_roll.rollCancel = false;
+  G_roll._userSelected = false;
 
   // Prefill current position info
   var info = eid('roll-current-info');
@@ -8495,6 +8496,8 @@ function rollLoadChain(){
   var newType=eid('roll-new-type').value;
   var newExp=eid('roll-new-exp').value;
   if(!newExp){return;}
+  // Reloading the chain (user picked a new expiry or hit LOAD) clears any pinned selection
+  G_roll._userSelected = false;
   eid('roll-leg2-info').textContent='Loading chain...';
   eid('roll-chain-body').innerHTML='<tr><td colspan="7" style="padding:8px;color:var(--gry);text-align:center;">Loading...</td></tr>';
   eid('roll-chain-wrap').style.display='block';
@@ -8539,7 +8542,7 @@ function rollLoadChain(){
         +'<td style="padding:3px 6px;color:var(--amb);text-align:center;">$'+fmt2(+o.ask)+'</td>'
         +'<td style="padding:3px 6px;color:var(--gry);text-align:center;">'+oi+'</td>'
         +'<td style="padding:3px 6px;color:var(--ambb);text-align:center;">'+bestTag+o._score+'</td>'
-+'<td style="padding:3px 6px;"><button onclick="rollSelectContract(\''+o.symbol+'\')" '
++'<td style="padding:3px 6px;"><button onclick="rollSelectContract(\''+o.symbol+'\', true)" '
         +'style="background:none;border:1px solid rgba(0,212,255,0.3);color:var(--amb);font-size:9px;padding:1px 6px;cursor:pointer;border-radius:2px;">SELECT</button></td>'
         +'</tr>';
     }).join('');
@@ -8550,11 +8553,14 @@ function rollLoadChain(){
   });
 }
 
-function rollSelectContract(sym){
+function rollSelectContract(sym, byUser){
   var chain=G_roll._chainCache||[];
   var o=null;
   for(var i=0;i<chain.length;i++){if(chain[i].symbol===sym){o=chain[i];break;}}
   if(!o) return;
+  // When a user explicitly clicks SELECT, mark the selection as pinned so the
+  // async "find best" race that fires from rollLoadChain can't overwrite it.
+  if(byUser) G_roll._userSelected = true;
   var newExp=G_roll._chainExp||eid('roll-new-exp').value;
   var newType=G_roll._chainType||eid('roll-new-type').value;
   G_roll.leg2={occSym:o.symbol,strike:+o.strike,exp:newExp,type:newType,bid:+o.bid,ask:+o.ask,delta:o.greeks?o.greeks.delta:null};
@@ -8591,9 +8597,13 @@ function rollSelectContract(sym){
   rollUpdateNet();
 }
 
-function rollSelectBest(){
+function rollSelectBest(fromUser){
   // Use the same fetchOptionContract logic as the Order Ticket's FIND BEST
   if(!G_roll.ticker){ toast('No ticker'); return; }
+  // Explicit BEST click from the user clears any prior manual selection
+  if(fromUser) G_roll._userSelected = false;
+  // If user already pinned a row and this auto-fire is not from the BEST button, skip entirely
+  if(!fromUser && G_roll._userSelected){ return; }
   var c = rollGetCreds();
   if(!c.key){
     // Fallback: pick best from loaded chain
@@ -8621,6 +8631,8 @@ function rollSelectBest(){
 
     // Now use the same logic as Order Ticket: fetchOptionContract
     fetchOptionContract(G_roll.ticker, 0, function(best){
+      // Abort if user has already manually picked a contract mid-flight
+      if(G_roll._userSelected){ return; }
       if(!best){
         eid('roll-status').textContent = 'No qualifying contracts found for '+G_roll.ticker;
         // Fallback to chain-based selection
@@ -8680,6 +8692,11 @@ function rollSelectBest(){
         G_roll._chainExp=best.exp;
         G_roll._chainType=eid('roll-new-type').value;
 
+        // If the user has already clicked a row, do NOT overwrite their choice
+        // (this async path loses the race when the user picks fast).
+        if(G_roll._userSelected){
+          return;
+        }
         // Find the exact contract or closest strike
         var target = null;
         var minDiff = 99999;
@@ -8717,7 +8734,7 @@ function rollRenderChainTable(chain){
       +'<td style="padding:3px 6px;color:var(--amb);text-align:center;">$'+fmt2(+o.ask)+'</td>'
       +'<td style="padding:3px 6px;color:var(--gry);text-align:center;">'+oi+'</td>'
       +'<td style="padding:3px 6px;color:var(--ambb);text-align:center;">'+bestTag+o._score+'</td>'
-      +'<td style="padding:3px 6px;"><button onclick="rollSelectContract(\''+o.symbol+'\')" '
+      +'<td style="padding:3px 6px;"><button onclick="rollSelectContract(\''+o.symbol+'\', true)" '
       +'style="background:none;border:1px solid rgba(0,212,255,0.3);color:var(--amb);font-size:9px;padding:1px 6px;cursor:pointer;border-radius:2px;">SELECT</button></td>'
       +'</tr>';
   }).join('');
