@@ -57,7 +57,7 @@ body.light-mode .pnl-pos{color:var(--grn) !important;}
 body.light-mode .pnl-neg{color:var(--wrn) !important;}
 body.light-mode input,body.light-mode select,body.light-mode textarea{background:#fff !important;color:#111 !important;border:1px solid #bbb !important;}
 body.light-mode table th{background:var(--bg2) !important;color:#111 !important;}
-body.light-mode table tbody tr:hover{background:var(--amb3) !important;}
+body.light-mode table tbody tr:hover{font-weight:700;}
 body.light-mode{font-weight:600;}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{
@@ -169,7 +169,8 @@ table{border-collapse:collapse;width:100%;}
 th{background:var(--bg2);border-bottom:1px solid rgba(0,212,255,.1);color:var(--amb);cursor:pointer;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:8px 10px;text-align:left;position:sticky;top:0;white-space:nowrap;user-select:none;text-shadow:0 0 15px rgba(0,212,255,.2);transition:color .15s;}
 th:hover{color:var(--ambb);}
 td{border-bottom:var(--bdr);color:var(--wht);font-size:11px;padding:5px 10px;white-space:nowrap;}
-tr:hover td{background:rgba(0,212,255,.06);cursor:pointer;border-left:2px solid var(--amb);}
+/* No blue row-hover bar; emphasize by making the text slightly larger + bolder instead */
+tr:hover td{cursor:pointer;font-weight:700;letter-spacing:.3px;}
 tr.sel-row td{background:var(--blu3);}
 .badge{border-radius:2px;font-size:10px;font-weight:700;padding:1px 6px;display:inline-block;}
 .badge.go{background:rgba(0,212,255,.12);color:var(--amb);box-shadow:0 0 10px rgba(0,212,255,.2);}
@@ -518,7 +519,7 @@ tr.sel-row td{background:var(--blu3);}
 .chain-tbl th{background:var(--bg2);color:var(--amb);font-weight:700;padding:4px 6px;text-align:right;border-bottom:1px solid var(--bg3);position:sticky;top:0;z-index:1;}
 .chain-tbl th.strike-col,.chain-tbl td.strike-col{text-align:center;background:var(--bg2);color:var(--gry3);font-weight:700;}
 .chain-tbl td{padding:3px 6px;text-align:right;border-bottom:1px solid rgba(255,255,255,0.03);cursor:pointer;}
-.chain-tbl tr:hover td,.chain-tbl tr:hover td.strike-col{background:var(--bg3);}
+.chain-tbl tr:hover td,.chain-tbl tr:hover td.strike-col{font-weight:700;}
 .chain-tbl tr.atm td{background:rgba(245,158,11,0.08);}
 .chain-tbl tr.atm td.strike-col{background:rgba(245,158,11,0.15);color:var(--ambb);}
 .chain-itm{color:var(--grn);}
@@ -554,10 +555,10 @@ tr.sel-row td{background:var(--blu3);}
 }
 /* Row hover for readability */
 .tbl-wrap tbody tr{transition:background .12s;}
-.tbl-wrap tbody tr:hover{background:rgba(0,212,255,0.04);}
+.tbl-wrap tbody tr:hover{font-weight:700;}
 
 </style>
-<!-- echarts CDN removed \u2014 detail-view charts removed, nothing uses echarts anymore -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
 </head>
 <body>
 <div id="hdr">
@@ -573,6 +574,7 @@ tr.sel-row td{background:var(--blu3);}
   </div>
   <div id="hdr-right">
     <button id="theme-toggle" onclick="toggleLightMode()" title="Toggle light / dark mode" style="background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.25);border-radius:3px;padding:2px 8px;font-size:10px;font-family:var(--ff-mono);color:var(--amb);letter-spacing:.5px;cursor:pointer;">&#9788; LIGHT</button>
+    <button id="push-toggle" onclick="requestPushPerm()" title="Enable browser notifications for order fills, stop-loss triggers, rolls, and share buys" style="background:rgba(255,215,64,0.08);border:1px solid rgba(255,215,64,0.35);border-radius:3px;padding:2px 8px;font-size:10px;font-family:var(--ff-mono);color:var(--wrn);letter-spacing:.5px;cursor:pointer;">\ud83d\udd14 NOTIFY</button>
     <span id="hdr-opt-bp" title="Option buying power from Tradier \u2014 click to refresh" onclick="fetchBalances()" style="cursor:pointer;background:rgba(0,230,118,0.08);border:1px solid rgba(0,230,118,0.3);border-radius:3px;padding:1px 7px;font-size:10px;font-family:var(--ff-mono);color:var(--grn);letter-spacing:.5px;">OPT BP: --</span>
     <span id="clk">--:--:--</span>
     <span id="mkt-status">--</span>
@@ -587,7 +589,6 @@ tr.sel-row td{background:var(--blu3);}
   <button class="ntab" onclick="switchTab('pos')">POSITIONS</button>
   <button class="ntab" onclick="switchTab('order')">ORDER TICKET</button>
   <button class="ntab" onclick="switchTab('al')">ALERTS</button>
-  <button class="ntab" onclick="switchTab('closed')">CLOSED POSITIONS</button>
   <button class="ntab" onclick="switchTab('api')">&#9881; API</button>
   <button class="ntab" onclick="switchTab('pf')">PORTFOLIO</button>
   <button class="ntab" onclick="switchTab('cw')">&#9734; OPTIONS WATCHLIST</button>
@@ -724,14 +725,33 @@ tr.sel-row td{background:var(--blu3);}
 </div>
 
 <div class="tab-pane" id="tab-wl">
-  <div class="flt-bar">
+  <div class="flt-bar" style="gap:8px;flex-wrap:wrap;">
     <input id="wl-add" placeholder="Add ticker..." style="width:120px;" onkeydown="if(event.key==='Enter')addWL()">
     <button class="btn" onclick="addWL()">ADD</button>
     <button class="btn blu" onclick="refreshWL()">&#8635; REFRESH</button>
+    <button class="btn" style="border-color:var(--amb);color:var(--amb);" onclick="wlCopyTickers()" title="Copy comma-separated list of watchlist tickers">&#128203; COPY TICKERS</button>
+    <button class="btn" style="border-color:var(--ngo);color:var(--ngo);" onclick="wlClearAll()" title="Remove all tickers from watchlist">&#10005; CLEAR ALL</button>
+    <span id="wl-chart-tf-toggle" style="margin-left:auto;display:flex;gap:4px;">
+      <button class="btn blu" id="wl-tf-d" onclick="wlSetTimeframe('D')" style="font-size:10px;padding:4px 10px;">DAILY</button>
+      <button class="btn" id="wl-tf-1m" onclick="wlSetTimeframe('1m')" style="font-size:10px;padding:4px 10px;">1 MIN</button>
+    </span>
   </div>
   <div class="split">
     <div class="split-l"><div class="tbl-wrap" id="wl-tbl-wrap"><div class="empty-det" id="wl-empty" style="min-height:200px;"><div class="ei">&#9632;</div><p>Add tickers to watchlist</p></div></div></div>
-    <div class="split-r"><div class="det-wrap"><div class="empty-det" id="wl-det-empty"><div class="ei">&#9632;</div><p>Select a row to view details</p></div><div id="wl-detail" style="display:none;flex-direction:column;height:100%;overflow:hidden;"></div></div></div>
+    <div class="split-r">
+      <div class="det-wrap" style="display:flex;flex-direction:column;height:100%;">
+        <div class="empty-det" id="wl-det-empty"><div class="ei">\u25b3</div><p>Select a ticker to view chart</p></div>
+        <div id="wl-chart-wrap" style="display:none;flex-direction:column;height:100%;">
+          <div style="padding:6px 10px;border-bottom:var(--bdr);font-family:var(--ff-mono);font-size:11px;letter-spacing:1.5px;color:var(--amb);display:flex;justify-content:space-between;align-items:center;">
+            <span id="wl-chart-title">--</span>
+            <span id="wl-chart-sub" style="color:var(--gry);font-size:10px;">--</span>
+          </div>
+          <div id="wl-chart-canvas" style="flex:1;position:relative;background:var(--bg0);">
+            <div id="wl-chart-loading" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--gry);font-size:11px;font-family:var(--ff-mono);letter-spacing:1px;">\u2014 select a ticker \u2014</div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 <div class="tab-pane" id="tab-pos">
@@ -1423,6 +1443,7 @@ tr.sel-row td{background:var(--blu3);}
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
       <span style="color:var(--gry);font-size:10px;" id="pf-last-update">Not loaded</span>
       <button class="btn blu" style="font-size:10px;padding:3px 10px;" onclick="pfRefreshAll()">&#8635; REFRESH ALL</button>
+      <button class="btn" style="font-size:10px;padding:3px 10px;border-color:var(--amb);color:var(--amb);" onclick="pfCopyAllTickers()" title="Copy comma-separated unique tickers from all columns">&#128203; COPY ALL TICKERS</button>
       <button class="btn" style="font-size:10px;padding:3px 10px;border-color:var(--grn);color:var(--grn);" onclick="pfAddColumn()">+ ADD COLUMN</button>
       <button class="btn" style="font-size:10px;padding:3px 10px;border-color:var(--wrn);color:var(--wrn);" onclick="pfExportCSV()">&#10515; EXPORT CSV</button>
       <button class="btn" style="font-size:10px;padding:3px 10px;border-color:var(--ngo);color:var(--ngo);" onclick="pfResetAll()">RESET</button>
@@ -5540,6 +5561,14 @@ function renderTV(cid,ticker){
   c.style.display='none';
 }
 
+function closeDetailPane(detId, emptyId){
+  var det = eid(detId), emp = eid(emptyId);
+  if(det){ det.style.display = 'none'; det.innerHTML = ''; }
+  if(emp){ emp.style.display = 'flex'; }
+  G.selTicker = null;
+  G.detailOpt = null;
+}
+
 function buildDetail(r,detId,emptyId){
   var det=eid(detId),emp=eid(emptyId);
   if(!r){if(emp)emp.style.display='flex';if(det)det.style.display='none';return;}
@@ -5566,6 +5595,7 @@ function buildDetail(r,detId,emptyId){
     +'<span class="det-pr">$'+fmt2(r.price)+'</span>'
     +'<span class="det-sig '+sigCls+'">'+sigLbl+'</span>'
     +'<span class="det-meta">'+r.sector+' | Score: <b>'+Math.round(r.score)+'</b>/150 | Tech: '+techScore+' Fund: '+fundScore+' | Passes: '+r.passes+'/14</span>'
+    +'<button onclick="closeDetailPane(\''+detId+'\',\''+emptyId+'\')" title="Close detail panel" style="margin-left:auto;background:transparent;border:1px solid var(--gry2);color:var(--wrn);border-radius:3px;padding:2px 9px;font-size:13px;font-weight:700;cursor:pointer;line-height:1;">\u2715</button>'
     +'</div>'
     +'<div class="chain-tabs">'
     +'<div class="chain-tab active" id="dtab-signals" onclick="switchDetTab(\''+r.ticker+'\',\'signals\')">SIGNALS</div>'
@@ -5930,6 +5960,50 @@ function viewDetail(ticker,detId,emptyId){
  }
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+//  PUSH NOTIFICATIONS \u2014 browser Notifications API
+//  Fires for: order filled, stop-loss triggered, roll completed, share bought
+// ═══════════════════════════════════════════════════════════════════════════
+function pushNotify(title, body, tag){
+  try{
+    if(!('Notification' in window)) return;
+    if(Notification.permission !== 'granted') return;
+    var n = new Notification(title, {
+      body: body || '',
+      tag: tag || ('opt-panda-'+Date.now()),
+      icon: './assets/pandas2.png',
+      silent: false
+    });
+    setTimeout(function(){ try{ n.close(); }catch(e){} }, 10000);
+  }catch(e){ /* no-op */ }
+}
+function _pushPermBtnUpdate(){
+  var b = eid('push-toggle'); if(!b) return;
+  if(!('Notification' in window)){ b.textContent='\ud83d\udd15 N/A'; b.disabled=true; return; }
+  if(Notification.permission === 'granted'){ b.textContent = '\ud83d\udd14 ON'; b.style.color='var(--grn)'; b.style.borderColor='var(--grn)'; }
+  else if(Notification.permission === 'denied'){ b.textContent = '\ud83d\udd15 BLOCKED'; b.style.color='var(--ngo)'; b.style.borderColor='var(--ngo)'; }
+  else { b.textContent = '\ud83d\udd14 NOTIFY'; }
+}
+function requestPushPerm(){
+  if(!('Notification' in window)){ toast('This browser does not support notifications'); return; }
+  if(Notification.permission === 'granted'){
+    pushNotify('Option Panda', 'Notifications already enabled. You\u2019ll get alerts for order fills, stop-loss triggers, rolls, and share buys.', 'test');
+    return;
+  }
+  if(Notification.permission === 'denied'){
+    toast('Notifications blocked \u2014 enable them in your browser site settings');
+    return;
+  }
+  Notification.requestPermission().then(function(p){
+    _pushPermBtnUpdate();
+    if(p === 'granted'){
+      pushNotify('Notifications enabled', 'You\u2019ll get alerts for order fills, stop-loss triggers, rolls, and share buys.', 'welcome');
+    }
+  });
+}
+// Run once on load to show correct button state
+setTimeout(_pushPermBtnUpdate, 100);
+
 // Quick Buy Shares \u2014 places a market equity order via Tradier. Prompts for qty + confirm.
 function quickBuyShares(ticker){
   if(!ticker) return;
@@ -5962,6 +6036,7 @@ function quickBuyShares(ticker){
       var status = data.order.status || 'submitted';
       toast('\u2713 '+ticker+' buy '+status+' (order '+oid+')', 5000);
       if(typeof addAlert === 'function') addAlert('BUY', ticker+' market buy '+qty+' sh \u2014 order '+oid+' ('+status+')', 'ok');
+      pushNotify('Share buy submitted', ticker+' \u2014 '+qty+' share'+(qty>1?'s':'')+' at market ('+status+', order #'+oid+')', 'buy-'+oid);
       try{ fetchBalances(); }catch(e){}
     } else {
       var errMsg = (data && data.errors && data.errors.error) ? (Array.isArray(data.errors.error)?data.errors.error.join(', '):data.errors.error) : 'unknown error';
@@ -7172,7 +7247,7 @@ function refreshWL(){
       var existing=false;for(var j=0;j<G.results.length;j++){if(G.results[j].ticker===t){existing=true;break;}}
       if(!existing){G.results.push({ticker:t,sector:u.s,price:q.price,change:q.change,changePct:q.changePct,volume:q.volume,ind:ind,opt:opt,score:sc.score,isGo:sc.isGo,filtersPass:sc.filtersPass,rules:sc.rules,passes:sc.passes});}
       var chgCls=q.change>=0?'pnl-pos':'pnl-neg';var sigBadge=sc.isGo?'<span class="badge go">GO</span>':'<span class="badge nogo">NO-GO</span>';
-      html+='<tr data-ticker="'+t+'" onclick="viewDetail(this.dataset.ticker,\'wl-detail\',\'wl-det-empty\')">'
+      html+='<tr data-ticker="'+t+'" onclick="wlSelectTicker(this.dataset.ticker)">'
         +'<td><b>'+t+'</b></td><td>$'+fmt2(q.price)+'</td>'
         +'<td class="'+chgCls+'">'+(q.change>=0?'+':'')+fmt2(q.change)+'</td>'
         +'<td class="'+chgCls+'">'+(q.changePct>=0?'+':'')+fmtP(q.changePct)+'</td>'
@@ -7224,6 +7299,244 @@ function refreshWL(){
       G.wlTickers.forEach(function(t){ simMap[t] = simQuote(t); });
       renderTable(simMap, 'simulated-fallback');
     });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  WATCHLIST HELPERS — copy, clear, chart panel (candles + EMA 10/20/50 + S/R)
+// ═══════════════════════════════════════════════════════════════════════════
+function wlCopyTickers(){
+  if(!G.wlTickers || !G.wlTickers.length){ toast('Watchlist is empty'); return; }
+  var csv = G.wlTickers.slice().join(', ');
+  try{
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(csv).then(function(){ toast('Copied '+G.wlTickers.length+' tickers'); }, function(){ _wlCopyFallback(csv); });
+    } else { _wlCopyFallback(csv); }
+  }catch(e){ _wlCopyFallback(csv); }
+}
+function _wlCopyFallback(csv){
+  var ta=document.createElement('textarea'); ta.value=csv; document.body.appendChild(ta); ta.select();
+  try{ document.execCommand('copy'); toast('Copied '+G.wlTickers.length+' tickers'); }catch(e){ toast('Copy failed \u2014 '+csv); }
+  document.body.removeChild(ta);
+}
+function wlClearAll(){
+  if(!G.wlTickers || !G.wlTickers.length){ toast('Watchlist is already empty'); return; }
+  if(!confirm('Remove all '+G.wlTickers.length+' tickers from the watchlist?')) return;
+  G.wlTickers = [];
+  try{ saveWL(); }catch(e){}
+  refreshWL();
+  // also clear chart pane
+  var empty = eid('wl-det-empty'), wrap = eid('wl-chart-wrap');
+  if(empty) empty.style.display = 'flex';
+  if(wrap) wrap.style.display = 'none';
+  G._wlChart && G._wlChart.dispose && G._wlChart.dispose();
+  G._wlChart = null;
+  toast('Watchlist cleared');
+}
+
+// Copy all unique tickers across every column in the portfolio.
+function pfCopyAllTickers(){
+  try{
+    var data = (typeof pfLoad === 'function') ? pfLoad() : null;
+    if(!data || !data.columns || !data.columns.length){ toast('Portfolio is empty'); return; }
+    var set = {};
+    data.columns.forEach(function(col){
+      (col.rows||[]).forEach(function(r){
+        if(r && r.ticker) set[String(r.ticker).toUpperCase()] = true;
+      });
+    });
+    var list = Object.keys(set).sort();
+    if(!list.length){ toast('No tickers in portfolio'); return; }
+    var csv = list.join(', ');
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(csv).then(function(){ toast('Copied '+list.length+' unique tickers'); }, function(){ _wlCopyFallback(csv); });
+    } else { _wlCopyFallback(csv); }
+  }catch(e){ toast('Copy failed: '+e.message); }
+}
+
+// ── Watchlist chart panel ────────────────────────────────────────────────
+G._wlChartTicker = null;
+G._wlChartTf     = 'D';     // 'D' or '1m'
+G._wlChart       = null;
+function wlSetTimeframe(tf){
+  G._wlChartTf = tf;
+  // Update button visuals
+  var dBtn = eid('wl-tf-d'), mBtn = eid('wl-tf-1m');
+  if(dBtn) dBtn.className = 'btn ' + (tf==='D' ? 'blu' : '');
+  if(mBtn) mBtn.className = 'btn ' + (tf==='1m' ? 'blu' : '');
+  if(G._wlChartTicker) wlRenderChart(G._wlChartTicker);
+}
+function wlSelectTicker(ticker){
+  G._wlChartTicker = ticker;
+  var empty = eid('wl-det-empty'), wrap = eid('wl-chart-wrap');
+  if(empty) empty.style.display = 'none';
+  if(wrap) wrap.style.display = 'flex';
+  // Highlight the row
+  try{
+    var rows = document.querySelectorAll('#wl-tbl-wrap tbody tr');
+    rows.forEach(function(r){ r.style.outline = r.dataset.ticker===ticker ? '1px solid var(--amb)' : ''; });
+  }catch(e){}
+  wlRenderChart(ticker);
+}
+
+function wlRenderChart(ticker){
+  var canvas = eid('wl-chart-canvas'), loading = eid('wl-chart-loading');
+  if(!canvas || typeof echarts === 'undefined'){ return; }
+  // Dispose prior instance to avoid leaks on ticker switch
+  if(G._wlChart){ try{ G._wlChart.dispose(); }catch(e){} G._wlChart = null; }
+  if(loading) loading.textContent = 'Loading '+ticker+' ('+(G._wlChartTf==='D'?'Daily':'1 Min')+')...';
+
+  var tfLbl = eid('wl-chart-title');
+  if(tfLbl) tfLbl.textContent = ticker + ' \u2014 ' + (G._wlChartTf==='D' ? 'DAILY' : '1 MIN');
+
+  var creds = (typeof rollGetCreds === 'function') ? rollGetCreds() : null;
+  if(!creds || !creds.key){
+    if(loading) loading.textContent = 'No Tradier API key \u2014 set one in the API tab';
+    return;
+  }
+  var host = creds.host, key = creds.key;
+
+  if(G._wlChartTf === 'D'){
+    var end = new Date(), start = new Date(); start.setDate(start.getDate() - 120);
+    var fmtD = function(d){ return d.toISOString().slice(0,10); };
+    fetch(host+'/v1/markets/history?symbol='+ticker+'&interval=daily&start='+fmtD(start)+'&end='+fmtD(end),{
+      headers:{Authorization:'Bearer '+key,Accept:'application/json'}
+    }).then(function(r){return r.json();})
+    .then(function(data){
+      var days = (data.history && data.history.day) ? data.history.day : [];
+      if(!Array.isArray(days)) days = [days];
+      if(!days.length){ if(loading) loading.textContent = 'No daily data for '+ticker; return; }
+      _wlDrawCandles(ticker, days, 'daily');
+    }).catch(function(e){ if(loading) loading.textContent = 'Chart error: '+e.message; });
+  } else {
+    // 1-minute intraday
+    var now = new Date(), mStart = new Date(now); mStart.setHours(9,30,0,0);
+    var mEnd = new Date(now); mEnd.setHours(16,0,0,0);
+    if(now.getDay()===0) mStart.setDate(mStart.getDate()-2);
+    if(now.getDay()===6) mStart.setDate(mStart.getDate()-1);
+    var fmtTs = function(d){ return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2)+' '+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)+':00'; };
+    fetch(host+'/v1/markets/timesales?symbol='+ticker+'&interval=1min&start='+encodeURIComponent(fmtTs(mStart))+'&end='+encodeURIComponent(fmtTs(mEnd))+'&session_filter=open',{
+      headers:{Authorization:'Bearer '+key,Accept:'application/json'}
+    }).then(function(r){return r.json();})
+    .then(function(data){
+      var series = (data.series && data.series.data) ? data.series.data : [];
+      if(!Array.isArray(series)) series = [series];
+      if(!series.length){ if(loading) loading.textContent = 'No intraday data (market closed?)'; return; }
+      var days = series.map(function(s){ return {date: s.time, open:s.open, high:s.high, low:s.low, close:s.close}; });
+      _wlDrawCandles(ticker, days, 'minute');
+    }).catch(function(e){ if(loading) loading.textContent = 'Chart error: '+e.message; });
+  }
+}
+
+function _wlDrawCandles(ticker, days, kind){
+  var canvas = eid('wl-chart-canvas'), loading = eid('wl-chart-loading');
+  if(loading) loading.style.display = 'none';
+  var labels = days.map(function(d){
+    if(kind==='minute') return (d.date||'').slice(11,16);
+    return (d.date||'').slice(5);
+  });
+  var closes = days.map(function(d){ return +d.close; });
+
+  function calcEma(data, period){
+    var k=2/(period+1), out=[], prev=null;
+    data.forEach(function(v,i){
+      if(i < period-1){ out.push(null); return; }
+      if(prev === null){ prev = data.slice(0, period).reduce(function(a,b){return a+b;},0)/period; out.push(+prev.toFixed(2)); return; }
+      prev = v*k + prev*(1-k); out.push(+prev.toFixed(2));
+    });
+    return out;
+  }
+  var ema10 = calcEma(closes, 10), ema20 = calcEma(closes, 20), ema50 = calcEma(closes, 50);
+
+  // Support / Resistance via pivot clusters (same logic as previous detail chart)
+  function findSR(data, lb){
+    lb = lb || 4;
+    var highs=[], lows=[];
+    for(var i=lb; i<data.length-lb; i++){
+      var h=+data[i].high, l=+data[i].low, isH=true, isL=true;
+      for(var j=i-lb; j<i; j++){ if(+data[j].high>h) isH=false; if(+data[j].low<l) isL=false; }
+      for(var j=i+1; j<=i+lb; j++){ if(+data[j].high>h) isH=false; if(+data[j].low<l) isL=false; }
+      if(isH) highs.push(h); if(isL) lows.push(l);
+    }
+    var rng = (Math.max.apply(null, closes) - Math.min.apply(null, closes)) * 0.015;
+    function cluster(pts){
+      var zones = [];
+      pts.sort(function(a,b){return a-b;});
+      pts.forEach(function(p){
+        var m = null;
+        for(var i=0; i<zones.length; i++){ if(Math.abs(zones[i].mid - p) < rng){ m = zones[i]; break; } }
+        if(m){ m.vals.push(p); m.mid = m.vals.reduce(function(a,b){return a+b;},0)/m.vals.length; }
+        else zones.push({mid:p, vals:[p]});
+      });
+      return zones.map(function(z){ return {lo:+(z.mid-rng*0.6).toFixed(2), hi:+(z.mid+rng*0.6).toFixed(2)}; });
+    }
+    return { res: cluster(highs), sup: cluster(lows) };
+  }
+  var sr = (kind === 'daily' && days.length > 10) ? findSR(days, 4) : {res:[], sup:[]};
+  var resAreas = sr.res.map(function(z){ return [
+    {yAxis:z.lo, itemStyle:{color:'rgba(255,60,60,0.15)', borderColor:'rgba(255,82,82,0.55)', borderWidth:1}},
+    {yAxis:z.hi}
+  ]; });
+  var supAreas = sr.sup.map(function(z){ return [
+    {yAxis:z.lo, itemStyle:{color:'rgba(0,210,100,0.12)', borderColor:'rgba(0,230,118,0.55)', borderWidth:1}},
+    {yAxis:z.hi}
+  ]; });
+
+  var priceMin = Math.min.apply(null, days.map(function(d){return +d.low;})) * 0.99;
+  var priceMax = Math.max.apply(null, days.map(function(d){return +d.high;})) * 1.01;
+
+  // Default zoom: last ~22 bars (1 month daily, ~22 min intraday) \u2014 user can auto-zoom out
+  var zoomStart = kind === 'daily'
+    ? Math.max(0, Math.round(((days.length-22)/days.length)*100))
+    : 0;
+
+  var ec = echarts.init(canvas, null, {renderer:'canvas'});
+  G._wlChart = ec;
+  ec.setOption({
+    backgroundColor:'transparent', animation:false,
+    tooltip:{
+      trigger:'axis',
+      axisPointer:{type:'cross', crossStyle:{color:'rgba(55,138,221,0.35)', width:1}},
+      backgroundColor:'#0b1522', borderColor:'rgba(0,212,255,0.25)',
+      textStyle:{color:'#c8daf8', fontSize:10},
+      formatter: function(params){
+        var c=null; for(var i=0;i<params.length;i++){ if(params[i].seriesName==='Price'){ c=params[i]; break; } }
+        if(!c) return '';
+        var d = days[c.dataIndex];
+        var chg = (((+d.close - +d.open)/+d.open)*100).toFixed(2);
+        var e10 = ema10[c.dataIndex], e20 = ema20[c.dataIndex], e50 = ema50[c.dataIndex];
+        return '<b>'+c.name+'</b><br>O:$'+fmt2(d.open)+' H:$'+fmt2(d.high)+' L:$'+fmt2(d.low)+' C:$'+fmt2(d.close)+'<br>'+(chg>=0?'+':'')+chg+'%'
+          + (e10 ? '<br><span style="color:#00e676">EMA10:$'+e10+'</span>' : '')
+          + (e20 ? '<br><span style="color:#ffd740">EMA20:$'+e20+'</span>' : '')
+          + (e50 ? '<br><span style="color:#ff5252">EMA50:$'+e50+'</span>' : '');
+      }
+    },
+    grid:{left:56, right:12, top:18, bottom:40},
+    xAxis:{type:'category', data:labels, axisLine:{lineStyle:{color:'rgba(120,140,180,0.15)'}}, axisLabel:{color:'#7090c8', fontSize:9, interval:Math.floor(days.length/6)}, splitLine:{show:false}},
+    yAxis:{scale:true, min:priceMin, max:priceMax, splitLine:{lineStyle:{color:'rgba(120,140,180,0.1)', type:'dashed'}}, axisLabel:{color:'#7090c8', fontSize:9, formatter:function(v){return '$'+v.toFixed(0);}}},
+    dataZoom:[
+      {type:'inside', start:zoomStart, end:100},
+      {type:'slider', start:zoomStart, end:100, bottom:2, height:18, borderColor:'rgba(0,212,255,0.15)', fillerColor:'rgba(0,212,255,0.05)', handleStyle:{color:'#378ADD'}, textStyle:{color:'#7090c8', fontSize:8}, dataBackground:{areaStyle:{color:'rgba(0,212,255,0.04)'}}}
+    ],
+    series:[
+      {name:'Price', type:'candlestick', data: days.map(function(d){ return [+d.open, +d.close, +d.low, +d.high]; }),
+        itemStyle:{color:'#1D9E75', color0:'#D85A30', borderColor:'#1D9E75', borderColor0:'#D85A30', borderWidth:1},
+        barMaxWidth:10, markArea:{silent:true, data: resAreas.concat(supAreas)}},
+      {name:'EMA10', type:'line', data:ema10, smooth:false, lineStyle:{color:'#00e676', width:1.5}, symbol:'none', connectNulls:false},
+      {name:'EMA20', type:'line', data:ema20, smooth:false, lineStyle:{color:'#ffd740', width:1.5}, symbol:'none', connectNulls:false},
+      {name:'EMA50', type:'line', data:ema50, smooth:false, lineStyle:{color:'#ff5252', width:2}, symbol:'none', connectNulls:false}
+    ]
+  });
+  try{
+    if(G._wlResizeObs) G._wlResizeObs.disconnect();
+    G._wlResizeObs = new ResizeObserver(function(){ try{ ec.resize(); }catch(e){} });
+    G._wlResizeObs.observe(canvas);
+  }catch(e){}
+  var sub = eid('wl-chart-sub');
+  if(sub){
+    var last = days[days.length-1];
+    var chg = last && last.open ? (((+last.close - +last.open)/+last.open)*100).toFixed(2) : '0.00';
+    sub.textContent = 'Last $'+fmt2(last.close)+' ('+(chg>=0?'+':'')+chg+'%) \u2014 '+days.length+' bars';
+  }
 }
 
 function parseOccSymbol(sym){
@@ -7448,10 +7761,13 @@ function renderPositionsTable(pos,srcLabel){
     tsLog('Trail stop auto-armed for ' + pos.length + ' position(s)', 'info');
   }
   var html='<table><thead><tr>'
-    +'<th>SYMBOL</th><th>TYPE</th><th>STRIKE</th><th>EXPIRY</th><th>DIT</th><th>DTE</th><th>HIGH %</th><th>OPENED</th><th>UL OPEN</th><th>UL NOW</th><th>QTY</th>'
-    +'<th>AVG COST</th><th>LAST</th><th>P&L $</th><th>P&L %</th>'
-    +'<th>TRAIL STOP</th><th>STATUS</th><th>ACTION</th><th></th><th></th>'
+    +'<th>TICKER</th><th>CLOSE</th><th>ROLL</th>'
+    +'<th>P/L $</th><th>P/L %</th>'
+    +'<th>STRIKE</th><th>EXP</th><th>DTE</th>'
+    +'<th>QTY</th><th>ENTRY</th><th>MARK</th><th>UL</th>'
+    +'<th>TRAIL</th><th></th><th></th>'
     +'</tr></thead><tbody>';
+  colCount = 15; // total columns (used by inline config/chart rows)
 
   pos.forEach(function(p){
     var pnlCls  = p.pnl>=0?'pnl-pos':'pnl-neg';
@@ -7527,40 +7843,37 @@ function renderPositionsTable(pos,srcLabel){
     }
     var dteCls = dteDays!=='--'&&dteDays<=7?'color:var(--red)':dteDays!=='--'&&dteDays<=14?'color:var(--ambb)':'color:var(--gry3)';
     var ditCls = 'color:var(--gry3)';
+    // Strike cell with C/P suffix + ITM/OTM badge (folded TYPE column into STRIKE)
+    var strikeCell = (function(){
+      var ul = p.ulNow || p.underlyingNow || 0;
+      var typeSfx = p.type === 'CALL' ? 'C' : 'P';
+      var base = '$'+fmt2(p.strike)+'<span style="color:var(--gry);font-size:10px;margin-left:2px;">'+typeSfx+'</span>';
+      if(!ul) return '<td style="white-space:nowrap;">'+base+'</td>';
+      var isCall = p.type === 'CALL';
+      var itm = isCall ? ul > p.strike : ul < p.strike;
+      var badge = itm
+        ? '<span style="background:rgba(34,197,94,0.15);color:#22c55e;font-size:9px;font-weight:700;padding:1px 5px;border-radius:2px;border:1px solid rgba(34,197,94,0.4);margin-left:4px;">ITM</span>'
+        : '<span style="background:rgba(239,68,68,0.12);color:#f87171;font-size:9px;font-weight:700;padding:1px 5px;border-radius:2px;border:1px solid rgba(239,68,68,0.3);margin-left:4px;">OTM</span>';
+      return '<td style="white-space:nowrap;">'+base+badge+'</td>';
+    })();
+    var ulCell = p.underlyingNow ? '$'+fmt2(p.underlyingNow) : '--';
+
     html += '<tr data-tk="'+tk+'" data-tp="'+tp+'" data-st="'+st+'" data-ex="'+ex+'" data-qty="'+qty+'" data-sym="'+sym+'">'
-      +'<td><b>'+sym+'</b></td>'
-      +'<td>'+p.type+'</td>'
-      +(function(){
-        var ul = p.ulNow || 0;
-        var DS = '$';
-        if(!ul) return '<td>'+DS+fmt2(p.strike)+'</td>';
-        var isCall = p.type === 'CALL';
-        var itm = isCall ? ul > p.strike : ul < p.strike;
-        var pct = Math.abs(((ul - p.strike) / p.strike) * 100).toFixed(1);
-        var badge = itm
-          ? '<span style="background:rgba(34,197,94,0.15);color:#22c55e;font-size:9px;font-weight:700;padding:1px 5px;border-radius:2px;border:1px solid rgba(34,197,94,0.4);margin-left:4px;">ITM</span>'
-          : '<span style="background:rgba(239,68,68,0.12);color:#f87171;font-size:9px;font-weight:700;padding:1px 5px;border-radius:2px;border:1px solid rgba(239,68,68,0.3);margin-left:4px;">OTM</span>';
-        var pctLabel = '<span style="color:var(--gry);font-size:9px;margin-left:3px;">'+(itm?'+':'-')+pct+'%</span>';
-        return '<td style="white-space:nowrap;">'+DS+fmt2(p.strike)+badge+pctLabel+'</td>';
-      })()
-      +'<td>'+p.exp+'</td>'
-      +'<td style="'+ditCls+';">'+(ditDays!=='--'?ditDays+'d':'--')+'</td>'
-      +'<td style="'+dteCls+';">'+(dteDays!=='--'?dteDays+'d':'--')+'</td>'
-      +'<td style="color:var(--ambb);">'+(tsState.peakPct>0?'+'+fmt2(tsState.peakPct)+'%':'--')+'</td>'
-      +'<td style="color:var(--gry);font-size:10px;">'+(p.openTs?new Date(p.openTs).toLocaleString('en-US',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:true}):'--')+'</td>'
-      +'<td style="color:var(--gry3)">'+(p.underlyingAtOpen?('$'+fmt2(p.underlyingAtOpen)):'--')+'</td>'
-      +'<td style="color:var(--gry3)">'+(p.underlyingNow?('$'+fmt2(p.underlyingNow)):'--')+'</td>'
-      +'<td>$'+fmt2(p.cost)+'</td>'
-      +'<td>$'+fmt2(p.last)+'</td>'
-      +'<td class="'+pnlCls+'">'+(p.pnl>=0?'+':'')+fmtD(p.pnl)+'</td>'
-      +'<td class="'+pnlCls+'">'+(p.pnlPct>=0?'+':'')+fmtP(p.pnlPct)+'</td>'
-      +'<td>'+trailBadge+'</td>'
-      +'<td>'+statusBadge+'</td>'
-      +'<td style="white-space:nowrap;">'+'<button class="cbtn" onclick="doClose(this)">CLOSE</button> '+'<button class="btn" style="font-size:10px;padding:3px 8px;border-color:var(--amb);color:var(--amb);margin-left:4px;" '+'onclick="doRoll(this)">&#8635; ROLL</button></td>'
-      +'<td><button class="btn ts-enable-btn" style="'+(cfgEnabled?'border-color:var(--grn);color:var(--grn);':'')+'" '
-        +'onclick="toggleTsRow(\''+sym+'\')">\u25b4 TRAIL</button></td>'
-      +'<td><button class="btn" style="font-size:10px;padding:3px 8px;border-color:var(--blu3);color:var(--blub);" '
-        +'onclick="togglePosChart(\''+sym+'\')">\u25b2 P&L</button></td>'
+      +'<td><b>'+tk+'</b></td>'                                                      // TICKER only
+      +'<td style="white-space:nowrap;"><button class="cbtn" onclick="doClose(this)">CLOSE</button></td>'
+      +'<td style="white-space:nowrap;"><button class="btn" style="font-size:10px;padding:3px 8px;border-color:var(--amb);color:var(--amb);" onclick="doRoll(this)">&#8635; ROLL</button></td>'
+      +'<td class="'+pnlCls+'">'+(p.pnl>=0?'+':'')+fmtD(p.pnl)+'</td>'               // P/L $
+      +'<td class="'+pnlCls+'">'+(p.pnlPct>=0?'+':'')+fmtP(p.pnlPct)+'</td>'         // P/L %
+      +strikeCell                                                                     // STRIKE ($NNN C/P + ITM/OTM)
+      +'<td>'+(p.exp||'--')+'</td>'                                                   // EXP
+      +'<td style="'+dteCls+';">'+(dteDays!=='--'?dteDays+'d':'--')+'</td>'          // DTE
+      +'<td>'+qty+'</td>'                                                             // QTY
+      +'<td>$'+fmt2(p.cost)+'</td>'                                                  // ENTRY
+      +'<td>$'+fmt2(p.last)+'</td>'                                                  // MARK
+      +'<td style="color:var(--gry3)">'+ulCell+'</td>'                               // UL
+      +'<td>'+trailBadge+'</td>'                                                      // TRAIL badge
+      +'<td><button class="btn ts-enable-btn" style="'+(cfgEnabled?'border-color:var(--grn);color:var(--grn);':'')+'" onclick="toggleTsRow(\''+sym+'\')">\u25b4 TRAIL</button></td>'
+      +'<td><button class="btn" style="font-size:10px;padding:3px 8px;border-color:var(--blu3);color:var(--blub);" onclick="togglePosChart(\''+sym+'\')">\u25b2 P&L</button></td>'
       +'</tr>';
 
     // Inline trailing stop config row
@@ -7792,6 +8105,7 @@ async function runTsCheck(){
         G.tsTriggered[sym]=true;
         tsLog(p.underlying+': TRIGGERED \u2014 pulled back '+fmt2(pullback)+'pp from peak +'+fmt2(st.peakPct)+'%','triggered');
         addAlert(p.underlying,'Trailing stop TRIGGERED \u2014 closing position','go');
+        pushNotify('Stop loss triggered', p.underlying+' pulled back '+fmt2(pullback)+'pp from peak +'+fmt2(st.peakPct)+'% \u2014 closing now', 'ts-'+p.symbol);
         toast('\u26a1 Trail Stop triggered: '+p.underlying);
         executeTsClose(p,closeMode,creds);
       }
@@ -8900,7 +9214,11 @@ async function submitRoll(){
       }
       var st=await pollOrderStatus(c,acct,res.orderId);
       rollLog('LEG 1 status: '+st.toUpperCase(),'');
-      if(st==='filled'){rollLog('\u2713 LEG 1 FILLED @ $'+fmt2(price),'ok');l1Filled=true;break;}
+      if(st==='filled'){
+        rollLog('\u2713 LEG 1 FILLED @ $'+fmt2(price),'ok');
+        pushNotify('LEG 1 filled', G_roll.ticker+' closed @ $'+fmt2(price)+' (x'+q1+')', 'l1-'+res.orderId);
+        l1Filled=true; break;
+      }
       if(st==='pending'||st==='open'||st==='partially_filled'){
         var cr = await cancelOrderVerbose(c,acct,res.orderId);
         rollLog((cr.ok?'\u2713 ':'\u26a0 ')+'LEG 1 cancel '+cr.msg, cr.ok?'':'err');
@@ -8971,7 +9289,11 @@ async function submitRoll(){
       }
       var st2=await pollOrderStatus(c,acct,res2.orderId);
       rollLog('LEG 2 status: '+st2.toUpperCase(),'');
-      if(st2==='filled'){rollLog('\u2713 LEG 2 FILLED @ $'+fmt2(price2),'ok');l2Filled=true;break;}
+      if(st2==='filled'){
+        rollLog('\u2713 LEG 2 FILLED @ $'+fmt2(price2),'ok');
+        pushNotify('LEG 2 filled', G_roll.ticker+' opened @ $'+fmt2(price2)+' (x'+q2+')', 'l2-'+res2.orderId);
+        l2Filled=true; break;
+      }
       if(st2==='pending'||st2==='open'||st2==='partially_filled'){
         var cr2 = await cancelOrderVerbose(c,acct,res2.orderId);
         rollLog((cr2.ok?'\u2713 ':'\u26a0 ')+'LEG 2 cancel '+cr2.msg, cr2.ok?'':'err');
@@ -9003,6 +9325,7 @@ async function submitRoll(){
   eid('roll-submit-btn').disabled=false; eid('roll-submit-btn').textContent='↻ EXECUTE ROLL';
   G_roll.rollActive=false;
   toast(l2Filled?'Roll complete: '+G_roll.ticker:'Roll partial: LEG 2 not filled');
+  pushNotify(l2Filled?'Roll complete':'Roll partial', G_roll.ticker+' \u2014 '+(net>=0?'CREDIT':'DEBIT')+' '+fmtD(Math.abs(net)), 'roll-'+G_roll.ticker);
   setTimeout(function(){if(G.acctId)fetchPositions();},3000);
 }
 
