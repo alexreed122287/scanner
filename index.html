@@ -8360,11 +8360,17 @@ function rollLog(msg,cls){
 function rollGetCreds(){
   var mode=localStorage.getItem('rrjcar_mode')||'sandbox';
   var host=mode==='live'?'https://api.tradier.com':'https://sandbox.tradier.com';
-  var key=mode==='live'
+  var rawKey=mode==='live'
     ?(localStorage.getItem('rrjcar_tradier_live')||localStorage.getItem('rrjcar_tradier')||'')
     :(localStorage.getItem('rrjcar_tradier_sandbox')||localStorage.getItem('rrjcar_tradier')||'');
-  if(!key&&typeof TRADIER_KEY_DEFAULT!=='undefined') key=TRADIER_KEY_DEFAULT;
-  return {host:host,key:key};
+  if(!rawKey&&typeof TRADIER_KEY_DEFAULT!=='undefined') rawKey=TRADIER_KEY_DEFAULT;
+  // Sanitize: strip whitespace + any char outside printable ASCII (smart quotes,
+  // zero-width spaces, BOM, trailing newlines). Safari's fetch throws
+  // "The string did not match the expected pattern" if the Authorization header
+  // has any non-ASCII byte.
+  var key = rawKey.replace(/[^\x20-\x7E]/g, '').trim();
+  var sanitized = key !== rawKey;
+  return {host:host, key:key, _rawKey:rawKey, _sanitized:sanitized, mode:mode};
 }
 
 function rollFetchLeg1Quote(){
@@ -8373,9 +8379,29 @@ function rollFetchLeg1Quote(){
     rollLog('\u2717 No Tradier API key \u2014 cannot fetch LEG 1 quote. Enter a key in the API tab.','err');
     return;
   }
-  fetch(c.host+'/v1/markets/options/quotes?symbols='+encodeURIComponent(G_roll.occSym)+'&greeks=false',{
+  if(c._sanitized){
+    rollLog('\u26a0 Tradier key had non-ASCII chars (len '+c._rawKey.length+' \u2192 '+c.key.length+'). Re-save cleanly in API tab if errors persist.','err');
+  }
+  if(!G_roll.occSym){
+    rollLog('\u2717 LEG 1 symbol is empty \u2014 close and reopen the Roll modal.','err');
+    return;
+  }
+  // OCC format check: 1-6 char underlying + 6 digit YYMMDD + C/P + 8 digit strike
+  if(!/^[A-Z]{1,6}\d{6}[CP]\d{8}$/.test(G_roll.occSym)){
+    rollLog('\u2717 LEG 1 OCC symbol "'+G_roll.occSym+'" is not in standard format.','err');
+    return;
+  }
+  var url = c.host+'/v1/markets/options/quotes?symbols='+encodeURIComponent(G_roll.occSym)+'&greeks=false';
+  rollLog('Fetching LEG 1 quote for '+G_roll.occSym+' ('+c.mode+')...','');
+  fetch(url,{
     headers:{Authorization:'Bearer '+c.key,Accept:'application/json'}
-  }).then(function(r){return r.json();})
+  }).then(function(r){
+    if(!r.ok){
+      rollLog('\u2717 Tradier HTTP '+r.status+' '+r.statusText+' on LEG 1 quote','err');
+      return r.text().then(function(txt){ rollLog('  response: '+(txt||'').slice(0,160),'err'); throw new Error('HTTP '+r.status); });
+    }
+    return r.json();
+  })
   .then(function(data){
     var q=(data.options&&data.options.option)?data.options.option:null;
     if(!q){q=(data.quotes&&data.quotes.quote)?data.quotes.quote:null;}
@@ -8408,7 +8434,14 @@ function rollFetchLeg1Quote(){
       }
     }).catch(function(){});
   }).catch(function(e){
-    rollLog('\u2717 LEG 1 quote fetch error: '+(e&&e.message?e.message:'network/API failure'),'err');
+    var msg = (e && e.message) ? e.message : 'network/API failure';
+    rollLog('\u2717 LEG 1 quote fetch error: '+msg,'err');
+    // Safari throws this exact string when the URL or Authorization header contains
+    // non-ASCII bytes. Give the user an actionable hint.
+    if(/did not match the expected pattern/i.test(msg)){
+      rollLog('  \u2192 This means your Tradier API key has a hidden character (space, smart quote, zero-width char, etc.).','err');
+      rollLog('  \u2192 Go to API tab \u2192 clear the Tradier key field \u2192 retype it by hand (don\u2019t paste with formatting) \u2192 Save.','err');
+    }
     rollUpdateNet();
   });
 }
@@ -10096,7 +10129,10 @@ function calcEx(){
 }
 
 function saveKeys(){
-  var fmp=eid('api-fmp').value.trim(),tr=eid('api-tr').value.trim(),mode=eid('api-mode').value,acct=eid('api-acct').value.trim();
+  // Sanitize keys: strip non-printable-ASCII (smart quotes, zero-width, BOM, newlines).
+  // Paste from iOS / email / docs often sneaks these in and Safari rejects them in headers.
+  function _cleanKey(s){ return (s||'').replace(/[^\x20-\x7E]/g,'').trim(); }
+  var fmp=_cleanKey(eid('api-fmp').value),tr=_cleanKey(eid('api-tr').value),mode=eid('api-mode').value,acct=_cleanKey(eid('api-acct').value);
   if(fmp)localStorage.setItem('rrjcar_fmp',fmp);
   // Mode-specific Tradier key + account (live/sandbox use different tokens)
   var trKey = mode==='live' ? 'rrjcar_tradier_live' : 'rrjcar_tradier_sandbox';
@@ -12768,6 +12804,23 @@ function init(){
     var activePane=document.querySelector('.tab-pane.active');
     if(isMarketHours && activePane && activePane.id==='tab-cw') cwRefreshAll();
   }, 300000);
+
+  // One-time cleanup: strip non-ASCII from any previously-saved API keys.
+  // Safari's fetch throws "The string did not match the expected pattern" if the
+  // Authorization header has hidden chars (smart quotes, zero-width, BOM, newlines
+  // from copy-paste). This quietly fixes already-stored bad keys in place.
+  try{
+    var _keyFields = ['rrjcar_tradier','rrjcar_tradier_live','rrjcar_tradier_sandbox','rrjcar_fmp','rrjcar_acct','rrjcar_acct_live','rrjcar_acct_sandbox'];
+    _keyFields.forEach(function(k){
+      var v = localStorage.getItem(k);
+      if(!v) return;
+      var cleaned = v.replace(/[^\x20-\x7E]/g,'').trim();
+      if(cleaned !== v){
+        localStorage.setItem(k, cleaned);
+        console.warn('[api-key-sanitize] cleaned '+k+' (stripped '+(v.length-cleaned.length)+' invalid chars)');
+      }
+    });
+  }catch(e){}
 
   addAlert('SYS','Option Panda v'+APP_VERSION+' initialized — cached data loaded, no API calls on startup','go');
 
