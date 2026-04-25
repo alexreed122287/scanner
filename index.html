@@ -843,6 +843,43 @@ tr.sel-row td{background:var(--blu3);}
     <span id="mode-badge">SANDBOX</span>
     <span id="api-counter-badge" title="Tradier API calls today (resets at midnight). Click to view breakdown." onclick="showApiBreakdown()" style="cursor:pointer;background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.25);border-radius:3px;padding:1px 7px;font-size:10px;font-family:var(--ff-mono);color:var(--amb);letter-spacing:.5px;user-select:none;">API: 0</span>
     <span id="hdr-scan-status" title="Scan status — click to jump to FULL SCANNER" onclick="switchTab('sc')" style="display:none;cursor:pointer;background:rgba(112,144,200,0.08);border:1px solid rgba(112,144,200,0.30);border-radius:3px;padding:1px 7px;font-size:10px;font-family:var(--ff-mono);color:var(--gry);letter-spacing:.5px;user-select:none;">SCAN: idle</span>
+    <span id="hdr-autoscan" title="Auto-scan settings — click to expand" onclick="toggleAutoScanPanel()" style="cursor:pointer;background:rgba(255,0,230,0.06);border:1px solid rgba(255,0,230,0.30);border-radius:3px;padding:1px 7px;font-size:10px;font-family:var(--ff-mono);color:var(--ngo);letter-spacing:.5px;user-select:none;">AUTO: OFF</span>
+  </div>
+</div>
+
+<!-- Auto-scan settings panel — collapsed by default; opens below header on click -->
+<div id="autoscan-panel" style="display:none;background:var(--bg1);border-bottom:var(--bdr);padding:10px 16px;font-family:var(--ff-mono);font-size:11px;color:var(--gry);">
+  <div style="display:flex;flex-wrap:wrap;align-items:center;gap:14px;max-width:1400px;margin:0 auto;">
+    <span style="color:var(--ngo);font-family:var(--ff-brand);font-size:11px;letter-spacing:2px;font-weight:700;">⚡ AUTO-SCAN</span>
+    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--wht);">
+      <input type="checkbox" id="auto-scan-on" onchange="saveAutoScan()"> ENABLED
+    </label>
+    <label style="display:flex;align-items:center;gap:6px;color:var(--gry);">
+      Interval
+      <select id="auto-scan-interval" onchange="saveAutoScan()" style="background:var(--bg2);border:var(--bdr);color:var(--wht);font-family:var(--ff-mono);font-size:11px;padding:3px 6px;">
+        <option value="5">5 min</option>
+        <option value="15" selected>15 min</option>
+        <option value="30">30 min</option>
+        <option value="60">60 min</option>
+      </select>
+    </label>
+    <label style="display:flex;align-items:center;gap:6px;color:var(--gry);">
+      Score threshold
+      <input type="number" id="auto-scan-threshold" value="110" min="0" step="5" onchange="saveAutoScan()" style="background:var(--bg2);border:var(--bdr);color:var(--wht);font-family:var(--ff-mono);font-size:11px;padding:3px 6px;width:60px;" title="Tickers scoring at or above this fire a desktop notification">
+    </label>
+    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--gry);" title="Skip auto-scans outside 9:30–4 ET on weekdays — saves API calls overnight & on weekends">
+      <input type="checkbox" id="auto-scan-mkthrs" checked onchange="saveAutoScan()"> Market hours only
+    </label>
+    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--gry);" title="Skip the scan if the browser tab is hidden (saves calls when minimized or on a different desktop)">
+      <input type="checkbox" id="auto-scan-pausehidden" onchange="saveAutoScan()"> Pause when tab hidden
+    </label>
+    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--gry);" title="Only notify when a ticker NEWLY crosses the threshold or appears for the first time today — prevents re-notifying the same names every cycle">
+      <input type="checkbox" id="auto-scan-newonly" checked onchange="saveAutoScan()"> Notify new hits only
+    </label>
+    <span id="auto-scan-status" style="margin-left:auto;color:var(--gry2);font-size:10px;"></span>
+  </div>
+  <div style="margin-top:6px;font-size:10px;color:var(--gry2);max-width:1400px;margin-left:auto;margin-right:auto;">
+    With Tradier-fetch caching live, each scan ≈ 700 API calls. At 15 min × 6.5h trading = 26 scans/day = ~18k calls (~4% of daily ceiling).
   </div>
 </div>
 <div id="nav">
@@ -6829,6 +6866,126 @@ function setScanProgress(pct, label){
 // Final state — paints the bar green, sticks around for 8 seconds, and
 // updates the header pill to a persistent "✓ DONE" with breakdown.
 // Also fires a desktop notification if the user has granted permission.
+// ── Auto-scan engine ──────────────────────────────────────────────────────
+// Periodically re-runs the scanner on a configurable interval and fires a
+// desktop notification when any ticker crosses the user's score threshold.
+// Settings persist in localStorage 'rrjcar_autoscan'. Pauses when the tab
+// is hidden (Page Visibility) and/or outside market hours, per user toggle.
+// Skips firing if a scan is already in flight (no stacking).
+var AUTO_SCAN = { timer: null, lastFire: 0, notifiedToday: {}, notifiedDate: '' };
+
+function loadAutoScan(){
+  var s;
+  try { s = JSON.parse(localStorage.getItem('rrjcar_autoscan') || '{}'); } catch(e) { s = {}; }
+  return {
+    on:          !!s.on,
+    intervalMin: [5,15,30,60].indexOf(s.intervalMin) >= 0 ? s.intervalMin : 15,
+    threshold:   typeof s.threshold === 'number' ? s.threshold : 110,
+    mktHrsOnly:  s.mktHrsOnly !== false,                      // default true
+    pauseHidden: !!s.pauseHidden,
+    newOnly:     s.newOnly !== false                          // default true
+  };
+}
+function saveAutoScan(){
+  var s = {
+    on:          eid('auto-scan-on') ? eid('auto-scan-on').checked : false,
+    intervalMin: eid('auto-scan-interval') ? +eid('auto-scan-interval').value : 15,
+    threshold:   eid('auto-scan-threshold') ? +eid('auto-scan-threshold').value : 110,
+    mktHrsOnly:  eid('auto-scan-mkthrs') ? eid('auto-scan-mkthrs').checked : true,
+    pauseHidden: eid('auto-scan-pausehidden') ? eid('auto-scan-pausehidden').checked : false,
+    newOnly:     eid('auto-scan-newonly') ? eid('auto-scan-newonly').checked : true
+  };
+  try { localStorage.setItem('rrjcar_autoscan', JSON.stringify(s)); } catch(e){}
+  startAutoScan(s);
+  updateAutoScanPill(s);
+}
+function applyAutoScanSettings(){
+  var s = loadAutoScan();
+  if(eid('auto-scan-on'))         eid('auto-scan-on').checked         = s.on;
+  if(eid('auto-scan-interval'))   eid('auto-scan-interval').value     = String(s.intervalMin);
+  if(eid('auto-scan-threshold'))  eid('auto-scan-threshold').value    = s.threshold;
+  if(eid('auto-scan-mkthrs'))     eid('auto-scan-mkthrs').checked     = s.mktHrsOnly;
+  if(eid('auto-scan-pausehidden'))eid('auto-scan-pausehidden').checked= s.pauseHidden;
+  if(eid('auto-scan-newonly'))    eid('auto-scan-newonly').checked    = s.newOnly;
+  startAutoScan(s);
+  updateAutoScanPill(s);
+}
+function startAutoScan(s){
+  if(AUTO_SCAN.timer){ clearInterval(AUTO_SCAN.timer); AUTO_SCAN.timer = null; }
+  if(!s || !s.on) return;
+  var ms = s.intervalMin * 60 * 1000;
+  AUTO_SCAN.timer = setInterval(autoScanTick, ms);
+}
+function autoScanTick(){
+  var s = loadAutoScan();
+  if(!s.on) return;
+  if(s.pauseHidden && document.hidden) return;
+  if(s.mktHrsOnly){
+    var et = new Date(new Date().toLocaleString('en-US',{timeZone:'America/New_York'}));
+    var day = et.getDay();
+    if(day === 0 || day === 6) return;          // weekend
+    var mins = et.getHours()*60 + et.getMinutes();
+    if(mins < 9*60+30 || mins >= 16*60) return; // outside 9:30-4 ET
+  }
+  if(G.scanRunning) return;                      // don't stack
+  AUTO_SCAN.lastFire = Date.now();
+  try { runScan(); } catch(e) { console.warn('autoScanTick: ', e); }
+}
+function toggleAutoScanPanel(){
+  var p = eid('autoscan-panel');
+  if(!p) return;
+  p.style.display = (p.style.display === 'none' || !p.style.display) ? 'block' : 'none';
+}
+function updateAutoScanPill(s){
+  var pill = eid('hdr-autoscan');
+  if(!pill) return;
+  if(!s) s = loadAutoScan();
+  if(s.on){
+    pill.textContent = 'AUTO: ' + s.intervalMin + 'm · ≥' + s.threshold;
+    pill.style.color = 'var(--ngo)';
+    pill.style.borderColor = 'rgba(255,0,230,0.5)';
+    pill.style.background = 'rgba(255,0,230,0.10)';
+  } else {
+    pill.textContent = 'AUTO: OFF';
+    pill.style.color = 'var(--gry)';
+    pill.style.borderColor = 'rgba(112,144,200,0.30)';
+    pill.style.background = 'rgba(112,144,200,0.08)';
+  }
+}
+// Threshold-alert check — called from setScanComplete after each scan
+// (auto OR manual). Fires a desktop notification listing tickers ≥ threshold,
+// suppressing names already notified today (when newOnly is on).
+function autoScanCheckAlerts(){
+  var s = loadAutoScan();
+  if(!G.results || !G.results.length) return;
+  // Reset notification dedup at midnight
+  var today = new Date().toISOString().slice(0,10);
+  if(AUTO_SCAN.notifiedDate !== today){
+    AUTO_SCAN.notifiedDate = today;
+    AUTO_SCAN.notifiedToday = {};
+  }
+  var hits = G.results.filter(function(r){ return r.score >= s.threshold; });
+  if(s.newOnly) hits = hits.filter(function(r){ return !AUTO_SCAN.notifiedToday[r.ticker]; });
+  if(!hits.length) return;
+  hits.forEach(function(r){ AUTO_SCAN.notifiedToday[r.ticker] = r.score; });
+  // In-app alert
+  var topNames = hits.slice(0, 8).map(function(r){ return r.ticker + '(' + Math.round(r.score) + ')'; }).join(', ');
+  var msg = hits.length + ' ticker(s) ≥' + s.threshold + ': ' + topNames + (hits.length > 8 ? ' …' : '');
+  if(typeof addAlert === 'function') addAlert('AUTO', msg, 'go');
+  // Desktop notification (uses existing rrjcar_notify_on_scan permission gate)
+  try {
+    if('Notification' in window && Notification.permission === 'granted'){
+      new Notification('Auto-scan: ' + hits.length + ' high-score ticker(s)', {
+        body: topNames, silent: true, tag: 'rrjcar-autoscan-' + Date.now()
+      });
+    }
+  } catch(_) {}
+  // Update status line in the panel
+  if(eid('auto-scan-status')){
+    eid('auto-scan-status').textContent = hits.length + ' new hit(s) at ' + new Date().toLocaleTimeString();
+  }
+}
+
 function setScanComplete(stats){
   // stats: {scanned, passed, scored, go, nogo}
   var bar = eid('sc-prog-bar');
@@ -6871,6 +7028,9 @@ function setScanComplete(stats){
       });
     }
   } catch(_) {}
+  // Auto-scan threshold-alert check — fires its own notification listing
+  // any tickers ≥ user's threshold (suppressed to NEW hits per session day).
+  if(typeof autoScanCheckAlerts === 'function') autoScanCheckAlerts();
 }
 
 async function fetchDynamicUniverse(key, mode){
@@ -15106,6 +15266,11 @@ function indDrawHist(topNames){
 
 window.addEventListener('resize', function(){
   if(IND.loaded && document.getElementById('tab-ind').classList.contains('active')) indDraw();
+});
+
+// Apply persisted auto-scan settings + start the timer if enabled.
+window.addEventListener('DOMContentLoaded', function(){
+  if(typeof applyAutoScanSettings === 'function') applyAutoScanSettings();
 });
 
 window.addEventListener('DOMContentLoaded',init);</script>
