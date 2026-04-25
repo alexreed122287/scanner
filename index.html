@@ -761,6 +761,10 @@ tr.sel-row td{background:var(--blu3);}
 #tab-ind .ind-mtag .perf.up{background:rgba(0,230,118,.18);color:var(--grn);}
 #tab-ind .ind-mtag .perf.dn{background:rgba(255,0,230,.18);color:var(--ngo);}
 #tab-ind .ind-mtag .perf.flat{background:var(--bg3);color:var(--gry);}
+/* Auto-assigned (heuristic) members rendered dimmer + italic so curated picks stand out */
+#tab-ind .ind-mtag.auto{opacity:.62;}
+#tab-ind .ind-mtag.auto .sym{font-weight:500;font-style:italic;}
+#tab-ind .ind-mtag.auto .sym::before{content:"·";margin-right:3px;color:var(--gry2);}
 #tab-ind .ind-unassigned{padding:0;max-height:340px;overflow-y:auto;}
 #tab-ind .ind-ubucket{border-bottom:var(--bdr);}
 #tab-ind .ind-ubucket:last-child{border-bottom:0;}
@@ -850,7 +854,7 @@ tr.sel-row td{background:var(--blu3);}
   <button class="ntab" onclick="switchTab('sent')">&#9678; SENTIMENT</button>
   <button class="ntab" onclick="switchTab('api')">&#9881; API</button>
   <button class="ntab" onclick="switchTab('pf')">PORTFOLIO</button>
-  <button class="ntab" onclick="switchTab('ind')">&#9889; INDUSTRY</button>
+  <button class="ntab" onclick="switchTab('ind')">INDUSTRY</button>
   <button class="ntab" onclick="switchTab('cw')">&#9734; OPTIONS WATCHLIST</button>
 </div>
 <div id="app">
@@ -6685,6 +6689,10 @@ function renderBuySig(){
   if(pfLabelEl && pfLabelEl.className==='stat-label') pfLabelEl.textContent='SECTOR GOs';
 
   if(G.results.length>0&&!G.selTicker){viewDetail(G.results[0].ticker,'bs-detail','bs-empty');}
+
+  // Cross-tab indicators on each card: ◉ for loud-on-sentiment, ⚡ for member-of-strong-industry-theme
+  if(typeof decorateSentiment === 'function') decorateSentiment();
+  if(typeof decorateIndustry  === 'function') decorateIndustry();
 }
 
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
@@ -7581,14 +7589,14 @@ function injectSentimentBadge(){
 // for neutral messages; falls back to bull_pct if net is unavailable.
 function decorateSentiment(){
   if(!SENT.loudMap || SENT.status !== 'ok') return;
-  var wrap = document.getElementById('sc-tbl-wrap');
-  if(!wrap) return;
-  var rows = wrap.querySelectorAll('tr[data-ticker]');
-  rows.forEach(function(tr){
-    var tk = tr.dataset.ticker;
+  // Both FULL SCANNER (tr[data-ticker]) and BUY SIGNALS (.sig-card[data-ticker])
+  // get the same loud-ticker badge — anchor differs by container type.
+  var nodes = document.querySelectorAll('tr[data-ticker], .sig-card[data-ticker]');
+  nodes.forEach(function(node){
+    var tk = node.dataset.ticker;
     var loud = SENT.loudMap[tk];
     if(!loud) return;
-    var tdTk = tr.children[1];
+    var tdTk = node.matches('tr') ? node.children[1] : node.querySelector('.tk');
     if(!tdTk || tdTk.querySelector('.sent-badge')) return;
     var net = loud.net;           // -1..+1, tagged-messages-only
     var bp  = loud.bull_pct;      // 0..100, tagged-messages-only
@@ -7617,6 +7625,14 @@ function decorateSentiment(){
     tdTk.appendChild(badge);
   });
 }
+
+// Boot: pre-fetch IND data so industry badges appear on BS/SC rows without
+// requiring the user to visit the INDUSTRY tab first. Cheap (~30 KB JSON).
+(function(){
+  function bootInd(){ if(typeof renderIndustryTab === 'function') renderIndustryTab(); }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bootInd);
+  else bootInd();
+})();
 
 // ── SENT tab renderer ──────────────────────────────────────────────────
 // Tab body is now a full-pane iframe to https://alexreed122287.github.io/sentiment-panel/
@@ -7755,6 +7771,7 @@ function renderScan(){
 
   wrap.innerHTML='<table><thead><tr>'+th+'</tr></thead><tbody>'+rows+'</tbody></table>';
   if(typeof decorateSentiment === 'function') decorateSentiment();
+  if(typeof decorateIndustry  === 'function') decorateIndustry();
 }
 </script>
 
@@ -14290,8 +14307,14 @@ function init(){
 //  INDUSTRY STRENGTH TAB
 // ════════════════════════════════════════════════════════════════════
 var IND = {
-  data:null, hist:null, tf:'daily', expanded:{}, loaded:false, loading:false
+  data:null, hist:null, tf:'daily', expanded:{}, loaded:false, loading:false,
+  // ticker -> [{theme, score, isCurated}, ...]  for cross-tab badges in BS/SC.
+  // Computed at the end of indDraw(). Only themes scoring >= IND_STRONG_THRESHOLD
+  // get included so a scanner badge means "ticker is in an actually-strong theme",
+  // not just "ticker is in any theme".
+  tickerThemes:{}
 };
+var IND_STRONG_THRESHOLD = 70;  // theme.scores.daily must be >= this to count
 var IND_TF_DESC = {
   daily:   'DAILY VIEW — weights short-term momentum heavily (50% RS 1W + 25% RS 1M + 15% breadth + 10% trend). Use to spot fresh rotation. Higher noise; cross-check with weekly.',
   weekly:  'WEEKLY VIEW — balanced short/intermediate (20% RS 1W + 50% RS 1M + 15% RS 3M + 15% breadth). Best signal for new positions in your typical 14-21 DTE call window.',
@@ -14452,17 +14475,24 @@ function indDraw(){
       + '</tr>';
     if(expanded){
       var rx = t.rs_excess_pct || {};
-      // Sort members by daily perf descending; tickers without perf go to the end alphabetically
-      var members = (t.members || []).slice().sort(function(a,b){
+      // Curated (hand-picked in build_master_list.py) shown bold/full-opacity;
+      // auto-assigned (heuristic via INDUSTRY_HINTS) shown italic/dimmed so the
+      // user can tell apart the "high-conviction theme" from the "broad sector"
+      // members. Within each group, sort by today's % change desc.
+      var autoSet = {}; (t.auto_members || []).forEach(function(m){ autoSet[m]=1; });
+      var byPerf = function(a,b){
         var pa = memberPerf[a], pb = memberPerf[b];
         if(pa == null && pb == null) return a.localeCompare(b);
         if(pa == null) return 1;
         if(pb == null) return -1;
         return pb - pa;
-      });
-      var memberHTML = members.map(function(m){
+      };
+      var curated = (t.curated_members || (t.members||[]).filter(function(m){return !autoSet[m];})).slice().sort(byPerf);
+      var auto    = (t.auto_members    || []).slice().sort(byPerf);
+      var members = curated.concat(auto);
+      var renderTag = function(m, isAuto){
         var p = memberPerf[m];
-        var perfHTML = '';
+        var perfHTML;
         if(p != null){
           var cls = p > 0.05 ? 'up' : (p < -0.05 ? 'dn' : 'flat');
           var sign = p > 0 ? '+' : '';
@@ -14470,10 +14500,17 @@ function indDraw(){
         } else {
           perfHTML = '<span class="perf flat">—</span>';
         }
-        return '<div class="ind-mtag"><span class="sym">'+indEsc(m)+'</span>'+perfHTML+'</div>';
-      }).join('');
+        var cls = 'ind-mtag' + (isAuto ? ' auto' : '');
+        var title = isAuto ? 'Auto-assigned via industry tag — not in curated basket' : 'Curated theme member';
+        return '<div class="'+cls+'" title="'+title+'"><span class="sym">'+indEsc(m)+'</span>'+perfHTML+'</div>';
+      };
+      var memberHTML = curated.map(function(m){return renderTag(m,false);}).join('')
+                     + auto.map(function(m){return renderTag(m,true);}).join('');
+      var memberHead = 'MEMBERS (' + members.length + ' · ' + curated.length + ' curated';
+      if(auto.length) memberHead += ' + ' + auto.length + ' auto';
+      memberHead += ', curated first then sorted by today’s % change)';
       html += '<tr class="ind-expand"><td colspan="11">'
-        + '<div class="ind-mhead">MEMBERS ('+members.length+', sorted by today’s % change) · RS_excess vs '+indEsc(d.benchmark||'SPY')+': '
+        + '<div class="ind-mhead">'+memberHead+' · RS_excess vs '+indEsc(d.benchmark||'SPY')+': '
         + '1W '+indFmt(rx['1W'])+'pp · 1M '+indFmt(rx['1M'])+'pp · 3M '+indFmt(rx['3M'])+'pp · 6M '+indFmt(rx['6M'])+'pp · breadth_200 '+indFmt(t.breadth_200,0)+'%</div>'
         + '<div class="ind-mgrid">'+memberHTML+'</div>'
         + '<div class="ind-copy">COPY-READY: <span>'+indEsc(members.join(','))+'</span></div>'
@@ -14548,6 +14585,65 @@ function indDraw(){
     + '<div class="ind-srow"><span class="lbl">curated themes</span><span class="val">'+curated+'</span></div>';
 
   indDrawHist(ranked.slice(0,5).map(function(r){ return r.name; }));
+
+  // Build the ticker -> strong-themes map for cross-tab badges in BS/SC.
+  // Strong = current daily score >= IND_STRONG_THRESHOLD. Includes both
+  // curated and auto members of those themes.
+  var tickerThemes = {};
+  ranked.forEach(function(r){
+    if(r.score < IND_STRONG_THRESHOLD) return;
+    var t = r.t;
+    var autoSet = {}; (t.auto_members || []).forEach(function(m){ autoSet[m]=1; });
+    (t.members || []).forEach(function(m){
+      (tickerThemes[m] = tickerThemes[m] || []).push({
+        theme: r.name, score: r.score, isCurated: !autoSet[m]
+      });
+    });
+  });
+  // Sort each ticker's themes by score desc so the badge tooltip leads with the strongest
+  Object.keys(tickerThemes).forEach(function(m){
+    tickerThemes[m].sort(function(a,b){ return b.score - a.score; });
+  });
+  IND.tickerThemes = tickerThemes;
+  // Repaint scanner/buy-signals badges if their tabs are visible
+  if(typeof decorateIndustry === 'function') decorateIndustry();
+}
+
+// ── Cross-tab industry badge ─────────────────────────────────────────────
+// Paints a ⚡ glyph on each BUY-SIGNALS card / FULL-SCANNER row when the
+// ticker is a member of any theme currently scoring >= IND_STRONG_THRESHOLD.
+// Hover reveals the list of strong themes (and which are curated picks).
+function decorateIndustry(){
+  if(!IND || !IND.tickerThemes) return;
+  // FULL SCANNER table rows have data-ticker on <tr>; BUY SIGNALS cards on .sig-card
+  var nodes = document.querySelectorAll('tr[data-ticker], .sig-card[data-ticker]');
+  nodes.forEach(function(node){
+    var tk = node.dataset.ticker;
+    if(!tk) return;
+    var hits = IND.tickerThemes[tk];
+    // Remove any stale badge so re-renders refresh / clear correctly
+    var existing = node.querySelector('.ind-badge');
+    if(existing) existing.remove();
+    if(!hits || !hits.length) return;
+    // Find the ticker-cell to attach to: in tables the ticker is in column 1 (index 1
+    // because column 0 is the star); in BS sig-cards it's in .tk
+    var anchor = node.matches('tr') ? (node.children[1] || node.children[0])
+                                    : node.querySelector('.tk');
+    if(!anchor) return;
+    var topScore = hits[0].score;
+    var color = topScore >= 90 ? 'var(--grn)' : topScore >= 80 ? 'var(--amb)' : 'var(--ambb)';
+    var lines = hits.slice(0, 6).map(function(h){
+      return '⚡ ' + h.theme + '  ' + h.score.toFixed(1) + (h.isCurated ? '' : '  (auto)');
+    });
+    if(hits.length > 6) lines.push('… +' + (hits.length - 6) + ' more');
+    var badge = document.createElement('span');
+    badge.className = 'ind-badge';
+    badge.style.cssText = 'margin-left:4px;font-size:9px;color:' + color +
+      ';vertical-align:middle;cursor:help;text-shadow:0 0 6px ' + color + ';';
+    badge.title = 'Strong industry themes (score ≥ ' + IND_STRONG_THRESHOLD + '):\n' + lines.join('\n');
+    badge.textContent = '⚡';   // ⚡
+    anchor.appendChild(badge);
+  });
 }
 
 function indDrawHist(topNames){

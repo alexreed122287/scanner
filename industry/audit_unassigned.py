@@ -29,17 +29,17 @@ OUT_JSON = ROOT / "industry" / "unassigned_tickers.json"
 SECTOR_HINTS: list[tuple[str, str]] = [
     ("electronic technology",      "Semiconductors"),
     ("electronic production",      "Semi Equipment"),
-    ("technology services",        "Big Tech"),
-    ("commercial services",        "Industrial / Picks"),
-    ("communications",             "Big Tech"),
-    ("producer manufacturing",     "Industrial / Picks"),
-    ("industrial services",        "Industrial / Picks"),
+    ("technology services",        "Software (Broad)"),
+    ("commercial services",        "Industrials (Broad)"),
+    ("communications",             "Internet & Content (Broad)"),
+    ("producer manufacturing",     "Industrials (Broad)"),
+    ("industrial services",        "Industrials (Broad)"),
     ("transportation",             "Travel & Leisure"),
-    ("consumer durables",          "Retail / Consumer"),
-    ("consumer non-durables",      "Retail / Consumer"),
+    ("consumer durables",          "Retail (Broad)"),
+    ("consumer non-durables",      "Retail (Broad)"),
     ("consumer services",          "Travel & Leisure"),
-    ("retail trade",               "Retail / Consumer"),
-    ("distribution services",      "Retail / Consumer"),
+    ("retail trade",               "Retail (Broad)"),
+    ("distribution services",      "Retail (Broad)"),
     ("finance",                    "Mega Banks"),
     ("utilities",                  "AI Power"),
     ("energy minerals",            "Oil & Gas E&P"),
@@ -49,11 +49,15 @@ SECTOR_HINTS: list[tuple[str, str]] = [
 
 INDUSTRY_HINTS: list[tuple[str, str]] = [
     # Tech / Semis
+    # NOTE: curated "Big Tech" (MAGAA) and "Enterprise SaaS" (13 highest-conviction
+    # SaaS names) and "Industrial / Picks" / "Retail / Consumer" stay tight — broad
+    # auto-assignments route to "(Broad)" sibling themes so the curated baskets
+    # don't get diluted from ~10 hand-picked names to 200+ sector members.
     ("semiconductor",              "Semiconductors"),
-    ("software - infrastructure",  "Enterprise SaaS"),
-    ("software - application",     "Enterprise SaaS"),
-    ("information technology",     "Enterprise SaaS"),
-    ("internet content",           "Big Tech"),
+    ("software - infrastructure",  "Software (Broad)"),
+    ("software - application",     "Software (Broad)"),
+    ("information technology",     "Software (Broad)"),
+    ("internet content",           "Internet & Content (Broad)"),
     ("internet retail",            "E-Commerce"),
     # Energy
     ("uranium",                    "Nuclear & Uranium"),
@@ -125,10 +129,10 @@ INDUSTRY_HINTS: list[tuple[str, str]] = [
     ("apparel retail",             "Luxury / Fashion"),
     ("footwear",                   "Athletic Apparel"),
     ("luxury goods",               "Luxury / Fashion"),
-    ("department stores",          "Retail / Consumer"),
-    ("discount stores",            "Retail / Consumer"),
-    ("home improvement",           "Retail / Consumer"),
-    ("specialty retail",           "Retail / Consumer"),
+    ("department stores",          "Retail (Broad)"),
+    ("discount stores",            "Retail (Broad)"),
+    ("home improvement",           "Retail (Broad)"),
+    ("specialty retail",           "Retail (Broad)"),
     ("grocery",                    "Grocery"),
     # Industrials / materials
     ("railroad",                   "Class I Rails"),
@@ -141,8 +145,8 @@ INDUSTRY_HINTS: list[tuple[str, str]] = [
     ("residential construction",   "Homebuilders"),
     ("agricultural - machinery",   "Heavy Machinery"),
     ("farm & heavy",               "Heavy Machinery"),
-    ("specialty industrial",       "Industrial Auto"),
-    ("electrical equipment",       "Industrial Auto"),
+    ("specialty industrial",       "Industrials (Broad)"),
+    ("electrical equipment",       "Industrials (Broad)"),
     ("specialty chemicals",        "Specialty Chemicals"),
     ("chemicals",                  "Commodity Chem"),
     ("steel",                      "Steel"),

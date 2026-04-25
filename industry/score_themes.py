@@ -295,16 +295,30 @@ def member_daily_perf(prices: pd.DataFrame, members: list[str]) -> dict[str, flo
 
 
 def score_themes(prices: pd.DataFrame, themes: dict[str, list[str]],
-                 spy_rets: pd.Series) -> dict[str, dict]:
-    """Compute raw metrics for each theme."""
+                 spy_rets: pd.Series,
+                 ticker_meta: dict[str, dict] | None = None) -> dict[str, dict]:
+    """Compute raw metrics for each theme.
+
+    `ticker_meta` (master_tickers.json's `tickers` block) lets us split each
+    theme's membership into curated (hand-picked in CURATED_THEMES) and auto
+    (heuristic-assigned via INDUSTRY_HINTS) so the frontend can flag them.
+    """
     spy_rets_by_window = {w: cumulative_return(spy_rets, n)
                           for w, n in WINDOWS.items()}
+    ticker_meta = ticker_meta or {}
 
     raw = {}
     for theme, members in themes.items():
         valid = [m for m in members if m in prices.columns]
         if len(valid) < 3:  # need at least 3 members for a meaningful basket
             continue
+        # Split into curated vs heuristic-auto based on the global per-ticker
+        # auto_theme flag (set in build_master_list during the auto-assign pass).
+        # A ticker is either fully curated or fully auto across all its themes
+        # (auto pass skips any ticker that already has a curated theme), so
+        # this flag is unambiguous.
+        curated_members = [m for m in valid if not ticker_meta.get(m, {}).get("auto_theme")]
+        auto_members    = [m for m in valid if     ticker_meta.get(m, {}).get("auto_theme")]
         comp = theme_composite_returns(prices, valid)
         if comp.empty:
             continue
@@ -328,6 +342,8 @@ def score_themes(prices: pd.DataFrame, themes: dict[str, list[str]],
 
         raw[theme] = {
             "members": valid,
+            "curated_members": curated_members,
+            "auto_members": auto_members,
             "member_count": len(valid),
             "rs_excess": rs_excess,
             "breadth_50": breadth(prices, valid, 50),
@@ -368,6 +384,8 @@ def composite_scores(raw: dict[str, dict]) -> dict[str, dict]:
 
         out[theme] = {
             "members": r["members"],
+            "curated_members": r.get("curated_members", []),
+            "auto_members": r.get("auto_members", []),
             "member_count": r["member_count"],
             "member_perf": r.get("member_perf", {}),
             "rs_excess_pct": {k: round(v, 2) if not np.isnan(v) else None
@@ -462,7 +480,7 @@ def main():
     spy_rets = prices[BENCHMARK].pct_change()
 
     print(f"[3/4] scoring themes...")
-    raw = score_themes(prices, themes, spy_rets)
+    raw = score_themes(prices, themes, spy_rets, ticker_meta=master.get("tickers"))
     scored = composite_scores(raw)
     print(f"      scored {len(scored)} themes")
 

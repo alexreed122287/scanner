@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-04-25T19:40:49+00:00",
+  "generated_at": "2026-04-25T19:49:29+00:00",
   "universe_size": 2548,
-  "theme_count": 99,
+  "theme_count": 103,
   "themes": {
     "AI Infrastructure": [
       "NVDA",
@@ -172,75 +172,7 @@
       "AMZN",
       "META",
       "NVDA",
-      "TSLA",
-      "NBIS",
-      "RDDT",
-      "VEEV",
-      "VRSK",
-      "HPQ",
-      "TRMB",
-      "J",
-      "PINS",
-      "Z",
-      "SNAP",
-      "TEM",
-      "VIAV",
-      "MTCH",
-      "BZ",
-      "DLB",
-      "EQPT",
-      "WAY",
-      "KBR",
-      "DOCS",
-      "CARG",
-      "OPLN",
-      "HNGE",
-      "IAC",
-      "DJT",
-      "STUB",
-      "HTFL",
-      "RUM",
-      "XMTR",
-      "ATHM",
-      "FA",
-      "YELP",
-      "UPWK",
-      "OPRA",
-      "GENI",
-      "BKSY",
-      "LZ",
-      "COUR",
-      "TBLA",
-      "CERT",
-      "MOMO",
-      "SDGR",
-      "ACVA",
-      "OMDA",
-      "SPIR",
-      "UDMY",
-      "NRDS",
-      "NTGR",
-      "CRSR",
-      "MAX",
-      "CARS",
-      "NXDR",
-      "EVER",
-      "PHR",
-      "BMBL",
-      "GRPN",
-      "WEAV",
-      "DDD",
-      "SLP",
-      "ANGI",
-      "SY",
-      "ZIP",
-      "CCLD",
-      "OPRX",
-      "HCAT",
-      "SKIL",
-      "SMX",
-      "HCTI",
-      "KIDZ"
+      "TSLA"
     ],
     "Defense": [
       "KTOS",
@@ -531,93 +463,10 @@
       "ETN",
       "EMR",
       "ROK",
-      "WM",
-      "MMM",
-      "CTAS",
-      "RSG",
-      "JBL",
-      "MTZ",
-      "VLTO",
-      "EFX",
-      "APG",
-      "ULS",
-      "CLH",
-      "LECO",
-      "STRL",
-      "MLI",
-      "DY",
-      "ACM",
-      "BLD",
-      "BAH",
-      "TTC",
-      "ICLR",
-      "CRL",
-      "PRIM",
-      "TTEK",
-      "ZWS",
-      "LGN",
-      "TKR",
-      "TAL",
-      "FLR",
-      "MWH",
-      "ECG",
-      "MHK",
-      "ROAD",
-      "ESAB",
-      "GVA",
-      "ADT",
-      "CWST",
-      "ALH",
-      "GPGI",
-      "LAUR",
-      "TPC",
-      "BCO",
-      "MMS",
-      "EXPO",
-      "KFY",
-      "YETI",
-      "KMT",
-      "FLNC",
-      "RHI",
-      "HNI",
-      "GEO",
-      "ABM",
-      "CDNL",
-      "CECO",
-      "CXW",
-      "UTI",
-      "TNET",
-      "TIC",
-      "CBZ",
-      "NVRI",
-      "TILE",
-      "MAN",
-      "AMRC",
-      "KODK",
-      "PCT",
       "TTI",
-      "BV",
-      "MLKN",
-      "NSP",
       "AVO",
-      "NRGV",
-      "ERII",
-      "NNDM",
-      "EVH",
-      "VELO",
-      "ACCO",
-      "FC",
-      "WLAC",
-      "YDDL",
-      "RGP",
-      "KULR",
       "ARQ",
-      "NNBR",
-      "MERC",
-      "ONEG",
-      "KSCP",
-      "FCUV",
-      "FCHL"
+      "MERC"
     ],
     "Travel & Leisure": [
       "BKNG",
@@ -659,82 +508,7 @@
       "HD",
       "LOW",
       "DG",
-      "DLTR",
-      "CVNA",
-      "FAST",
-      "FERG",
-      "SYY",
-      "CPRT",
-      "CASY",
-      "ULTA",
-      "TSCO",
-      "WSM",
-      "AS",
-      "USFD",
-      "SGI",
-      "SNX",
-      "QXO",
-      "SN",
-      "WCC",
-      "BBY",
-      "HAS",
-      "FIVE",
-      "ALLE",
-      "BJ",
-      "GME",
-      "SWK",
-      "CNM",
-      "ARW",
-      "POOL",
-      "FSS",
-      "SITE",
-      "REZI",
-      "OLLI",
-      "FND",
-      "AVT",
-      "MSM",
-      "M",
-      "ZGN",
-      "MAT",
-      "TBBB",
-      "PVH",
-      "KTB",
-      "WHR",
-      "BBWI",
-      "UNFI",
-      "CALY",
-      "FIGS",
-      "RH",
-      "DNOW",
-      "EYE",
-      "SONO",
-      "HLMN",
-      "KSS",
-      "LEG",
-      "OLPX",
-      "SBH",
-      "SVV",
-      "GIII",
-      "VSTS",
-      "MBC",
-      "ARHS",
-      "CRCT",
-      "WOOF",
-      "CWH",
-      "ARKO",
-      "TRON",
-      "ETD",
-      "BBBY",
-      "XWIN",
-      "FNKO",
-      "PLBY",
-      "GPRO",
-      "PLCE",
-      "SPWH",
-      "SNBR",
-      "RECT",
-      "DBGI",
-      "UCAR"
+      "DLTR"
     ],
     "Regional Banks": [
       "KEY",
@@ -1506,50 +1280,7 @@
       "DOV",
       "FLS",
       "GGG",
-      "WTS",
-      "PH",
-      "CMI",
-      "ITW",
-      "AME",
-      "SYM",
-      "IR",
-      "OTIS",
-      "XYL",
-      "NVT",
-      "ITT",
-      "IEX",
-      "AEIS",
-      "RRX",
-      "CR",
-      "DCI",
-      "GTLS",
-      "AYI",
-      "POWL",
-      "MIDD",
-      "GTES",
-      "MIR",
-      "MWA",
-      "HAYW",
-      "CXT",
-      "AMPX",
-      "BW",
-      "EOSE",
-      "HLIO",
-      "PSIX",
-      "AMSC",
-      "TE",
-      "ENVX",
-      "NNE",
-      "SERV",
-      "RR",
-      "LTBR",
-      "FCEL",
-      "NPWR",
-      "SHMD",
-      "SKYX",
-      "LASE",
-      "LNKS",
-      "ELPW"
+      "WTS"
     ],
     "Aerospace OEM": [
       "BA",
@@ -1976,205 +1707,7 @@
       "HUBS",
       "BSY",
       "TEAM",
-      "PCTY",
-      "UBER",
-      "ACN",
-      "SNPS",
-      "CDNS",
-      "ADP",
-      "CRWV",
-      "ADSK",
-      "XYZ",
-      "ROP",
-      "FISV",
-      "PAYX",
-      "CTSH",
-      "ZM",
-      "VRSN",
-      "CPAY",
-      "TWLO",
-      "LDOS",
-      "BR",
-      "SSNC",
-      "FFIV",
-      "IOT",
-      "CDW",
-      "PTC",
-      "GRAB",
-      "GEN",
-      "GWRE",
-      "GDDY",
-      "IT",
-      "FIG",
-      "RBRK",
-      "AUR",
-      "NTNX",
-      "DOCU",
-      "CHYM",
-      "APLD",
-      "YMM",
-      "DOCN",
-      "PCOR",
-      "MANH",
-      "PEGA",
-      "CWAN",
-      "DOX",
-      "YOU",
-      "EPAM",
-      "PAYC",
-      "SAIL",
-      "INGM",
-      "BLSH",
-      "G",
-      "PSN",
-      "CORZ",
-      "WEX",
-      "TTAN",
-      "LYFT",
-      "DBX",
-      "KLAR",
-      "KVYO",
-      "SRAD",
-      "FROG",
-      "KC",
-      "FOUR",
-      "EXLS",
-      "DUOL",
-      "ACIW",
-      "SAIC",
-      "CVLT",
-      "DLO",
-      "NTSK",
-      "WIX",
-      "NAVN",
-      "BULL",
-      "LIF",
-      "MNDY",
-      "SOUN",
-      "BOX",
-      "NATL",
-      "RNG",
-      "WK",
-      "NIQ",
-      "CALX",
-      "CCC",
-      "QTWO",
-      "CLBT",
-      "DAVE",
-      "KD",
-      "BTDR",
-      "QLYS",
-      "DBD",
-      "ADEA",
-      "EEFT",
-      "VRNS",
-      "BRZE",
-      "TDC",
-      "VNET",
-      "PTRN",
-      "GRND",
-      "FRSH",
-      "NTCT",
-      "NN",
-      "ALRM",
-      "VRRM",
-      "DXC",
-      "AVPT",
-      "GLOB",
-      "NCNO",
-      "SPSC",
-      "VERX",
-      "BL",
-      "GTM",
-      "INTA",
-      "ATEN",
-      "BBAI",
-      "SEMR",
-      "ALKT",
-      "MQ",
-      "CNXC",
-      "BLKB",
-      "RAMP",
-      "GCT",
-      "WLTH",
-      "KDK",
-      "KEEL",
-      "CLVT",
-      "APPN",
-      "ASAN",
-      "TUYA",
-      "INOD",
-      "VIA",
-      "CXM",
-      "PENG",
-      "PRGS",
-      "FIVN",
-      "PGY",
-      "RZLV",
-      "UPBD",
-      "VYX",
-      "AEVA",
-      "NABL",
-      "AMPL",
-      "CTLP",
-      "MNTN",
-      "CGNT",
-      "VTEX",
-      "SABR",
-      "MITK",
-      "TASK",
-      "WYFI",
-      "PAR",
-      "GDYN",
-      "RBBN",
-      "YEXT",
-      "PSFE",
-      "AIOT",
-      "OSPN",
-      "BLND",
-      "TSSI",
-      "AZ",
-      "RPD",
-      "CRNC",
-      "TLS",
-      "BNAI",
-      "SPT",
-      "PAYS",
-      "NUAI",
-      "PDYN",
-      "RXT",
-      "BKKT",
-      "GRRR",
-      "RPAY",
-      "EGHT",
-      "SUPX",
-      "DUOT",
-      "CNDT",
-      "BLZE",
-      "CMRC",
-      "BZAI",
-      "IMMR",
-      "VERI",
-      "UIS",
-      "IDN",
-      "THRY",
-      "TTEC",
-      "DOMO",
-      "ZENA",
-      "AISP",
-      "LIDR",
-      "FUSE",
-      "ARAI",
-      "AIXI",
-      "NVNI",
-      "CETX",
-      "RMSG",
-      "HKIT",
-      "CYCU",
-      "MYSE",
-      "JTAI",
-      "MASK",
-      "JDZG"
+      "PCTY"
     ],
     "Cloud / CDN": [
       "NET",
@@ -2296,6 +1829,481 @@
       "ZS",
       "SMCI",
       "MU"
+    ],
+    "Software (Broad)": [
+      "UBER",
+      "ACN",
+      "SNPS",
+      "CDNS",
+      "ADP",
+      "CRWV",
+      "ADSK",
+      "XYZ",
+      "ROP",
+      "FISV",
+      "PAYX",
+      "CTSH",
+      "VEEV",
+      "ZM",
+      "VRSN",
+      "VRSK",
+      "CPAY",
+      "TWLO",
+      "LDOS",
+      "BR",
+      "HPQ",
+      "SSNC",
+      "FFIV",
+      "IOT",
+      "CDW",
+      "PTC",
+      "GRAB",
+      "TRMB",
+      "J",
+      "GEN",
+      "GWRE",
+      "GDDY",
+      "IT",
+      "FIG",
+      "RBRK",
+      "AUR",
+      "NTNX",
+      "TEM",
+      "DOCU",
+      "VIAV",
+      "CHYM",
+      "APLD",
+      "YMM",
+      "DOCN",
+      "PCOR",
+      "MANH",
+      "PEGA",
+      "CWAN",
+      "DOX",
+      "YOU",
+      "EPAM",
+      "PAYC",
+      "SAIL",
+      "INGM",
+      "BLSH",
+      "G",
+      "PSN",
+      "CORZ",
+      "DLB",
+      "WEX",
+      "TTAN",
+      "LYFT",
+      "DBX",
+      "KLAR",
+      "KVYO",
+      "SRAD",
+      "EQPT",
+      "FROG",
+      "KC",
+      "FOUR",
+      "EXLS",
+      "WAY",
+      "KBR",
+      "DUOL",
+      "DOCS",
+      "ACIW",
+      "SAIC",
+      "CVLT",
+      "DLO",
+      "NTSK",
+      "WIX",
+      "NAVN",
+      "BULL",
+      "LIF",
+      "CARG",
+      "MNDY",
+      "SOUN",
+      "BOX",
+      "NATL",
+      "OPLN",
+      "HNGE",
+      "RNG",
+      "WK",
+      "NIQ",
+      "CALX",
+      "CCC",
+      "QTWO",
+      "CLBT",
+      "DAVE",
+      "KD",
+      "BTDR",
+      "QLYS",
+      "DBD",
+      "ADEA",
+      "EEFT",
+      "VRNS",
+      "BRZE",
+      "HTFL",
+      "TDC",
+      "VNET",
+      "PTRN",
+      "GRND",
+      "XMTR",
+      "FRSH",
+      "NTCT",
+      "NN",
+      "ALRM",
+      "VRRM",
+      "DXC",
+      "AVPT",
+      "GLOB",
+      "NCNO",
+      "SPSC",
+      "FA",
+      "VERX",
+      "BL",
+      "GTM",
+      "INTA",
+      "ATEN",
+      "BBAI",
+      "SEMR",
+      "ALKT",
+      "MQ",
+      "CNXC",
+      "BLKB",
+      "RAMP",
+      "GCT",
+      "WLTH",
+      "KDK",
+      "KEEL",
+      "CLVT",
+      "APPN",
+      "ASAN",
+      "TUYA",
+      "INOD",
+      "VIA",
+      "CXM",
+      "PENG",
+      "PRGS",
+      "BKSY",
+      "FIVN",
+      "PGY",
+      "RZLV",
+      "UPBD",
+      "LZ",
+      "COUR",
+      "CERT",
+      "VYX",
+      "AEVA",
+      "NABL",
+      "SDGR",
+      "AMPL",
+      "ACVA",
+      "CTLP",
+      "OMDA",
+      "SPIR",
+      "UDMY",
+      "MNTN",
+      "CGNT",
+      "VTEX",
+      "NTGR",
+      "SABR",
+      "MITK",
+      "CRSR",
+      "TASK",
+      "WYFI",
+      "PAR",
+      "PHR",
+      "GDYN",
+      "RBBN",
+      "YEXT",
+      "PSFE",
+      "AIOT",
+      "OSPN",
+      "WEAV",
+      "BLND",
+      "TSSI",
+      "AZ",
+      "RPD",
+      "CRNC",
+      "TLS",
+      "BNAI",
+      "SPT",
+      "PAYS",
+      "NUAI",
+      "PDYN",
+      "RXT",
+      "DDD",
+      "SLP",
+      "BKKT",
+      "GRRR",
+      "SY",
+      "RPAY",
+      "EGHT",
+      "SUPX",
+      "DUOT",
+      "CNDT",
+      "BLZE",
+      "CMRC",
+      "BZAI",
+      "IMMR",
+      "VERI",
+      "UIS",
+      "IDN",
+      "THRY",
+      "TTEC",
+      "DOMO",
+      "CCLD",
+      "OPRX",
+      "ZENA",
+      "HCAT",
+      "AISP",
+      "LIDR",
+      "SKIL",
+      "FUSE",
+      "ARAI",
+      "SMX",
+      "AIXI",
+      "NVNI",
+      "CETX",
+      "RMSG",
+      "HKIT",
+      "CYCU",
+      "MYSE",
+      "JTAI",
+      "HCTI",
+      "KIDZ",
+      "MASK",
+      "JDZG"
+    ],
+    "Industrials (Broad)": [
+      "PH",
+      "WM",
+      "CMI",
+      "MMM",
+      "ITW",
+      "CTAS",
+      "RSG",
+      "AME",
+      "SYM",
+      "IR",
+      "JBL",
+      "OTIS",
+      "XYL",
+      "MTZ",
+      "VLTO",
+      "EFX",
+      "NVT",
+      "APG",
+      "ITT",
+      "ULS",
+      "CLH",
+      "IEX",
+      "AEIS",
+      "LECO",
+      "STRL",
+      "MLI",
+      "RRX",
+      "DY",
+      "ACM",
+      "CR",
+      "BLD",
+      "DCI",
+      "GTLS",
+      "BAH",
+      "TTC",
+      "ICLR",
+      "CRL",
+      "PRIM",
+      "AYI",
+      "POWL",
+      "TTEK",
+      "ZWS",
+      "LGN",
+      "TKR",
+      "TAL",
+      "FLR",
+      "MWH",
+      "MIDD",
+      "ECG",
+      "MHK",
+      "GTES",
+      "ROAD",
+      "ESAB",
+      "GVA",
+      "ADT",
+      "CWST",
+      "MIR",
+      "ALH",
+      "GPGI",
+      "LAUR",
+      "MWA",
+      "TPC",
+      "BCO",
+      "MMS",
+      "EXPO",
+      "KFY",
+      "HAYW",
+      "YETI",
+      "KMT",
+      "FLNC",
+      "RHI",
+      "CXT",
+      "HNI",
+      "AMPX",
+      "BW",
+      "EOSE",
+      "GEO",
+      "ABM",
+      "HLIO",
+      "CDNL",
+      "CECO",
+      "CXW",
+      "UTI",
+      "PSIX",
+      "TNET",
+      "AMSC",
+      "TIC",
+      "CBZ",
+      "NVRI",
+      "TILE",
+      "TE",
+      "MAN",
+      "ENVX",
+      "AMRC",
+      "NNE",
+      "KODK",
+      "PCT",
+      "BV",
+      "MLKN",
+      "NSP",
+      "SERV",
+      "NRGV",
+      "ERII",
+      "RR",
+      "LTBR",
+      "FCEL",
+      "NPWR",
+      "NNDM",
+      "EVH",
+      "VELO",
+      "ACCO",
+      "SHMD",
+      "FC",
+      "WLAC",
+      "YDDL",
+      "SKYX",
+      "RGP",
+      "KULR",
+      "NNBR",
+      "ONEG",
+      "KSCP",
+      "LASE",
+      "LNKS",
+      "ELPW",
+      "FCUV",
+      "FCHL"
+    ],
+    "Retail (Broad)": [
+      "CVNA",
+      "FAST",
+      "FERG",
+      "SYY",
+      "CPRT",
+      "CASY",
+      "ULTA",
+      "TSCO",
+      "WSM",
+      "AS",
+      "USFD",
+      "SGI",
+      "SNX",
+      "QXO",
+      "SN",
+      "WCC",
+      "BBY",
+      "HAS",
+      "FIVE",
+      "ALLE",
+      "BJ",
+      "GME",
+      "SWK",
+      "CNM",
+      "ARW",
+      "POOL",
+      "FSS",
+      "SITE",
+      "REZI",
+      "OLLI",
+      "FND",
+      "AVT",
+      "MSM",
+      "M",
+      "ZGN",
+      "MAT",
+      "TBBB",
+      "PVH",
+      "KTB",
+      "WHR",
+      "BBWI",
+      "UNFI",
+      "CALY",
+      "FIGS",
+      "RH",
+      "DNOW",
+      "EYE",
+      "SONO",
+      "HLMN",
+      "KSS",
+      "LEG",
+      "OLPX",
+      "SBH",
+      "SVV",
+      "GIII",
+      "VSTS",
+      "MBC",
+      "ARHS",
+      "CRCT",
+      "WOOF",
+      "CWH",
+      "ARKO",
+      "TRON",
+      "ETD",
+      "BBBY",
+      "XWIN",
+      "FNKO",
+      "PLBY",
+      "GPRO",
+      "PLCE",
+      "SPWH",
+      "SNBR",
+      "RECT",
+      "DBGI",
+      "UCAR"
+    ],
+    "Internet & Content (Broad)": [
+      "NBIS",
+      "RDDT",
+      "PINS",
+      "Z",
+      "SNAP",
+      "MTCH",
+      "BZ",
+      "IAC",
+      "DJT",
+      "STUB",
+      "RUM",
+      "ATHM",
+      "YELP",
+      "UPWK",
+      "OPRA",
+      "GENI",
+      "TBLA",
+      "MOMO",
+      "NRDS",
+      "MAX",
+      "CARS",
+      "NXDR",
+      "EVER",
+      "BMBL",
+      "GRPN",
+      "ANGI",
+      "ZIP"
     ]
   },
   "tickers": {
@@ -2880,7 +2888,7 @@
       "tv_sector": "Transportation",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -3100,7 +3108,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Specialty Industrial Machinery",
       "themes": [
-        "Industrial Auto"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -3109,7 +3117,7 @@
       "tv_sector": "Technology services",
       "industry": "Information Technology Services",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -3394,7 +3402,7 @@
       "tv_sector": "Industrial services",
       "industry": "Waste Management",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -3461,7 +3469,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -3478,7 +3486,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -3496,7 +3504,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Specialty Industrial Machinery",
       "themes": [
-        "Industrial Auto"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -3521,7 +3529,7 @@
       "tv_sector": "Retail trade",
       "industry": "Auto & Truck Dealerships",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -3544,7 +3552,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Conglomerates",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -3553,7 +3561,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -3647,7 +3655,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Specialty Industrial Machinery",
       "themes": [
-        "Industrial Auto"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -3738,7 +3746,7 @@
       "tv_sector": "Commercial services",
       "industry": "Specialty Business Services",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -3901,7 +3909,7 @@
       "tv_sector": "Industrial services",
       "industry": "Waste Management",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -3940,7 +3948,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -4146,7 +4154,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Specialty Industrial Machinery",
       "themes": [
-        "Industrial Auto"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -4198,7 +4206,7 @@
       "tv_sector": "Distribution services",
       "industry": "Industrial Distribution",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -4245,7 +4253,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -4262,7 +4270,7 @@
       "tv_sector": "Distribution services",
       "industry": "Industrial Distribution",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -4487,7 +4495,7 @@
       "tv_sector": "Technology services",
       "industry": "Internet Content & Information",
       "themes": [
-        "Big Tech"
+        "Internet & Content (Broad)"
       ],
       "auto_theme": true
     },
@@ -4543,7 +4551,7 @@
       "tv_sector": "Commercial services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -4688,7 +4696,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -4747,7 +4755,7 @@
       "tv_sector": "Distribution services",
       "industry": "Food Distribution",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -4756,7 +4764,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Specialty Industrial Machinery",
       "themes": [
-        "Industrial Auto"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -4849,7 +4857,7 @@
       "tv_sector": "Commercial services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -4867,7 +4875,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Specialty Industrial Machinery",
       "themes": [
-        "Industrial Auto"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -4893,7 +4901,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -4920,7 +4928,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Electronic Components",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -4929,7 +4937,7 @@
       "tv_sector": "Retail trade",
       "industry": "Specialty Business Services",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -4983,7 +4991,7 @@
       "tv_sector": "Industrial services",
       "industry": "Specialty Industrial Machinery",
       "themes": [
-        "Industrial Auto"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -5070,7 +5078,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Specialty Industrial Machinery",
       "themes": [
-        "Industrial Auto"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -5088,7 +5096,7 @@
       "tv_sector": "Technology services",
       "industry": "Internet Content & Information",
       "themes": [
-        "Big Tech"
+        "Internet & Content (Broad)"
       ],
       "auto_theme": true
     },
@@ -5167,7 +5175,7 @@
       "tv_sector": "Technology services",
       "industry": "Information Technology Services",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -5193,7 +5201,7 @@
       "tv_sector": "Industrial services",
       "industry": "Engineering & Construction",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -5330,7 +5338,7 @@
       "tv_sector": "Technology services",
       "industry": "Health Information Services",
       "themes": [
-        "Big Tech"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -5339,7 +5347,7 @@
       "tv_sector": "Retail trade",
       "industry": "Specialty Retail",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -5397,7 +5405,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -5474,7 +5482,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -5530,7 +5538,7 @@
       "tv_sector": "Technology services",
       "industry": "Consulting Services",
       "themes": [
-        "Big Tech"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -5610,7 +5618,7 @@
       "tv_sector": "Retail trade",
       "industry": "Specialty Retail",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -5627,7 +5635,7 @@
       "tv_sector": "Retail trade",
       "industry": "Specialty Retail",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -5695,7 +5703,7 @@
       "tv_sector": "Retail trade",
       "industry": "Specialty Retail",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -5746,7 +5754,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Pollution & Treatment Controls",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -5755,7 +5763,7 @@
       "tv_sector": "Commercial services",
       "industry": "Consulting Services",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -5798,7 +5806,7 @@
       "tv_sector": "Commercial services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -5902,7 +5910,7 @@
       "tv_sector": "Electronic technology",
       "industry": "Electrical Equipment & Parts",
       "themes": [
-        "Industrial Auto"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -5928,7 +5936,7 @@
       "tv_sector": "Consumer durables",
       "industry": "Leisure",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -6006,7 +6014,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -6021,7 +6029,7 @@
       "tv_sector": "Technology services",
       "industry": "Information Technology Services",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -6046,7 +6054,7 @@
       "tv_sector": "Distribution services",
       "industry": "Food Distribution",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -6105,7 +6113,7 @@
       "tv_sector": "Industrial services",
       "industry": "Engineering & Construction",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -6193,7 +6201,7 @@
       "tv_sector": "Technology services",
       "industry": "Information Technology Services",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -6228,7 +6236,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Specialty Industrial Machinery",
       "themes": [
-        "Industrial Auto"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -6291,7 +6299,7 @@
       "tv_sector": "Commercial services",
       "industry": "Specialty Business Services",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -6317,7 +6325,7 @@
       "tv_sector": "Technology services",
       "industry": "Computer Hardware",
       "themes": [
-        "Big Tech"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -6351,7 +6359,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -6360,7 +6368,7 @@
       "tv_sector": "Consumer durables",
       "industry": "Furnishings, Fixtures & Appliances",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -6377,7 +6385,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -6409,7 +6417,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -6443,7 +6451,7 @@
       "tv_sector": "Technology services",
       "industry": "Information Technology Services",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -6452,7 +6460,7 @@
       "tv_sector": "Distribution services",
       "industry": "Electronics & Computer Distribution",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -6470,7 +6478,7 @@
       "tv_sector": "Distribution services",
       "industry": "Industrial Distribution",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -6503,7 +6511,7 @@
       "tv_sector": "Consumer durables",
       "industry": "Furnishings, Fixtures & Appliances",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -6512,7 +6520,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -6571,7 +6579,7 @@
       "tv_sector": "Transportation",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -6636,7 +6644,7 @@
       "tv_sector": "Industrial services",
       "industry": "Waste Management",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -6645,7 +6653,7 @@
       "tv_sector": "Technology services",
       "industry": "Scientific & Technical Instruments",
       "themes": [
-        "Big Tech"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -6732,7 +6740,7 @@
       "tv_sector": "Technology services",
       "industry": "Engineering & Construction",
       "themes": [
-        "Big Tech"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -6741,7 +6749,7 @@
       "tv_sector": "Distribution services",
       "industry": "Industrial Distribution",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -6768,7 +6776,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Specialty Industrial Machinery",
       "themes": [
-        "Industrial Auto"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -6866,7 +6874,7 @@
       "tv_sector": "Electronic technology",
       "industry": "Electrical Equipment & Parts",
       "themes": [
-        "Industrial Auto"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -6917,7 +6925,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Tools & Accessories",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -6926,7 +6934,7 @@
       "tv_sector": "Industrial services",
       "industry": "Engineering & Construction",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -7013,7 +7021,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Metal Fabrication",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -7038,7 +7046,7 @@
       "tv_sector": "Retail trade",
       "industry": "Specialty Retail",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -7056,7 +7064,7 @@
       "tv_sector": "Consumer durables",
       "industry": "Leisure",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -7121,7 +7129,7 @@
       "tv_sector": "Technology services",
       "industry": "Internet Content & Information",
       "themes": [
-        "Big Tech"
+        "Internet & Content (Broad)"
       ],
       "auto_theme": true
     },
@@ -7166,7 +7174,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Specialty Industrial Machinery",
       "themes": [
-        "Industrial Auto"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -7297,7 +7305,7 @@
       "tv_sector": "Retail trade",
       "industry": "Specialty Retail",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -7339,7 +7347,7 @@
       "tv_sector": "Consumer durables",
       "industry": "Security & Protection Services",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -7386,7 +7394,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -7411,7 +7419,7 @@
       "tv_sector": "Industrial services",
       "industry": "Engineering & Construction",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -7437,7 +7445,7 @@
       "tv_sector": "Retail trade",
       "industry": "Discount Stores",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -7488,7 +7496,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -7584,7 +7592,7 @@
       "tv_sector": "Industrial services",
       "industry": "Engineering & Construction",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -7625,7 +7633,7 @@
       "tv_sector": "Retail trade",
       "industry": "Specialty Retail",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -7673,7 +7681,7 @@
       "tv_sector": "Electronic technology",
       "industry": "Specialty Industrial Machinery",
       "themes": [
-        "Industrial Auto"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -7682,7 +7690,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -7734,7 +7742,7 @@
       "tv_sector": "Industrial services",
       "industry": "Engineering & Construction",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -7767,7 +7775,7 @@
       "tv_sector": "Technology services",
       "industry": "Information Technology Services",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -7799,7 +7807,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -7857,7 +7865,7 @@
       "tv_sector": "Technology services",
       "industry": "Internet Content & Information",
       "themes": [
-        "Big Tech"
+        "Internet & Content (Broad)"
       ],
       "auto_theme": true
     },
@@ -7866,7 +7874,7 @@
       "tv_sector": "Consumer durables",
       "industry": "Tools & Accessories",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -7875,7 +7883,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -7890,7 +7898,7 @@
       "tv_sector": "Distribution services",
       "industry": "Industrial Distribution",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -7907,7 +7915,7 @@
       "tv_sector": "Technology services",
       "industry": "Information Technology Services",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -7943,7 +7951,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Specialty Industrial Machinery",
       "themes": [
-        "Industrial Auto"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -7952,7 +7960,7 @@
       "tv_sector": "Technology services",
       "industry": "Internet Content & Information",
       "themes": [
-        "Big Tech"
+        "Internet & Content (Broad)"
       ],
       "auto_theme": true
     },
@@ -7970,7 +7978,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -7995,7 +8003,7 @@
       "tv_sector": "Technology services",
       "industry": "Health Information Services",
       "themes": [
-        "Big Tech"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -8072,7 +8080,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Specialty Industrial Machinery",
       "themes": [
-        "Industrial Auto"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -8096,7 +8104,7 @@
       "tv_sector": "Commercial services",
       "industry": "Consulting Services",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -8323,7 +8331,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -8347,7 +8355,7 @@
       "tv_sector": "Technology services",
       "industry": "Communication Equipment",
       "themes": [
-        "Big Tech"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -8381,7 +8389,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Tools & Accessories",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -8390,7 +8398,7 @@
       "tv_sector": "Finance",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -8421,7 +8429,7 @@
       "tv_sector": "Commercial services",
       "industry": "Diagnostics & Research",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -8430,7 +8438,7 @@
       "tv_sector": "Commercial services",
       "industry": "Diagnostics & Research",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -8453,7 +8461,7 @@
       "tv_sector": "Industrial services",
       "industry": "Engineering & Construction",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -8479,7 +8487,7 @@
       "tv_sector": "Technology services",
       "industry": "Information Technology Services",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -8536,7 +8544,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -8560,7 +8568,7 @@
       "tv_sector": "Distribution services",
       "industry": "Electronics & Computer Distribution",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -8612,7 +8620,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Electrical Equipment & Parts",
       "themes": [
-        "Industrial Auto"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -8647,7 +8655,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Electrical Equipment & Parts",
       "themes": [
-        "Industrial Auto"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -8688,7 +8696,7 @@
       "tv_sector": "Distribution services",
       "industry": "Industrial Distribution",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -8712,7 +8720,7 @@
       "tv_sector": "Industrial services",
       "industry": "Engineering & Construction",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -8815,7 +8823,7 @@
       "tv_sector": "Technology services",
       "industry": "Internet Content & Information",
       "themes": [
-        "Big Tech"
+        "Internet & Content (Broad)"
       ],
       "auto_theme": true
     },
@@ -8848,7 +8856,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -8866,7 +8874,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Pollution & Treatment Controls",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -8892,7 +8900,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -8928,7 +8936,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -9029,7 +9037,7 @@
       "tv_sector": "Industrial services",
       "industry": "Engineering & Construction",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -9135,7 +9143,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Tools & Accessories",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -9144,7 +9152,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -9178,7 +9186,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -9230,7 +9238,7 @@
       "tv_sector": "Commercial services",
       "industry": "Education & Training Services",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -9239,7 +9247,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -9270,7 +9278,7 @@
       "tv_sector": "Industrial services",
       "industry": "Engineering & Construction",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -9305,7 +9313,7 @@
       "tv_sector": "Consumer durables",
       "industry": "Pollution & Treatment Controls",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -9338,7 +9346,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -9372,7 +9380,7 @@
       "tv_sector": "Industrial services",
       "industry": "Infrastructure Operations",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -9381,7 +9389,7 @@
       "tv_sector": "Technology services",
       "industry": "Information Technology Services",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -9427,7 +9435,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -9452,7 +9460,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -9478,7 +9486,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Specialty Industrial Machinery",
       "themes": [
-        "Industrial Auto"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -9495,7 +9503,7 @@
       "tv_sector": "Industrial services",
       "industry": "Engineering & Construction",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -9504,7 +9512,7 @@
       "tv_sector": "Technology services",
       "industry": "Information Technology Services",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -9566,7 +9574,7 @@
       "tv_sector": "Commercial services",
       "industry": "Internet Content & Information",
       "themes": [
-        "Big Tech"
+        "Internet & Content (Broad)"
       ],
       "auto_theme": true
     },
@@ -9609,7 +9617,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Furnishings, Fixtures & Appliances",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -9679,7 +9687,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Specialty Industrial Machinery",
       "themes": [
-        "Industrial Auto"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -9705,7 +9713,7 @@
       "tv_sector": "Industrial services",
       "industry": "Engineering & Construction",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -9723,7 +9731,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -9761,7 +9769,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Metal Fabrication",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -9779,7 +9787,7 @@
       "tv_sector": "Commercial services",
       "industry": "Information Technology Services",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -9797,7 +9805,7 @@
       "tv_sector": "Distribution services",
       "industry": "Industrial Distribution",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -9853,7 +9861,7 @@
       "tv_sector": "Technology services",
       "industry": "Information Technology Services",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -9870,7 +9878,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -9879,7 +9887,7 @@
       "tv_sector": "Distribution services",
       "industry": "Industrial Distribution",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -9888,7 +9896,7 @@
       "tv_sector": "Technology services",
       "industry": "Specialty Business Services",
       "themes": [
-        "Big Tech"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -9960,7 +9968,7 @@
       "tv_sector": "Commercial services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -9989,7 +9997,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -10048,7 +10056,7 @@
       "tv_sector": "Transportation",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -10072,7 +10080,7 @@
       "tv_sector": "Retail trade",
       "industry": "Discount Stores",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -10090,7 +10098,7 @@
       "tv_sector": "Retail trade",
       "industry": "Home Improvement Retail",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -10099,7 +10107,7 @@
       "tv_sector": "Distribution services",
       "industry": "Electronics & Computer Distribution",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -10175,7 +10183,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -10243,7 +10251,7 @@
       "tv_sector": "Commercial services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -10252,7 +10260,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -10400,7 +10408,7 @@
       "tv_sector": "Industrial services",
       "industry": "Engineering & Construction",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -10497,7 +10505,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -10531,7 +10539,7 @@
       "tv_sector": "Commercial services",
       "industry": "Security & Protection Services",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -10557,7 +10565,7 @@
       "tv_sector": "Technology services",
       "industry": "Rental & Leasing Services",
       "themes": [
-        "Big Tech"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -10592,7 +10600,7 @@
       "tv_sector": "Distribution services",
       "industry": "Industrial Distribution",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -10624,7 +10632,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -10633,7 +10641,7 @@
       "tv_sector": "Industrial services",
       "industry": "Waste Management",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -10728,7 +10736,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -10761,7 +10769,7 @@
       "tv_sector": "Retail trade",
       "industry": "Department Stores",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -10815,7 +10823,7 @@
       "tv_sector": "Electronic technology",
       "industry": "Specialty Industrial Machinery",
       "themes": [
-        "Industrial Auto"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -10824,7 +10832,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Furnishings, Fixtures & Appliances",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -10841,7 +10849,7 @@
       "tv_sector": "Commercial services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -10859,7 +10867,7 @@
       "tv_sector": "Technology services",
       "industry": "Information Technology Services",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -10876,7 +10884,7 @@
       "tv_sector": "Consumer non-durables",
       "industry": "Apparel Manufacturing",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -10946,7 +10954,7 @@
       "tv_sector": "Commercial services",
       "industry": "Metal Fabrication",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -10989,7 +10997,7 @@
       "tv_sector": "Technology services",
       "industry": "Health Information Services",
       "themes": [
-        "Big Tech"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -10998,7 +11006,7 @@
       "tv_sector": "Commercial services",
       "industry": "Education & Training Services",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -11075,7 +11083,7 @@
       "tv_sector": "Technology services",
       "industry": "Engineering & Construction",
       "themes": [
-        "Big Tech"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -11084,7 +11092,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -11154,7 +11162,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Specialty Industrial Machinery",
       "themes": [
-        "Industrial Auto"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -11177,7 +11185,7 @@
       "tv_sector": "Industrial services",
       "industry": "Engineering & Construction",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -11251,7 +11259,7 @@
       "tv_sector": "Consumer durables",
       "industry": "Leisure",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -11269,7 +11277,7 @@
       "tv_sector": "Commercial services",
       "industry": "Security & Protection Services",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -11326,7 +11334,7 @@
       "tv_sector": "Technology services",
       "industry": "Health Information Services",
       "themes": [
-        "Big Tech"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -11379,7 +11387,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -11539,7 +11547,7 @@
       "tv_sector": "Technology services",
       "industry": "Information Technology Services",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -11587,7 +11595,7 @@
       "tv_sector": "Retail trade",
       "industry": "Discount Stores",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -11622,7 +11630,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -11732,7 +11740,7 @@
       "tv_sector": "Consumer non-durables",
       "industry": "Apparel Manufacturing",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -11750,7 +11758,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -11798,7 +11806,7 @@
       "tv_sector": "Consumer non-durables",
       "industry": "Apparel Manufacturing",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -11860,7 +11868,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -11877,7 +11885,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -11946,7 +11954,7 @@
       "tv_sector": "Commercial services",
       "industry": "Specialty Business Services",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -12074,7 +12082,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -12083,7 +12091,7 @@
       "tv_sector": "Consumer durables",
       "industry": "Furnishings, Fixtures & Appliances",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -12112,7 +12120,7 @@
       "tv_sector": "Retail trade",
       "industry": "Specialty Retail",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -12336,7 +12344,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -12359,7 +12367,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -12377,7 +12385,7 @@
       "tv_sector": "Technology services",
       "industry": "Auto & Truck Dealerships",
       "themes": [
-        "Big Tech"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -12412,7 +12420,7 @@
       "tv_sector": "Industrial services",
       "industry": "Engineering & Construction",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -12439,7 +12447,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -12462,7 +12470,7 @@
       "tv_sector": "Commercial services",
       "industry": "Staffing & Employment Services",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -12480,7 +12488,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -12513,7 +12521,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -12522,7 +12530,7 @@
       "tv_sector": "Electronic technology",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -12540,7 +12548,7 @@
       "tv_sector": "Technology services",
       "industry": "Auto & Truck Dealerships",
       "themes": [
-        "Big Tech"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -12557,7 +12565,7 @@
       "tv_sector": "Technology services",
       "industry": "Health Information Services",
       "themes": [
-        "Big Tech"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -12575,7 +12583,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -12605,7 +12613,7 @@
       "tv_sector": "Technology services",
       "industry": "Internet Content & Information",
       "themes": [
-        "Big Tech"
+        "Internet & Content (Broad)"
       ],
       "auto_theme": true
     },
@@ -12648,7 +12656,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -12657,7 +12665,7 @@
       "tv_sector": "Technology services",
       "industry": "Information Technology Services",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -12675,7 +12683,7 @@
       "tv_sector": "Consumer durables",
       "industry": "Electrical Equipment & Parts",
       "themes": [
-        "Industrial Auto"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -12684,7 +12692,7 @@
       "tv_sector": "Electronic technology",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -12710,7 +12718,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -12725,7 +12733,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -12740,7 +12748,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -12749,7 +12757,7 @@
       "tv_sector": "Finance",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -12758,7 +12766,7 @@
       "tv_sector": "Technology services",
       "industry": "Information Technology Services",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -12856,7 +12864,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -12865,7 +12873,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -12914,7 +12922,7 @@
       "tv_sector": "Electronic technology",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -12923,7 +12931,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -12992,7 +13000,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Leisure",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -13019,7 +13027,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Tools & Accessories",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -13037,7 +13045,7 @@
       "tv_sector": "Commercial services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -13122,7 +13130,7 @@
       "tv_sector": "Distribution services",
       "industry": "Food Distribution",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -13162,7 +13170,7 @@
       "tv_sector": "Commercial services",
       "industry": "Internet Content & Information",
       "themes": [
-        "Big Tech"
+        "Internet & Content (Broad)"
       ],
       "auto_theme": true
     },
@@ -13188,7 +13196,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Utilities - Renewable",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -13197,7 +13205,7 @@
       "tv_sector": "Commercial services",
       "industry": "Staffing & Employment Services",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -13279,7 +13287,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -13424,7 +13432,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Specialty Industrial Machinery",
       "themes": [
-        "Industrial Auto"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -13480,7 +13488,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -13498,7 +13506,7 @@
       "tv_sector": "Consumer durables",
       "industry": "Leisure",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -13507,7 +13515,7 @@
       "tv_sector": "Consumer non-durables",
       "industry": "Apparel Manufacturing",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -13516,7 +13524,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Furnishings, Fixtures & Appliances",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -13549,7 +13557,7 @@
       "tv_sector": "Technology services",
       "industry": "Internet Content & Information",
       "themes": [
-        "Big Tech"
+        "Internet & Content (Broad)"
       ],
       "auto_theme": true
     },
@@ -13572,7 +13580,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Electrical Equipment & Parts",
       "themes": [
-        "Industrial Auto"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -13581,7 +13589,7 @@
       "tv_sector": "Technology services",
       "industry": "Health Information Services",
       "themes": [
-        "Big Tech"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -13614,7 +13622,7 @@
       "tv_sector": "Electronic technology",
       "industry": "Specialty Industrial Machinery",
       "themes": [
-        "Industrial Auto"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -13656,7 +13664,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -13688,7 +13696,7 @@
       "tv_sector": "Retail trade",
       "industry": "Specialty Retail",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -13715,7 +13723,7 @@
       "tv_sector": "Technology services",
       "industry": "Internet Content & Information",
       "themes": [
-        "Big Tech"
+        "Internet & Content (Broad)"
       ],
       "auto_theme": true
     },
@@ -13733,7 +13741,7 @@
       "tv_sector": "Technology services",
       "industry": "Information Technology Services",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -13766,7 +13774,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Electrical Equipment & Parts",
       "themes": [
-        "Industrial Auto"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -13784,7 +13792,7 @@
       "tv_sector": "Commercial services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -13799,7 +13807,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -13832,7 +13840,7 @@
       "tv_sector": "Technology services",
       "industry": "Industrial Distribution",
       "themes": [
-        "Big Tech"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -13841,7 +13849,7 @@
       "tv_sector": "Commercial services",
       "industry": "Security & Protection Services",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -13887,7 +13895,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -13905,7 +13913,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -13941,7 +13949,7 @@
       "tv_sector": "Commercial services",
       "industry": "Specialty Business Services",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -13967,7 +13975,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -14017,7 +14025,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -14026,7 +14034,7 @@
       "tv_sector": "Transportation",
       "industry": "Information Technology Services",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -14035,7 +14043,7 @@
       "tv_sector": "Technology services",
       "industry": "Internet Content & Information",
       "themes": [
-        "Big Tech"
+        "Internet & Content (Broad)"
       ],
       "auto_theme": true
     },
@@ -14050,7 +14058,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Specialty Industrial Machinery",
       "themes": [
-        "Industrial Auto"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -14059,7 +14067,7 @@
       "tv_sector": "Distribution services",
       "industry": "Industrial Distribution",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -14077,7 +14085,7 @@
       "tv_sector": "Industrial services",
       "industry": "Engineering & Construction",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -14174,7 +14182,7 @@
       "tv_sector": "Technology services",
       "industry": "Information Technology Services",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -14205,7 +14213,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Pollution & Treatment Controls",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -14222,7 +14230,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -14231,7 +14239,7 @@
       "tv_sector": "Technology services",
       "industry": "Information Technology Services",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -14281,7 +14289,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -14290,7 +14298,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -14317,7 +14325,7 @@
       "tv_sector": "Technology services",
       "industry": "Specialty Business Services",
       "themes": [
-        "Big Tech"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -14439,7 +14447,7 @@
       "tv_sector": "Retail trade",
       "industry": "Specialty Retail",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -14492,7 +14500,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -14501,7 +14509,7 @@
       "tv_sector": "Commercial services",
       "industry": "Security & Protection Services",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -14519,7 +14527,7 @@
       "tv_sector": "Commercial services",
       "industry": "Education & Training Services",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -14537,7 +14545,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -14570,7 +14578,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Specialty Industrial Machinery",
       "themes": [
-        "Industrial Auto"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -14671,7 +14679,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -14686,7 +14694,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -14741,7 +14749,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -14756,7 +14764,7 @@
       "tv_sector": "Commercial services",
       "industry": "Staffing & Employment Services",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -14783,7 +14791,7 @@
       "tv_sector": "Technology services",
       "industry": "Information Technology Services",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -14798,7 +14806,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -14839,7 +14847,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Specialty Industrial Machinery",
       "themes": [
-        "Industrial Auto"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -14856,7 +14864,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -14935,7 +14943,7 @@
       "tv_sector": "Commercial services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -14944,7 +14952,7 @@
       "tv_sector": "Technology services",
       "industry": "Information Technology Services",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -14968,7 +14976,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -14992,7 +15000,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -15036,7 +15044,7 @@
       "tv_sector": "Distribution services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -15087,7 +15095,7 @@
       "tv_sector": "Commercial services",
       "industry": "Specialty Business Services",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -15120,7 +15128,7 @@
       "tv_sector": "Consumer durables",
       "industry": "Consumer Electronics",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -15135,7 +15143,7 @@
       "tv_sector": "Commercial services",
       "industry": "Specialty Business Services",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -15144,7 +15152,7 @@
       "tv_sector": "Distribution services",
       "industry": "Tools & Accessories",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -15159,7 +15167,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -15200,7 +15208,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -15226,7 +15234,7 @@
       "tv_sector": "Industrial services",
       "industry": "Waste Management",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -15249,7 +15257,7 @@
       "tv_sector": "Technology services",
       "industry": "Information Technology Services",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -15273,7 +15281,7 @@
       "tv_sector": "Retail trade",
       "industry": "Department Stores",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -15282,7 +15290,7 @@
       "tv_sector": "Technology services",
       "industry": "Internet Content & Information",
       "themes": [
-        "Big Tech"
+        "Internet & Content (Broad)"
       ],
       "auto_theme": true
     },
@@ -15309,7 +15317,7 @@
       "tv_sector": "Commercial services",
       "industry": "Information Technology Services",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -15318,7 +15326,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Furnishings, Fixtures & Appliances",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -15345,7 +15353,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -15460,7 +15468,7 @@
       "tv_sector": "Consumer durables",
       "industry": "Furnishings, Fixtures & Appliances",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -15564,7 +15572,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Electrical Equipment & Parts",
       "themes": [
-        "Industrial Auto"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -15590,7 +15598,7 @@
       "tv_sector": "Commercial services",
       "industry": "Internet Content & Information",
       "themes": [
-        "Big Tech"
+        "Internet & Content (Broad)"
       ],
       "auto_theme": true
     },
@@ -15638,7 +15646,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -15677,7 +15685,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -15686,7 +15694,7 @@
       "tv_sector": "Technology services",
       "industry": "Information Technology Services",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -15701,7 +15709,7 @@
       "tv_sector": "Commercial services",
       "industry": "Staffing & Employment Services",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -15754,7 +15762,7 @@
       "tv_sector": "Technology services",
       "industry": "Internet Content & Information",
       "themes": [
-        "Big Tech"
+        "Internet & Content (Broad)"
       ],
       "auto_theme": true
     },
@@ -15781,7 +15789,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -15829,7 +15837,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Electrical Equipment & Parts",
       "themes": [
-        "Industrial Auto"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -15838,7 +15846,7 @@
       "tv_sector": "Distribution services",
       "industry": "Specialty Retail",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -15855,7 +15863,7 @@
       "tv_sector": "Industrial services",
       "industry": "Engineering & Construction",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -15878,7 +15886,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -15887,7 +15895,7 @@
       "tv_sector": "Electronic technology",
       "industry": "Information Technology Services",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -15896,7 +15904,7 @@
       "tv_sector": "Retail trade",
       "industry": "Specialty Retail",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -16010,7 +16018,7 @@
       "tv_sector": "Retail trade",
       "industry": "Specialty Retail",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -16052,7 +16060,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Specialty Industrial Machinery",
       "themes": [
-        "Industrial Auto"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -16061,7 +16069,7 @@
       "tv_sector": "Consumer non-durables",
       "industry": "Apparel Manufacturing",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -16097,7 +16105,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Specialty Business Services",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -16115,7 +16123,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -16139,7 +16147,7 @@
       "tv_sector": "Technology services",
       "industry": "Internet Content & Information",
       "themes": [
-        "Big Tech"
+        "Internet & Content (Broad)"
       ],
       "auto_theme": true
     },
@@ -16154,7 +16162,7 @@
       "tv_sector": "Technology services",
       "industry": "Specialty Business Services",
       "themes": [
-        "Big Tech"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -16178,7 +16186,7 @@
       "tv_sector": "Consumer non-durables",
       "industry": "Rental & Leasing Services",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -16212,7 +16220,7 @@
       "tv_sector": "Industrial services",
       "industry": "Pollution & Treatment Controls",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -16248,7 +16256,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -16257,7 +16265,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -16327,7 +16335,7 @@
       "tv_sector": "Commercial services",
       "industry": "Specialty Business Services",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -16418,7 +16426,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -16433,7 +16441,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Furnishings, Fixtures & Appliances",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -16442,7 +16450,7 @@
       "tv_sector": "Finance",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -16460,7 +16468,7 @@
       "tv_sector": "Consumer durables",
       "industry": "Furnishings, Fixtures & Appliances",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -16511,7 +16519,7 @@
       "tv_sector": "Technology services",
       "industry": "Specialty Business Services",
       "themes": [
-        "Big Tech"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -16603,7 +16611,7 @@
       "tv_sector": "Commercial services",
       "industry": "Staffing & Employment Services",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -16612,7 +16620,7 @@
       "tv_sector": "Technology services",
       "industry": "Education & Training Services",
       "themes": [
-        "Big Tech"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -16675,7 +16683,7 @@
       "tv_sector": "Consumer durables",
       "industry": "Specialty Retail",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -16684,7 +16692,7 @@
       "tv_sector": "Technology services",
       "industry": "Internet Content & Information",
       "themes": [
-        "Big Tech"
+        "Internet & Content (Broad)"
       ],
       "auto_theme": true
     },
@@ -16738,7 +16746,7 @@
       "tv_sector": "Technology services",
       "industry": "Health Information Services",
       "themes": [
-        "Big Tech"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -16783,7 +16791,7 @@
       "tv_sector": "Technology services",
       "industry": "Information Technology Services",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -16792,7 +16800,7 @@
       "tv_sector": "Technology services",
       "industry": "Internet Content & Information",
       "themes": [
-        "Big Tech"
+        "Internet & Content (Broad)"
       ],
       "auto_theme": true
     },
@@ -16822,7 +16830,7 @@
       "tv_sector": "Electronic technology",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -16837,7 +16845,7 @@
       "tv_sector": "Technology services",
       "industry": "Information Technology Services",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -16933,7 +16941,7 @@
       "tv_sector": "Technology services",
       "industry": "Health Information Services",
       "themes": [
-        "Big Tech"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -16966,7 +16974,7 @@
       "tv_sector": "Distribution services",
       "industry": "Computer Hardware",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -17005,7 +17013,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -17110,7 +17118,7 @@
       "tv_sector": "Technology services",
       "industry": "Auto & Truck Dealerships",
       "themes": [
-        "Big Tech"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -17161,7 +17169,7 @@
       "tv_sector": "Retail trade",
       "industry": "Specialty Retail",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -17248,7 +17256,7 @@
       "tv_sector": "Commercial services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -17320,7 +17328,7 @@
       "tv_sector": "Technology services",
       "industry": "Health Information Services",
       "themes": [
-        "Big Tech"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -17485,7 +17493,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Specialty Industrial Machinery",
       "themes": [
-        "Industrial Auto"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -17494,7 +17502,7 @@
       "tv_sector": "Technology services",
       "industry": "Specialty Business Services",
       "themes": [
-        "Big Tech"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -17530,7 +17538,7 @@
       "tv_sector": "Technology services",
       "industry": "Education & Training Services",
       "themes": [
-        "Big Tech"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -17557,7 +17565,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -17598,7 +17606,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -17607,7 +17615,7 @@
       "tv_sector": "Retail trade",
       "industry": "Auto & Truck Dealerships",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -17640,7 +17648,7 @@
       "tv_sector": "Technology services",
       "industry": "Internet Content & Information",
       "themes": [
-        "Big Tech"
+        "Internet & Content (Broad)"
       ],
       "auto_theme": true
     },
@@ -17658,7 +17666,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -17676,7 +17684,7 @@
       "tv_sector": "Technology services",
       "industry": "Communication Equipment",
       "themes": [
-        "Big Tech"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -17685,7 +17693,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -17721,7 +17729,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -17730,7 +17738,7 @@
       "tv_sector": "Retail trade",
       "industry": "Specialty Retail",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -17754,7 +17762,7 @@
       "tv_sector": "Consumer durables",
       "industry": "Leisure",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -17808,7 +17816,7 @@
       "tv_sector": "Technology services",
       "industry": "Computer Hardware",
       "themes": [
-        "Big Tech"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -17926,7 +17934,7 @@
       "tv_sector": "Commercial services",
       "industry": "Information Technology Services",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -17959,7 +17967,7 @@
       "tv_sector": "Technology services",
       "industry": "Internet Content & Information",
       "themes": [
-        "Big Tech"
+        "Internet & Content (Broad)"
       ],
       "auto_theme": true
     },
@@ -17968,7 +17976,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -18001,7 +18009,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Utilities - Renewable",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -18033,7 +18041,7 @@
       "tv_sector": "Technology services",
       "industry": "Internet Content & Information",
       "themes": [
-        "Big Tech"
+        "Internet & Content (Broad)"
       ],
       "auto_theme": true
     },
@@ -18078,7 +18086,7 @@
       "tv_sector": "Technology services",
       "industry": "Internet Content & Information",
       "themes": [
-        "Big Tech"
+        "Internet & Content (Broad)"
       ],
       "auto_theme": true
     },
@@ -18123,7 +18131,7 @@
       "tv_sector": "Electronic technology",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -18150,7 +18158,7 @@
       "tv_sector": "Consumer durables",
       "industry": "Furnishings, Fixtures & Appliances",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -18159,7 +18167,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Pollution & Treatment Controls",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -18176,7 +18184,7 @@
       "tv_sector": "Technology services",
       "industry": "Internet Content & Information",
       "themes": [
-        "Big Tech"
+        "Internet & Content (Broad)"
       ],
       "auto_theme": true
     },
@@ -18218,7 +18226,7 @@
       "tv_sector": "Technology services",
       "industry": "Health Information Services",
       "themes": [
-        "Big Tech"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -18266,7 +18274,7 @@
       "tv_sector": "Consumer durables",
       "industry": "Specialty Industrial Machinery",
       "themes": [
-        "Industrial Auto"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -18313,7 +18321,7 @@
       "tv_sector": "Technology services",
       "industry": "Internet Content & Information",
       "themes": [
-        "Big Tech"
+        "Internet & Content (Broad)"
       ],
       "auto_theme": true
     },
@@ -18337,7 +18345,7 @@
       "tv_sector": "Retail trade",
       "industry": "Internet Content & Information",
       "themes": [
-        "Big Tech"
+        "Internet & Content (Broad)"
       ],
       "auto_theme": true
     },
@@ -18424,7 +18432,7 @@
       "tv_sector": "Technology services",
       "industry": "Information Technology Services",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -18578,7 +18586,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -18610,7 +18618,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -18649,7 +18657,7 @@
       "tv_sector": "Commercial services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -18673,7 +18681,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -18754,7 +18762,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -18778,7 +18786,7 @@
       "tv_sector": "Process industries",
       "industry": "Electrical Equipment & Parts",
       "themes": [
-        "Industrial Auto"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -18802,7 +18810,7 @@
       "tv_sector": "Technology services",
       "industry": "Health Information Services",
       "themes": [
-        "Big Tech"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -18867,7 +18875,7 @@
       "tv_sector": "Electronic technology",
       "industry": "Electrical Equipment & Parts",
       "themes": [
-        "Industrial Auto"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -18884,7 +18892,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -18893,7 +18901,7 @@
       "tv_sector": "Technology services",
       "industry": "Information Technology Services",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -18932,7 +18940,7 @@
       "tv_sector": "Finance",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -18941,7 +18949,7 @@
       "tv_sector": "Retail trade",
       "industry": "Specialty Retail",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -18980,7 +18988,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -19028,7 +19036,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -19076,7 +19084,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Specialty Industrial Machinery",
       "themes": [
-        "Industrial Auto"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -19109,7 +19117,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Computer Hardware",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -19142,7 +19150,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -19211,7 +19219,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -19220,7 +19228,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -19262,7 +19270,7 @@
       "tv_sector": "Commercial services",
       "industry": "Health Information Services",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -19280,7 +19288,7 @@
       "tv_sector": "Commercial services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -19307,7 +19315,7 @@
       "tv_sector": "Finance",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -19322,7 +19330,7 @@
       "tv_sector": "Consumer durables",
       "industry": "Furnishings, Fixtures & Appliances",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -19343,7 +19351,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -19352,7 +19360,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -19394,7 +19402,7 @@
       "tv_sector": "Technology services",
       "industry": "Computer Hardware",
       "themes": [
-        "Big Tech"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -19403,7 +19411,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Computer Hardware",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -19412,7 +19420,7 @@
       "tv_sector": "Technology services",
       "industry": "Health Information Services",
       "themes": [
-        "Big Tech"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -19421,7 +19429,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Business Equipment & Supplies",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -19436,7 +19444,7 @@
       "tv_sector": "Technology services",
       "industry": "Internet Content & Information",
       "themes": [
-        "Big Tech"
+        "Internet & Content (Broad)"
       ],
       "auto_theme": true
     },
@@ -19466,7 +19474,7 @@
       "tv_sector": "Electronic technology",
       "industry": "Specialty Industrial Machinery",
       "themes": [
-        "Industrial Auto"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -19475,7 +19483,7 @@
       "tv_sector": "Commercial services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -19484,7 +19492,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -19538,7 +19546,7 @@
       "tv_sector": "Technology services",
       "industry": "Health Information Services",
       "themes": [
-        "Big Tech"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -19556,7 +19564,7 @@
       "tv_sector": "Commercial services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -19616,7 +19624,7 @@
       "tv_sector": "Commercial services",
       "industry": "Education & Training Services",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -19631,7 +19639,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -19649,7 +19657,7 @@
       "tv_sector": "Commercial services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -19712,7 +19720,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -19739,7 +19747,7 @@
       "tv_sector": "Commercial services",
       "industry": "Information Technology Services",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -19772,7 +19780,7 @@
       "tv_sector": "Commercial services",
       "industry": "Shell Companies",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -19820,7 +19828,7 @@
       "tv_sector": "Technology services",
       "industry": "Internet Content & Information",
       "themes": [
-        "Big Tech"
+        "Internet & Content (Broad)"
       ],
       "auto_theme": true
     },
@@ -19829,7 +19837,7 @@
       "tv_sector": "Electronic technology",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -19838,7 +19846,7 @@
       "tv_sector": "Industrial services",
       "industry": "Waste Management",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -19897,7 +19905,7 @@
       "tv_sector": "Consumer durables",
       "industry": "Leisure",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -19939,7 +19947,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -19972,7 +19980,7 @@
       "tv_sector": "Electronic technology",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -19981,7 +19989,7 @@
       "tv_sector": "Electronic technology",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -19996,7 +20004,7 @@
       "tv_sector": "Retail trade",
       "industry": "Leisure",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -20068,7 +20076,7 @@
       "tv_sector": "Commercial services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -20113,7 +20121,7 @@
       "tv_sector": "Consumer durables",
       "industry": "Consumer Electronics",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -20155,7 +20163,7 @@
       "tv_sector": "Technology services",
       "industry": "Information Technology Services",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -20188,7 +20196,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -20233,7 +20241,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Electrical Equipment & Parts",
       "themes": [
-        "Industrial Auto"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -20272,7 +20280,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -20290,7 +20298,7 @@
       "tv_sector": "Technology services",
       "industry": "Information Technology Services",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -20371,7 +20379,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -20380,7 +20388,7 @@
       "tv_sector": "Commercial services",
       "industry": "Consulting Services",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -20389,7 +20397,7 @@
       "tv_sector": "Technology services",
       "industry": "Health Information Services",
       "themes": [
-        "Big Tech"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -20413,7 +20421,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Electronic Components",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -20431,7 +20439,7 @@
       "tv_sector": "Technology services",
       "industry": "Health Information Services",
       "themes": [
-        "Big Tech"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -20566,7 +20574,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -20575,7 +20583,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Conglomerates",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -20611,7 +20619,7 @@
       "tv_sector": "Technology services",
       "industry": "Health Information Services",
       "themes": [
-        "Big Tech"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -20656,7 +20664,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -20689,7 +20697,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -20722,7 +20730,7 @@
       "tv_sector": "Retail trade",
       "industry": "Apparel Manufacturing",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -20797,7 +20805,7 @@
       "tv_sector": "Industrial services",
       "industry": "Engineering & Construction",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -20806,7 +20814,7 @@
       "tv_sector": "Retail trade",
       "industry": "Specialty Retail",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -20836,7 +20844,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Security & Protection Services",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -20863,7 +20871,7 @@
       "tv_sector": "Consumer durables",
       "industry": "Furnishings, Fixtures & Appliances",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -20878,7 +20886,7 @@
       "tv_sector": "Technology services",
       "industry": "Education & Training Services",
       "themes": [
-        "Big Tech"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -20911,7 +20919,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -20967,7 +20975,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -21009,7 +21017,7 @@
       "tv_sector": "Electronic technology",
       "industry": "Specialty Industrial Machinery",
       "themes": [
-        "Industrial Auto"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -21060,7 +21068,7 @@
       "tv_sector": "Technology services",
       "industry": "Specialty Business Services",
       "themes": [
-        "Big Tech"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -21108,7 +21116,7 @@
       "tv_sector": "Distribution services",
       "industry": "Specialty Retail",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -21174,7 +21182,7 @@
       "tv_sector": "Consumer non-durables",
       "industry": null,
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -21183,7 +21191,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -21207,7 +21215,7 @@
       "tv_sector": "Finance",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -21222,7 +21230,7 @@
       "tv_sector": "Electronic technology",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -21279,7 +21287,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -21297,7 +21305,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -21327,7 +21335,7 @@
       "tv_sector": "Technology services",
       "industry": "Information Technology Services",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -21354,7 +21362,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -21420,7 +21428,7 @@
       "tv_sector": "Transportation",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -21444,7 +21452,7 @@
       "tv_sector": "Consumer durables",
       "industry": "Auto & Truck Dealerships",
       "themes": [
-        "Retail / Consumer"
+        "Retail (Broad)"
       ],
       "auto_theme": true
     },
@@ -21453,7 +21461,7 @@
       "tv_sector": "Electronic technology",
       "industry": "Electrical Equipment & Parts",
       "themes": [
-        "Industrial Auto"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -21462,7 +21470,7 @@
       "tv_sector": "Technology services",
       "industry": "Health Information Services",
       "themes": [
-        "Big Tech"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -21471,7 +21479,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": "Electrical Equipment & Parts",
       "themes": [
-        "Industrial Auto"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -21486,7 +21494,7 @@
       "tv_sector": "Commercial services",
       "industry": "Scientific & Technical Instruments",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },
@@ -21504,7 +21512,7 @@
       "tv_sector": "Technology services",
       "industry": "Education & Training Services",
       "themes": [
-        "Big Tech"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -21513,7 +21521,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Application",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -21537,7 +21545,7 @@
       "tv_sector": "Commercial services",
       "industry": "Information Technology Services",
       "themes": [
-        "Enterprise SaaS"
+        "Software (Broad)"
       ],
       "auto_theme": true
     },
@@ -21552,7 +21560,7 @@
       "tv_sector": "Commercial services",
       "industry": "Education & Training Services",
       "themes": [
-        "Industrial / Picks"
+        "Industrials (Broad)"
       ],
       "auto_theme": true
     },

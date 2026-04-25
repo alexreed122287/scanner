@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-25T19:42:11+00:00",
+  "generated_at": "2026-04-25T19:50:54+00:00",
   "as_of": "2026-04-24",
   "benchmark": "SPY",
   "windows": {
@@ -26,6 +26,23 @@
         "GNRC",
         "CEG"
       ],
+      "curated_members": [
+        "NVDA",
+        "AVGO",
+        "AMD",
+        "MRVL",
+        "SMCI",
+        "DELL",
+        "ANET",
+        "VRT",
+        "ETN",
+        "PWR",
+        "GEV",
+        "EME",
+        "GNRC",
+        "CEG"
+      ],
+      "auto_members": [],
       "member_count": 14,
       "member_perf": {
         "NVDA": 4.32,
@@ -50,18 +67,18 @@
         "6M": 28.49
       },
       "rs_rank": {
-        "1W": 97.4,
-        "1M": 91.5,
-        "3M": 94.9,
-        "6M": 83.8
+        "1W": 97.5,
+        "1M": 91.7,
+        "3M": 95.9,
+        "6M": 85.1
       },
       "breadth_50": 100.0,
       "breadth_200": 85.7,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 96.6,
-        "weekly": 94.4,
-        "monthly": 89.7
+        "daily": 96.7,
+        "weekly": 94.8,
+        "monthly": 90.5
       }
     },
     "Photonics": {
@@ -78,6 +95,20 @@
         "ANET",
         "CIEN"
       ],
+      "curated_members": [
+        "LITE",
+        "COHR",
+        "AAOI",
+        "GLW",
+        "IPGP",
+        "LASR",
+        "FN",
+        "MTSI",
+        "POET",
+        "ANET",
+        "CIEN"
+      ],
+      "auto_members": [],
       "member_count": 11,
       "member_perf": {
         "LITE": 4.1,
@@ -100,8 +131,8 @@
       },
       "rs_rank": {
         "1W": 100.0,
-        "1M": 97.4,
-        "3M": 99.1,
+        "1M": 97.5,
+        "3M": 99.2,
         "6M": 98.3
       },
       "breadth_50": 100.0,
@@ -121,6 +152,14 @@
         "GLW",
         "CIEN"
       ],
+      "curated_members": [
+        "LITE",
+        "COHR",
+        "AAOI",
+        "GLW",
+        "CIEN"
+      ],
+      "auto_members": [],
       "member_count": 5,
       "member_perf": {
         "LITE": 4.1,
@@ -136,8 +175,8 @@
         "6M": 281.2
       },
       "rs_rank": {
-        "1W": 74.4,
-        "1M": 93.2,
+        "1W": 75.2,
+        "1M": 93.4,
         "3M": 100.0,
         "6M": 100.0
       },
@@ -145,8 +184,8 @@
       "breadth_200": 100.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 85.5,
-        "weekly": 91.5,
+        "daily": 86.0,
+        "weekly": 91.7,
         "monthly": 99.0
       }
     },
@@ -158,6 +197,14 @@
         "SNDK",
         "NTAP"
       ],
+      "curated_members": [
+        "MU",
+        "WDC",
+        "STX",
+        "SNDK",
+        "NTAP"
+      ],
+      "auto_members": [],
       "member_count": 5,
       "member_perf": {
         "MU": 3.11,
@@ -173,10 +220,10 @@
         "6M": 179.45
       },
       "rs_rank": {
-        "1W": 95.7,
+        "1W": 95.9,
         "1M": 100.0,
         "3M": 98.3,
-        "6M": 99.1
+        "6M": 99.2
       },
       "breadth_50": 100.0,
       "breadth_200": 100.0,
@@ -201,6 +248,20 @@
         "FORM",
         "UCTT"
       ],
+      "curated_members": [
+        "AMAT",
+        "LRCX",
+        "TER",
+        "KLAC",
+        "ASML",
+        "ENTG",
+        "MKSI",
+        "ACLS",
+        "ONTO",
+        "FORM",
+        "UCTT"
+      ],
+      "auto_members": [],
       "member_count": 11,
       "member_perf": {
         "AMAT": 3.25,
@@ -222,18 +283,18 @@
         "6M": 115.37
       },
       "rs_rank": {
-        "1W": 94.9,
-        "1M": 94.0,
-        "3M": 95.7,
-        "6M": 97.4
+        "1W": 95.0,
+        "1M": 94.2,
+        "3M": 96.7,
+        "6M": 97.5
       },
       "breadth_50": 100.0,
       "breadth_200": 100.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 95.9,
-        "weekly": 95.3,
-        "monthly": 96.6
+        "daily": 96.1,
+        "weekly": 95.6,
+        "monthly": 97.1
       }
     },
     "Semiconductors": {
@@ -252,6 +313,113 @@
         "NXPI",
         "MPWR",
         "SMCI",
+        "CSCO",
+        "APH",
+        "ARM",
+        "HON",
+        "MSI",
+        "TEL",
+        "KEYS",
+        "GRMN",
+        "HPE",
+        "CRDO",
+        "ALAB",
+        "FLEX",
+        "FTAI",
+        "Q",
+        "GFS",
+        "TSEM",
+        "PSTG",
+        "FTV",
+        "LSCC",
+        "AMKR",
+        "RMBS",
+        "TTMI",
+        "ZBRA",
+        "CGNX",
+        "VICR",
+        "SWKS",
+        "SMTC",
+        "SANM",
+        "CRUS",
+        "QRVO",
+        "ALGM",
+        "AMTM",
+        "ST",
+        "RAL",
+        "OLED",
+        "SIMO",
+        "ITRI",
+        "VISN",
+        "KLIC",
+        "DIOD",
+        "AXTI",
+        "ACMR",
+        "VSH",
+        "POWI",
+        "SYNA",
+        "PLAB",
+        "VECO",
+        "AMBA",
+        "KN",
+        "NVTS",
+        "EXTR",
+        "AEHR",
+        "ICHR",
+        "MXL",
+        "COHU",
+        "HIMX",
+        "SKYT",
+        "OUST",
+        "DQ",
+        "GILT",
+        "ADTN",
+        "EVLV",
+        "HLIT",
+        "WOLF",
+        "AOSL",
+        "AIP",
+        "LPTH",
+        "SSYS",
+        "INDI",
+        "LAES",
+        "KOPN",
+        "OPTX",
+        "ALMU",
+        "MRAM",
+        "MEI",
+        "OSS",
+        "LTRX",
+        "GSIT",
+        "CRNT",
+        "VUZI",
+        "ATOM",
+        "XRX",
+        "WATT",
+        "QMCO",
+        "AMPG",
+        "HOLO",
+        "MOBX",
+        "ASTC",
+        "BOXL"
+      ],
+      "curated_members": [
+        "NVDA",
+        "AMD",
+        "AVGO",
+        "MRVL",
+        "QCOM",
+        "TXN",
+        "INTC",
+        "MU",
+        "ON",
+        "MCHP",
+        "ADI",
+        "NXPI",
+        "MPWR",
+        "SMCI"
+      ],
+      "auto_members": [
         "CSCO",
         "APH",
         "ARM",
@@ -455,18 +623,18 @@
         "6M": 47.24
       },
       "rs_rank": {
-        "1W": 99.1,
+        "1W": 99.2,
         "1M": 98.3,
-        "3M": 94.0,
-        "6M": 90.6
+        "3M": 95.0,
+        "6M": 91.7
       },
       "breadth_50": 85.4,
       "breadth_200": 75.2,
       "trend_above_50ema": true,
       "scores": {
         "daily": 97.0,
-        "weekly": 95.9,
-        "monthly": 90.8
+        "weekly": 96.1,
+        "monthly": 91.6
       }
     },
     "Big Tech": {
@@ -478,77 +646,20 @@
         "AMZN",
         "META",
         "NVDA",
-        "TSLA",
-        "NBIS",
-        "RDDT",
-        "VEEV",
-        "VRSK",
-        "HPQ",
-        "TRMB",
-        "J",
-        "PINS",
-        "Z",
-        "SNAP",
-        "TEM",
-        "VIAV",
-        "MTCH",
-        "BZ",
-        "DLB",
-        "EQPT",
-        "WAY",
-        "KBR",
-        "DOCS",
-        "CARG",
-        "OPLN",
-        "HNGE",
-        "IAC",
-        "DJT",
-        "STUB",
-        "HTFL",
-        "RUM",
-        "XMTR",
-        "ATHM",
-        "FA",
-        "YELP",
-        "UPWK",
-        "OPRA",
-        "GENI",
-        "BKSY",
-        "LZ",
-        "COUR",
-        "TBLA",
-        "CERT",
-        "MOMO",
-        "SDGR",
-        "ACVA",
-        "OMDA",
-        "SPIR",
-        "UDMY",
-        "NRDS",
-        "NTGR",
-        "CRSR",
-        "MAX",
-        "CARS",
-        "NXDR",
-        "EVER",
-        "PHR",
-        "BMBL",
-        "GRPN",
-        "WEAV",
-        "DDD",
-        "SLP",
-        "ANGI",
-        "SY",
-        "ZIP",
-        "CCLD",
-        "OPRX",
-        "HCAT",
-        "SKIL",
-        "SMX",
-        "HCTI",
-        "KIDZ"
+        "TSLA"
       ],
-      "member_count": 76,
+      "curated_members": [
+        "AAPL",
+        "MSFT",
+        "GOOGL",
+        "GOOG",
+        "AMZN",
+        "META",
+        "NVDA",
+        "TSLA"
+      ],
+      "auto_members": [],
+      "member_count": 8,
       "member_perf": {
         "AAPL": -0.87,
         "MSFT": 2.13,
@@ -557,95 +668,27 @@
         "AMZN": 3.49,
         "META": 2.41,
         "NVDA": 4.32,
-        "TSLA": 0.69,
-        "NBIS": -6.32,
-        "RDDT": 1.26,
-        "VEEV": 3.19,
-        "VRSK": 0.25,
-        "HPQ": -1.74,
-        "TRMB": 0.46,
-        "J": -0.77,
-        "PINS": 0.66,
-        "Z": 2.04,
-        "SNAP": 1.44,
-        "TEM": 1.32,
-        "VIAV": 3.47,
-        "MTCH": 3.06,
-        "BZ": 2.18,
-        "DLB": 1.78,
-        "EQPT": -6.28,
-        "WAY": 2.29,
-        "KBR": 0.0,
-        "DOCS": 3.63,
-        "CARG": 0.37,
-        "OPLN": 0.63,
-        "HNGE": 2.43,
-        "IAC": 1.21,
-        "DJT": 1.96,
-        "STUB": 2.44,
-        "HTFL": -2.56,
-        "RUM": 0.0,
-        "XMTR": 1.77,
-        "ATHM": 0.71,
-        "FA": 1.38,
-        "YELP": 1.48,
-        "UPWK": 1.43,
-        "OPRA": 4.05,
-        "GENI": 2.76,
-        "BKSY": -11.99,
-        "LZ": 0.96,
-        "COUR": -11.56,
-        "TBLA": 2.15,
-        "CERT": 5.33,
-        "MOMO": 0.49,
-        "SDGR": 3.33,
-        "ACVA": -1.16,
-        "OMDA": 0.77,
-        "SPIR": -5.87,
-        "UDMY": -10.15,
-        "NRDS": 4.02,
-        "NTGR": 1.22,
-        "CRSR": 2.97,
-        "MAX": 1.16,
-        "CARS": 3.43,
-        "NXDR": 3.9,
-        "EVER": 4.4,
-        "PHR": 7.8,
-        "BMBL": 1.43,
-        "GRPN": 0.34,
-        "WEAV": 3.4,
-        "DDD": 2.26,
-        "SLP": 1.96,
-        "ANGI": 6.4,
-        "SY": 0.74,
-        "ZIP": 3.85,
-        "CCLD": 1.33,
-        "OPRX": 0.31,
-        "HCAT": 3.76,
-        "SKIL": -1.68,
-        "SMX": -40.91,
-        "HCTI": -2.67,
-        "KIDZ": -18.89
+        "TSLA": 0.69
       },
       "rs_excess_pct": {
-        "1W": -3.74,
-        "1M": -0.79,
-        "3M": -20.69,
-        "6M": -24.54
+        "1W": -0.17,
+        "1M": 5.1,
+        "3M": -1.3,
+        "6M": 1.49
       },
       "rs_rank": {
-        "1W": 19.7,
-        "1M": 49.6,
-        "3M": 4.3,
-        "6M": 12.0
+        "1W": 66.1,
+        "1M": 77.7,
+        "3M": 57.0,
+        "6M": 56.2
       },
-      "breadth_50": 65.8,
-      "breadth_200": 23.3,
+      "breadth_50": 87.5,
+      "breadth_200": 62.5,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 42.1,
-        "weekly": 39.2,
-        "monthly": 16.2
+        "daily": 75.6,
+        "weekly": 73.7,
+        "monthly": 60.7
       }
     },
     "Defense": {
@@ -662,6 +705,50 @@
         "GD",
         "TDG",
         "BA",
+        "AXON",
+        "WWD",
+        "DRS",
+        "KRMN",
+        "SARO",
+        "VSEC",
+        "LOAR",
+        "FLY",
+        "LUNR",
+        "MRCY",
+        "YSS",
+        "BETA",
+        "ATRO",
+        "VOYG",
+        "SATL",
+        "EVEX",
+        "SWBI",
+        "MRLN",
+        "ISSC",
+        "SIDU",
+        "AIRO",
+        "POWW",
+        "FJET",
+        "SPCE",
+        "BYRN",
+        "VWAV",
+        "HOVR",
+        "XTIA"
+      ],
+      "curated_members": [
+        "KTOS",
+        "AVAV",
+        "PLTR",
+        "HII",
+        "LHX",
+        "HWM",
+        "NOC",
+        "RTX",
+        "LMT",
+        "GD",
+        "TDG",
+        "BA"
+      ],
+      "auto_members": [
         "AXON",
         "WWD",
         "DRS",
@@ -741,18 +828,18 @@
         "6M": 9.45
       },
       "rs_rank": {
-        "1W": 2.6,
-        "1M": 6.8,
-        "3M": 12.0,
-        "6M": 67.5
+        "1W": 2.5,
+        "1M": 6.6,
+        "3M": 12.4,
+        "6M": 67.8
       },
       "breadth_50": 27.5,
       "breadth_200": 42.9,
       "trend_above_50ema": false,
       "scores": {
-        "daily": 7.1,
-        "weekly": 9.9,
-        "monthly": 32.5
+        "daily": 7.0,
+        "weekly": 9.8,
+        "monthly": 32.7
       }
     },
     "Drones": {
@@ -769,6 +856,20 @@
         "ACHR",
         "JOBY"
       ],
+      "curated_members": [
+        "UMAC",
+        "ONDS",
+        "RDW",
+        "RCAT",
+        "AVAV",
+        "KTOS",
+        "AERT",
+        "DPRO",
+        "EH",
+        "ACHR",
+        "JOBY"
+      ],
+      "auto_members": [],
       "member_count": 11,
       "member_perf": {
         "UMAC": -9.18,
@@ -790,18 +891,18 @@
         "6M": -13.19
       },
       "rs_rank": {
-        "1W": 12.8,
-        "1M": 20.5,
-        "3M": 2.6,
-        "6M": 22.2
+        "1W": 12.4,
+        "1M": 20.7,
+        "3M": 3.3,
+        "6M": 22.3
       },
       "breadth_50": 27.3,
       "breadth_200": 36.4,
       "trend_above_50ema": false,
       "scores": {
-        "daily": 15.6,
-        "weekly": 17.3,
-        "monthly": 16.2
+        "daily": 15.5,
+        "weekly": 17.4,
+        "monthly": 16.6
       }
     },
     "Space": {
@@ -815,6 +916,17 @@
         "VSAT",
         "GSAT"
       ],
+      "curated_members": [
+        "RKLB",
+        "ASTS",
+        "RDW",
+        "MNTS",
+        "PL",
+        "IRDM",
+        "VSAT",
+        "GSAT"
+      ],
+      "auto_members": [],
       "member_count": 8,
       "member_perf": {
         "RKLB": -5.82,
@@ -833,18 +945,18 @@
         "6M": 48.96
       },
       "rs_rank": {
-        "1W": 5.1,
-        "1M": 82.1,
-        "3M": 75.2,
-        "6M": 92.3
+        "1W": 5.0,
+        "1M": 82.6,
+        "3M": 76.0,
+        "6M": 93.4
       },
       "breadth_50": 87.5,
       "breadth_200": 87.5,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 46.2,
-        "weekly": 66.5,
-        "monthly": 83.2
+        "daily": 46.3,
+        "weekly": 66.8,
+        "monthly": 84.0
       }
     },
     "Nuclear & Uranium": {
@@ -862,6 +974,21 @@
         "CEG",
         "VST"
       ],
+      "curated_members": [
+        "UUUU",
+        "CCJ",
+        "DNN",
+        "UEC",
+        "NXE",
+        "URG",
+        "LEU",
+        "BWXT",
+        "OKLO",
+        "SMR",
+        "CEG",
+        "VST"
+      ],
+      "auto_members": [],
       "member_count": 12,
       "member_perf": {
         "UUUU": -7.26,
@@ -884,17 +1011,17 @@
         "6M": -9.98
       },
       "rs_rank": {
-        "1W": 61.5,
-        "1M": 59.8,
-        "3M": 16.2,
-        "6M": 28.2
+        "1W": 62.0,
+        "1M": 59.5,
+        "3M": 16.5,
+        "6M": 28.1
       },
       "breadth_50": 83.3,
       "breadth_200": 58.3,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 68.2,
-        "weekly": 57.2,
+        "daily": 68.4,
+        "weekly": 57.1,
         "monthly": 32.7
       }
     },
@@ -911,6 +1038,75 @@
         "NRG",
         "BE",
         "PLUG",
+        "NEE",
+        "SO",
+        "DUK",
+        "AEP",
+        "SRE",
+        "D",
+        "ETR",
+        "XEL",
+        "EXC",
+        "PEG",
+        "ED",
+        "PCG",
+        "WEC",
+        "ATO",
+        "AEE",
+        "DTE",
+        "PPL",
+        "FE",
+        "CNP",
+        "EIX",
+        "ES",
+        "AWK",
+        "CMS",
+        "NI",
+        "EVRG",
+        "LNT",
+        "TLN",
+        "PNW",
+        "WTRG",
+        "AES",
+        "OGE",
+        "CWEN",
+        "IDA",
+        "UGI",
+        "ORA",
+        "SWX",
+        "TXNM",
+        "BEPC",
+        "POR",
+        "BKH",
+        "NJR",
+        "OGS",
+        "BIPC",
+        "NWE",
+        "MDU",
+        "AVA",
+        "CTRI",
+        "HE",
+        "HTO",
+        "XIFR",
+        "RNW",
+        "IMSR",
+        "NKLR",
+        "CDZI"
+      ],
+      "curated_members": [
+        "VRT",
+        "ETN",
+        "PWR",
+        "GEV",
+        "EME",
+        "GNRC",
+        "CEG",
+        "VST",
+        "NRG",
+        "BE",
+        "PLUG"
+      ],
+      "auto_members": [
         "NEE",
         "SO",
         "DUK",
@@ -1041,18 +1237,18 @@
         "6M": 5.61
       },
       "rs_rank": {
-        "1W": 68.4,
-        "1M": 39.3,
-        "3M": 73.5,
-        "6M": 62.4
+        "1W": 69.4,
+        "1M": 39.7,
+        "3M": 74.4,
+        "6M": 62.8
       },
       "breadth_50": 58.5,
       "breadth_200": 85.9,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 62.8,
-        "weekly": 53.1,
-        "monthly": 66.9
+        "daily": 63.4,
+        "weekly": 53.6,
+        "monthly": 67.4
       }
     },
     "Solar": {
@@ -1064,6 +1260,23 @@
         "NXT",
         "ARRY",
         "SHLS",
+        "JKS",
+        "CSIQ",
+        "SPWR",
+        "ASTI",
+        "MAXN",
+        "TURB"
+      ],
+      "curated_members": [
+        "FSLR",
+        "ENPH",
+        "SEDG",
+        "RUN",
+        "NXT",
+        "ARRY",
+        "SHLS"
+      ],
+      "auto_members": [
         "JKS",
         "CSIQ",
         "SPWR",
@@ -1094,18 +1307,18 @@
         "6M": 10.45
       },
       "rs_rank": {
-        "1W": 85.5,
-        "1M": 22.2,
-        "3M": 56.4,
-        "6M": 70.9
+        "1W": 85.1,
+        "1M": 23.1,
+        "3M": 56.2,
+        "6M": 71.1
       },
       "breadth_50": 30.8,
       "breadth_200": 30.8,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 62.9,
-        "weekly": 41.3,
-        "monthly": 51.8
+        "daily": 63.0,
+        "weekly": 41.6,
+        "monthly": 51.9
       }
     },
     "Oil & Gas E&P": {
@@ -1118,6 +1331,59 @@
         "FANG",
         "DVN",
         "PR",
+        "EQT",
+        "CTRA",
+        "EXE",
+        "CRS",
+        "OVV",
+        "APA",
+        "AR",
+        "RRC",
+        "NFG",
+        "CHRD",
+        "MTDR",
+        "SM",
+        "CRC",
+        "CNX",
+        "MUR",
+        "MGY",
+        "CRK",
+        "HCC",
+        "CNR",
+        "CRGY",
+        "BTU",
+        "BKV",
+        "NOG",
+        "TALO",
+        "KOS",
+        "DEC",
+        "METC",
+        "REPX",
+        "HNRG",
+        "HPK",
+        "VTS",
+        "GRNT",
+        "EGY",
+        "SD",
+        "SXC",
+        "WTI",
+        "ABAT",
+        "ANNA",
+        "AREC",
+        "PROP",
+        "SKYQ"
+      ],
+      "curated_members": [
+        "XOM",
+        "CVX",
+        "COP",
+        "EOG",
+        "OXY",
+        "FANG",
+        "DVN",
+        "PR"
+      ],
+      "auto_members": [
         "EQT",
         "CTRA",
         "EXE",
@@ -1219,18 +1485,18 @@
         "6M": 25.99
       },
       "rs_rank": {
-        "1W": 92.3,
-        "1M": 4.3,
-        "3M": 86.3,
-        "6M": 80.3
+        "1W": 92.6,
+        "1M": 4.1,
+        "3M": 86.8,
+        "6M": 81.8
       },
       "breadth_50": 59.2,
       "breadth_200": 75.5,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 66.1,
-        "weekly": 42.4,
-        "monthly": 70.6
+        "daily": 66.2,
+        "weekly": 42.5,
+        "monthly": 71.2
       }
     },
     "Crypto / Miners": {
@@ -1247,6 +1513,20 @@
         "MSTR",
         "GLXY"
       ],
+      "curated_members": [
+        "MARA",
+        "RIOT",
+        "CLSK",
+        "HUT",
+        "BITF",
+        "CIFR",
+        "WULF",
+        "IREN",
+        "COIN",
+        "MSTR",
+        "GLXY"
+      ],
+      "auto_members": [],
       "member_count": 11,
       "member_perf": {
         "MARA": -1.36,
@@ -1268,18 +1548,18 @@
         "6M": -10.56
       },
       "rs_rank": {
-        "1W": 78.6,
-        "1M": 95.7,
-        "3M": 70.9,
-        "6M": 26.5
+        "1W": 78.5,
+        "1M": 95.9,
+        "3M": 71.9,
+        "6M": 26.4
       },
       "breadth_50": 100.0,
       "breadth_200": 63.6,
       "trend_above_50ema": true,
       "scores": {
         "daily": 88.2,
-        "weekly": 89.2,
-        "monthly": 60.2
+        "weekly": 89.4,
+        "monthly": 60.6
       }
     },
     "Fintech": {
@@ -1294,6 +1574,18 @@
         "TOST",
         "MELI"
       ],
+      "curated_members": [
+        "PYPL",
+        "SOFI",
+        "AFRM",
+        "HOOD",
+        "COIN",
+        "NU",
+        "BILL",
+        "TOST",
+        "MELI"
+      ],
+      "auto_members": [],
       "member_count": 9,
       "member_perf": {
         "PYPL": 1.47,
@@ -1313,18 +1605,18 @@
         "6M": -28.02
       },
       "rs_rank": {
-        "1W": 22.2,
-        "1M": 73.5,
-        "3M": 6.0,
-        "6M": 6.0
+        "1W": 20.7,
+        "1M": 73.6,
+        "3M": 5.8,
+        "6M": 6.6
       },
       "breadth_50": 77.8,
       "breadth_200": 0.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 51.2,
-        "weekly": 53.8,
-        "monthly": 15.2
+        "daily": 50.4,
+        "weekly": 53.4,
+        "monthly": 15.3
       }
     },
     "Mega Banks": {
@@ -1336,6 +1628,31 @@
         "GS",
         "MS",
         "USB",
+        "AER",
+        "CAR",
+        "HQY",
+        "WSC",
+        "HRI",
+        "PRVA",
+        "HTZ",
+        "CTOS",
+        "CODI",
+        "CEPT",
+        "APAD",
+        "RILY",
+        "ETHM",
+        "RENX"
+      ],
+      "curated_members": [
+        "JPM",
+        "BAC",
+        "WFC",
+        "C",
+        "GS",
+        "MS",
+        "USB"
+      ],
+      "auto_members": [
         "AER",
         "CAR",
         "HQY",
@@ -1382,18 +1699,18 @@
         "6M": 6.5
       },
       "rs_rank": {
-        "1W": 27.4,
-        "1M": 86.3,
-        "3M": 76.1,
-        "6M": 63.2
+        "1W": 26.4,
+        "1M": 86.8,
+        "3M": 76.9,
+        "6M": 63.6
       },
       "breadth_50": 85.7,
       "breadth_200": 75.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 58.1,
-        "weekly": 72.9,
-        "monthly": 73.6
+        "daily": 57.8,
+        "weekly": 73.1,
+        "monthly": 74.1
       }
     },
     "Cybersecurity": {
@@ -1408,6 +1725,18 @@
         "OKTA",
         "TENB"
       ],
+      "curated_members": [
+        "ZS",
+        "CRWD",
+        "PANW",
+        "FTNT",
+        "S",
+        "NET",
+        "CHKP",
+        "OKTA",
+        "TENB"
+      ],
+      "auto_members": [],
       "member_count": 9,
       "member_perf": {
         "ZS": 1.9,
@@ -1427,18 +1756,18 @@
         "6M": -27.84
       },
       "rs_rank": {
-        "1W": 83.8,
-        "1M": 24.8,
-        "3M": 20.5,
-        "6M": 6.8
+        "1W": 83.5,
+        "1M": 25.6,
+        "3M": 20.7,
+        "6M": 7.4
       },
       "breadth_50": 66.7,
       "breadth_200": 22.2,
       "trend_above_50ema": true,
       "scores": {
         "daily": 68.1,
-        "weekly": 42.2,
-        "monthly": 17.3
+        "weekly": 42.6,
+        "monthly": 17.7
       }
     },
     "Quantum": {
@@ -1450,6 +1779,15 @@
         "ARQQ",
         "IBM"
       ],
+      "curated_members": [
+        "IONQ",
+        "RGTI",
+        "QBTS",
+        "QUBT",
+        "ARQQ",
+        "IBM"
+      ],
+      "auto_members": [],
       "member_count": 6,
       "member_perf": {
         "IONQ": -2.15,
@@ -1467,17 +1805,17 @@
       },
       "rs_rank": {
         "1W": 1.7,
-        "1M": 79.5,
-        "3M": 1.7,
-        "6M": 1.7
+        "1M": 79.3,
+        "3M": 2.5,
+        "6M": 2.5
       },
       "breadth_50": 66.7,
       "breadth_200": 0.0,
       "trend_above_50ema": true,
       "scores": {
         "daily": 40.7,
-        "weekly": 50.3,
-        "monthly": 13.1
+        "weekly": 50.4,
+        "monthly": 13.6
       }
     },
     "Industrial / Picks": {
@@ -1488,94 +1826,26 @@
         "ETN",
         "EMR",
         "ROK",
-        "WM",
-        "MMM",
-        "CTAS",
-        "RSG",
-        "JBL",
-        "MTZ",
-        "VLTO",
-        "EFX",
-        "APG",
-        "ULS",
-        "CLH",
-        "LECO",
-        "STRL",
-        "MLI",
-        "DY",
-        "ACM",
-        "BLD",
-        "BAH",
-        "TTC",
-        "ICLR",
-        "CRL",
-        "PRIM",
-        "TTEK",
-        "ZWS",
-        "LGN",
-        "TKR",
-        "TAL",
-        "FLR",
-        "ECG",
-        "MHK",
-        "ROAD",
-        "ESAB",
-        "GVA",
-        "ADT",
-        "CWST",
-        "ALH",
-        "GPGI",
-        "LAUR",
-        "TPC",
-        "BCO",
-        "MMS",
-        "EXPO",
-        "KFY",
-        "YETI",
-        "KMT",
-        "FLNC",
-        "RHI",
-        "HNI",
-        "GEO",
-        "ABM",
-        "CDNL",
-        "CECO",
-        "CXW",
-        "UTI",
-        "TNET",
-        "TIC",
-        "CBZ",
-        "NVRI",
-        "TILE",
-        "MAN",
-        "AMRC",
-        "KODK",
-        "PCT",
         "TTI",
-        "BV",
-        "MLKN",
-        "NSP",
         "AVO",
-        "NRGV",
-        "ERII",
-        "NNDM",
-        "EVH",
-        "VELO",
-        "ACCO",
-        "FC",
-        "WLAC",
-        "YDDL",
-        "RGP",
-        "KULR",
         "ARQ",
-        "NNBR",
-        "MERC",
-        "ONEG",
-        "KSCP",
-        "FCUV",
-        "FCHL"
+        "MERC"
       ],
-      "member_count": 92,
+      "curated_members": [
+        "CAT",
+        "DE",
+        "URI",
+        "ETN",
+        "EMR",
+        "ROK"
+      ],
+      "auto_members": [
+        "TTI",
+        "AVO",
+        "ARQ",
+        "MERC"
+      ],
+      "member_count": 10,
       "member_perf": {
         "CAT": -0.53,
         "DE": -4.95,
@@ -1583,112 +1853,30 @@
         "ETN": -0.14,
         "EMR": -0.77,
         "ROK": -1.89,
-        "WM": -1.4,
-        "MMM": 0.79,
-        "CTAS": -0.97,
-        "RSG": -1.99,
-        "JBL": 0.92,
-        "MTZ": -1.77,
-        "VLTO": -0.19,
-        "EFX": -1.41,
-        "APG": -0.69,
-        "ULS": 0.78,
-        "CLH": -0.43,
-        "LECO": -1.2,
-        "STRL": 0.3,
-        "MLI": 0.21,
-        "DY": -0.88,
-        "ACM": -0.11,
-        "BLD": -2.48,
-        "BAH": -0.34,
-        "TTC": -1.07,
-        "ICLR": -3.92,
-        "CRL": 1.23,
-        "PRIM": -0.54,
-        "TTEK": -0.29,
-        "ZWS": -0.55,
-        "LGN": -0.89,
-        "TKR": -1.38,
-        "TAL": 3.02,
-        "FLR": 1.28,
-        "ECG": -0.2,
-        "MHK": -0.49,
-        "ROAD": -1.28,
-        "ESAB": -1.59,
-        "GVA": 0.64,
-        "ADT": 0.28,
-        "CWST": -4.39,
-        "ALH": -1.8,
-        "GPGI": -1.83,
-        "LAUR": -0.83,
-        "TPC": 0.32,
-        "BCO": -0.73,
-        "MMS": -0.12,
-        "EXPO": -0.59,
-        "KFY": 0.69,
-        "YETI": 0.1,
-        "KMT": -0.71,
-        "FLNC": -1.04,
-        "RHI": -5.85,
-        "HNI": 1.32,
-        "GEO": 1.89,
-        "ABM": -0.86,
-        "CDNL": -0.52,
-        "CECO": 0.14,
-        "CXW": 2.35,
-        "UTI": -2.31,
-        "TNET": 3.08,
-        "TIC": -0.69,
-        "CBZ": 3.23,
-        "NVRI": -0.67,
-        "TILE": 0.57,
-        "MAN": 0.72,
-        "AMRC": 0.58,
-        "KODK": -0.62,
-        "PCT": 0.55,
         "TTI": 1.68,
-        "BV": -1.28,
-        "MLKN": 1.62,
-        "NSP": 1.74,
         "AVO": 0.73,
-        "NRGV": 0.0,
-        "ERII": 2.45,
-        "NNDM": 0.0,
-        "EVH": 6.1,
-        "VELO": 3.52,
-        "ACCO": 1.85,
-        "FC": -1.14,
-        "WLAC": 12.6,
-        "YDDL": -2.94,
-        "RGP": 3.59,
-        "KULR": -2.43,
         "ARQ": -0.43,
-        "NNBR": -4.6,
-        "MERC": -4.27,
-        "ONEG": 11.49,
-        "KSCP": -1.87,
-        "FCUV": -12.57,
-        "FCHL": 8.24
+        "MERC": -4.27
       },
       "rs_excess_pct": {
-        "1W": 0.37,
-        "1M": -0.31,
-        "3M": -5.07,
-        "6M": -2.24
+        "1W": 2.98,
+        "1M": -1.23,
+        "3M": -7.7,
+        "6M": -4.58
       },
       "rs_rank": {
-        "1W": 69.2,
-        "1M": 54.7,
-        "3M": 47.9,
-        "6M": 49.6
+        "1W": 86.0,
+        "1M": 48.8,
+        "3M": 36.4,
+        "6M": 43.0
       },
-      "breadth_50": 57.6,
-      "breadth_200": 51.7,
+      "breadth_50": 70.0,
+      "breadth_200": 80.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 66.9,
-        "weekly": 57.0,
-        "monthly": 50.0
+        "daily": 75.7,
+        "weekly": 57.5,
+        "monthly": 46.8
       }
     },
     "Travel & Leisure": {
@@ -1703,6 +1891,41 @@
         "UAL",
         "HLT",
         "EXPE",
+        "PFGC",
+        "ARMK",
+        "EDU",
+        "LTH",
+        "PLNT",
+        "VNT",
+        "VVV",
+        "LRN",
+        "OSW",
+        "MCW",
+        "PRDO",
+        "DRVN",
+        "PTON",
+        "PRKS",
+        "TH",
+        "FIP",
+        "KLC",
+        "XPOF",
+        "BAER",
+        "AGH",
+        "RIME"
+      ],
+      "curated_members": [
+        "BKNG",
+        "MAR",
+        "ABNB",
+        "RCL",
+        "CCL",
+        "NCLH",
+        "DAL",
+        "UAL",
+        "HLT",
+        "EXPE"
+      ],
+      "auto_members": [
         "PFGC",
         "ARMK",
         "EDU",
@@ -1766,18 +1989,18 @@
         "6M": -2.94
       },
       "rs_rank": {
-        "1W": 18.8,
-        "1M": 41.9,
-        "3M": 65.0,
-        "6M": 46.2
+        "1W": 18.2,
+        "1M": 42.1,
+        "3M": 65.3,
+        "6M": 47.1
       },
       "breadth_50": 54.8,
       "breadth_200": 41.9,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 38.1,
+        "daily": 37.9,
         "weekly": 42.7,
-        "monthly": 52.4
+        "monthly": 52.9
       }
     },
     "Retail / Consumer": {
@@ -1788,84 +2011,19 @@
         "HD",
         "LOW",
         "DG",
-        "DLTR",
-        "CVNA",
-        "FAST",
-        "FERG",
-        "SYY",
-        "CPRT",
-        "CASY",
-        "ULTA",
-        "TSCO",
-        "WSM",
-        "AS",
-        "USFD",
-        "SGI",
-        "SNX",
-        "QXO",
-        "SN",
-        "WCC",
-        "BBY",
-        "HAS",
-        "FIVE",
-        "ALLE",
-        "BJ",
-        "GME",
-        "SWK",
-        "CNM",
-        "ARW",
-        "POOL",
-        "FSS",
-        "SITE",
-        "REZI",
-        "OLLI",
-        "FND",
-        "AVT",
-        "MSM",
-        "M",
-        "ZGN",
-        "MAT",
-        "TBBB",
-        "PVH",
-        "KTB",
-        "WHR",
-        "BBWI",
-        "UNFI",
-        "CALY",
-        "FIGS",
-        "RH",
-        "DNOW",
-        "EYE",
-        "SONO",
-        "HLMN",
-        "KSS",
-        "LEG",
-        "OLPX",
-        "SBH",
-        "SVV",
-        "GIII",
-        "VSTS",
-        "MBC",
-        "ARHS",
-        "CRCT",
-        "WOOF",
-        "CWH",
-        "ARKO",
-        "TRON",
-        "ETD",
-        "BBBY",
-        "XWIN",
-        "FNKO",
-        "PLBY",
-        "GPRO",
-        "PLCE",
-        "SPWH",
-        "SNBR",
-        "RECT",
-        "DBGI",
-        "UCAR"
+        "DLTR"
       ],
-      "member_count": 82,
+      "curated_members": [
+        "WMT",
+        "COST",
+        "TGT",
+        "HD",
+        "LOW",
+        "DG",
+        "DLTR"
+      ],
+      "auto_members": [],
+      "member_count": 7,
       "member_perf": {
         "WMT": -1.6,
         "COST": -0.32,
@@ -1873,102 +2031,27 @@
         "HD": -1.26,
         "LOW": -0.85,
         "DG": -1.11,
-        "DLTR": 1.47,
-        "CVNA": 1.5,
-        "FAST": -1.67,
-        "FERG": 0.08,
-        "SYY": 0.99,
-        "CPRT": -2.39,
-        "CASY": 1.23,
-        "ULTA": -1.04,
-        "TSCO": -3.75,
-        "WSM": -0.96,
-        "AS": -0.08,
-        "USFD": 0.4,
-        "SGI": -0.48,
-        "SNX": 2.19,
-        "QXO": -5.11,
-        "SN": 0.92,
-        "WCC": -0.47,
-        "BBY": -1.71,
-        "HAS": -1.55,
-        "FIVE": -1.76,
-        "ALLE": -0.9,
-        "BJ": -2.73,
-        "GME": -0.24,
-        "SWK": 0.83,
-        "CNM": 1.12,
-        "ARW": -0.26,
-        "POOL": 1.69,
-        "FSS": -0.68,
-        "SITE": 0.48,
-        "REZI": 1.01,
-        "OLLI": 2.27,
-        "FND": 0.26,
-        "AVT": 0.69,
-        "MSM": -0.23,
-        "M": -0.4,
-        "ZGN": 0.0,
-        "MAT": -1.49,
-        "TBBB": -0.08,
-        "PVH": -1.79,
-        "KTB": -4.05,
-        "WHR": -0.74,
-        "BBWI": -2.0,
-        "UNFI": 1.13,
-        "CALY": 1.12,
-        "FIGS": 2.42,
-        "RH": -0.42,
-        "DNOW": 2.17,
-        "EYE": -1.41,
-        "SONO": 2.29,
-        "HLMN": -1.34,
-        "KSS": -2.46,
-        "LEG": -0.35,
-        "OLPX": 0.49,
-        "SBH": 1.17,
-        "SVV": 2.83,
-        "GIII": -0.44,
-        "VSTS": 3.05,
-        "MBC": 0.11,
-        "ARHS": 1.73,
-        "CRCT": -2.63,
-        "WOOF": -1.67,
-        "CWH": 8.41,
-        "ARKO": 2.75,
-        "TRON": -8.29,
-        "ETD": -0.22,
-        "BBBY": 1.63,
-        "XWIN": 0.55,
-        "FNKO": 0.23,
-        "PLBY": -1.08,
-        "GPRO": 3.1,
-        "PLCE": -0.59,
-        "SPWH": -1.32,
-        "SNBR": -4.07,
-        "RECT": 6.67,
-        "DBGI": -5.92,
-        "UCAR": -2.96
+        "DLTR": 1.47
       },
       "rs_excess_pct": {
-        "1W": -1.84,
-        "1M": 4.24,
-        "3M": -4.32,
-        "6M": -2.57
+        "1W": -1.81,
+        "1M": -5.14,
+        "3M": -7.99,
+        "6M": 4.07
       },
       "rs_rank": {
-        "1W": 43.6,
-        "1M": 77.8,
-        "3M": 52.1,
-        "6M": 47.0
+        "1W": 42.1,
+        "1M": 21.5,
+        "3M": 33.1,
+        "6M": 60.3
       },
-      "breadth_50": 63.4,
-      "breadth_200": 48.8,
+      "breadth_50": 42.9,
+      "breadth_200": 57.1,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 60.8,
-        "weekly": 64.9,
-        "monthly": 53.9
+        "daily": 42.9,
+        "weekly": 30.6,
+        "monthly": 43.1
       }
     },
     "Regional Banks": {
@@ -1987,6 +2070,76 @@
         "CFR",
         "PB",
         "BPOP",
+        "EWBC",
+        "PNFP",
+        "WBS",
+        "SSB",
+        "UMBF",
+        "ONB",
+        "COLB",
+        "CBSH",
+        "VLY",
+        "FNB",
+        "GBCI",
+        "UBSI",
+        "CBC",
+        "FLG",
+        "ABCB",
+        "HOMB",
+        "HWC",
+        "AUB",
+        "OZK",
+        "AX",
+        "ASB",
+        "FFIN",
+        "IBOC",
+        "FULT",
+        "TFSL",
+        "UCB",
+        "RNST",
+        "INTR",
+        "FBP",
+        "BKU",
+        "MCHB",
+        "WSBC",
+        "FIBK",
+        "FHB",
+        "SBCF",
+        "FFBC",
+        "SFNC",
+        "BANC",
+        "PFS",
+        "CVBF",
+        "BBT",
+        "WAFD",
+        "BUSE",
+        "NWBI",
+        "FCF",
+        "LC",
+        "HOPE",
+        "OSBC",
+        "OCFC",
+        "CFFN",
+        "HTBK",
+        "BRBS"
+      ],
+      "curated_members": [
+        "KEY",
+        "RF",
+        "CFG",
+        "FITB",
+        "MTB",
+        "HBAN",
+        "ZION",
+        "PNC",
+        "TFC",
+        "FHN",
+        "WAL",
+        "CFR",
+        "PB",
+        "BPOP"
+      ],
+      "auto_members": [
         "EWBC",
         "PNFP",
         "WBS",
@@ -2116,18 +2269,18 @@
         "6M": 8.63
       },
       "rs_rank": {
-        "1W": 36.8,
-        "1M": 44.4,
-        "3M": 58.1,
-        "6M": 65.8
+        "1W": 34.7,
+        "1M": 45.5,
+        "3M": 58.7,
+        "6M": 66.1
       },
       "breadth_50": 89.4,
       "breadth_200": 89.2,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 52.9,
-        "weekly": 51.7,
-        "monthly": 63.0
+        "daily": 52.1,
+        "weekly": 51.9,
+        "monthly": 63.5
       }
     },
     "Custody Banks": {
@@ -2136,6 +2289,12 @@
         "STT",
         "NTRS"
       ],
+      "curated_members": [
+        "BK",
+        "STT",
+        "NTRS"
+      ],
+      "auto_members": [],
       "member_count": 3,
       "member_perf": {
         "BK": -1.01,
@@ -2149,18 +2308,18 @@
         "6M": 23.98
       },
       "rs_rank": {
-        "1W": 77.8,
-        "1M": 84.6,
-        "3M": 81.2,
-        "6M": 78.6
+        "1W": 77.7,
+        "1M": 85.1,
+        "3M": 81.8,
+        "6M": 80.2
       },
       "breadth_50": 100.0,
       "breadth_200": 100.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 85.0,
-        "weekly": 85.0,
-        "monthly": 83.8
+        "daily": 85.1,
+        "weekly": 85.4,
+        "monthly": 84.5
       }
     },
     "Asset Managers": {
@@ -2177,6 +2336,87 @@
         "IVZ",
         "AMG",
         "SEIC",
+        "SCHW",
+        "IBKR",
+        "AMP",
+        "RJF",
+        "LPLA",
+        "CRCL",
+        "FUTU",
+        "CG",
+        "TPG",
+        "EVR",
+        "SF",
+        "CRBG",
+        "HLI",
+        "XP",
+        "BMNR",
+        "JEF",
+        "SNEX",
+        "JHG",
+        "VIRT",
+        "FIGR",
+        "STEP",
+        "PIPR",
+        "HLNE",
+        "OTF",
+        "BGC",
+        "MC",
+        "MAIN",
+        "HASI",
+        "VCTR",
+        "LAZ",
+        "FHI",
+        "MIAX",
+        "MRX",
+        "GBDC",
+        "APAM",
+        "ETOR",
+        "DBRG",
+        "WT",
+        "GCMG",
+        "PAX",
+        "PWP",
+        "SBET",
+        "CSWC",
+        "TRIN",
+        "TIGR",
+        "ABTC",
+        "ASST",
+        "RPC",
+        "NMFC",
+        "PURR",
+        "AXG",
+        "GEMI",
+        "BTBT",
+        "INV",
+        "RWAY",
+        "CNCK",
+        "BRR",
+        "DFDV",
+        "SLNH",
+        "STEX",
+        "BTCS",
+        "BTM",
+        "BENF",
+        "BCG",
+        "MIGI"
+      ],
+      "curated_members": [
+        "BLK",
+        "BX",
+        "KKR",
+        "APO",
+        "ARES",
+        "BAM",
+        "OWL",
+        "TROW",
+        "BEN",
+        "IVZ",
+        "AMG",
+        "SEIC"
+      ],
+      "auto_members": [
         "SCHW",
         "IBKR",
         "AMP",
@@ -2330,18 +2570,18 @@
         "6M": -15.23
       },
       "rs_rank": {
-        "1W": 44.4,
-        "1M": 78.6,
-        "3M": 26.5,
-        "6M": 19.7
+        "1W": 43.0,
+        "1M": 76.9,
+        "3M": 26.4,
+        "6M": 19.8
       },
       "breadth_50": 75.3,
       "breadth_200": 35.6,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 63.2,
-        "weekly": 63.5,
-        "monthly": 33.6
+        "daily": 62.0,
+        "weekly": 62.3,
+        "monthly": 33.4
       }
     },
     "P&C Insurance": {
@@ -2358,6 +2598,38 @@
         "ERIE",
         "RLI",
         "AFG",
+        "FNF",
+        "ORI",
+        "AXS",
+        "FAF",
+        "MTG",
+        "ESNT",
+        "LMND",
+        "SIGI",
+        "RDN",
+        "SLDE",
+        "SKWD",
+        "KMPR",
+        "FIHL",
+        "PRA",
+        "PRCH",
+        "OSG"
+      ],
+      "curated_members": [
+        "TRV",
+        "CB",
+        "ALL",
+        "PGR",
+        "AIG",
+        "HIG",
+        "WRB",
+        "L",
+        "CINF",
+        "ERIE",
+        "RLI",
+        "AFG"
+      ],
+      "auto_members": [
         "FNF",
         "ORI",
         "AXS",
@@ -2413,18 +2685,18 @@
         "6M": -6.79
       },
       "rs_rank": {
-        "1W": 38.5,
-        "1M": 25.6,
-        "3M": 55.6,
-        "6M": 37.6
+        "1W": 36.4,
+        "1M": 26.4,
+        "3M": 55.4,
+        "6M": 37.2
       },
       "breadth_50": 64.3,
       "breadth_200": 64.3,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 45.3,
-        "weekly": 38.5,
-        "monthly": 47.0
+        "daily": 44.4,
+        "weekly": 38.4,
+        "monthly": 46.9
       }
     },
     "Life Insurance": {
@@ -2437,6 +2709,26 @@
         "GL",
         "EQH",
         "VOYA",
+        "UNM",
+        "JXN",
+        "CNO",
+        "FG",
+        "BHF",
+        "GNW",
+        "LIFE",
+        "ABX"
+      ],
+      "curated_members": [
+        "MET",
+        "PRU",
+        "AFL",
+        "LNC",
+        "PFG",
+        "GL",
+        "EQH",
+        "VOYA"
+      ],
+      "auto_members": [
         "UNM",
         "JXN",
         "CNO",
@@ -2472,18 +2764,18 @@
         "6M": 4.89
       },
       "rs_rank": {
-        "1W": 66.7,
-        "1M": 68.4,
-        "3M": 59.0,
-        "6M": 61.5
+        "1W": 67.8,
+        "1M": 67.8,
+        "3M": 59.5,
+        "6M": 62.0
       },
       "breadth_50": 93.8,
       "breadth_200": 73.3,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 74.5,
+        "daily": 74.9,
         "weekly": 70.4,
-        "monthly": 63.3
+        "monthly": 63.6
       }
     },
     "Insurance Brokers": {
@@ -2493,6 +2785,20 @@
         "WTW",
         "BRO",
         "RYAN",
+        "MRSH",
+        "BWIN",
+        "ARX",
+        "EHTH",
+        "HUIZ"
+      ],
+      "curated_members": [
+        "AON",
+        "AJG",
+        "WTW",
+        "BRO",
+        "RYAN"
+      ],
+      "auto_members": [
         "MRSH",
         "BWIN",
         "ARX",
@@ -2519,18 +2825,18 @@
         "6M": -28.8
       },
       "rs_rank": {
-        "1W": 35.0,
-        "1M": 43.6,
-        "3M": 5.1,
-        "6M": 5.1
+        "1W": 33.1,
+        "1M": 44.6,
+        "3M": 5.0,
+        "6M": 5.8
       },
       "breadth_50": 30.0,
       "breadth_200": 0.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 42.9,
-        "weekly": 34.1,
-        "monthly": 10.1
+        "daily": 42.2,
+        "weekly": 34.2,
+        "monthly": 10.4
       }
     },
     "Reinsurance": {
@@ -2539,6 +2845,15 @@
         "EG",
         "ACGL",
         "RGA",
+        "SPNT"
+      ],
+      "curated_members": [
+        "RNR",
+        "EG",
+        "ACGL",
+        "RGA"
+      ],
+      "auto_members": [
         "SPNT"
       ],
       "member_count": 5,
@@ -2556,18 +2871,18 @@
         "6M": 8.36
       },
       "rs_rank": {
-        "1W": 47.9,
-        "1M": 34.2,
-        "3M": 72.6,
-        "6M": 65.0
+        "1W": 46.3,
+        "1M": 34.7,
+        "3M": 73.6,
+        "6M": 65.3
       },
       "breadth_50": 60.0,
       "breadth_200": 100.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 51.5,
+        "daily": 50.8,
         "weekly": 46.6,
-        "monthly": 68.7
+        "monthly": 69.2
       }
     },
     "Specialty Finance": {
@@ -2580,6 +2895,30 @@
         "OMF",
         "BX",
         "ARES",
+        "SLM",
+        "BFH",
+        "SEZL",
+        "LU",
+        "EZPW",
+        "PICS",
+        "ECPG",
+        "QFIN",
+        "FINV",
+        "GDOT",
+        "LX",
+        "LPRO"
+      ],
+      "curated_members": [
+        "ALLY",
+        "SYF",
+        "COF",
+        "AXP",
+        "NAVI",
+        "OMF",
+        "BX",
+        "ARES"
+      ],
+      "auto_members": [
         "SLM",
         "BFH",
         "SEZL",
@@ -2623,18 +2962,18 @@
         "6M": -13.32
       },
       "rs_rank": {
-        "1W": 40.2,
+        "1W": 38.0,
         "1M": 75.2,
-        "3M": 37.6,
-        "6M": 20.5
+        "3M": 38.8,
+        "6M": 20.7
       },
       "breadth_50": 70.0,
       "breadth_200": 31.6,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 59.4,
-        "weekly": 61.8,
-        "monthly": 37.2
+        "daily": 58.3,
+        "weekly": 61.5,
+        "monthly": 37.8
       }
     },
     "Exchanges": {
@@ -2645,6 +2984,22 @@
         "CBOE",
         "MKTX",
         "TW",
+        "SPGI",
+        "MCO",
+        "MSCI",
+        "TRU",
+        "FDS",
+        "MORN"
+      ],
+      "curated_members": [
+        "ICE",
+        "CME",
+        "NDAQ",
+        "CBOE",
+        "MKTX",
+        "TW"
+      ],
+      "auto_members": [
         "SPGI",
         "MCO",
         "MSCI",
@@ -2674,18 +3029,18 @@
         "6M": -7.93
       },
       "rs_rank": {
-        "1W": 37.6,
-        "1M": 35.9,
+        "1W": 35.5,
+        "1M": 36.4,
         "3M": 25.6,
-        "6M": 35.9
+        "6M": 35.5
       },
       "breadth_50": 58.3,
       "breadth_200": 25.0,
       "trend_above_50ema": false,
       "scores": {
-        "daily": 36.5,
-        "weekly": 38.1,
-        "monthly": 30.2
+        "daily": 35.6,
+        "weekly": 37.9,
+        "monthly": 30.1
       }
     },
     "Tower REITs": {
@@ -2693,6 +3048,23 @@
         "AMT",
         "CCI",
         "SBAC",
+        "IRM",
+        "WY",
+        "LAMR",
+        "GLPI",
+        "RYN",
+        "OUT",
+        "EPR",
+        "FRMI",
+        "UNIT",
+        "LAND"
+      ],
+      "curated_members": [
+        "AMT",
+        "CCI",
+        "SBAC"
+      ],
+      "auto_members": [
         "IRM",
         "WY",
         "LAMR",
@@ -2727,18 +3099,18 @@
         "6M": 1.24
       },
       "rs_rank": {
-        "1W": 30.8,
-        "1M": 70.1,
-        "3M": 64.1,
-        "6M": 55.6
+        "1W": 28.9,
+        "1M": 69.4,
+        "3M": 64.5,
+        "6M": 54.5
       },
       "breadth_50": 76.9,
       "breadth_200": 75.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 54.4,
-        "weekly": 62.4,
-        "monthly": 64.1
+        "daily": 53.4,
+        "weekly": 61.7,
+        "monthly": 63.8
       }
     },
     "Industrial REITs": {
@@ -2750,6 +3122,38 @@
         "STAG",
         "TRNO",
         "EXR",
+        "CBRE",
+        "VICI",
+        "CSGP",
+        "WPC",
+        "LINE",
+        "COMP",
+        "OPEN",
+        "BNL",
+        "COLD",
+        "CWK",
+        "LXP",
+        "NMRK",
+        "GNL",
+        "SMA",
+        "KW",
+        "EXPI",
+        "ESRT",
+        "AHRT",
+        "REAX",
+        "DOUG",
+        "SQFT"
+      ],
+      "curated_members": [
+        "PLD",
+        "REXR",
+        "EGP",
+        "FR",
+        "STAG",
+        "TRNO",
+        "EXR"
+      ],
+      "auto_members": [
         "CBRE",
         "VICI",
         "CSGP",
@@ -2810,18 +3214,18 @@
         "6M": -12.37
       },
       "rs_rank": {
-        "1W": 42.7,
-        "1M": 62.4,
-        "3M": 32.5,
+        "1W": 40.5,
+        "1M": 62.0,
+        "3M": 32.2,
         "6M": 24.8
       },
       "breadth_50": 85.7,
       "breadth_200": 46.4,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 59.8,
-        "weekly": 57.5,
-        "monthly": 36.8
+        "daily": 58.6,
+        "weekly": 56.8,
+        "monthly": 36.6
       }
     },
     "Self-Storage REITs": {
@@ -2831,6 +3235,13 @@
         "CUBE",
         "NSA"
       ],
+      "curated_members": [
+        "PSA",
+        "EXR",
+        "CUBE",
+        "NSA"
+      ],
+      "auto_members": [],
       "member_count": 4,
       "member_perf": {
         "PSA": -0.81,
@@ -2845,10 +3256,10 @@
         "6M": 0.11
       },
       "rs_rank": {
-        "1W": 53.0,
-        "1M": 76.1,
-        "3M": 76.9,
-        "6M": 54.7
+        "1W": 52.9,
+        "1M": 76.0,
+        "3M": 77.7,
+        "6M": 53.7
       },
       "breadth_50": 100.0,
       "breadth_200": 100.0,
@@ -2871,6 +3282,26 @@
         "AMH",
         "ELS",
         "SUI",
+        "MRP",
+        "IRT",
+        "VRE",
+        "UMH",
+        "AIV",
+        "ELME"
+      ],
+      "curated_members": [
+        "MAA",
+        "AVB",
+        "EQR",
+        "ESS",
+        "UDR",
+        "CPT",
+        "INVH",
+        "AMH",
+        "ELS",
+        "SUI"
+      ],
+      "auto_members": [
         "MRP",
         "IRT",
         "VRE",
@@ -2904,18 +3335,18 @@
         "6M": -7.32
       },
       "rs_rank": {
-        "1W": 51.3,
-        "1M": 36.8,
-        "3M": 46.2,
-        "6M": 36.8
+        "1W": 51.2,
+        "1M": 37.2,
+        "3M": 47.1,
+        "6M": 36.4
       },
       "breadth_50": 68.8,
       "breadth_200": 43.8,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 55.1,
-        "weekly": 45.9,
-        "monthly": 41.6
+        "daily": 55.2,
+        "weekly": 46.2,
+        "monthly": 41.9
       }
     },
     "Retail REITs": {
@@ -2930,6 +3361,31 @@
         "AKR",
         "NNN",
         "ADC",
+        "EPRT",
+        "PECO",
+        "KRG",
+        "SKT",
+        "CURB",
+        "FCPT",
+        "UE",
+        "NTST",
+        "GTY",
+        "WSR",
+        "SITC"
+      ],
+      "curated_members": [
+        "O",
+        "SPG",
+        "REG",
+        "FRT",
+        "KIM",
+        "BRX",
+        "MAC",
+        "AKR",
+        "NNN",
+        "ADC"
+      ],
+      "auto_members": [
         "EPRT",
         "PECO",
         "KRG",
@@ -2973,18 +3429,18 @@
         "6M": 4.73
       },
       "rs_rank": {
-        "1W": 31.6,
+        "1W": 29.8,
         "1M": 50.4,
-        "3M": 74.4,
-        "6M": 60.7
+        "3M": 75.2,
+        "6M": 61.2
       },
       "breadth_50": 76.2,
       "breadth_200": 95.2,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 49.8,
-        "weekly": 54.1,
-        "monthly": 69.8
+        "daily": 48.9,
+        "weekly": 53.9,
+        "monthly": 70.3
       }
     },
     "Office REITs": {
@@ -2995,6 +3451,23 @@
         "CUZ",
         "HIW",
         "DEI",
+        "ARE",
+        "CDP",
+        "SLG",
+        "PDM",
+        "JBGS",
+        "BDN",
+        "HPP"
+      ],
+      "curated_members": [
+        "BXP",
+        "VNO",
+        "KRC",
+        "CUZ",
+        "HIW",
+        "DEI"
+      ],
+      "auto_members": [
         "ARE",
         "CDP",
         "SLG",
@@ -3026,18 +3499,18 @@
         "6M": -25.97
       },
       "rs_rank": {
-        "1W": 72.6,
-        "1M": 80.3,
-        "3M": 31.6,
-        "6M": 8.5
+        "1W": 73.6,
+        "1M": 81.0,
+        "3M": 31.4,
+        "6M": 9.1
       },
       "breadth_50": 92.3,
       "breadth_200": 15.4,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 80.3,
-        "weekly": 73.3,
-        "monthly": 29.6
+        "daily": 80.9,
+        "weekly": 73.8,
+        "monthly": 29.7
       }
     },
     "Hotel REITs": {
@@ -3048,6 +3521,21 @@
         "APLE",
         "SHO",
         "DRH",
+        "PEB",
+        "XHR",
+        "RLJ",
+        "SVC",
+        "INN"
+      ],
+      "curated_members": [
+        "HST",
+        "PK",
+        "RHP",
+        "APLE",
+        "SHO",
+        "DRH"
+      ],
+      "auto_members": [
         "PEB",
         "XHR",
         "RLJ",
@@ -3075,18 +3563,18 @@
         "6M": 3.78
       },
       "rs_rank": {
-        "1W": 60.7,
-        "1M": 46.2,
-        "3M": 62.4,
-        "6M": 59.8
+        "1W": 61.2,
+        "1M": 47.1,
+        "3M": 62.8,
+        "6M": 59.5
       },
       "breadth_50": 90.9,
       "breadth_200": 81.8,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 65.5,
-        "weekly": 58.2,
-        "monthly": 62.1
+        "daily": 66.0,
+        "weekly": 58.8,
+        "monthly": 62.3
       }
     },
     "Mortgage REITs": {
@@ -3099,6 +3587,40 @@
         "RITM",
         "DX",
         "TWO",
+        "RKT",
+        "UWMC",
+        "PFSI",
+        "ARR",
+        "EFC",
+        "ARI",
+        "ORC",
+        "LADR",
+        "CIM",
+        "PMT",
+        "MFA",
+        "BRSP",
+        "RWT",
+        "IVR",
+        "FBRT",
+        "BETR",
+        "ADAM",
+        "TRTX",
+        "KREF",
+        "LDI",
+        "RC",
+        "BLNE"
+      ],
+      "curated_members": [
+        "AGNC",
+        "NLY",
+        "STWD",
+        "ABR",
+        "BXMT",
+        "RITM",
+        "DX",
+        "TWO"
+      ],
+      "auto_members": [
         "RKT",
         "UWMC",
         "PFSI",
@@ -3162,18 +3684,18 @@
         "6M": -9.03
       },
       "rs_rank": {
-        "1W": 39.3,
-        "1M": 53.0,
-        "3M": 22.2,
-        "6M": 29.9
+        "1W": 37.2,
+        "1M": 53.7,
+        "3M": 22.3,
+        "6M": 29.8
       },
       "breadth_50": 76.7,
       "breadth_200": 63.3,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 54.4,
-        "weekly": 49.2,
-        "monthly": 35.3
+        "daily": 53.5,
+        "weekly": 49.1,
+        "monthly": 35.4
       }
     },
     "Auto OEMs": {
@@ -3186,6 +3708,27 @@
         "STLA",
         "TM",
         "HMC",
+        "VFS",
+        "BC",
+        "THO",
+        "PATK",
+        "LCII",
+        "PII",
+        "HOG",
+        "WGO",
+        "EMPD"
+      ],
+      "curated_members": [
+        "TSLA",
+        "F",
+        "GM",
+        "RIVN",
+        "LCID",
+        "STLA",
+        "TM",
+        "HMC"
+      ],
+      "auto_members": [
         "VFS",
         "BC",
         "THO",
@@ -3223,18 +3766,18 @@
         "6M": -12.71
       },
       "rs_rank": {
-        "1W": 15.4,
-        "1M": 18.8,
-        "3M": 12.8,
+        "1W": 14.9,
+        "1M": 19.0,
+        "3M": 13.2,
         "6M": 23.1
       },
       "breadth_50": 47.1,
       "breadth_200": 41.2,
       "trend_above_50ema": false,
       "scores": {
-        "daily": 19.5,
+        "daily": 19.2,
         "weekly": 21.5,
-        "monthly": 21.0
+        "monthly": 21.3
       }
     },
     "Auto Suppliers": {
@@ -3250,6 +3793,40 @@
         "PHIN",
         "DORM",
         "STRT",
+        "GPC",
+        "ALSN",
+        "LKQ",
+        "MBLY",
+        "ATMU",
+        "GNTX",
+        "QS",
+        "VC",
+        "GT",
+        "ADNT",
+        "DCH",
+        "SLDP",
+        "FOXF",
+        "MVST",
+        "SES",
+        "ECX",
+        "HLLY",
+        "HYLN",
+        "CVGI"
+      ],
+      "curated_members": [
+        "APTV",
+        "BWA",
+        "MGA",
+        "LEA",
+        "DAN",
+        "MOD",
+        "GTX",
+        "ALV",
+        "PHIN",
+        "DORM",
+        "STRT"
+      ],
+      "auto_members": [
         "GPC",
         "ALSN",
         "LKQ",
@@ -3311,17 +3888,17 @@
       },
       "rs_rank": {
         "1W": 76.9,
-        "1M": 63.2,
-        "3M": 47.0,
-        "6M": 50.4
+        "1M": 62.8,
+        "3M": 47.9,
+        "6M": 49.6
       },
       "breadth_50": 70.0,
       "breadth_200": 53.3,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 74.8,
-        "weekly": 64.6,
-        "monthly": 51.4
+        "daily": 74.6,
+        "weekly": 64.5,
+        "monthly": 51.5
       }
     },
     "Auto Dealers": {
@@ -3334,6 +3911,16 @@
         "LAD",
         "SAH"
       ],
+      "curated_members": [
+        "AN",
+        "KMX",
+        "PAG",
+        "GPI",
+        "ABG",
+        "LAD",
+        "SAH"
+      ],
+      "auto_members": [],
       "member_count": 7,
       "member_perf": {
         "AN": 0.05,
@@ -3351,18 +3938,18 @@
         "6M": -18.02
       },
       "rs_rank": {
-        "1W": 26.5,
-        "1M": 27.4,
-        "3M": 23.9,
-        "6M": 17.1
+        "1W": 25.6,
+        "1M": 28.1,
+        "3M": 24.0,
+        "6M": 17.4
       },
       "breadth_50": 71.4,
       "breadth_200": 14.3,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 40.8,
-        "weekly": 33.3,
-        "monthly": 20.9
+        "daily": 40.5,
+        "weekly": 33.5,
+        "monthly": 21.2
       }
     },
     "Auto Parts Retail": {
@@ -3372,6 +3959,13 @@
         "AAP",
         "MNRO"
       ],
+      "curated_members": [
+        "AZO",
+        "ORLY",
+        "AAP",
+        "MNRO"
+      ],
+      "auto_members": [],
       "member_count": 4,
       "member_perf": {
         "AZO": -0.54,
@@ -3387,16 +3981,16 @@
       },
       "rs_rank": {
         "1W": 50.4,
-        "1M": 38.5,
+        "1M": 38.8,
         "3M": 50.4,
-        "6M": 27.4
+        "6M": 27.3
       },
       "breadth_50": 75.0,
       "breadth_200": 25.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 56.1,
-        "weekly": 48.1,
+        "daily": 56.2,
+        "weekly": 48.3,
         "monthly": 37.9
       }
     },
@@ -3407,6 +4001,13 @@
         "EVGO",
         "WBX"
       ],
+      "curated_members": [
+        "CHPT",
+        "BLNK",
+        "EVGO",
+        "WBX"
+      ],
+      "auto_members": [],
       "member_count": 4,
       "member_perf": {
         "CHPT": -1.15,
@@ -3421,17 +4022,17 @@
         "6M": -49.45
       },
       "rs_rank": {
-        "1W": 96.6,
-        "1M": 90.6,
+        "1W": 96.7,
+        "1M": 90.9,
         "3M": 24.8,
-        "6M": 0.9
+        "6M": 0.8
       },
       "breadth_50": 100.0,
       "breadth_200": 0.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 95.9,
-        "weekly": 83.3,
+        "daily": 96.1,
+        "weekly": 83.5,
         "monthly": 23.8
       }
     },
@@ -3450,6 +4051,33 @@
         "DNUT",
         "PLAY",
         "TXRH",
+        "YUMC",
+        "CAVA",
+        "CHA",
+        "SG",
+        "KRUS",
+        "FWRG",
+        "CBRL",
+        "CNNE",
+        "PTLO",
+        "BTBD"
+      ],
+      "curated_members": [
+        "MCD",
+        "CMG",
+        "YUM",
+        "QSR",
+        "DPZ",
+        "WING",
+        "SHAK",
+        "PZZA",
+        "JACK",
+        "WEN",
+        "DNUT",
+        "PLAY",
+        "TXRH"
+      ],
+      "auto_members": [
         "YUMC",
         "CAVA",
         "CHA",
@@ -3495,17 +4123,17 @@
       },
       "rs_rank": {
         "1W": 52.1,
-        "1M": 56.4,
-        "3M": 34.2,
-        "6M": 21.4
+        "1M": 56.2,
+        "3M": 34.7,
+        "6M": 21.5
       },
       "breadth_50": 52.2,
       "breadth_200": 34.8,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 58.0,
-        "weekly": 51.6,
-        "monthly": 33.8
+        "daily": 57.9,
+        "weekly": 51.5,
+        "monthly": 34.0
       }
     },
     "Restaurants - Casual": {
@@ -3518,6 +4146,16 @@
         "CHEF",
         "BROS"
       ],
+      "curated_members": [
+        "DRI",
+        "EAT",
+        "BLMN",
+        "BJRI",
+        "CAKE",
+        "CHEF",
+        "BROS"
+      ],
+      "auto_members": [],
       "member_count": 7,
       "member_perf": {
         "DRI": -0.63,
@@ -3535,18 +4173,18 @@
         "6M": -1.04
       },
       "rs_rank": {
-        "1W": 23.1,
-        "1M": 31.6,
-        "3M": 27.4,
-        "6M": 52.1
+        "1W": 22.3,
+        "1M": 32.2,
+        "3M": 27.3,
+        "6M": 51.2
       },
       "breadth_50": 71.4,
       "breadth_200": 57.1,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 40.2,
-        "weekly": 35.2,
-        "monthly": 39.9
+        "daily": 39.9,
+        "weekly": 35.4,
+        "monthly": 39.7
       }
     },
     "Coffee": {
@@ -3556,6 +4194,13 @@
         "BROS",
         "FARM"
       ],
+      "curated_members": [
+        "SBUX",
+        "DNUT",
+        "BROS",
+        "FARM"
+      ],
+      "auto_members": [],
       "member_count": 4,
       "member_perf": {
         "SBUX": -0.87,
@@ -3570,18 +4215,18 @@
         "6M": -8.41
       },
       "rs_rank": {
-        "1W": 88.9,
-        "1M": 60.7,
-        "3M": 51.3,
-        "6M": 33.3
+        "1W": 89.3,
+        "1M": 60.3,
+        "3M": 51.2,
+        "6M": 33.1
       },
       "breadth_50": 75.0,
       "breadth_200": 50.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 80.9,
-        "weekly": 67.1,
-        "monthly": 47.1
+        "daily": 81.0,
+        "weekly": 67.0,
+        "monthly": 47.0
       }
     },
     "Athletic Apparel": {
@@ -3596,6 +4241,25 @@
         "CROX",
         "VFC",
         "COLM",
+        "SHOO",
+        "WWW",
+        "FWDI",
+        "DBI",
+        "FOSL"
+      ],
+      "curated_members": [
+        "NKE",
+        "LULU",
+        "UA",
+        "UAA",
+        "ONON",
+        "DECK",
+        "BIRK",
+        "CROX",
+        "VFC",
+        "COLM"
+      ],
+      "auto_members": [
         "SHOO",
         "WWW",
         "FWDI",
@@ -3627,18 +4291,18 @@
         "6M": 0.07
       },
       "rs_rank": {
-        "1W": 14.5,
-        "1M": 55.6,
-        "3M": 41.0,
-        "6M": 53.8
+        "1W": 14.0,
+        "1M": 55.4,
+        "3M": 42.1,
+        "6M": 52.9
       },
       "breadth_50": 60.0,
       "breadth_200": 60.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 40.2,
+        "daily": 39.9,
         "weekly": 45.8,
-        "monthly": 49.9
+        "monthly": 50.0
       }
     },
     "Luxury / Fashion": {
@@ -3653,6 +4317,34 @@
         "AEO",
         "URBN",
         "LULU",
+        "GAP",
+        "BOOT",
+        "VSCO",
+        "SIG",
+        "BKE",
+        "CRI",
+        "REAL",
+        "SCVL",
+        "SFIX",
+        "CAL",
+        "LE",
+        "CURV",
+        "BIRD",
+        "JEM"
+      ],
+      "curated_members": [
+        "TPR",
+        "RL",
+        "CPRI",
+        "TJX",
+        "ROST",
+        "BURL",
+        "ANF",
+        "AEO",
+        "URBN",
+        "LULU"
+      ],
+      "auto_members": [
         "GAP",
         "BOOT",
         "VSCO",
@@ -3702,18 +4394,18 @@
         "6M": 18.47
       },
       "rs_rank": {
-        "1W": 8.5,
-        "1M": 94.9,
-        "3M": 77.8,
-        "6M": 76.9
+        "1W": 8.3,
+        "1M": 95.0,
+        "3M": 78.5,
+        "6M": 77.7
       },
       "breadth_50": 62.5,
       "breadth_200": 58.3,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 47.4,
-        "weekly": 70.2,
-        "monthly": 77.2
+        "daily": 47.3,
+        "weekly": 70.3,
+        "monthly": 77.7
       }
     },
     "Airlines": {
@@ -3726,6 +4418,21 @@
         "JBLU",
         "ALGT",
         "SKYW",
+        "CPA",
+        "SNCY",
+        "ULCC"
+      ],
+      "curated_members": [
+        "DAL",
+        "UAL",
+        "AAL",
+        "LUV",
+        "ALK",
+        "JBLU",
+        "ALGT",
+        "SKYW"
+      ],
+      "auto_members": [
         "CPA",
         "SNCY",
         "ULCC"
@@ -3751,18 +4458,18 @@
         "6M": -0.24
       },
       "rs_rank": {
-        "1W": 3.4,
-        "1M": 16.2,
-        "3M": 14.5,
-        "6M": 53.0
+        "1W": 3.3,
+        "1M": 16.5,
+        "3M": 14.9,
+        "6M": 52.1
       },
       "breadth_50": 27.3,
       "breadth_200": 45.5,
       "trend_above_50ema": false,
       "scores": {
         "daily": 9.9,
-        "weekly": 15.1,
-        "monthly": 31.0
+        "weekly": 15.2,
+        "monthly": 30.9
       }
     },
     "Cruise Lines": {
@@ -3772,6 +4479,13 @@
         "NCLH",
         "VIK"
       ],
+      "curated_members": [
+        "CCL",
+        "RCL",
+        "NCLH",
+        "VIK"
+      ],
+      "auto_members": [],
       "member_count": 4,
       "member_perf": {
         "CCL": 1.95,
@@ -3786,8 +4500,8 @@
         "6M": -11.68
       },
       "rs_rank": {
-        "1W": 4.3,
-        "1M": 12.0,
+        "1W": 4.1,
+        "1M": 12.4,
         "3M": 49.6,
         "6M": 25.6
       },
@@ -3796,7 +4510,7 @@
       "trend_above_50ema": false,
       "scores": {
         "daily": 8.9,
-        "weekly": 18.0,
+        "weekly": 18.2,
         "monthly": 33.1
       }
     },
@@ -3809,6 +4523,18 @@
         "CHH",
         "HGV",
         "WH",
+        "ATAT"
+      ],
+      "curated_members": [
+        "MAR",
+        "HLT",
+        "H",
+        "IHG",
+        "CHH",
+        "HGV",
+        "WH"
+      ],
+      "auto_members": [
         "ATAT"
       ],
       "member_count": 8,
@@ -3829,18 +4555,18 @@
         "6M": 7.19
       },
       "rs_rank": {
-        "1W": 34.2,
-        "1M": 72.6,
-        "3M": 69.2,
-        "6M": 64.1
+        "1W": 32.2,
+        "1M": 72.7,
+        "3M": 70.2,
+        "6M": 64.5
       },
       "breadth_50": 100.0,
       "breadth_200": 100.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 60.3,
-        "weekly": 68.5,
-        "monthly": 72.8
+        "daily": 59.3,
+        "weekly": 68.3,
+        "monthly": 73.3
       }
     },
     "Online Travel": {
@@ -3850,6 +4576,20 @@
         "ABNB",
         "TRIP",
         "TRVG",
+        "TNL",
+        "MMYT",
+        "GBTG",
+        "LIND",
+        "AHMA"
+      ],
+      "curated_members": [
+        "BKNG",
+        "EXPE",
+        "ABNB",
+        "TRIP",
+        "TRVG"
+      ],
+      "auto_members": [
         "TNL",
         "MMYT",
         "GBTG",
@@ -3876,18 +4616,18 @@
         "6M": 1.5
       },
       "rs_rank": {
-        "1W": 6.0,
-        "1M": 29.9,
-        "3M": 0.9,
-        "6M": 57.3
+        "1W": 5.8,
+        "1M": 30.6,
+        "3M": 1.7,
+        "6M": 57.0
       },
       "breadth_50": 50.0,
       "breadth_200": 44.4,
       "trend_above_50ema": false,
       "scores": {
         "daily": 18.0,
-        "weekly": 23.8,
-        "monthly": 28.7
+        "weekly": 24.2,
+        "monthly": 29.0
       }
     },
     "Casinos": {
@@ -3902,6 +4642,27 @@
         "MCRI",
         "FLL",
         "GDEN",
+        "CHDN",
+        "SGHC",
+        "MTN",
+        "BRSL",
+        "VAC",
+        "MLCO",
+        "GAMB"
+      ],
+      "curated_members": [
+        "LVS",
+        "WYNN",
+        "MGM",
+        "CZR",
+        "BYD",
+        "RRR",
+        "PENN",
+        "MCRI",
+        "FLL",
+        "GDEN"
+      ],
+      "auto_members": [
         "CHDN",
         "SGHC",
         "MTN",
@@ -3937,18 +4698,18 @@
         "6M": -8.35
       },
       "rs_rank": {
-        "1W": 64.1,
-        "1M": 28.2,
-        "3M": 59.8,
-        "6M": 34.2
+        "1W": 64.5,
+        "1M": 28.9,
+        "3M": 60.3,
+        "6M": 33.9
       },
       "breadth_50": 64.7,
       "breadth_200": 52.9,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 58.8,
-        "weekly": 45.6,
-        "monthly": 46.4
+        "daily": 59.2,
+        "weekly": 46.1,
+        "monthly": 46.6
       }
     },
     "Online Gambling": {
@@ -3959,6 +4720,14 @@
         "RSI",
         "PLTK"
       ],
+      "curated_members": [
+        "DKNG",
+        "FLUT",
+        "BETZ",
+        "RSI",
+        "PLTK"
+      ],
+      "auto_members": [],
       "member_count": 5,
       "member_perf": {
         "DKNG": 4.56,
@@ -3974,17 +4743,17 @@
         "6M": -25.61
       },
       "rs_rank": {
-        "1W": 59.0,
-        "1M": 66.7,
+        "1W": 59.5,
+        "1M": 66.1,
         "3M": 23.1,
-        "6M": 9.4
+        "6M": 9.9
       },
       "breadth_50": 80.0,
       "breadth_200": 20.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 68.2,
-        "weekly": 60.6,
+        "daily": 68.3,
+        "weekly": 60.4,
         "monthly": 25.1
       }
     },
@@ -3995,6 +4764,17 @@
         "CSX",
         "CNI",
         "CP",
+        "TRN",
+        "GBX"
+      ],
+      "curated_members": [
+        "UNP",
+        "NSC",
+        "CSX",
+        "CNI",
+        "CP"
+      ],
+      "auto_members": [
         "TRN",
         "GBX"
       ],
@@ -4015,18 +4795,18 @@
         "6M": 10.38
       },
       "rs_rank": {
-        "1W": 84.6,
-        "1M": 51.3,
-        "3M": 82.1,
-        "6M": 70.1
+        "1W": 84.3,
+        "1M": 51.2,
+        "3M": 82.6,
+        "6M": 70.2
       },
       "breadth_50": 71.4,
       "breadth_200": 100.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 75.8,
+        "daily": 75.7,
         "weekly": 65.6,
-        "monthly": 76.5
+        "monthly": 76.8
       }
     },
     "Trucking / LTL": {
@@ -4042,6 +4822,23 @@
         "SNDR",
         "HTLD",
         "MRTN",
+        "SAIA",
+        "RXO"
+      ],
+      "curated_members": [
+        "ODFL",
+        "JBHT",
+        "KNX",
+        "XPO",
+        "WERN",
+        "CHRW",
+        "ARCB",
+        "LSTR",
+        "SNDR",
+        "HTLD",
+        "MRTN"
+      ],
+      "auto_members": [
         "SAIA",
         "RXO"
       ],
@@ -4068,18 +4865,18 @@
         "6M": 37.33
       },
       "rs_rank": {
-        "1W": 80.3,
-        "1M": 85.5,
-        "3M": 87.2,
-        "6M": 88.0
+        "1W": 80.2,
+        "1M": 86.0,
+        "3M": 88.4,
+        "6M": 89.3
       },
       "breadth_50": 100.0,
       "breadth_200": 100.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 86.5,
-        "weekly": 86.9,
-        "monthly": 89.1
+        "daily": 86.6,
+        "weekly": 87.3,
+        "monthly": 90.0
       }
     },
     "Logistics & Parcels": {
@@ -4090,6 +4887,21 @@
         "GXO",
         "ZTO",
         "FWRD",
+        "HUBG",
+        "PBI",
+        "CYRX",
+        "CIIT",
+        "GVH"
+      ],
+      "curated_members": [
+        "FDX",
+        "UPS",
+        "EXPD",
+        "GXO",
+        "ZTO",
+        "FWRD"
+      ],
+      "auto_members": [
         "HUBG",
         "PBI",
         "CYRX",
@@ -4117,18 +4929,18 @@
         "6M": 11.03
       },
       "rs_rank": {
-        "1W": 87.2,
-        "1M": 99.1,
-        "3M": 83.8,
-        "6M": 71.8
+        "1W": 87.6,
+        "1M": 99.2,
+        "3M": 84.3,
+        "6M": 71.9
       },
       "breadth_50": 81.8,
       "breadth_200": 72.7,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 90.6,
-        "weekly": 91.8,
-        "monthly": 80.8
+        "daily": 90.9,
+        "weekly": 92.0,
+        "monthly": 81.1
       }
     },
     "Marine Shipping": {
@@ -4140,6 +4952,23 @@
         "DAC",
         "GSL",
         "CMRE",
+        "SFL",
+        "SB",
+        "ASC",
+        "PANL",
+        "HTCO",
+        "NCT"
+      ],
+      "curated_members": [
+        "ZIM",
+        "MATX",
+        "KEX",
+        "SBLK",
+        "DAC",
+        "GSL",
+        "CMRE"
+      ],
+      "auto_members": [
         "SFL",
         "SB",
         "ASC",
@@ -4170,18 +4999,18 @@
         "6M": 27.76
       },
       "rs_rank": {
-        "1W": 82.1,
-        "1M": 67.5,
-        "3M": 80.3,
-        "6M": 82.9
+        "1W": 81.8,
+        "1M": 66.9,
+        "3M": 81.0,
+        "6M": 84.3
       },
       "breadth_50": 61.5,
       "breadth_200": 92.3,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 77.1,
-        "weekly": 71.5,
-        "monthly": 81.0
+        "daily": 76.9,
+        "weekly": 71.2,
+        "monthly": 81.6
       }
     },
     "Building Products": {
@@ -4197,6 +5026,37 @@
         "WMS",
         "CSL",
         "TREX",
+        "CRH",
+        "CARR",
+        "AMRZ",
+        "JHX",
+        "SPXC",
+        "BLDR",
+        "OC",
+        "AAON",
+        "LPX",
+        "KNF",
+        "ARLO",
+        "JBI",
+        "SWIM",
+        "ASPN",
+        "JELD",
+        "RETO"
+      ],
+      "curated_members": [
+        "TT",
+        "WSO",
+        "LII",
+        "JCI",
+        "MAS",
+        "AOS",
+        "FBIN",
+        "PNR",
+        "WMS",
+        "CSL",
+        "TREX"
+      ],
+      "auto_members": [
         "CRH",
         "CARR",
         "AMRZ",
@@ -4251,18 +5111,18 @@
         "6M": -15.9
       },
       "rs_rank": {
-        "1W": 62.4,
+        "1W": 62.8,
         "1M": 52.1,
-        "3M": 41.9,
-        "6M": 18.8
+        "3M": 43.0,
+        "6M": 19.0
       },
       "breadth_50": 55.6,
       "breadth_200": 51.9,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 62.6,
-        "weekly": 53.2,
-        "monthly": 38.0
+        "daily": 62.8,
+        "weekly": 53.4,
+        "monthly": 38.5
       }
     },
     "Homebuilders": {
@@ -4279,6 +5139,25 @@
         "BZH",
         "GRBK",
         "CCS",
+        "TMHC",
+        "SKY",
+        "DFH"
+      ],
+      "curated_members": [
+        "DHI",
+        "LEN",
+        "NVR",
+        "PHM",
+        "TOL",
+        "KBH",
+        "MTH",
+        "TPH",
+        "MHO",
+        "BZH",
+        "GRBK",
+        "CCS"
+      ],
+      "auto_members": [
         "TMHC",
         "SKY",
         "DFH"
@@ -4308,18 +5187,18 @@
         "6M": -8.72
       },
       "rs_rank": {
-        "1W": 70.1,
-        "1M": 47.0,
-        "3M": 42.7,
-        "6M": 30.8
+        "1W": 71.1,
+        "1M": 47.9,
+        "3M": 43.8,
+        "6M": 30.6
       },
       "breadth_50": 60.0,
       "breadth_200": 46.7,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 65.8,
-        "weekly": 52.9,
-        "monthly": 40.4
+        "daily": 66.5,
+        "weekly": 53.8,
+        "monthly": 40.9
       }
     },
     "Heavy Machinery": {
@@ -4330,6 +5209,23 @@
         "TEX",
         "OSK",
         "PCAR",
+        "CNH",
+        "AEBI",
+        "TWI",
+        "CMCO",
+        "WNC",
+        "UGRO",
+        "HCAI"
+      ],
+      "curated_members": [
+        "CAT",
+        "DE",
+        "AGCO",
+        "TEX",
+        "OSK",
+        "PCAR"
+      ],
+      "auto_members": [
         "CNH",
         "AEBI",
         "TWI",
@@ -4361,18 +5257,18 @@
         "6M": 38.85
       },
       "rs_rank": {
-        "1W": 81.2,
-        "1M": 32.5,
-        "3M": 93.2,
-        "6M": 88.9
+        "1W": 81.0,
+        "1M": 33.1,
+        "3M": 94.2,
+        "6M": 90.1
       },
       "breadth_50": 23.1,
       "breadth_200": 46.2,
       "trend_above_50ema": true,
       "scores": {
         "daily": 62.2,
-        "weekly": 49.9,
-        "monthly": 75.7
+        "weekly": 50.3,
+        "monthly": 76.6
       }
     },
     "Industrial Auto": {
@@ -4385,52 +5281,21 @@
         "DOV",
         "FLS",
         "GGG",
-        "WTS",
-        "PH",
-        "CMI",
-        "ITW",
-        "AME",
-        "SYM",
-        "IR",
-        "OTIS",
-        "XYL",
-        "NVT",
-        "ITT",
-        "IEX",
-        "AEIS",
-        "RRX",
-        "CR",
-        "DCI",
-        "GTLS",
-        "AYI",
-        "POWL",
-        "MIDD",
-        "GTES",
-        "MIR",
-        "MWA",
-        "HAYW",
-        "CXT",
-        "AMPX",
-        "BW",
-        "EOSE",
-        "HLIO",
-        "PSIX",
-        "AMSC",
-        "TE",
-        "ENVX",
-        "NNE",
-        "SERV",
-        "RR",
-        "LTBR",
-        "FCEL",
-        "NPWR",
-        "SHMD",
-        "SKYX",
-        "LASE",
-        "LNKS",
-        "ELPW"
+        "WTS"
       ],
-      "member_count": 52,
+      "curated_members": [
+        "ROK",
+        "EMR",
+        "ETN",
+        "HUBB",
+        "WAB",
+        "DOV",
+        "FLS",
+        "GGG",
+        "WTS"
+      ],
+      "auto_members": [],
+      "member_count": 9,
       "member_perf": {
         "ROK": -1.89,
         "EMR": -0.77,
@@ -4440,70 +5305,27 @@
         "DOV": -1.48,
         "FLS": 1.6,
         "GGG": -0.73,
-        "WTS": -0.72,
-        "PH": 0.06,
-        "CMI": 0.58,
-        "ITW": -1.41,
-        "AME": -0.87,
-        "SYM": -4.99,
-        "IR": -1.34,
-        "OTIS": -1.94,
-        "XYL": -0.19,
-        "NVT": -0.27,
-        "ITT": -0.22,
-        "IEX": -0.92,
-        "AEIS": 1.25,
-        "RRX": -0.57,
-        "CR": -0.19,
-        "DCI": 1.13,
-        "GTLS": -0.04,
-        "AYI": 0.05,
-        "POWL": 0.23,
-        "MIDD": -2.37,
-        "GTES": 0.12,
-        "MIR": 1.18,
-        "MWA": 0.28,
-        "HAYW": 0.2,
-        "CXT": -0.93,
-        "AMPX": -4.92,
-        "BW": -7.41,
-        "EOSE": 10.68,
-        "HLIO": -0.23,
-        "PSIX": -1.52,
-        "AMSC": 7.22,
-        "TE": -1.86,
-        "ENVX": -0.45,
-        "NNE": -3.3,
-        "SERV": -1.07,
-        "RR": -3.91,
-        "LTBR": -3.0,
-        "FCEL": -8.13,
-        "NPWR": 1.76,
-        "SHMD": 11.7,
-        "SKYX": 0.97,
-        "LASE": 0.52,
-        "LNKS": -3.89,
-        "ELPW": 35.58
+        "WTS": -0.72
       },
       "rs_excess_pct": {
-        "1W": 1.43,
-        "1M": -1.27,
-        "3M": 45.04,
-        "6M": 57.47
+        "1W": -0.79,
+        "1M": -2.07,
+        "3M": 3.14,
+        "6M": 16.92
       },
       "rs_rank": {
-        "1W": 76.1,
-        "1M": 47.9,
-        "3M": 96.6,
-        "6M": 94.0
+        "1W": 57.9,
+        "1M": 43.8,
+        "3M": 66.1,
+        "6M": 76.0
       },
-      "breadth_50": 63.5,
-      "breadth_200": 61.5,
+      "breadth_50": 77.8,
+      "breadth_200": 88.9,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 69.5,
-        "weekly": 63.2,
-        "monthly": 83.2
+        "daily": 61.5,
+        "weekly": 55.1,
+        "monthly": 69.2
       }
     },
     "Aerospace OEM": {
@@ -4516,6 +5338,16 @@
         "RTX",
         "HXL"
       ],
+      "curated_members": [
+        "BA",
+        "TDG",
+        "HEI",
+        "TXT",
+        "GE",
+        "RTX",
+        "HXL"
+      ],
+      "auto_members": [],
       "member_count": 7,
       "member_perf": {
         "BA": -0.73,
@@ -4533,18 +5365,18 @@
         "6M": -4.53
       },
       "rs_rank": {
-        "1W": 11.1,
-        "1M": 11.1,
-        "3M": 17.9,
-        "6M": 43.6
+        "1W": 10.7,
+        "1M": 11.6,
+        "3M": 19.0,
+        "6M": 43.8
       },
       "breadth_50": 28.6,
       "breadth_200": 42.9,
       "trend_above_50ema": false,
       "scores": {
         "daily": 12.6,
-        "weekly": 14.8,
-        "monthly": 28.4
+        "weekly": 15.1,
+        "monthly": 28.9
       }
     },
     "Cement & Aggregates": {
@@ -4555,6 +5387,14 @@
         "CX",
         "EAF"
       ],
+      "curated_members": [
+        "VMC",
+        "MLM",
+        "EXP",
+        "CX",
+        "EAF"
+      ],
+      "auto_members": [],
       "member_count": 5,
       "member_perf": {
         "VMC": -0.22,
@@ -4570,18 +5410,18 @@
         "6M": -9.68
       },
       "rs_rank": {
-        "1W": 90.6,
-        "1M": 83.8,
-        "3M": 11.1,
-        "6M": 29.1
+        "1W": 90.9,
+        "1M": 84.3,
+        "3M": 11.6,
+        "6M": 28.9
       },
       "breadth_50": 80.0,
       "breadth_200": 40.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 88.2,
-        "weekly": 73.7,
-        "monthly": 31.7
+        "daily": 88.5,
+        "weekly": 74.1,
+        "monthly": 32.0
       }
     },
     "Steel": {
@@ -4595,6 +5435,23 @@
         "RS",
         "CMC",
         "WOR",
+        "AA",
+        "CENX",
+        "CSTM",
+        "ASTL"
+      ],
+      "curated_members": [
+        "NUE",
+        "STLD",
+        "CLF",
+        "MT",
+        "TX",
+        "ATI",
+        "RS",
+        "CMC",
+        "WOR"
+      ],
+      "auto_members": [
         "AA",
         "CENX",
         "CSTM",
@@ -4623,18 +5480,18 @@
         "6M": 36.53
       },
       "rs_rank": {
-        "1W": 75.2,
-        "1M": 82.9,
-        "3M": 70.1,
-        "6M": 87.2
+        "1W": 76.0,
+        "1M": 83.5,
+        "3M": 71.1,
+        "6M": 88.4
       },
       "breadth_50": 100.0,
       "breadth_200": 84.6,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 83.3,
-        "weekly": 82.0,
-        "monthly": 79.3
+        "daily": 83.9,
+        "weekly": 82.6,
+        "monthly": 80.2
       }
     },
     "Copper / Base Metal": {
@@ -4647,6 +5504,29 @@
         "VALE",
         "ERO",
         "HBM",
+        "MP",
+        "USAR",
+        "IE",
+        "TMC",
+        "UAMY",
+        "CRML",
+        "CMP",
+        "NB",
+        "GSM",
+        "ALOY",
+        "OMEX"
+      ],
+      "curated_members": [
+        "FCX",
+        "SCCO",
+        "TECK",
+        "BHP",
+        "RIO",
+        "VALE",
+        "ERO",
+        "HBM"
+      ],
+      "auto_members": [
         "MP",
         "USAR",
         "IE",
@@ -4688,18 +5568,18 @@
         "6M": 9.0
       },
       "rs_rank": {
-        "1W": 10.3,
-        "1M": 81.2,
-        "3M": 10.3,
-        "6M": 66.7
+        "1W": 9.9,
+        "1M": 81.8,
+        "3M": 10.7,
+        "6M": 66.9
       },
       "breadth_50": 57.9,
       "breadth_200": 73.7,
       "trend_above_50ema": true,
       "scores": {
         "daily": 44.1,
-        "weekly": 52.9,
-        "monthly": 47.3
+        "weekly": 53.2,
+        "monthly": 47.7
       }
     },
     "Gold Miners": {
@@ -4717,6 +5597,34 @@
         "EGO",
         "NGD",
         "BTG",
+        "RGLD",
+        "CDE",
+        "HL",
+        "AUGO",
+        "NG",
+        "HYMC",
+        "MUX",
+        "DC",
+        "CTGO",
+        "LODE",
+        "NAMM"
+      ],
+      "curated_members": [
+        "NEM",
+        "AEM",
+        "GOLD",
+        "AU",
+        "KGC",
+        "AGI",
+        "PAAS",
+        "WPM",
+        "FNV",
+        "SSRM",
+        "EGO",
+        "NGD",
+        "BTG"
+      ],
+      "auto_members": [
         "RGLD",
         "CDE",
         "HL",
@@ -4763,18 +5671,18 @@
         "6M": 44.29
       },
       "rs_rank": {
-        "1W": 6.8,
-        "1M": 69.2,
-        "3M": 15.4,
-        "6M": 89.7
+        "1W": 6.6,
+        "1M": 68.6,
+        "3M": 15.7,
+        "6M": 90.9
       },
       "breadth_50": 29.2,
       "breadth_200": 87.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 35.1,
-        "weekly": 42.7,
-        "monthly": 56.5
+        "daily": 34.8,
+        "weekly": 42.4,
+        "monthly": 56.9
       }
     },
     "Lithium": {
@@ -4784,6 +5692,13 @@
         "LAC",
         "SGML"
       ],
+      "curated_members": [
+        "ALB",
+        "SQM",
+        "LAC",
+        "SGML"
+      ],
+      "auto_members": [],
       "member_count": 4,
       "member_perf": {
         "ALB": -2.49,
@@ -4798,18 +5713,18 @@
         "6M": 84.72
       },
       "rs_rank": {
-        "1W": 32.5,
-        "1M": 96.6,
-        "3M": 57.3,
-        "6M": 96.6
+        "1W": 30.6,
+        "1M": 96.7,
+        "3M": 57.9,
+        "6M": 96.7
       },
       "breadth_50": 100.0,
       "breadth_200": 75.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 65.4,
-        "weekly": 78.4,
-        "monthly": 77.6
+        "daily": 64.5,
+        "weekly": 78.1,
+        "monthly": 77.9
       }
     },
     "Specialty Chemicals": {
@@ -4825,6 +5740,37 @@
         "FUL",
         "CE",
         "ESI",
+        "IFF",
+        "SOLS",
+        "AXTA",
+        "PRM",
+        "CC",
+        "AVNT",
+        "CLMT",
+        "ASH",
+        "LWLG",
+        "ECVT",
+        "MATV",
+        "GEVO",
+        "ALTO",
+        "OEC",
+        "FF",
+        "AMTX"
+      ],
+      "curated_members": [
+        "LIN",
+        "APD",
+        "ECL",
+        "SHW",
+        "PPG",
+        "RPM",
+        "ALB",
+        "DD",
+        "FUL",
+        "CE",
+        "ESI"
+      ],
+      "auto_members": [
         "IFF",
         "SOLS",
         "AXTA",
@@ -4879,18 +5825,18 @@
         "6M": 36.23
       },
       "rs_rank": {
-        "1W": 73.5,
-        "1M": 58.1,
-        "3M": 88.9,
-        "6M": 86.3
+        "1W": 74.4,
+        "1M": 57.9,
+        "3M": 90.1,
+        "6M": 87.6
       },
       "breadth_50": 70.4,
       "breadth_200": 76.9,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 71.8,
-        "weekly": 67.6,
-        "monthly": 81.7
+        "daily": 72.2,
+        "weekly": 67.9,
+        "monthly": 82.5
       }
     },
     "Commodity Chem": {
@@ -4902,6 +5848,21 @@
         "WLK",
         "HUN",
         "TROX",
+        "GPRE",
+        "LXU",
+        "RYAM",
+        "ASIX"
+      ],
+      "curated_members": [
+        "DOW",
+        "LYB",
+        "EMN",
+        "OLN",
+        "WLK",
+        "HUN",
+        "TROX"
+      ],
+      "auto_members": [
         "GPRE",
         "LXU",
         "RYAM",
@@ -4928,18 +5889,18 @@
         "6M": 57.09
       },
       "rs_rank": {
-        "1W": 88.0,
-        "1M": 7.7,
-        "3M": 92.3,
-        "6M": 93.2
+        "1W": 88.4,
+        "1M": 7.4,
+        "3M": 93.4,
+        "6M": 94.2
       },
       "breadth_50": 81.8,
       "breadth_200": 100.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 68.2,
-        "weekly": 47.6,
-        "monthly": 81.0
+        "daily": 68.3,
+        "weekly": 47.7,
+        "monthly": 81.7
       }
     },
     "Packaging": {
@@ -4952,6 +5913,25 @@
         "OI",
         "BALL",
         "SON",
+        "SW",
+        "AVY",
+        "CCK",
+        "GPK",
+        "AMBP",
+        "TRS",
+        "ORBS"
+      ],
+      "curated_members": [
+        "PKG",
+        "IP",
+        "AMCR",
+        "SEE",
+        "SLGN",
+        "OI",
+        "BALL",
+        "SON"
+      ],
+      "auto_members": [
         "SW",
         "AVY",
         "CCK",
@@ -4985,18 +5965,18 @@
         "6M": -20.02
       },
       "rs_rank": {
-        "1W": 7.7,
-        "1M": 3.4,
-        "3M": 13.7,
-        "6M": 14.5
+        "1W": 7.4,
+        "1M": 3.3,
+        "3M": 14.0,
+        "6M": 14.9
       },
       "breadth_50": 13.3,
       "breadth_200": 46.7,
       "trend_above_50ema": false,
       "scores": {
-        "daily": 6.7,
-        "weekly": 7.3,
-        "monthly": 17.3
+        "daily": 6.5,
+        "weekly": 7.2,
+        "monthly": 17.6
       }
     },
     "Ag Inputs": {
@@ -5007,6 +5987,23 @@
         "NTR",
         "FMC",
         "SMG",
+        "ADM",
+        "BG",
+        "TSN",
+        "CALM",
+        "DOLE",
+        "VITL",
+        "VFF"
+      ],
+      "curated_members": [
+        "CTVA",
+        "MOS",
+        "CF",
+        "NTR",
+        "FMC",
+        "SMG"
+      ],
+      "auto_members": [
         "ADM",
         "BG",
         "TSN",
@@ -5038,18 +6035,18 @@
         "6M": -5.96
       },
       "rs_rank": {
-        "1W": 59.8,
-        "1M": 6.0,
-        "3M": 40.2,
-        "6M": 38.5
+        "1W": 60.3,
+        "1M": 5.8,
+        "3M": 41.3,
+        "6M": 38.0
       },
       "breadth_50": 38.5,
       "breadth_200": 61.5,
       "trend_above_50ema": false,
       "scores": {
-        "daily": 37.2,
-        "weekly": 26.8,
-        "monthly": 37.7
+        "daily": 37.4,
+        "weekly": 26.9,
+        "monthly": 38.0
       }
     },
     "Pipelines / Midstream": {
@@ -5066,6 +6063,38 @@
         "WES",
         "DTM",
         "PAGP",
+        "LNG",
+        "VNOM",
+        "AM",
+        "HESM",
+        "KNTK",
+        "GLNG",
+        "STNG",
+        "INSW",
+        "DHT",
+        "TNK",
+        "FLNG",
+        "LPG",
+        "NAT",
+        "TK",
+        "IMPP",
+        "RBNE"
+      ],
+      "curated_members": [
+        "ENB",
+        "ET",
+        "EPD",
+        "MPLX",
+        "WMB",
+        "OKE",
+        "KMI",
+        "TRGP",
+        "PAA",
+        "WES",
+        "DTM",
+        "PAGP"
+      ],
+      "auto_members": [
         "LNG",
         "VNOM",
         "AM",
@@ -5121,18 +6150,18 @@
         "6M": 20.22
       },
       "rs_rank": {
-        "1W": 71.8,
-        "1M": 10.3,
-        "3M": 85.5,
-        "6M": 77.8
+        "1W": 72.7,
+        "1M": 10.7,
+        "3M": 86.0,
+        "6M": 78.5
       },
       "breadth_50": 64.3,
       "breadth_200": 96.4,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 58.1,
-        "weekly": 42.0,
-        "monthly": 73.5
+        "daily": 58.7,
+        "weekly": 42.5,
+        "monthly": 74.0
       }
     },
     "Refiners": {
@@ -5144,6 +6173,22 @@
         "PBF",
         "HF",
         "DINO",
+        "IEP",
+        "CVI",
+        "PARR",
+        "WKC",
+        "CLNE"
+      ],
+      "curated_members": [
+        "MPC",
+        "VLO",
+        "PSX",
+        "DK",
+        "PBF",
+        "HF",
+        "DINO"
+      ],
+      "auto_members": [
         "IEP",
         "CVI",
         "PARR",
@@ -5172,18 +6217,18 @@
         "6M": 11.91
       },
       "rs_rank": {
-        "1W": 94.0,
-        "1M": 5.1,
-        "3M": 89.7,
-        "6M": 72.6
+        "1W": 94.2,
+        "1M": 5.0,
+        "3M": 90.9,
+        "6M": 72.7
       },
       "breadth_50": 66.7,
       "breadth_200": 91.7,
       "trend_above_50ema": true,
       "scores": {
         "daily": 68.3,
-        "weekly": 44.8,
-        "monthly": 72.2
+        "weekly": 45.0,
+        "monthly": 72.7
       }
     },
     "Oilfield Services": {
@@ -5198,6 +6243,46 @@
         "RIG",
         "OII",
         "TS",
+        "NE",
+        "AROC",
+        "VAL",
+        "KGS",
+        "SEI",
+        "LBRT",
+        "WHD",
+        "TDW",
+        "PTEN",
+        "HP",
+        "SDRL",
+        "NESR",
+        "FLOC",
+        "WTTR",
+        "SOC",
+        "NEXT",
+        "XPRO",
+        "INVX",
+        "BORR",
+        "AESI",
+        "RES",
+        "HLX",
+        "NPKI",
+        "ACDC",
+        "OIS",
+        "DTI"
+      ],
+      "curated_members": [
+        "SLB",
+        "HAL",
+        "BKR",
+        "FTI",
+        "WFRD",
+        "NOV",
+        "PUMP",
+        "RIG",
+        "OII",
+        "TS"
+      ],
+      "auto_members": [
         "NE",
         "AROC",
         "VAL",
@@ -5272,17 +6357,17 @@
       },
       "rs_rank": {
         "1W": 98.3,
-        "1M": 37.6,
-        "3M": 91.5,
-        "6M": 95.7
+        "1M": 38.0,
+        "3M": 92.6,
+        "6M": 95.9
       },
       "breadth_50": 88.9,
       "breadth_200": 94.4,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 81.9,
-        "weekly": 65.5,
-        "monthly": 85.1
+        "daily": 82.0,
+        "weekly": 65.9,
+        "monthly": 85.7
       }
     },
     "Telecom": {
@@ -5291,6 +6376,24 @@
         "VZ",
         "TMUS",
         "LUMN",
+        "SATS",
+        "TIGO",
+        "TDS",
+        "LBTYA",
+        "KYIV",
+        "CCOI",
+        "OPTU",
+        "GOGO",
+        "IQST",
+        "IOTR"
+      ],
+      "curated_members": [
+        "T",
+        "VZ",
+        "TMUS",
+        "LUMN"
+      ],
+      "auto_members": [
         "SATS",
         "TIGO",
         "TDS",
@@ -5326,18 +6429,18 @@
         "6M": -8.02
       },
       "rs_rank": {
-        "1W": 16.2,
-        "1M": 45.3,
-        "3M": 45.3,
-        "6M": 35.0
+        "1W": 15.7,
+        "1M": 46.3,
+        "3M": 46.3,
+        "6M": 34.7
       },
       "breadth_50": 57.1,
       "breadth_200": 42.9,
       "trend_above_50ema": true,
       "scores": {
         "daily": 38.0,
-        "weekly": 41.3,
-        "monthly": 41.9
+        "weekly": 41.8,
+        "monthly": 42.3
       }
     },
     "Cable": {
@@ -5346,6 +6449,12 @@
         "CHTR",
         "WBD"
       ],
+      "curated_members": [
+        "CMCSA",
+        "CHTR",
+        "WBD"
+      ],
+      "auto_members": [],
       "member_count": 3,
       "member_perf": {
         "CMCSA": -12.9,
@@ -5359,18 +6468,18 @@
         "6M": -5.77
       },
       "rs_rank": {
-        "1W": 0.9,
+        "1W": 0.8,
         "1M": 1.7,
-        "3M": 33.3,
-        "6M": 40.2
+        "3M": 33.9,
+        "6M": 39.7
       },
       "breadth_50": 0.0,
       "breadth_200": 33.3,
       "trend_above_50ema": false,
       "scores": {
-        "daily": 0.9,
-        "weekly": 6.0,
-        "monthly": 30.6
+        "daily": 0.8,
+        "weekly": 6.1,
+        "monthly": 30.7
       }
     },
     "Streaming / Media": {
@@ -5384,6 +6493,42 @@
         "LYV",
         "WMG",
         "SPOT",
+        "TKO",
+        "FOX",
+        "NWS",
+        "NYT",
+        "PSKY",
+        "NXST",
+        "VSNT",
+        "SPHR",
+        "CNK",
+        "LION",
+        "WLY",
+        "IMAX",
+        "SBGI",
+        "TDAY",
+        "AMC",
+        "NMAX",
+        "SCHL",
+        "HUYA",
+        "GTN",
+        "IHRT",
+        "SSP",
+        "ANGX",
+        "BBGI"
+      ],
+      "curated_members": [
+        "NFLX",
+        "DIS",
+        "WBD",
+        "ROKU",
+        "SIRI",
+        "FUBO",
+        "LYV",
+        "WMG",
+        "SPOT"
+      ],
+      "auto_members": [
         "TKO",
         "FOX",
         "NWS",
@@ -5450,18 +6595,18 @@
         "6M": 16.58
       },
       "rs_rank": {
-        "1W": 41.0,
-        "1M": 89.7,
-        "3M": 79.5,
+        "1W": 38.8,
+        "1M": 90.1,
+        "3M": 80.2,
         "6M": 75.2
       },
       "breadth_50": 68.8,
       "breadth_200": 63.3,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 63.3,
-        "weekly": 75.3,
-        "monthly": 77.3
+        "daily": 62.3,
+        "weekly": 75.1,
+        "monthly": 77.6
       }
     },
     "Video Games": {
@@ -5472,6 +6617,17 @@
         "U",
         "PLTK",
         "GLBE",
+        "GXAI"
+      ],
+      "curated_members": [
+        "TTWO",
+        "EA",
+        "RBLX",
+        "U",
+        "PLTK",
+        "GLBE"
+      ],
+      "auto_members": [
         "GXAI"
       ],
       "member_count": 7,
@@ -5491,18 +6647,18 @@
         "6M": -19.34
       },
       "rs_rank": {
-        "1W": 35.9,
-        "1M": 65.8,
-        "3M": 29.9,
-        "6M": 15.4
+        "1W": 33.9,
+        "1M": 65.3,
+        "3M": 29.8,
+        "6M": 15.7
       },
       "breadth_50": 71.4,
       "breadth_200": 14.3,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 55.1,
-        "weekly": 55.3,
-        "monthly": 28.6
+        "daily": 54.0,
+        "weekly": 54.6,
+        "monthly": 28.5
       }
     },
     "AdTech": {
@@ -5514,6 +6670,24 @@
         "APPS",
         "ZETA",
         "ROKU",
+        "APP",
+        "OMC",
+        "ZD",
+        "STGW",
+        "QNST",
+        "NCMI",
+        "CDLX"
+      ],
+      "curated_members": [
+        "TTD",
+        "PUBM",
+        "MGNI",
+        "DV",
+        "APPS",
+        "ZETA",
+        "ROKU"
+      ],
+      "auto_members": [
         "APP",
         "OMC",
         "ZD",
@@ -5546,18 +6720,18 @@
         "6M": -17.19
       },
       "rs_rank": {
-        "1W": 25.6,
-        "1M": 57.3,
-        "3M": 29.1,
-        "6M": 17.9
+        "1W": 24.8,
+        "1M": 57.0,
+        "3M": 28.9,
+        "6M": 18.2
       },
       "breadth_50": 78.6,
       "breadth_200": 35.7,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 48.9,
-        "weekly": 49.9,
-        "monthly": 31.0
+        "daily": 48.4,
+        "weekly": 49.6,
+        "monthly": 30.9
       }
     },
     "Tobacco": {
@@ -5565,6 +6739,15 @@
         "MO",
         "PM",
         "BTI",
+        "RLX",
+        "TPB"
+      ],
+      "curated_members": [
+        "MO",
+        "PM",
+        "BTI"
+      ],
+      "auto_members": [
         "RLX",
         "TPB"
       ],
@@ -5583,9 +6766,9 @@
         "6M": -2.53
       },
       "rs_rank": {
-        "1W": 79.5,
-        "1M": 9.4,
-        "3M": 21.4,
+        "1W": 79.3,
+        "1M": 9.9,
+        "3M": 21.5,
         "6M": 47.9
       },
       "breadth_50": 20.0,
@@ -5593,8 +6776,8 @@
       "trend_above_50ema": false,
       "scores": {
         "daily": 45.1,
-        "weekly": 26.8,
-        "monthly": 33.3
+        "weekly": 27.0,
+        "monthly": 33.5
       }
     },
     "Beverages": {
@@ -5611,6 +6794,25 @@
         "SAM",
         "FIZZ",
         "COCO",
+        "CCEP",
+        "COKE",
+        "PRMB"
+      ],
+      "curated_members": [
+        "KO",
+        "PEP",
+        "KDP",
+        "MNST",
+        "CELH",
+        "STZ",
+        "BUD",
+        "TAP",
+        "DEO",
+        "SAM",
+        "FIZZ",
+        "COCO"
+      ],
+      "auto_members": [
         "CCEP",
         "COKE",
         "PRMB"
@@ -5640,18 +6842,18 @@
         "6M": -2.35
       },
       "rs_rank": {
-        "1W": 54.7,
-        "1M": 23.9,
-        "3M": 53.8,
-        "6M": 48.7
+        "1W": 54.5,
+        "1M": 24.8,
+        "3M": 53.7,
+        "6M": 48.8
       },
       "breadth_50": 40.0,
       "breadth_200": 66.7,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 49.3,
-        "weekly": 37.0,
-        "monthly": 49.7
+        "daily": 49.5,
+        "weekly": 37.4,
+        "monthly": 49.8
       }
     },
     "Packaged Food": {
@@ -5667,6 +6869,34 @@
         "POST",
         "TR",
         "FLO",
+        "HSY",
+        "KHC",
+        "JBS",
+        "SFD",
+        "DAR",
+        "PPC",
+        "LW",
+        "FRPT",
+        "HLF",
+        "UTZ",
+        "SMPL",
+        "MAMA",
+        "BGS"
+      ],
+      "curated_members": [
+        "GIS",
+        "MDLZ",
+        "CAG",
+        "HRL",
+        "CPB",
+        "SJM",
+        "MKC",
+        "INGR",
+        "POST",
+        "TR",
+        "FLO"
+      ],
+      "auto_members": [
         "HSY",
         "KHC",
         "JBS",
@@ -5715,18 +6945,18 @@
         "6M": -8.58
       },
       "rs_rank": {
-        "1W": 55.6,
-        "1M": 17.9,
-        "3M": 36.8,
-        "6M": 31.6
+        "1W": 55.4,
+        "1M": 18.2,
+        "3M": 38.0,
+        "6M": 31.4
       },
       "breadth_50": 29.2,
       "breadth_200": 37.5,
       "trend_above_50ema": false,
       "scores": {
         "daily": 36.6,
-        "weekly": 30.0,
-        "monthly": 32.5
+        "weekly": 30.2,
+        "monthly": 33.0
       }
     },
     "Grocery": {
@@ -5736,6 +6966,13 @@
         "SFM",
         "GO"
       ],
+      "curated_members": [
+        "KR",
+        "ACI",
+        "SFM",
+        "GO"
+      ],
+      "auto_members": [],
       "member_count": 4,
       "member_perf": {
         "KR": -2.71,
@@ -5750,18 +6987,18 @@
         "6M": -31.11
       },
       "rs_rank": {
-        "1W": 65.0,
-        "1M": 19.7,
-        "3M": 43.6,
-        "6M": 3.4
+        "1W": 65.3,
+        "1M": 19.8,
+        "3M": 44.6,
+        "6M": 4.1
       },
       "breadth_50": 25.0,
       "breadth_200": 25.0,
       "trend_above_50ema": false,
       "scores": {
-        "daily": 41.1,
-        "weekly": 33.1,
-        "monthly": 25.2
+        "daily": 41.4,
+        "weekly": 33.4,
+        "monthly": 25.8
       }
     },
     "Personal Care": {
@@ -5775,6 +7012,35 @@
         "ENR",
         "REYN",
         "SPB",
+        "KVUE",
+        "ROL",
+        "SCI",
+        "BFAM",
+        "FTDR",
+        "ELF",
+        "HRB",
+        "COTY",
+        "NWL",
+        "EPC",
+        "ODD",
+        "HELE",
+        "HNST",
+        "EWCZ",
+        "YYGH",
+        "CLIK"
+      ],
+      "curated_members": [
+        "PG",
+        "CL",
+        "CHD",
+        "EL",
+        "KMB",
+        "CLX",
+        "ENR",
+        "REYN",
+        "SPB"
+      ],
+      "auto_members": [
         "KVUE",
         "ROL",
         "SCI",
@@ -5827,18 +7093,18 @@
         "6M": -19.17
       },
       "rs_rank": {
-        "1W": 65.8,
-        "1M": 71.8,
-        "3M": 18.8,
-        "6M": 16.2
+        "1W": 66.9,
+        "1M": 71.9,
+        "3M": 19.8,
+        "6M": 16.5
       },
       "breadth_50": 48.0,
       "breadth_200": 36.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 68.1,
-        "weekly": 59.1,
-        "monthly": 28.6
+        "daily": 68.6,
+        "weekly": 59.5,
+        "monthly": 29.1
       }
     },
     "Enterprise SaaS": {
@@ -5854,207 +7120,24 @@
         "HUBS",
         "BSY",
         "TEAM",
-        "PCTY",
-        "UBER",
-        "ACN",
-        "SNPS",
-        "CDNS",
-        "ADP",
-        "CRWV",
-        "ADSK",
-        "XYZ",
-        "ROP",
-        "FISV",
-        "PAYX",
-        "CTSH",
-        "ZM",
-        "VRSN",
-        "CPAY",
-        "TWLO",
-        "LDOS",
-        "BR",
-        "SSNC",
-        "FFIV",
-        "IOT",
-        "CDW",
-        "PTC",
-        "GRAB",
-        "GEN",
-        "GWRE",
-        "GDDY",
-        "IT",
-        "FIG",
-        "RBRK",
-        "AUR",
-        "NTNX",
-        "DOCU",
-        "CHYM",
-        "APLD",
-        "YMM",
-        "DOCN",
-        "PCOR",
-        "MANH",
-        "PEGA",
-        "CWAN",
-        "DOX",
-        "YOU",
-        "EPAM",
-        "PAYC",
-        "SAIL",
-        "INGM",
-        "BLSH",
-        "G",
-        "PSN",
-        "CORZ",
-        "WEX",
-        "TTAN",
-        "LYFT",
-        "DBX",
-        "KLAR",
-        "KVYO",
-        "SRAD",
-        "FROG",
-        "KC",
-        "FOUR",
-        "EXLS",
-        "DUOL",
-        "ACIW",
-        "SAIC",
-        "CVLT",
-        "DLO",
-        "NTSK",
-        "WIX",
-        "NAVN",
-        "BULL",
-        "LIF",
-        "MNDY",
-        "SOUN",
-        "BOX",
-        "NATL",
-        "RNG",
-        "WK",
-        "NIQ",
-        "CALX",
-        "CCC",
-        "QTWO",
-        "CLBT",
-        "DAVE",
-        "KD",
-        "BTDR",
-        "QLYS",
-        "DBD",
-        "ADEA",
-        "EEFT",
-        "VRNS",
-        "BRZE",
-        "TDC",
-        "VNET",
-        "PTRN",
-        "GRND",
-        "FRSH",
-        "NTCT",
-        "NN",
-        "ALRM",
-        "VRRM",
-        "DXC",
-        "AVPT",
-        "GLOB",
-        "NCNO",
-        "SPSC",
-        "VERX",
-        "BL",
-        "GTM",
-        "INTA",
-        "ATEN",
-        "BBAI",
-        "SEMR",
-        "ALKT",
-        "MQ",
-        "CNXC",
-        "BLKB",
-        "RAMP",
-        "GCT",
-        "WLTH",
-        "KDK",
-        "KEEL",
-        "CLVT",
-        "APPN",
-        "ASAN",
-        "TUYA",
-        "INOD",
-        "VIA",
-        "CXM",
-        "PENG",
-        "PRGS",
-        "FIVN",
-        "PGY",
-        "RZLV",
-        "UPBD",
-        "VYX",
-        "AEVA",
-        "NABL",
-        "AMPL",
-        "CTLP",
-        "MNTN",
-        "CGNT",
-        "VTEX",
-        "SABR",
-        "MITK",
-        "TASK",
-        "WYFI",
-        "PAR",
-        "GDYN",
-        "RBBN",
-        "YEXT",
-        "PSFE",
-        "AIOT",
-        "OSPN",
-        "BLND",
-        "TSSI",
-        "AZ",
-        "RPD",
-        "CRNC",
-        "TLS",
-        "BNAI",
-        "SPT",
-        "PAYS",
-        "NUAI",
-        "PDYN",
-        "RXT",
-        "BKKT",
-        "GRRR",
-        "RPAY",
-        "EGHT",
-        "SUPX",
-        "DUOT",
-        "CNDT",
-        "BLZE",
-        "CMRC",
-        "BZAI",
-        "IMMR",
-        "VERI",
-        "UIS",
-        "IDN",
-        "THRY",
-        "TTEC",
-        "DOMO",
-        "ZENA",
-        "AISP",
-        "LIDR",
-        "FUSE",
-        "ARAI",
-        "AIXI",
-        "NVNI",
-        "CETX",
-        "RMSG",
-        "HKIT",
-        "CYCU",
-        "MYSE",
-        "JTAI",
-        "MASK",
-        "JDZG"
+        "PCTY"
       ],
-      "member_count": 210,
+      "curated_members": [
+        "CRM",
+        "NOW",
+        "ADBE",
+        "INTU",
+        "WDAY",
+        "TYL",
+        "SAP",
+        "ORCL",
+        "HUBS",
+        "BSY",
+        "TEAM",
+        "PCTY"
+      ],
+      "auto_members": [],
+      "member_count": 12,
       "member_perf": {
         "CRM": 2.8,
         "NOW": 6.36,
@@ -6067,225 +7150,27 @@
         "HUBS": 4.02,
         "BSY": 2.42,
         "TEAM": 5.81,
-        "PCTY": 2.11,
-        "UBER": -0.08,
-        "ACN": 0.04,
-        "SNPS": 9.62,
-        "CDNS": 5.9,
-        "ADP": -1.01,
-        "CRWV": -6.2,
-        "ADSK": 2.35,
-        "XYZ": 2.43,
-        "ROP": -2.85,
-        "FISV": -1.15,
-        "PAYX": -1.24,
-        "CTSH": 0.02,
-        "ZM": 2.24,
-        "VRSN": -2.8,
-        "CPAY": -0.18,
-        "TWLO": 1.55,
-        "LDOS": -1.04,
-        "BR": -0.56,
-        "SSNC": -3.95,
-        "FFIV": 1.09,
-        "IOT": 2.32,
-        "CDW": -0.84,
-        "PTC": 0.99,
-        "GRAB": -1.52,
-        "GEN": 1.22,
-        "GWRE": 6.33,
-        "GDDY": 1.5,
-        "IT": 1.31,
-        "FIG": 0.87,
-        "RBRK": 2.45,
-        "AUR": 1.87,
-        "NTNX": 3.6,
-        "DOCU": 2.67,
-        "CHYM": -0.18,
-        "APLD": -3.77,
-        "YMM": 1.88,
-        "DOCN": -0.68,
-        "PCOR": 3.75,
-        "MANH": 2.91,
-        "PEGA": 5.9,
-        "CWAN": -0.12,
-        "DOX": 0.82,
-        "YOU": 1.97,
-        "EPAM": -1.48,
-        "PAYC": -1.42,
-        "SAIL": 2.93,
-        "INGM": -0.2,
-        "BLSH": -5.62,
-        "G": -0.52,
-        "PSN": 3.13,
-        "CORZ": 0.34,
-        "WEX": -2.78,
-        "TTAN": 2.84,
-        "LYFT": 1.5,
-        "DBX": 0.5,
-        "KLAR": 2.7,
-        "KVYO": 3.68,
-        "SRAD": 3.02,
-        "FROG": 2.91,
-        "KC": -3.48,
-        "FOUR": -2.08,
-        "EXLS": -0.52,
-        "DUOL": 3.15,
-        "ACIW": 2.32,
-        "SAIC": 0.36,
-        "CVLT": 4.18,
-        "DLO": 3.38,
-        "NTSK": -1.63,
-        "WIX": 5.14,
-        "NAVN": 0.71,
-        "BULL": -0.14,
-        "LIF": 4.47,
-        "MNDY": 4.94,
-        "SOUN": 4.73,
-        "BOX": 3.19,
-        "NATL": -1.83,
-        "RNG": 5.88,
-        "WK": 1.84,
-        "NIQ": 2.94,
-        "CALX": 1.62,
-        "CCC": 3.97,
-        "QTWO": 4.1,
-        "CLBT": -0.24,
-        "DAVE": 0.08,
-        "KD": 1.12,
-        "BTDR": -0.82,
-        "QLYS": 0.36,
-        "DBD": 1.35,
-        "ADEA": 0.63,
-        "EEFT": -0.55,
-        "VRNS": 2.55,
-        "BRZE": 3.61,
-        "TDC": 2.01,
-        "VNET": 4.3,
-        "PTRN": 1.81,
-        "GRND": 3.06,
-        "FRSH": 2.42,
-        "NTCT": 2.06,
-        "NN": -1.17,
-        "ALRM": 2.92,
-        "VRRM": -0.6,
-        "DXC": -0.25,
-        "AVPT": 2.39,
-        "GLOB": -1.11,
-        "NCNO": 4.31,
-        "SPSC": 2.49,
-        "VERX": 7.1,
-        "BL": 4.25,
-        "GTM": 4.43,
-        "INTA": 2.44,
-        "ATEN": 3.53,
-        "BBAI": -0.8,
-        "SEMR": 0.17,
-        "ALKT": 1.82,
-        "MQ": 0.47,
-        "CNXC": -0.93,
-        "BLKB": 3.59,
-        "RAMP": 4.09,
-        "GCT": -1.6,
-        "WLTH": 1.71,
-        "KDK": -1.46,
-        "KEEL": 1.54,
-        "CLVT": -2.0,
-        "APPN": 2.52,
-        "ASAN": 4.75,
-        "TUYA": 4.35,
-        "INOD": -2.62,
-        "VIA": 0.19,
-        "CXM": 3.72,
-        "PENG": 11.16,
-        "PRGS": -0.84,
-        "FIVN": 7.05,
-        "PGY": 0.59,
-        "RZLV": 0.77,
-        "UPBD": 1.18,
-        "VYX": 5.06,
-        "AEVA": 4.39,
-        "NABL": 5.5,
-        "AMPL": 5.22,
-        "CTLP": 0.28,
-        "MNTN": 1.73,
-        "CGNT": 1.48,
-        "VTEX": 3.07,
-        "SABR": 4.0,
-        "MITK": 2.36,
-        "TASK": 1.41,
-        "WYFI": -1.02,
-        "PAR": 2.16,
-        "GDYN": 2.69,
-        "RBBN": 2.58,
-        "YEXT": 2.39,
-        "PSFE": 1.75,
-        "AIOT": -2.62,
-        "OSPN": 1.43,
-        "BLND": 5.04,
-        "TSSI": -0.32,
-        "AZ": 0.26,
-        "RPD": 2.94,
-        "CRNC": 8.03,
-        "TLS": 3.99,
-        "BNAI": -4.09,
-        "SPT": 6.96,
-        "PAYS": 2.13,
-        "NUAI": -0.93,
-        "PDYN": -2.17,
-        "RXT": -7.06,
-        "BKKT": 1.73,
-        "GRRR": 2.67,
-        "RPAY": -8.96,
-        "EGHT": 1.6,
-        "SUPX": -8.78,
-        "DUOT": -0.12,
-        "CNDT": 1.19,
-        "BLZE": 4.47,
-        "CMRC": 2.04,
-        "BZAI": 4.69,
-        "IMMR": -0.33,
-        "VERI": 2.29,
-        "UIS": 3.11,
-        "IDN": -6.94,
-        "THRY": 5.06,
-        "TTEC": 2.31,
-        "DOMO": 2.37,
-        "ZENA": 1.44,
-        "AISP": -0.79,
-        "LIDR": 29.59,
-        "FUSE": 7.47,
-        "ARAI": -0.27,
-        "AIXI": -29.63,
-        "NVNI": 0.0,
-        "CETX": -1.79,
-        "RMSG": -5.64,
-        "HKIT": -1.0,
-        "CYCU": -7.0,
-        "MYSE": 6.69,
-        "JTAI": -7.41,
-        "MASK": -4.19,
-        "JDZG": 1.69
+        "PCTY": 2.11
       },
       "rs_excess_pct": {
-        "1W": -2.84,
-        "1M": 4.19,
-        "3M": -11.72,
-        "6M": -25.02
+        "1W": -1.42,
+        "1M": -9.26,
+        "3M": -29.1,
+        "6M": -47.6
       },
       "rs_rank": {
-        "1W": 29.1,
-        "1M": 76.9,
-        "3M": 19.7,
-        "6M": 10.3
+        "1W": 47.1,
+        "1M": 9.1,
+        "3M": 0.8,
+        "6M": 1.7
       },
-      "breadth_50": 55.7,
-      "breadth_200": 23.6,
-      "trend_above_50ema": true,
+      "breadth_50": 16.7,
+      "breadth_200": 0.0,
+      "trend_above_50ema": false,
       "scores": {
-        "daily": 52.1,
-        "weekly": 55.6,
-        "monthly": 26.0
+        "daily": 28.3,
+        "weekly": 16.6,
+        "monthly": 2.2
       }
     },
     "Cloud / CDN": {
@@ -6294,6 +7179,12 @@
         "FSLY",
         "AKAM"
       ],
+      "curated_members": [
+        "NET",
+        "FSLY",
+        "AKAM"
+      ],
+      "auto_members": [],
       "member_count": 3,
       "member_perf": {
         "NET": 1.01,
@@ -6307,17 +7198,17 @@
         "6M": 59.04
       },
       "rs_rank": {
-        "1W": 57.3,
-        "1M": 0.9,
-        "3M": 97.4,
-        "6M": 94.9
+        "1W": 57.0,
+        "1M": 0.8,
+        "3M": 97.5,
+        "6M": 95.0
       },
       "breadth_50": 33.3,
       "breadth_200": 100.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 43.8,
-        "weekly": 31.5,
+        "daily": 43.7,
+        "weekly": 31.4,
         "monthly": 82.6
       }
     },
@@ -6336,6 +7227,21 @@
         "BSY",
         "PD"
       ],
+      "curated_members": [
+        "SNOW",
+        "DDOG",
+        "MDB",
+        "ESTC",
+        "GTLB",
+        "DT",
+        "CFLT",
+        "S",
+        "PATH",
+        "AI",
+        "BSY",
+        "PD"
+      ],
+      "auto_members": [],
       "member_count": 12,
       "member_perf": {
         "SNOW": -4.15,
@@ -6358,18 +7264,18 @@
         "6M": -38.66
       },
       "rs_rank": {
-        "1W": 56.4,
-        "1M": 12.8,
-        "3M": 3.4,
-        "6M": 2.6
+        "1W": 56.2,
+        "1M": 13.2,
+        "3M": 4.1,
+        "6M": 3.3
       },
       "breadth_50": 33.3,
       "breadth_200": 8.3,
       "trend_above_50ema": false,
       "scores": {
         "daily": 36.4,
-        "weekly": 23.2,
-        "monthly": 5.3
+        "weekly": 23.5,
+        "monthly": 5.9
       }
     },
     "Payments": {
@@ -6386,6 +7292,20 @@
         "PAYO",
         "FLYW"
       ],
+      "curated_members": [
+        "V",
+        "MA",
+        "PYPL",
+        "FIS",
+        "JKHY",
+        "GPN",
+        "WU",
+        "RELY",
+        "EBC",
+        "PAYO",
+        "FLYW"
+      ],
+      "auto_members": [],
       "member_count": 11,
       "member_perf": {
         "V": 0.17,
@@ -6407,18 +7327,18 @@
         "6M": -12.56
       },
       "rs_rank": {
-        "1W": 23.9,
-        "1M": 23.1,
-        "3M": 35.0,
-        "6M": 23.9
+        "1W": 23.1,
+        "1M": 24.0,
+        "3M": 35.5,
+        "6M": 24.0
       },
       "breadth_50": 36.4,
       "breadth_200": 36.4,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 33.2,
-        "weekly": 27.0,
-        "monthly": 30.1
+        "daily": 33.0,
+        "weekly": 27.4,
+        "monthly": 30.5
       }
     },
     "BNPL / Consumer Lending": {
@@ -6430,6 +7350,15 @@
         "OPRT",
         "ENVA"
       ],
+      "curated_members": [
+        "AFRM",
+        "UPST",
+        "PAGS",
+        "STNE",
+        "OPRT",
+        "ENVA"
+      ],
+      "auto_members": [],
       "member_count": 6,
       "member_perf": {
         "AFRM": 1.17,
@@ -6446,18 +7375,18 @@
         "6M": -5.87
       },
       "rs_rank": {
-        "1W": 33.3,
-        "1M": 88.0,
-        "3M": 28.2,
-        "6M": 39.3
+        "1W": 31.4,
+        "1M": 88.4,
+        "3M": 28.1,
+        "6M": 38.8
       },
       "breadth_50": 83.3,
       "breadth_200": 50.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 61.2,
-        "weekly": 67.4,
-        "monthly": 43.8
+        "daily": 60.3,
+        "weekly": 67.2,
+        "monthly": 43.7
       }
     },
     "E-Commerce": {
@@ -6476,6 +7405,31 @@
         "GLBE",
         "RVLV",
         "SE",
+        "DASH",
+        "CART",
+        "RERE",
+        "TDUP",
+        "BZUN",
+        "WBUY",
+        "IPW"
+      ],
+      "curated_members": [
+        "AMZN",
+        "SHOP",
+        "MELI",
+        "EBAY",
+        "ETSY",
+        "W",
+        "CHWY",
+        "JD",
+        "BABA",
+        "PDD",
+        "CPNG",
+        "GLBE",
+        "RVLV",
+        "SE"
+      ],
+      "auto_members": [
         "DASH",
         "CART",
         "RERE",
@@ -6515,18 +7469,18 @@
         "6M": -27.51
       },
       "rs_rank": {
-        "1W": 17.1,
-        "1M": 53.8,
-        "3M": 6.8,
-        "6M": 7.7
+        "1W": 16.5,
+        "1M": 54.5,
+        "3M": 7.4,
+        "6M": 8.3
       },
       "breadth_50": 76.2,
       "breadth_200": 33.3,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 43.4,
-        "weekly": 42.8,
-        "monthly": 18.1
+        "daily": 43.3,
+        "weekly": 43.1,
+        "monthly": 18.6
       }
     },
     "China ADRs": {
@@ -6548,6 +7502,25 @@
         "NIO",
         "XPEV"
       ],
+      "curated_members": [
+        "BABA",
+        "PDD",
+        "JD",
+        "BIDU",
+        "NTES",
+        "TCOM",
+        "BILI",
+        "TME",
+        "ZTO",
+        "VIPS",
+        "IQ",
+        "WB",
+        "BEKE",
+        "LI",
+        "NIO",
+        "XPEV"
+      ],
+      "auto_members": [],
       "member_count": 16,
       "member_perf": {
         "BABA": 3.13,
@@ -6574,18 +7547,18 @@
         "6M": -24.65
       },
       "rs_rank": {
-        "1W": 9.4,
-        "1M": 13.7,
-        "3M": 8.5,
-        "6M": 11.1
+        "1W": 9.1,
+        "1M": 14.0,
+        "3M": 9.1,
+        "6M": 10.7
       },
       "breadth_50": 50.0,
       "breadth_200": 25.0,
       "trend_above_50ema": false,
       "scores": {
         "daily": 15.6,
-        "weekly": 17.5,
-        "monthly": 12.6
+        "weekly": 17.7,
+        "monthly": 12.7
       }
     },
     "LATAM": {
@@ -6601,6 +7574,19 @@
         "ABEV",
         "SBS"
       ],
+      "curated_members": [
+        "MELI",
+        "PAGS",
+        "STNE",
+        "NU",
+        "BBD",
+        "ITUB",
+        "VALE",
+        "PBR",
+        "ABEV",
+        "SBS"
+      ],
+      "auto_members": [],
       "member_count": 10,
       "member_perf": {
         "MELI": 1.44,
@@ -6621,18 +7607,18 @@
         "6M": 16.3
       },
       "rs_rank": {
-        "1W": 20.5,
-        "1M": 48.7,
-        "3M": 61.5,
+        "1W": 19.0,
+        "1M": 49.6,
+        "3M": 62.0,
         "6M": 74.4
       },
       "breadth_50": 70.0,
       "breadth_200": 70.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 42.9,
-        "weekly": 48.2,
-        "monthly": 64.7
+        "daily": 42.4,
+        "weekly": 48.4,
+        "monthly": 65.0
       }
     },
     "Cannabis": {
@@ -6644,6 +7630,15 @@
         "OGI",
         "CRON"
       ],
+      "curated_members": [
+        "TLRY",
+        "CGC",
+        "SNDL",
+        "ACB",
+        "OGI",
+        "CRON"
+      ],
+      "auto_members": [],
       "member_count": 6,
       "member_perf": {
         "TLRY": -2.74,
@@ -6660,18 +7655,18 @@
         "6M": -28.93
       },
       "rs_rank": {
-        "1W": 47.0,
-        "1M": 40.2,
-        "3M": 9.4,
-        "6M": 4.3
+        "1W": 45.5,
+        "1M": 40.5,
+        "3M": 9.9,
+        "6M": 5.0
       },
       "breadth_50": 66.7,
       "breadth_200": 16.7,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 53.5,
-        "weekly": 40.9,
-        "monthly": 13.6
+        "daily": 52.9,
+        "weekly": 40.8,
+        "monthly": 14.0
       }
     },
     "Top Recurring": {
@@ -6689,6 +7684,21 @@
         "SMCI",
         "MU"
       ],
+      "curated_members": [
+        "NVDA",
+        "PLTR",
+        "AMZN",
+        "MSFT",
+        "GOOGL",
+        "META",
+        "TSLA",
+        "AMD",
+        "MRVL",
+        "ZS",
+        "SMCI",
+        "MU"
+      ],
+      "auto_members": [],
       "member_count": 12,
       "member_perf": {
         "NVDA": 4.32,
@@ -6711,18 +7721,1536 @@
         "6M": 3.0
       },
       "rs_rank": {
-        "1W": 89.7,
-        "1M": 88.9,
-        "3M": 66.7,
-        "6M": 59.0
+        "1W": 90.1,
+        "1M": 89.3,
+        "3M": 67.8,
+        "6M": 58.7
       },
       "breadth_50": 75.0,
       "breadth_200": 50.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 88.3,
-        "weekly": 83.6,
-        "monthly": 65.2
+        "daily": 88.6,
+        "weekly": 84.1,
+        "monthly": 65.6
+      }
+    },
+    "Software (Broad)": {
+      "members": [
+        "UBER",
+        "ACN",
+        "SNPS",
+        "CDNS",
+        "ADP",
+        "CRWV",
+        "ADSK",
+        "XYZ",
+        "ROP",
+        "FISV",
+        "PAYX",
+        "CTSH",
+        "VEEV",
+        "ZM",
+        "VRSN",
+        "VRSK",
+        "CPAY",
+        "TWLO",
+        "LDOS",
+        "BR",
+        "HPQ",
+        "SSNC",
+        "FFIV",
+        "IOT",
+        "CDW",
+        "PTC",
+        "GRAB",
+        "TRMB",
+        "J",
+        "GEN",
+        "GWRE",
+        "GDDY",
+        "IT",
+        "FIG",
+        "RBRK",
+        "AUR",
+        "NTNX",
+        "TEM",
+        "DOCU",
+        "VIAV",
+        "CHYM",
+        "APLD",
+        "YMM",
+        "DOCN",
+        "PCOR",
+        "MANH",
+        "PEGA",
+        "CWAN",
+        "DOX",
+        "YOU",
+        "EPAM",
+        "PAYC",
+        "SAIL",
+        "INGM",
+        "BLSH",
+        "G",
+        "PSN",
+        "CORZ",
+        "DLB",
+        "WEX",
+        "TTAN",
+        "LYFT",
+        "DBX",
+        "KLAR",
+        "KVYO",
+        "SRAD",
+        "EQPT",
+        "FROG",
+        "KC",
+        "FOUR",
+        "EXLS",
+        "WAY",
+        "KBR",
+        "DUOL",
+        "DOCS",
+        "ACIW",
+        "SAIC",
+        "CVLT",
+        "DLO",
+        "NTSK",
+        "WIX",
+        "NAVN",
+        "BULL",
+        "LIF",
+        "CARG",
+        "MNDY",
+        "SOUN",
+        "BOX",
+        "NATL",
+        "OPLN",
+        "HNGE",
+        "RNG",
+        "WK",
+        "NIQ",
+        "CALX",
+        "CCC",
+        "QTWO",
+        "CLBT",
+        "DAVE",
+        "KD",
+        "BTDR",
+        "QLYS",
+        "DBD",
+        "ADEA",
+        "EEFT",
+        "VRNS",
+        "BRZE",
+        "HTFL",
+        "TDC",
+        "VNET",
+        "PTRN",
+        "GRND",
+        "XMTR",
+        "FRSH",
+        "NTCT",
+        "NN",
+        "ALRM",
+        "VRRM",
+        "DXC",
+        "AVPT",
+        "GLOB",
+        "NCNO",
+        "SPSC",
+        "FA",
+        "VERX",
+        "BL",
+        "GTM",
+        "INTA",
+        "ATEN",
+        "BBAI",
+        "SEMR",
+        "ALKT",
+        "MQ",
+        "CNXC",
+        "BLKB",
+        "RAMP",
+        "GCT",
+        "WLTH",
+        "KDK",
+        "KEEL",
+        "CLVT",
+        "APPN",
+        "ASAN",
+        "TUYA",
+        "INOD",
+        "VIA",
+        "CXM",
+        "PENG",
+        "PRGS",
+        "BKSY",
+        "FIVN",
+        "PGY",
+        "RZLV",
+        "UPBD",
+        "LZ",
+        "COUR",
+        "CERT",
+        "VYX",
+        "AEVA",
+        "NABL",
+        "SDGR",
+        "AMPL",
+        "ACVA",
+        "CTLP",
+        "OMDA",
+        "SPIR",
+        "UDMY",
+        "MNTN",
+        "CGNT",
+        "VTEX",
+        "NTGR",
+        "SABR",
+        "MITK",
+        "CRSR",
+        "TASK",
+        "WYFI",
+        "PAR",
+        "PHR",
+        "GDYN",
+        "RBBN",
+        "YEXT",
+        "PSFE",
+        "AIOT",
+        "OSPN",
+        "WEAV",
+        "BLND",
+        "TSSI",
+        "AZ",
+        "RPD",
+        "CRNC",
+        "TLS",
+        "BNAI",
+        "SPT",
+        "PAYS",
+        "NUAI",
+        "PDYN",
+        "RXT",
+        "DDD",
+        "SLP",
+        "BKKT",
+        "GRRR",
+        "SY",
+        "RPAY",
+        "EGHT",
+        "SUPX",
+        "DUOT",
+        "CNDT",
+        "BLZE",
+        "CMRC",
+        "BZAI",
+        "IMMR",
+        "VERI",
+        "UIS",
+        "IDN",
+        "THRY",
+        "TTEC",
+        "DOMO",
+        "CCLD",
+        "OPRX",
+        "ZENA",
+        "HCAT",
+        "AISP",
+        "LIDR",
+        "SKIL",
+        "FUSE",
+        "ARAI",
+        "SMX",
+        "AIXI",
+        "NVNI",
+        "CETX",
+        "RMSG",
+        "HKIT",
+        "CYCU",
+        "MYSE",
+        "JTAI",
+        "HCTI",
+        "KIDZ",
+        "MASK",
+        "JDZG"
+      ],
+      "curated_members": [],
+      "auto_members": [
+        "UBER",
+        "ACN",
+        "SNPS",
+        "CDNS",
+        "ADP",
+        "CRWV",
+        "ADSK",
+        "XYZ",
+        "ROP",
+        "FISV",
+        "PAYX",
+        "CTSH",
+        "VEEV",
+        "ZM",
+        "VRSN",
+        "VRSK",
+        "CPAY",
+        "TWLO",
+        "LDOS",
+        "BR",
+        "HPQ",
+        "SSNC",
+        "FFIV",
+        "IOT",
+        "CDW",
+        "PTC",
+        "GRAB",
+        "TRMB",
+        "J",
+        "GEN",
+        "GWRE",
+        "GDDY",
+        "IT",
+        "FIG",
+        "RBRK",
+        "AUR",
+        "NTNX",
+        "TEM",
+        "DOCU",
+        "VIAV",
+        "CHYM",
+        "APLD",
+        "YMM",
+        "DOCN",
+        "PCOR",
+        "MANH",
+        "PEGA",
+        "CWAN",
+        "DOX",
+        "YOU",
+        "EPAM",
+        "PAYC",
+        "SAIL",
+        "INGM",
+        "BLSH",
+        "G",
+        "PSN",
+        "CORZ",
+        "DLB",
+        "WEX",
+        "TTAN",
+        "LYFT",
+        "DBX",
+        "KLAR",
+        "KVYO",
+        "SRAD",
+        "EQPT",
+        "FROG",
+        "KC",
+        "FOUR",
+        "EXLS",
+        "WAY",
+        "KBR",
+        "DUOL",
+        "DOCS",
+        "ACIW",
+        "SAIC",
+        "CVLT",
+        "DLO",
+        "NTSK",
+        "WIX",
+        "NAVN",
+        "BULL",
+        "LIF",
+        "CARG",
+        "MNDY",
+        "SOUN",
+        "BOX",
+        "NATL",
+        "OPLN",
+        "HNGE",
+        "RNG",
+        "WK",
+        "NIQ",
+        "CALX",
+        "CCC",
+        "QTWO",
+        "CLBT",
+        "DAVE",
+        "KD",
+        "BTDR",
+        "QLYS",
+        "DBD",
+        "ADEA",
+        "EEFT",
+        "VRNS",
+        "BRZE",
+        "HTFL",
+        "TDC",
+        "VNET",
+        "PTRN",
+        "GRND",
+        "XMTR",
+        "FRSH",
+        "NTCT",
+        "NN",
+        "ALRM",
+        "VRRM",
+        "DXC",
+        "AVPT",
+        "GLOB",
+        "NCNO",
+        "SPSC",
+        "FA",
+        "VERX",
+        "BL",
+        "GTM",
+        "INTA",
+        "ATEN",
+        "BBAI",
+        "SEMR",
+        "ALKT",
+        "MQ",
+        "CNXC",
+        "BLKB",
+        "RAMP",
+        "GCT",
+        "WLTH",
+        "KDK",
+        "KEEL",
+        "CLVT",
+        "APPN",
+        "ASAN",
+        "TUYA",
+        "INOD",
+        "VIA",
+        "CXM",
+        "PENG",
+        "PRGS",
+        "BKSY",
+        "FIVN",
+        "PGY",
+        "RZLV",
+        "UPBD",
+        "LZ",
+        "COUR",
+        "CERT",
+        "VYX",
+        "AEVA",
+        "NABL",
+        "SDGR",
+        "AMPL",
+        "ACVA",
+        "CTLP",
+        "OMDA",
+        "SPIR",
+        "UDMY",
+        "MNTN",
+        "CGNT",
+        "VTEX",
+        "NTGR",
+        "SABR",
+        "MITK",
+        "CRSR",
+        "TASK",
+        "WYFI",
+        "PAR",
+        "PHR",
+        "GDYN",
+        "RBBN",
+        "YEXT",
+        "PSFE",
+        "AIOT",
+        "OSPN",
+        "WEAV",
+        "BLND",
+        "TSSI",
+        "AZ",
+        "RPD",
+        "CRNC",
+        "TLS",
+        "BNAI",
+        "SPT",
+        "PAYS",
+        "NUAI",
+        "PDYN",
+        "RXT",
+        "DDD",
+        "SLP",
+        "BKKT",
+        "GRRR",
+        "SY",
+        "RPAY",
+        "EGHT",
+        "SUPX",
+        "DUOT",
+        "CNDT",
+        "BLZE",
+        "CMRC",
+        "BZAI",
+        "IMMR",
+        "VERI",
+        "UIS",
+        "IDN",
+        "THRY",
+        "TTEC",
+        "DOMO",
+        "CCLD",
+        "OPRX",
+        "ZENA",
+        "HCAT",
+        "AISP",
+        "LIDR",
+        "SKIL",
+        "FUSE",
+        "ARAI",
+        "SMX",
+        "AIXI",
+        "NVNI",
+        "CETX",
+        "RMSG",
+        "HKIT",
+        "CYCU",
+        "MYSE",
+        "JTAI",
+        "HCTI",
+        "KIDZ",
+        "MASK",
+        "JDZG"
+      ],
+      "member_count": 239,
+      "member_perf": {
+        "UBER": -0.08,
+        "ACN": 0.04,
+        "SNPS": 9.62,
+        "CDNS": 5.9,
+        "ADP": -1.01,
+        "CRWV": -6.2,
+        "ADSK": 2.35,
+        "XYZ": 2.43,
+        "ROP": -2.85,
+        "FISV": -1.15,
+        "PAYX": -1.24,
+        "CTSH": 0.02,
+        "VEEV": 3.19,
+        "ZM": 2.24,
+        "VRSN": -2.8,
+        "VRSK": 0.25,
+        "CPAY": -0.18,
+        "TWLO": 1.55,
+        "LDOS": -1.04,
+        "BR": -0.56,
+        "HPQ": -1.74,
+        "SSNC": -3.95,
+        "FFIV": 1.09,
+        "IOT": 2.32,
+        "CDW": -0.84,
+        "PTC": 0.99,
+        "GRAB": -1.52,
+        "TRMB": 0.46,
+        "J": -0.77,
+        "GEN": 1.22,
+        "GWRE": 6.33,
+        "GDDY": 1.5,
+        "IT": 1.31,
+        "FIG": 0.87,
+        "RBRK": 2.45,
+        "AUR": 1.87,
+        "NTNX": 3.6,
+        "TEM": 1.32,
+        "DOCU": 2.67,
+        "VIAV": 3.47,
+        "CHYM": -0.18,
+        "APLD": -3.77,
+        "YMM": 1.88,
+        "DOCN": -0.68,
+        "PCOR": 3.75,
+        "MANH": 2.91,
+        "PEGA": 5.9,
+        "CWAN": -0.12,
+        "DOX": 0.82,
+        "YOU": 1.97,
+        "EPAM": -1.48,
+        "PAYC": -1.42,
+        "SAIL": 2.93,
+        "INGM": -0.2,
+        "BLSH": -5.62,
+        "G": -0.52,
+        "PSN": 3.13,
+        "CORZ": 0.34,
+        "DLB": 1.78,
+        "WEX": -2.78,
+        "TTAN": 2.84,
+        "LYFT": 1.5,
+        "DBX": 0.5,
+        "KLAR": 2.7,
+        "KVYO": 3.68,
+        "SRAD": 3.02,
+        "EQPT": -6.28,
+        "FROG": 2.91,
+        "KC": -3.48,
+        "FOUR": -2.08,
+        "EXLS": -0.52,
+        "WAY": 2.29,
+        "KBR": 0.0,
+        "DUOL": 3.15,
+        "DOCS": 3.63,
+        "ACIW": 2.32,
+        "SAIC": 0.36,
+        "CVLT": 4.18,
+        "DLO": 3.38,
+        "NTSK": -1.63,
+        "WIX": 5.14,
+        "NAVN": 0.71,
+        "BULL": -0.14,
+        "LIF": 4.47,
+        "CARG": 0.37,
+        "MNDY": 4.94,
+        "SOUN": 4.73,
+        "BOX": 3.19,
+        "NATL": -1.83,
+        "OPLN": 0.63,
+        "HNGE": 2.43,
+        "RNG": 5.88,
+        "WK": 1.84,
+        "NIQ": 2.94,
+        "CALX": 1.62,
+        "CCC": 3.97,
+        "QTWO": 4.1,
+        "CLBT": -0.24,
+        "DAVE": 0.08,
+        "KD": 1.12,
+        "BTDR": -0.82,
+        "QLYS": 0.36,
+        "DBD": 1.35,
+        "ADEA": 0.63,
+        "EEFT": -0.55,
+        "VRNS": 2.55,
+        "BRZE": 3.61,
+        "HTFL": -2.56,
+        "TDC": 2.01,
+        "VNET": 4.3,
+        "PTRN": 1.81,
+        "GRND": 3.06,
+        "XMTR": 1.77,
+        "FRSH": 2.42,
+        "NTCT": 2.06,
+        "NN": -1.17,
+        "ALRM": 2.92,
+        "VRRM": -0.6,
+        "DXC": -0.25,
+        "AVPT": 2.39,
+        "GLOB": -1.11,
+        "NCNO": 4.31,
+        "SPSC": 2.49,
+        "FA": 1.38,
+        "VERX": 7.1,
+        "BL": 4.25,
+        "GTM": 4.43,
+        "INTA": 2.44,
+        "ATEN": 3.53,
+        "BBAI": -0.8,
+        "SEMR": 0.17,
+        "ALKT": 1.82,
+        "MQ": 0.47,
+        "CNXC": -0.93,
+        "BLKB": 3.59,
+        "RAMP": 4.09,
+        "GCT": -1.6,
+        "WLTH": 1.71,
+        "KDK": -1.46,
+        "KEEL": 1.54,
+        "CLVT": -2.0,
+        "APPN": 2.52,
+        "ASAN": 4.75,
+        "TUYA": 4.35,
+        "INOD": -2.62,
+        "VIA": 0.19,
+        "CXM": 3.72,
+        "PENG": 11.16,
+        "PRGS": -0.84,
+        "BKSY": -11.99,
+        "FIVN": 7.05,
+        "PGY": 0.59,
+        "RZLV": 0.77,
+        "UPBD": 1.18,
+        "LZ": 0.96,
+        "COUR": -11.56,
+        "CERT": 5.33,
+        "VYX": 5.06,
+        "AEVA": 4.39,
+        "NABL": 5.5,
+        "SDGR": 3.33,
+        "AMPL": 5.22,
+        "ACVA": -1.16,
+        "CTLP": 0.28,
+        "OMDA": 0.77,
+        "SPIR": -5.87,
+        "UDMY": -10.15,
+        "MNTN": 1.73,
+        "CGNT": 1.48,
+        "VTEX": 3.07,
+        "NTGR": 1.22,
+        "SABR": 4.0,
+        "MITK": 2.36,
+        "CRSR": 2.97,
+        "TASK": 1.41,
+        "WYFI": -1.02,
+        "PAR": 2.16,
+        "PHR": 7.8,
+        "GDYN": 2.69,
+        "RBBN": 2.58,
+        "YEXT": 2.39,
+        "PSFE": 1.75,
+        "AIOT": -2.62,
+        "OSPN": 1.43,
+        "WEAV": 3.4,
+        "BLND": 5.04,
+        "TSSI": -0.32,
+        "AZ": 0.26,
+        "RPD": 2.94,
+        "CRNC": 8.03,
+        "TLS": 3.99,
+        "BNAI": -4.09,
+        "SPT": 6.96,
+        "PAYS": 2.13,
+        "NUAI": -0.93,
+        "PDYN": -2.17,
+        "RXT": -7.06,
+        "DDD": 2.26,
+        "SLP": 1.96,
+        "BKKT": 1.73,
+        "GRRR": 2.67,
+        "SY": 0.74,
+        "RPAY": -8.96,
+        "EGHT": 1.6,
+        "SUPX": -8.78,
+        "DUOT": -0.12,
+        "CNDT": 1.19,
+        "BLZE": 4.47,
+        "CMRC": 2.04,
+        "BZAI": 4.69,
+        "IMMR": -0.33,
+        "VERI": 2.29,
+        "UIS": 3.11,
+        "IDN": -6.94,
+        "THRY": 5.06,
+        "TTEC": 2.31,
+        "DOMO": 2.37,
+        "CCLD": 1.33,
+        "OPRX": 0.31,
+        "ZENA": 1.44,
+        "HCAT": 3.76,
+        "AISP": -0.79,
+        "LIDR": 29.59,
+        "SKIL": -1.68,
+        "FUSE": 7.47,
+        "ARAI": -0.27,
+        "SMX": -40.91,
+        "AIXI": -29.63,
+        "NVNI": 0.0,
+        "CETX": -1.79,
+        "RMSG": -5.64,
+        "HKIT": -1.0,
+        "CYCU": -7.0,
+        "MYSE": 6.69,
+        "JTAI": -7.41,
+        "HCTI": -2.67,
+        "KIDZ": -18.89,
+        "MASK": -4.19,
+        "JDZG": 1.69
+      },
+      "rs_excess_pct": {
+        "1W": -3.45,
+        "1M": 3.02,
+        "3M": -13.46,
+        "6M": -24.45
+      },
+      "rs_rank": {
+        "1W": 21.5,
+        "1M": 71.1,
+        "3M": 17.4,
+        "6M": 11.6
+      },
+      "breadth_50": 57.7,
+      "breadth_200": 23.9,
+      "trend_above_50ema": true,
+      "scores": {
+        "daily": 47.2,
+        "weekly": 51.1,
+        "monthly": 24.7
+      }
+    },
+    "Industrials (Broad)": {
+      "members": [
+        "PH",
+        "WM",
+        "CMI",
+        "MMM",
+        "ITW",
+        "CTAS",
+        "RSG",
+        "AME",
+        "SYM",
+        "IR",
+        "JBL",
+        "OTIS",
+        "XYL",
+        "MTZ",
+        "VLTO",
+        "EFX",
+        "NVT",
+        "APG",
+        "ITT",
+        "ULS",
+        "CLH",
+        "IEX",
+        "AEIS",
+        "LECO",
+        "STRL",
+        "MLI",
+        "RRX",
+        "DY",
+        "ACM",
+        "CR",
+        "BLD",
+        "DCI",
+        "GTLS",
+        "BAH",
+        "TTC",
+        "ICLR",
+        "CRL",
+        "PRIM",
+        "AYI",
+        "POWL",
+        "TTEK",
+        "ZWS",
+        "LGN",
+        "TKR",
+        "TAL",
+        "FLR",
+        "MIDD",
+        "ECG",
+        "MHK",
+        "GTES",
+        "ROAD",
+        "ESAB",
+        "GVA",
+        "ADT",
+        "CWST",
+        "MIR",
+        "ALH",
+        "GPGI",
+        "LAUR",
+        "MWA",
+        "TPC",
+        "BCO",
+        "MMS",
+        "EXPO",
+        "KFY",
+        "HAYW",
+        "YETI",
+        "KMT",
+        "FLNC",
+        "RHI",
+        "CXT",
+        "HNI",
+        "AMPX",
+        "BW",
+        "EOSE",
+        "GEO",
+        "ABM",
+        "HLIO",
+        "CDNL",
+        "CECO",
+        "CXW",
+        "UTI",
+        "PSIX",
+        "TNET",
+        "AMSC",
+        "TIC",
+        "CBZ",
+        "NVRI",
+        "TILE",
+        "TE",
+        "MAN",
+        "ENVX",
+        "AMRC",
+        "NNE",
+        "KODK",
+        "PCT",
+        "BV",
+        "MLKN",
+        "NSP",
+        "SERV",
+        "NRGV",
+        "ERII",
+        "RR",
+        "LTBR",
+        "FCEL",
+        "NPWR",
+        "NNDM",
+        "EVH",
+        "VELO",
+        "ACCO",
+        "SHMD",
+        "FC",
+        "WLAC",
+        "YDDL",
+        "SKYX",
+        "RGP",
+        "KULR",
+        "NNBR",
+        "ONEG",
+        "KSCP",
+        "LASE",
+        "LNKS",
+        "ELPW",
+        "FCUV",
+        "FCHL"
+      ],
+      "curated_members": [],
+      "auto_members": [
+        "PH",
+        "WM",
+        "CMI",
+        "MMM",
+        "ITW",
+        "CTAS",
+        "RSG",
+        "AME",
+        "SYM",
+        "IR",
+        "JBL",
+        "OTIS",
+        "XYL",
+        "MTZ",
+        "VLTO",
+        "EFX",
+        "NVT",
+        "APG",
+        "ITT",
+        "ULS",
+        "CLH",
+        "IEX",
+        "AEIS",
+        "LECO",
+        "STRL",
+        "MLI",
+        "RRX",
+        "DY",
+        "ACM",
+        "CR",
+        "BLD",
+        "DCI",
+        "GTLS",
+        "BAH",
+        "TTC",
+        "ICLR",
+        "CRL",
+        "PRIM",
+        "AYI",
+        "POWL",
+        "TTEK",
+        "ZWS",
+        "LGN",
+        "TKR",
+        "TAL",
+        "FLR",
+        "MIDD",
+        "ECG",
+        "MHK",
+        "GTES",
+        "ROAD",
+        "ESAB",
+        "GVA",
+        "ADT",
+        "CWST",
+        "MIR",
+        "ALH",
+        "GPGI",
+        "LAUR",
+        "MWA",
+        "TPC",
+        "BCO",
+        "MMS",
+        "EXPO",
+        "KFY",
+        "HAYW",
+        "YETI",
+        "KMT",
+        "FLNC",
+        "RHI",
+        "CXT",
+        "HNI",
+        "AMPX",
+        "BW",
+        "EOSE",
+        "GEO",
+        "ABM",
+        "HLIO",
+        "CDNL",
+        "CECO",
+        "CXW",
+        "UTI",
+        "PSIX",
+        "TNET",
+        "AMSC",
+        "TIC",
+        "CBZ",
+        "NVRI",
+        "TILE",
+        "TE",
+        "MAN",
+        "ENVX",
+        "AMRC",
+        "NNE",
+        "KODK",
+        "PCT",
+        "BV",
+        "MLKN",
+        "NSP",
+        "SERV",
+        "NRGV",
+        "ERII",
+        "RR",
+        "LTBR",
+        "FCEL",
+        "NPWR",
+        "NNDM",
+        "EVH",
+        "VELO",
+        "ACCO",
+        "SHMD",
+        "FC",
+        "WLAC",
+        "YDDL",
+        "SKYX",
+        "RGP",
+        "KULR",
+        "NNBR",
+        "ONEG",
+        "KSCP",
+        "LASE",
+        "LNKS",
+        "ELPW",
+        "FCUV",
+        "FCHL"
+      ],
+      "member_count": 125,
+      "member_perf": {
+        "PH": 0.06,
+        "WM": -1.4,
+        "CMI": 0.58,
+        "MMM": 0.79,
+        "ITW": -1.41,
+        "CTAS": -0.97,
+        "RSG": -1.99,
+        "AME": -0.87,
+        "SYM": -4.99,
+        "IR": -1.34,
+        "JBL": 0.92,
+        "OTIS": -1.94,
+        "XYL": -0.19,
+        "MTZ": -1.77,
+        "VLTO": -0.19,
+        "EFX": -1.41,
+        "NVT": -0.27,
+        "APG": -0.69,
+        "ITT": -0.22,
+        "ULS": 0.78,
+        "CLH": -0.43,
+        "IEX": -0.92,
+        "AEIS": 1.25,
+        "LECO": -1.2,
+        "STRL": 0.3,
+        "MLI": 0.21,
+        "RRX": -0.57,
+        "DY": -0.88,
+        "ACM": -0.11,
+        "CR": -0.19,
+        "BLD": -2.48,
+        "DCI": 1.13,
+        "GTLS": -0.04,
+        "BAH": -0.34,
+        "TTC": -1.07,
+        "ICLR": -3.92,
+        "CRL": 1.23,
+        "PRIM": -0.54,
+        "AYI": 0.05,
+        "POWL": 0.23,
+        "TTEK": -0.29,
+        "ZWS": -0.55,
+        "LGN": -0.89,
+        "TKR": -1.38,
+        "TAL": 3.02,
+        "FLR": 1.28,
+        "MIDD": -2.37,
+        "ECG": -0.2,
+        "MHK": -0.49,
+        "GTES": 0.12,
+        "ROAD": -1.28,
+        "ESAB": -1.59,
+        "GVA": 0.64,
+        "ADT": 0.28,
+        "CWST": -4.39,
+        "MIR": 1.18,
+        "ALH": -1.8,
+        "GPGI": -1.83,
+        "LAUR": -0.83,
+        "MWA": 0.28,
+        "TPC": 0.32,
+        "BCO": -0.73,
+        "MMS": -0.12,
+        "EXPO": -0.59,
+        "KFY": 0.69,
+        "HAYW": 0.2,
+        "YETI": 0.1,
+        "KMT": -0.71,
+        "FLNC": -1.04,
+        "RHI": -5.85,
+        "CXT": -0.93,
+        "HNI": 1.32,
+        "AMPX": -4.92,
+        "BW": -7.41,
+        "EOSE": 10.68,
+        "GEO": 1.89,
+        "ABM": -0.86,
+        "HLIO": -0.23,
+        "CDNL": -0.52,
+        "CECO": 0.14,
+        "CXW": 2.35,
+        "UTI": -2.31,
+        "PSIX": -1.52,
+        "TNET": 3.08,
+        "AMSC": 7.22,
+        "TIC": -0.69,
+        "CBZ": 3.23,
+        "NVRI": -0.67,
+        "TILE": 0.57,
+        "TE": -1.86,
+        "MAN": 0.72,
+        "ENVX": -0.45,
+        "AMRC": 0.58,
+        "NNE": -3.3,
+        "KODK": -0.62,
+        "PCT": 0.55,
+        "BV": -1.28,
+        "MLKN": 1.62,
+        "NSP": 1.74,
+        "SERV": -1.07,
+        "NRGV": 0.0,
+        "ERII": 2.45,
+        "RR": -3.91,
+        "LTBR": -3.0,
+        "FCEL": -8.13,
+        "NPWR": 1.76,
+        "NNDM": 0.0,
+        "EVH": 6.1,
+        "VELO": 3.52,
+        "ACCO": 1.85,
+        "SHMD": 11.7,
+        "FC": -1.14,
+        "WLAC": 12.6,
+        "YDDL": -2.94,
+        "SKYX": 0.97,
+        "RGP": 3.59,
+        "KULR": -2.43,
+        "NNBR": -4.6,
+        "ONEG": 11.49,
+        "KSCP": -1.87,
+        "LASE": 0.52,
+        "LNKS": -3.89,
+        "ELPW": 35.58,
+        "FCUV": -12.57,
+        "FCHL": 8.24
+      },
+      "rs_excess_pct": {
+        "1W": 0.69,
+        "1M": -0.47,
+        "3M": 16.14,
+        "6M": 21.71
+      },
+      "rs_rank": {
+        "1W": 70.2,
+        "1M": 52.9,
+        "3M": 87.6,
+        "6M": 79.3
+      },
+      "breadth_50": 57.6,
+      "breadth_200": 50.8,
+      "trend_above_50ema": true,
+      "scores": {
+        "daily": 67.0,
+        "weekly": 62.3,
+        "monthly": 74.4
+      }
+    },
+    "Retail (Broad)": {
+      "members": [
+        "CVNA",
+        "FAST",
+        "FERG",
+        "SYY",
+        "CPRT",
+        "CASY",
+        "ULTA",
+        "TSCO",
+        "WSM",
+        "AS",
+        "USFD",
+        "SGI",
+        "SNX",
+        "QXO",
+        "SN",
+        "WCC",
+        "BBY",
+        "HAS",
+        "FIVE",
+        "ALLE",
+        "BJ",
+        "GME",
+        "SWK",
+        "CNM",
+        "ARW",
+        "POOL",
+        "FSS",
+        "SITE",
+        "REZI",
+        "OLLI",
+        "FND",
+        "AVT",
+        "MSM",
+        "M",
+        "ZGN",
+        "MAT",
+        "TBBB",
+        "PVH",
+        "KTB",
+        "WHR",
+        "BBWI",
+        "UNFI",
+        "CALY",
+        "FIGS",
+        "RH",
+        "DNOW",
+        "EYE",
+        "SONO",
+        "HLMN",
+        "KSS",
+        "LEG",
+        "OLPX",
+        "SBH",
+        "SVV",
+        "GIII",
+        "VSTS",
+        "MBC",
+        "ARHS",
+        "CRCT",
+        "WOOF",
+        "CWH",
+        "ARKO",
+        "TRON",
+        "ETD",
+        "BBBY",
+        "XWIN",
+        "FNKO",
+        "PLBY",
+        "GPRO",
+        "PLCE",
+        "SPWH",
+        "SNBR",
+        "RECT",
+        "DBGI",
+        "UCAR"
+      ],
+      "curated_members": [],
+      "auto_members": [
+        "CVNA",
+        "FAST",
+        "FERG",
+        "SYY",
+        "CPRT",
+        "CASY",
+        "ULTA",
+        "TSCO",
+        "WSM",
+        "AS",
+        "USFD",
+        "SGI",
+        "SNX",
+        "QXO",
+        "SN",
+        "WCC",
+        "BBY",
+        "HAS",
+        "FIVE",
+        "ALLE",
+        "BJ",
+        "GME",
+        "SWK",
+        "CNM",
+        "ARW",
+        "POOL",
+        "FSS",
+        "SITE",
+        "REZI",
+        "OLLI",
+        "FND",
+        "AVT",
+        "MSM",
+        "M",
+        "ZGN",
+        "MAT",
+        "TBBB",
+        "PVH",
+        "KTB",
+        "WHR",
+        "BBWI",
+        "UNFI",
+        "CALY",
+        "FIGS",
+        "RH",
+        "DNOW",
+        "EYE",
+        "SONO",
+        "HLMN",
+        "KSS",
+        "LEG",
+        "OLPX",
+        "SBH",
+        "SVV",
+        "GIII",
+        "VSTS",
+        "MBC",
+        "ARHS",
+        "CRCT",
+        "WOOF",
+        "CWH",
+        "ARKO",
+        "TRON",
+        "ETD",
+        "BBBY",
+        "XWIN",
+        "FNKO",
+        "PLBY",
+        "GPRO",
+        "PLCE",
+        "SPWH",
+        "SNBR",
+        "RECT",
+        "DBGI",
+        "UCAR"
+      ],
+      "member_count": 75,
+      "member_perf": {
+        "CVNA": 1.5,
+        "FAST": -1.67,
+        "FERG": 0.08,
+        "SYY": 0.99,
+        "CPRT": -2.39,
+        "CASY": 1.23,
+        "ULTA": -1.04,
+        "TSCO": -3.75,
+        "WSM": -0.96,
+        "AS": -0.08,
+        "USFD": 0.4,
+        "SGI": -0.48,
+        "SNX": 2.19,
+        "QXO": -5.11,
+        "SN": 0.92,
+        "WCC": -0.47,
+        "BBY": -1.71,
+        "HAS": -1.55,
+        "FIVE": -1.76,
+        "ALLE": -0.9,
+        "BJ": -2.73,
+        "GME": -0.24,
+        "SWK": 0.83,
+        "CNM": 1.12,
+        "ARW": -0.26,
+        "POOL": 1.69,
+        "FSS": -0.68,
+        "SITE": 0.48,
+        "REZI": 1.01,
+        "OLLI": 2.27,
+        "FND": 0.26,
+        "AVT": 0.69,
+        "MSM": -0.23,
+        "M": -0.4,
+        "ZGN": 0.0,
+        "MAT": -1.49,
+        "TBBB": -0.08,
+        "PVH": -1.79,
+        "KTB": -4.05,
+        "WHR": -0.74,
+        "BBWI": -2.0,
+        "UNFI": 1.13,
+        "CALY": 1.12,
+        "FIGS": 2.42,
+        "RH": -0.42,
+        "DNOW": 2.17,
+        "EYE": -1.41,
+        "SONO": 2.29,
+        "HLMN": -1.34,
+        "KSS": -2.46,
+        "LEG": -0.35,
+        "OLPX": 0.49,
+        "SBH": 1.17,
+        "SVV": 2.83,
+        "GIII": -0.44,
+        "VSTS": 3.05,
+        "MBC": 0.11,
+        "ARHS": 1.73,
+        "CRCT": -2.63,
+        "WOOF": -1.67,
+        "CWH": 8.41,
+        "ARKO": 2.75,
+        "TRON": -8.29,
+        "ETD": -0.22,
+        "BBBY": 1.63,
+        "XWIN": 0.55,
+        "FNKO": 0.23,
+        "PLBY": -1.08,
+        "GPRO": 3.1,
+        "PLCE": -0.59,
+        "SPWH": -1.32,
+        "SNBR": -4.07,
+        "RECT": 6.67,
+        "DBGI": -5.92,
+        "UCAR": -2.96
+      },
+      "rs_excess_pct": {
+        "1W": -1.84,
+        "1M": 5.13,
+        "3M": -4.03,
+        "6M": -3.26
+      },
+      "rs_rank": {
+        "1W": 41.3,
+        "1M": 78.5,
+        "3M": 52.1,
+        "6M": 45.5
+      },
+      "breadth_50": 65.3,
+      "breadth_200": 48.0,
+      "trend_above_50ema": true,
+      "scores": {
+        "daily": 60.1,
+        "weekly": 65.1,
+        "monthly": 53.4
+      }
+    },
+    "Internet & Content (Broad)": {
+      "members": [
+        "NBIS",
+        "RDDT",
+        "PINS",
+        "Z",
+        "SNAP",
+        "MTCH",
+        "BZ",
+        "IAC",
+        "DJT",
+        "STUB",
+        "RUM",
+        "ATHM",
+        "YELP",
+        "UPWK",
+        "OPRA",
+        "GENI",
+        "TBLA",
+        "MOMO",
+        "NRDS",
+        "MAX",
+        "CARS",
+        "NXDR",
+        "EVER",
+        "BMBL",
+        "GRPN",
+        "ANGI",
+        "ZIP"
+      ],
+      "curated_members": [],
+      "auto_members": [
+        "NBIS",
+        "RDDT",
+        "PINS",
+        "Z",
+        "SNAP",
+        "MTCH",
+        "BZ",
+        "IAC",
+        "DJT",
+        "STUB",
+        "RUM",
+        "ATHM",
+        "YELP",
+        "UPWK",
+        "OPRA",
+        "GENI",
+        "TBLA",
+        "MOMO",
+        "NRDS",
+        "MAX",
+        "CARS",
+        "NXDR",
+        "EVER",
+        "BMBL",
+        "GRPN",
+        "ANGI",
+        "ZIP"
+      ],
+      "member_count": 27,
+      "member_perf": {
+        "NBIS": -6.32,
+        "RDDT": 1.26,
+        "PINS": 0.66,
+        "Z": 2.04,
+        "SNAP": 1.44,
+        "MTCH": 3.06,
+        "BZ": 2.18,
+        "IAC": 1.21,
+        "DJT": 1.96,
+        "STUB": 2.44,
+        "RUM": 0.0,
+        "ATHM": 0.71,
+        "YELP": 1.48,
+        "UPWK": 1.43,
+        "OPRA": 4.05,
+        "GENI": 2.76,
+        "TBLA": 2.15,
+        "MOMO": 0.49,
+        "NRDS": 4.02,
+        "MAX": 1.16,
+        "CARS": 3.43,
+        "NXDR": 3.9,
+        "EVER": 4.4,
+        "BMBL": 1.43,
+        "GRPN": 0.34,
+        "ANGI": 6.4,
+        "ZIP": 3.85
+      },
+      "rs_excess_pct": {
+        "1W": -1.41,
+        "1M": 6.21,
+        "3M": -17.39,
+        "6M": -24.28
+      },
+      "rs_rank": {
+        "1W": 49.6,
+        "1M": 80.2,
+        "3M": 6.6,
+        "6M": 12.4
+      },
+      "breadth_50": 74.1,
+      "breadth_200": 19.2,
+      "trend_above_50ema": true,
+      "scores": {
+        "daily": 65.9,
+        "weekly": 62.1,
+        "monthly": 21.3
       }
     },
     "[TV] Electronic technology": {
@@ -6757,6 +9285,40 @@
         "NOC",
         "GD",
         "EMR"
+      ],
+      "curated_members": [
+        "NVDA",
+        "AAPL",
+        "AVGO",
+        "MU",
+        "AMD",
+        "GE",
+        "INTC",
+        "RTX",
+        "KLAC",
+        "TXN",
+        "ANET",
+        "BA",
+        "ADI",
+        "GLW",
+        "QCOM",
+        "LMT",
+        "SNDK",
+        "WDC",
+        "MRVL",
+        "VRT",
+        "DELL",
+        "STX",
+        "HWM",
+        "NOC",
+        "GD",
+        "EMR"
+      ],
+      "auto_members": [
+        "CSCO",
+        "APH",
+        "ARM",
+        "HON"
       ],
       "member_count": 30,
       "member_perf": {
@@ -6798,18 +9360,18 @@
         "6M": 48.48
       },
       "rs_rank": {
-        "1W": 93.2,
-        "1M": 87.2,
-        "3M": 90.6,
-        "6M": 91.5
+        "1W": 93.4,
+        "1M": 87.6,
+        "3M": 91.7,
+        "6M": 92.6
       },
       "breadth_50": 76.7,
       "breadth_200": 80.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 89.9,
-        "weekly": 87.3,
-        "monthly": 88.8
+        "daily": 90.1,
+        "weekly": 87.7,
+        "monthly": 89.6
       }
     },
     "[TV] Technology services": {
@@ -6843,6 +9405,40 @@
         "MSTR",
         "DDOG",
         "RBLX",
+        "NBIS"
+      ],
+      "curated_members": [
+        "GOOG",
+        "MSFT",
+        "META",
+        "ORCL",
+        "NFLX",
+        "PLTR",
+        "IBM",
+        "CRM",
+        "PANW",
+        "SPOT",
+        "INTU",
+        "CRWD",
+        "ADBE",
+        "NOW",
+        "NTES",
+        "NET",
+        "FTNT",
+        "EA",
+        "SNOW",
+        "MSTR",
+        "DDOG",
+        "RBLX"
+      ],
+      "auto_members": [
+        "APP",
+        "ACN",
+        "SNPS",
+        "CDNS",
+        "ADP",
+        "CRWV",
+        "ADSK",
         "NBIS"
       ],
       "member_count": 30,
@@ -6885,17 +9481,17 @@
         "6M": -23.41
       },
       "rs_rank": {
-        "1W": 45.3,
-        "1M": 42.7,
-        "3M": 30.8,
-        "6M": 12.8
+        "1W": 43.8,
+        "1M": 43.0,
+        "3M": 30.6,
+        "6M": 13.2
       },
       "breadth_50": 56.7,
       "breadth_200": 26.7,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 51.8,
-        "weekly": 43.5,
+        "daily": 51.1,
+        "weekly": 43.3,
         "monthly": 26.6
       }
     },
@@ -6930,6 +9526,40 @@
         "BURL",
         "DLTR",
         "DKS",
+        "BBY"
+      ],
+      "curated_members": [
+        "AMZN",
+        "WMT",
+        "COST",
+        "HD",
+        "BABA",
+        "TJX",
+        "PDD",
+        "LOW",
+        "CVS",
+        "MELI",
+        "ORLY",
+        "ROST",
+        "TGT",
+        "SE",
+        "EBAY",
+        "KR",
+        "CPNG",
+        "JD",
+        "TPR",
+        "DG",
+        "BURL",
+        "DLTR",
+        "DKS"
+      ],
+      "auto_members": [
+        "CVNA",
+        "CPRT",
+        "CASY",
+        "ULTA",
+        "TSCO",
+        "WSM",
         "BBY"
       ],
       "member_count": 30,
@@ -6972,18 +9602,18 @@
         "6M": -5.72
       },
       "rs_rank": {
-        "1W": 28.2,
-        "1M": 29.1,
-        "3M": 38.5,
-        "6M": 41.9
+        "1W": 27.3,
+        "1M": 29.8,
+        "3M": 39.7,
+        "6M": 41.3
       },
       "breadth_50": 53.3,
       "breadth_200": 53.3,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 39.4,
-        "weekly": 33.9,
-        "monthly": 40.3
+        "daily": 39.1,
+        "weekly": 34.3,
+        "monthly": 40.7
       }
     },
     "[TV] Consumer durables": {
@@ -7016,6 +9646,40 @@
         "WHR",
         "PATK",
         "KBH",
+        "HAYW",
+        "PII"
+      ],
+      "curated_members": [
+        "TSLA",
+        "GM",
+        "F",
+        "DHI",
+        "PHM",
+        "LEN",
+        "RIVN",
+        "NIO",
+        "TOL",
+        "OSK",
+        "TPH",
+        "KBH"
+      ],
+      "auto_members": [
+        "AS",
+        "SGI",
+        "SN",
+        "HAS",
+        "ALLE",
+        "SWK",
+        "VFS",
+        "LKQ",
+        "FSS",
+        "TMHC",
+        "MAT",
+        "FTDR",
+        "SKY",
+        "THO",
+        "WHR",
+        "PATK",
         "HAYW",
         "PII"
       ],
@@ -7059,18 +9723,18 @@
         "6M": -3.19
       },
       "rs_rank": {
-        "1W": 48.7,
-        "1M": 35.0,
-        "3M": 35.9,
-        "6M": 45.3
+        "1W": 47.9,
+        "1M": 35.5,
+        "3M": 37.2,
+        "6M": 46.3
       },
       "breadth_50": 60.0,
       "breadth_200": 63.3,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 52.1,
-        "weekly": 41.6,
-        "monthly": 42.7
+        "daily": 51.9,
+        "weekly": 41.9,
+        "monthly": 43.6
       }
     },
     "[TV] Health technology": {
@@ -7106,6 +9770,39 @@
         "RVMD",
         "IQV"
       ],
+      "curated_members": [
+        "LLY",
+        "JNJ",
+        "ABBV",
+        "MRK",
+        "TMO",
+        "AMGN",
+        "ABT",
+        "GILD",
+        "ISRG",
+        "PFE",
+        "DHR",
+        "SYK",
+        "BMY",
+        "VRTX",
+        "MDT",
+        "BSX",
+        "REGN",
+        "MDLN",
+        "ZTS",
+        "IDXX",
+        "EW",
+        "BDX",
+        "ALNY",
+        "A",
+        "GEHC",
+        "RMD",
+        "WAT",
+        "INSM",
+        "RVMD",
+        "IQV"
+      ],
+      "auto_members": [],
       "member_count": 30,
       "member_perf": {
         "LLY": -3.67,
@@ -7146,18 +9843,18 @@
         "6M": -8.44
       },
       "rs_rank": {
-        "1W": 13.7,
-        "1M": 8.5,
-        "3M": 17.1,
-        "6M": 32.5
+        "1W": 13.2,
+        "1M": 8.3,
+        "3M": 18.2,
+        "6M": 32.2
       },
       "breadth_50": 10.0,
       "breadth_200": 31.0,
       "trend_above_50ema": false,
       "scores": {
-        "daily": 10.5,
-        "weekly": 11.1,
-        "monthly": 22.5
+        "daily": 10.2,
+        "weekly": 11.0,
+        "monthly": 22.8
       }
     },
     "[TV] Finance": {
@@ -7192,6 +9889,40 @@
         "BAM",
         "HOOD",
         "NU"
+      ],
+      "curated_members": [
+        "JPM",
+        "V",
+        "MA",
+        "BAC",
+        "MS",
+        "GS",
+        "WFC",
+        "C",
+        "AXP",
+        "BLK",
+        "BX",
+        "WELL",
+        "PLD",
+        "CB",
+        "COF",
+        "PGR",
+        "CME",
+        "EQIX",
+        "ICE",
+        "KKR",
+        "BK",
+        "PNC",
+        "USB",
+        "AMT",
+        "BAM",
+        "HOOD",
+        "NU"
+      ],
+      "auto_members": [
+        "SCHW",
+        "IBKR",
+        "MRSH"
       ],
       "member_count": 30,
       "member_perf": {
@@ -7233,18 +9964,18 @@
         "6M": -3.71
       },
       "rs_rank": {
-        "1W": 24.8,
-        "1M": 41.0,
-        "3M": 48.7,
-        "6M": 44.4
+        "1W": 24.0,
+        "1M": 41.3,
+        "3M": 48.8,
+        "6M": 44.6
       },
       "breadth_50": 60.0,
       "breadth_200": 46.7,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 41.6,
+        "daily": 41.3,
         "weekly": 41.8,
-        "monthly": 46.0
+        "monthly": 46.1
       }
     },
     "[TV] Energy minerals": {
@@ -7267,6 +9998,40 @@
         "APA",
         "AR",
         "DINO",
+        "RRC",
+        "NFG",
+        "HESM",
+        "CHRD",
+        "MTDR",
+        "SM",
+        "CRC",
+        "CNX",
+        "MUR",
+        "MGY",
+        "IEP",
+        "CRK"
+      ],
+      "curated_members": [
+        "XOM",
+        "CVX",
+        "COP",
+        "EOG",
+        "VLO",
+        "MPC",
+        "PSX",
+        "OXY",
+        "FANG",
+        "DVN",
+        "PR",
+        "DINO"
+      ],
+      "auto_members": [
+        "EQT",
+        "CTRA",
+        "EXE",
+        "OVV",
+        "APA",
+        "AR",
         "RRC",
         "NFG",
         "HESM",
@@ -7320,18 +10085,18 @@
         "6M": 24.98
       },
       "rs_rank": {
-        "1W": 91.5,
-        "1M": 2.6,
-        "3M": 88.0,
-        "6M": 79.5
+        "1W": 91.7,
+        "1M": 2.5,
+        "3M": 89.3,
+        "6M": 81.0
       },
       "breadth_50": 66.7,
       "breadth_200": 93.3,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 66.4,
-        "weekly": 42.8,
-        "monthly": 73.4
+        "daily": 66.5,
+        "weekly": 43.0,
+        "monthly": 74.4
       }
     },
     "[TV] Producer manufacturing": {
@@ -7366,6 +10131,40 @@
         "ITT",
         "MKSI",
         "WSO"
+      ],
+      "curated_members": [
+        "CAT",
+        "LRCX",
+        "AMAT",
+        "GEV",
+        "DE",
+        "ETN",
+        "TT",
+        "JCI",
+        "PCAR",
+        "LITE",
+        "ROK",
+        "WAB",
+        "DOV",
+        "HUBB",
+        "ENTG",
+        "MKSI",
+        "WSO"
+      ],
+      "auto_members": [
+        "PH",
+        "CMI",
+        "MMM",
+        "ITW",
+        "AME",
+        "CARR",
+        "SYM",
+        "IR",
+        "JBL",
+        "XYL",
+        "WWD",
+        "VLTO",
+        "ITT"
       ],
       "member_count": 30,
       "member_perf": {
@@ -7407,18 +10206,18 @@
         "6M": 34.86
       },
       "rs_rank": {
-        "1W": 67.5,
-        "1M": 65.0,
-        "3M": 84.6,
-        "6M": 85.5
+        "1W": 68.6,
+        "1M": 64.5,
+        "3M": 85.1,
+        "6M": 86.8
       },
       "breadth_50": 76.7,
       "breadth_200": 90.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 71.5,
+        "daily": 71.9,
         "weekly": 70.2,
-        "monthly": 82.7
+        "monthly": 83.3
       }
     },
     "[TV] Consumer non-durables": {
@@ -7453,6 +10252,40 @@
         "CLX",
         "ONON",
         "HRL"
+      ],
+      "curated_members": [
+        "PG",
+        "KO",
+        "PM",
+        "PEP",
+        "MO",
+        "MNST",
+        "MDLZ",
+        "NKE",
+        "CL",
+        "KDP",
+        "KMB",
+        "STZ",
+        "EL",
+        "CHD",
+        "RL",
+        "LULU",
+        "GIS",
+        "DECK",
+        "MKC",
+        "CLX",
+        "ONON",
+        "HRL"
+      ],
+      "auto_members": [
+        "CCEP",
+        "HSY",
+        "KVUE",
+        "KHC",
+        "TSN",
+        "JBS",
+        "IFF",
+        "COKE"
       ],
       "member_count": 30,
       "member_perf": {
@@ -7494,18 +10327,18 @@
         "6M": -5.75
       },
       "rs_rank": {
-        "1W": 46.2,
-        "1M": 15.4,
-        "3M": 39.3,
-        "6M": 41.0
+        "1W": 44.6,
+        "1M": 15.7,
+        "3M": 40.5,
+        "6M": 40.5
       },
       "breadth_50": 30.0,
       "breadth_200": 56.7,
       "trend_above_50ema": false,
       "scores": {
-        "daily": 31.4,
-        "weekly": 27.3,
-        "monthly": 38.8
+        "daily": 30.7,
+        "weekly": 27.4,
+        "monthly": 39.2
       }
     },
     "[TV] Health services": {
@@ -7541,6 +10374,39 @@
         "WGS",
         "MD"
       ],
+      "curated_members": [
+        "UNH",
+        "HCA",
+        "CI",
+        "ELV",
+        "HUM",
+        "LH",
+        "DGX",
+        "CNC",
+        "THC",
+        "SOLV",
+        "GH",
+        "UHS",
+        "EHC",
+        "DVA",
+        "BTSG",
+        "MOH",
+        "HIMS",
+        "PACS",
+        "RDNT",
+        "OPCH",
+        "ALHC",
+        "OSCR",
+        "BLLN",
+        "BKD",
+        "CON",
+        "LFST",
+        "ACHC",
+        "SEM",
+        "WGS",
+        "MD"
+      ],
+      "auto_members": [],
       "member_count": 30,
       "member_perf": {
         "UNH": 0.1,
@@ -7581,18 +10447,18 @@
         "6M": 1.44
       },
       "rs_rank": {
-        "1W": 70.9,
-        "1M": 59.0,
-        "3M": 54.7,
-        "6M": 56.4
+        "1W": 71.9,
+        "1M": 58.7,
+        "3M": 54.5,
+        "6M": 55.4
       },
       "breadth_50": 60.0,
       "breadth_200": 58.6,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 69.2,
+        "daily": 69.6,
         "weekly": 60.9,
-        "monthly": 56.4
+        "monthly": 56.0
       }
     },
     "[TV] Process industries": {
@@ -7627,6 +10493,40 @@
         "PPC",
         "MOS",
         "CE"
+      ],
+      "curated_members": [
+        "LIN",
+        "SHW",
+        "ECL",
+        "APD",
+        "CTVA",
+        "DOW",
+        "PPG",
+        "LYB",
+        "ALB",
+        "IP",
+        "DD",
+        "AMCR",
+        "CF",
+        "PKG",
+        "BALL",
+        "WLK",
+        "RPM",
+        "ESI",
+        "EMN",
+        "ATR",
+        "MOS",
+        "CE"
+      ],
+      "auto_members": [
+        "ADM",
+        "BG",
+        "SW",
+        "AVY",
+        "SOLS",
+        "CCK",
+        "OC",
+        "PPC"
       ],
       "member_count": 30,
       "member_perf": {
@@ -7668,18 +10568,18 @@
         "6M": 13.55
       },
       "rs_rank": {
-        "1W": 49.6,
-        "1M": 14.5,
-        "3M": 65.8,
-        "6M": 73.5
+        "1W": 48.8,
+        "1M": 14.9,
+        "3M": 66.9,
+        "6M": 73.6
       },
       "breadth_50": 43.3,
       "breadth_200": 65.5,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 44.9,
-        "weekly": 33.6,
-        "monthly": 60.4
+        "daily": 44.6,
+        "weekly": 33.7,
+        "monthly": 60.9
       }
     },
     "[TV] Consumer services": {
@@ -7714,6 +10614,40 @@
         "PSKY",
         "DPZ",
         "DKNG"
+      ],
+      "curated_members": [
+        "MCD",
+        "DIS",
+        "BKNG",
+        "SBUX",
+        "CMCSA",
+        "MAR",
+        "ABNB",
+        "RCL",
+        "HLT",
+        "WBD",
+        "CMG",
+        "YUM",
+        "CCL",
+        "LVS",
+        "LYV",
+        "VIK",
+        "QSR",
+        "EXPE",
+        "CHTR",
+        "DRI",
+        "FLUT",
+        "H",
+        "DPZ",
+        "DKNG"
+      ],
+      "auto_members": [
+        "TKO",
+        "FOX",
+        "YUMC",
+        "NWS",
+        "NYT",
+        "PSKY"
       ],
       "member_count": 30,
       "member_perf": {
@@ -7755,18 +10689,18 @@
         "6M": -5.62
       },
       "rs_rank": {
-        "1W": 21.4,
-        "1M": 21.4,
-        "3M": 44.4,
-        "6M": 42.7
+        "1W": 19.8,
+        "1M": 22.3,
+        "3M": 45.5,
+        "6M": 42.1
       },
       "breadth_50": 53.3,
       "breadth_200": 50.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 34.0,
-        "weekly": 29.6,
-        "monthly": 41.3
+        "daily": 33.5,
+        "weekly": 29.9,
+        "monthly": 41.7
       }
     },
     "[TV] Communications": {
@@ -7782,6 +10716,25 @@
         "TDS",
         "LBTYA",
         "IRDM",
+        "CCOI",
+        "OPTU",
+        "GOGO",
+        "IQST"
+      ],
+      "curated_members": [
+        "TMUS",
+        "VZ",
+        "T",
+        "ASTS",
+        "GSAT",
+        "LUMN",
+        "IRDM"
+      ],
+      "auto_members": [
+        "SATS",
+        "TIGO",
+        "TDS",
+        "LBTYA",
         "CCOI",
         "OPTU",
         "GOGO",
@@ -7812,18 +10765,18 @@
         "6M": 1.72
       },
       "rs_rank": {
-        "1W": 17.9,
-        "1M": 33.3,
-        "3M": 63.2,
-        "6M": 58.1
+        "1W": 17.4,
+        "1M": 33.9,
+        "3M": 63.6,
+        "6M": 57.9
       },
       "breadth_50": 53.3,
       "breadth_200": 60.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 35.3,
-        "weekly": 37.7,
-        "monthly": 56.7
+        "daily": 35.1,
+        "weekly": 38.0,
+        "monthly": 56.9
       }
     },
     "[TV] Utilities": {
@@ -7845,6 +10798,40 @@
         "PCG",
         "WEC",
         "NRG",
+        "ATO",
+        "AEE",
+        "DTE",
+        "PPL",
+        "FE",
+        "CNP",
+        "EIX",
+        "ES",
+        "AWK",
+        "CMS",
+        "NI",
+        "EVRG",
+        "LNT"
+      ],
+      "curated_members": [
+        "CEG",
+        "VST",
+        "TRGP",
+        "NRG"
+      ],
+      "auto_members": [
+        "NEE",
+        "SO",
+        "DUK",
+        "AEP",
+        "SRE",
+        "D",
+        "ETR",
+        "XEL",
+        "EXC",
+        "PEG",
+        "ED",
+        "PCG",
+        "WEC",
         "ATO",
         "AEE",
         "DTE",
@@ -7899,18 +10886,18 @@
         "6M": -1.42
       },
       "rs_rank": {
-        "1W": 53.8,
-        "1M": 17.1,
-        "3M": 71.8,
-        "6M": 51.3
+        "1W": 53.7,
+        "1M": 17.4,
+        "3M": 72.7,
+        "6M": 50.4
       },
       "breadth_50": 40.0,
       "breadth_200": 86.7,
       "trend_above_50ema": true,
       "scores": {
         "daily": 47.2,
-        "weekly": 36.1,
-        "monthly": 59.7
+        "weekly": 36.3,
+        "monthly": 59.8
       }
     },
     "[TV] Commercial services": {
@@ -7930,6 +10917,39 @@
         "GPN",
         "ULS",
         "WMG",
+        "TRU",
+        "BAH",
+        "ICLR",
+        "CRL",
+        "FDS",
+        "MORN",
+        "TAL",
+        "BZ",
+        "G",
+        "WEX",
+        "KLAR",
+        "ADT",
+        "FOUR",
+        "GPGI"
+      ],
+      "curated_members": [
+        "SHOP",
+        "PYPL",
+        "GPN",
+        "WMG"
+      ],
+      "auto_members": [
+        "SPGI",
+        "MCO",
+        "CTAS",
+        "MSCI",
+        "XYZ",
+        "FISV",
+        "ROL",
+        "EFX",
+        "OMC",
+        "CPAY",
+        "ULS",
         "TRU",
         "BAH",
         "ICLR",
@@ -7984,18 +11004,18 @@
         "6M": -22.61
       },
       "rs_rank": {
-        "1W": 12.0,
-        "1M": 26.5,
-        "3M": 7.7,
-        "6M": 13.7
+        "1W": 11.6,
+        "1M": 27.3,
+        "3M": 8.3,
+        "6M": 14.0
       },
       "breadth_50": 51.7,
       "breadth_200": 21.4,
       "trend_above_50ema": false,
       "scores": {
         "daily": 20.4,
-        "weekly": 24.6,
-        "monthly": 14.4
+        "weekly": 24.9,
+        "monthly": 14.8
       }
     },
     "[TV] Transportation": {
@@ -8029,6 +11049,40 @@
         "CPA",
         "ALK",
         "SNDR",
+        "TDW"
+      ],
+      "curated_members": [
+        "UNP",
+        "UPS",
+        "FDX",
+        "CSX",
+        "NSC",
+        "DAL",
+        "ODFL",
+        "UAL",
+        "XPO",
+        "JBHT",
+        "LUV",
+        "CHRW",
+        "EXPD",
+        "KNX",
+        "AAL",
+        "KEX",
+        "GXO",
+        "ALK",
+        "SNDR"
+      ],
+      "auto_members": [
+        "UBER",
+        "DASH",
+        "GRAB",
+        "PFGC",
+        "SAIA",
+        "CART",
+        "SARO",
+        "LYFT",
+        "VNT",
+        "CPA",
         "TDW"
       ],
       "member_count": 30,
@@ -8071,18 +11125,18 @@
         "6M": 9.49
       },
       "rs_rank": {
-        "1W": 41.9,
-        "1M": 61.5,
-        "3M": 60.7,
-        "6M": 68.4
+        "1W": 39.7,
+        "1M": 61.2,
+        "3M": 61.2,
+        "6M": 68.6
       },
       "breadth_50": 73.3,
       "breadth_200": 63.3,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 57.3,
-        "weekly": 59.2,
-        "monthly": 63.5
+        "daily": 56.1,
+        "weekly": 58.7,
+        "monthly": 63.7
       }
     },
     "[TV] Non-energy minerals": {
@@ -8117,6 +11171,40 @@
         "TREX",
         "CSTM",
         "LEU"
+      ],
+      "curated_members": [
+        "SCCO",
+        "NEM",
+        "FCX",
+        "AU",
+        "NUE",
+        "VMC",
+        "STLD",
+        "ATI",
+        "UEC",
+        "CMC",
+        "SSRM",
+        "EXP",
+        "CLF",
+        "TREX",
+        "LEU"
+      ],
+      "auto_members": [
+        "CRH",
+        "AMRZ",
+        "RGLD",
+        "CRS",
+        "CDE",
+        "AA",
+        "HL",
+        "JHX",
+        "MP",
+        "AUGO",
+        "CENX",
+        "LPX",
+        "KNF",
+        "NG",
+        "CSTM"
       ],
       "member_count": 30,
       "member_perf": {
@@ -8158,18 +11246,18 @@
         "6M": 26.02
       },
       "rs_rank": {
-        "1W": 29.9,
+        "1W": 28.1,
         "1M": 74.4,
-        "3M": 53.0,
-        "6M": 81.2
+        "3M": 52.9,
+        "6M": 82.6
       },
       "breadth_50": 66.7,
       "breadth_200": 75.9,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 53.5,
-        "weekly": 61.1,
-        "monthly": 68.1
+        "daily": 52.6,
+        "weekly": 60.7,
+        "monthly": 68.5
       }
     },
     "[TV] Distribution services": {
@@ -8204,6 +11292,40 @@
         "WKC",
         "CRCT",
         "DNUT"
+      ],
+      "curated_members": [
+        "MCK",
+        "COR",
+        "CAH",
+        "HSIC",
+        "CHEF",
+        "DNUT"
+      ],
+      "auto_members": [
+        "FAST",
+        "FERG",
+        "SYY",
+        "USFD",
+        "SNX",
+        "QXO",
+        "GPC",
+        "WCC",
+        "CNM",
+        "ARW",
+        "POOL",
+        "UGI",
+        "SITE",
+        "REZI",
+        "AVT",
+        "MSM",
+        "UNFI",
+        "DNOW",
+        "GCT",
+        "HLMN",
+        "DOLE",
+        "OLPX",
+        "WKC",
+        "CRCT"
       ],
       "member_count": 30,
       "member_perf": {
@@ -8245,18 +11367,18 @@
         "6M": 10.24
       },
       "rs_rank": {
-        "1W": 58.1,
-        "1M": 64.1,
-        "3M": 67.5,
-        "6M": 69.2
+        "1W": 58.7,
+        "1M": 63.6,
+        "3M": 68.6,
+        "6M": 69.4
       },
       "breadth_50": 73.3,
       "breadth_200": 73.3,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 66.1,
+        "daily": 66.2,
         "weekly": 64.8,
-        "monthly": 68.4
+        "monthly": 68.8
       }
     },
     "[TV] Industrial services": {
@@ -8291,6 +11413,40 @@
         "WFRD",
         "FLR",
         "NOV"
+      ],
+      "curated_members": [
+        "PWR",
+        "WMB",
+        "SLB",
+        "KMI",
+        "BKR",
+        "OKE",
+        "HAL",
+        "FTI",
+        "PAA",
+        "DTM",
+        "WFRD",
+        "NOV"
+      ],
+      "auto_members": [
+        "WM",
+        "RSG",
+        "LNG",
+        "OTIS",
+        "MTZ",
+        "APG",
+        "CLH",
+        "STRL",
+        "DY",
+        "ACM",
+        "BLD",
+        "AM",
+        "PRIM",
+        "TTEK",
+        "KNTK",
+        "NE",
+        "LGN",
+        "FLR"
       ],
       "member_count": 30,
       "member_perf": {
@@ -8332,18 +11488,18 @@
         "6M": 27.71
       },
       "rs_rank": {
-        "1W": 86.3,
-        "1M": 30.8,
-        "3M": 82.9,
-        "6M": 82.1
+        "1W": 86.8,
+        "1M": 31.4,
+        "3M": 83.5,
+        "6M": 83.5
       },
       "breadth_50": 70.0,
       "breadth_200": 86.2,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 71.4,
-        "weekly": 55.6,
-        "monthly": 75.3
+        "daily": 71.7,
+        "weekly": 56.1,
+        "monthly": 76.1
       }
     },
     "[TV] Miscellaneous": {
@@ -8358,6 +11514,20 @@
         "INV",
         "BETZ",
         "HF"
+      ],
+      "curated_members": [
+        "TPL",
+        "BETZ",
+        "HF"
+      ],
+      "auto_members": [
+        "VNOM",
+        "WT",
+        "CSWC",
+        "TRIN",
+        "ASST",
+        "PANL",
+        "INV"
       ],
       "member_count": 10,
       "member_perf": {
@@ -8379,18 +11549,18 @@
         "6M": 31.87
       },
       "rs_rank": {
-        "1W": 82.9,
-        "1M": 70.9,
-        "3M": 78.6,
-        "6M": 84.6
+        "1W": 82.6,
+        "1M": 70.2,
+        "3M": 79.3,
+        "6M": 86.0
       },
       "breadth_50": 80.0,
       "breadth_200": 80.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 81.2,
-        "weekly": 75.8,
-        "monthly": 79.5
+        "daily": 80.9,
+        "weekly": 75.6,
+        "monthly": 80.1
       }
     },
     "[TV] 3X": {
@@ -8426,6 +11596,39 @@
         "TQQY",
         "UTSL"
       ],
+      "curated_members": [
+        "UMDD",
+        "WEBL",
+        "FAS",
+        "TPOR",
+        "YSPY",
+        "HIBL",
+        "UDOW",
+        "SPXL",
+        "UPRO",
+        "DPST",
+        "TQQQ",
+        "TECL",
+        "SEMY",
+        "URTY",
+        "DUSL",
+        "TNA",
+        "MEXX",
+        "RETL",
+        "DFEN",
+        "NAIL",
+        "TMF",
+        "SOXL",
+        "DRN",
+        "EDC",
+        "YINN",
+        "KORU",
+        "WANT",
+        "EURL",
+        "TQQY",
+        "UTSL"
+      ],
+      "auto_members": [],
       "member_count": 30,
       "member_perf": {
         "UMDD": 0.71,
@@ -8466,18 +11669,18 @@
         "6M": 17.96
       },
       "rs_rank": {
-        "1W": 63.2,
-        "1M": 92.3,
-        "3M": 68.4,
-        "6M": 76.1
+        "1W": 63.6,
+        "1M": 92.6,
+        "3M": 69.4,
+        "6M": 76.9
       },
       "breadth_50": 83.3,
       "breadth_200": 69.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 77.2,
-        "weekly": 81.6,
-        "monthly": 74.4
+        "daily": 77.5,
+        "weekly": 81.9,
+        "monthly": 75.1
       }
     }
   }
