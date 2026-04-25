@@ -744,6 +744,24 @@ tr.sel-row td{background:var(--blu3);}
 #tab-ind .ind-chart canvas{width:100%;height:240px;display:block;}
 #tab-ind .ind-empty{padding:40px 20px;text-align:center;color:var(--gry);font-family:var(--ff-mono);font-size:12px;}
 #tab-ind .ind-tbl-scroll{max-height:65vh;overflow-y:auto;}
+#tab-ind .ind-copy-btn{background:var(--bg2);border:var(--bdr);color:var(--ambb);font-family:var(--ff-mono);font-size:10px;padding:3px 8px;border-radius:3px;cursor:pointer;letter-spacing:.05em;transition:all .15s;}
+#tab-ind .ind-copy-btn:hover{background:var(--amb3);border-color:var(--amb);color:var(--amb);}
+#tab-ind .ind-copy-btn.copied{background:rgba(0,230,118,.18);color:var(--grn);border-color:var(--grn);}
+#tab-ind .ind-mtag{display:flex;justify-content:space-between;align-items:center;gap:6px;padding:4px 8px;}
+#tab-ind .ind-mtag .sym{font-weight:600;}
+#tab-ind .ind-mtag .perf{font-size:10px;font-weight:600;font-family:var(--ff-mono);padding:1px 5px;border-radius:2px;}
+#tab-ind .ind-mtag .perf.up{background:rgba(0,230,118,.18);color:var(--grn);}
+#tab-ind .ind-mtag .perf.dn{background:rgba(255,0,230,.18);color:var(--ngo);}
+#tab-ind .ind-mtag .perf.flat{background:var(--bg3);color:var(--gry);}
+#tab-ind .ind-unassigned{padding:0;max-height:340px;overflow-y:auto;}
+#tab-ind .ind-ubucket{border-bottom:var(--bdr);}
+#tab-ind .ind-ubucket:last-child{border-bottom:0;}
+#tab-ind .ind-ubucket summary{padding:8px 12px;cursor:pointer;font-family:var(--ff-mono);font-size:11px;color:var(--ambb);letter-spacing:.05em;display:flex;justify-content:space-between;align-items:center;list-style:none;user-select:none;}
+#tab-ind .ind-ubucket summary::-webkit-details-marker{display:none;}
+#tab-ind .ind-ubucket summary:hover{background:var(--amb3);}
+#tab-ind .ind-ubucket summary .cnt{color:var(--gry2);font-size:10px;}
+#tab-ind .ind-ubucket .ulist{padding:6px 12px 10px;display:flex;flex-wrap:wrap;gap:4px;}
+#tab-ind .ind-utag{font-family:var(--ff-mono);font-size:10px;padding:2px 6px;border-radius:2px;background:var(--bg2);border:var(--bdr);color:var(--wht);cursor:default;}
 .chain-bar{display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--bg1);border-bottom:var(--bdr);flex-shrink:0;flex-wrap:wrap;}
 .chain-bar select{background:var(--bg2);border:var(--bdr);color:var(--wht);font-family:var(--ff-mono);font-size:11px;padding:3px 6px;border-radius:3px;}
 .chain-wrap{overflow-y:auto;flex:1;}
@@ -1852,9 +1870,10 @@ tr.sel-row td{background:var(--blu3);}
                 <th class="r">B50</th>
                 <th class="r">Trend</th>
                 <th class="r">N</th>
+                <th class="r"></th>
               </tr>
             </thead>
-            <tbody id="ind-body"><tr><td colspan="10" class="ind-empty">Loading theme scores…</td></tr></tbody>
+            <tbody id="ind-body"><tr><td colspan="11" class="ind-empty">Loading theme scores…</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -1870,6 +1889,10 @@ tr.sel-row td{background:var(--blu3);}
         <div class="ind-panel">
           <div class="ind-phead">Top 5 History (30d)</div>
           <div class="ind-chart"><canvas id="ind-hist"></canvas></div>
+        </div>
+        <div class="ind-panel">
+          <div class="ind-phead">Unassigned Tickers <span class="ind-pill" id="ind-unassigned-count">--</span></div>
+          <div class="ind-unassigned" id="ind-unassigned"><div class="ind-empty" style="padding:14px;">Loading…</div></div>
         </div>
         <div class="ind-panel">
           <div class="ind-phead">Diagnostics</div>
@@ -14355,23 +14378,86 @@ function indRsClass(v){
 function indScoreClass(v){ if(v>=70)return 's-hi'; if(v>=40)return 's-md'; return 's-lo'; }
 
 function renderIndustryTab(forceReload){
-  if(forceReload){ IND.loaded=false; IND.data=null; IND.hist=null; IND.expanded={}; }
+  if(forceReload){ IND.loaded=false; IND.data=null; IND.hist=null; IND.expanded={}; IND.unassigned=null; }
   if(IND.loading) return;
   if(IND.loaded){ indDraw(); return; }
   IND.loading = true;
   var body = document.getElementById('ind-body');
-  if(body) body.innerHTML = '<tr><td colspan="10" class="ind-empty">Loading theme scores…</td></tr>';
+  if(body) body.innerHTML = '<tr><td colspan="11" class="ind-empty">Loading theme scores…</td></tr>';
   var cb = '?cb=' + Date.now();
   Promise.all([
     fetch('./industry/theme_scores.json' + cb).then(function(r){ if(!r.ok) throw new Error('scores '+r.status); return r.json(); }),
-    fetch('./industry/theme_scores_history.json' + cb).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; })
+    fetch('./industry/theme_scores_history.json' + cb).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }),
+    fetch('./industry/unassigned_tickers.json' + cb).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; })
   ]).then(function(arr){
-    IND.data = arr[0]; IND.hist = arr[1]; IND.loaded = true; IND.loading = false;
+    IND.data = arr[0]; IND.hist = arr[1]; IND.unassigned = arr[2]; IND.loaded = true; IND.loading = false;
     indDraw();
+    indRenderUnassigned();
   }).catch(function(e){
     IND.loading = false;
-    if(body) body.innerHTML = '<tr><td colspan="10" class="ind-empty">No data yet — run <code>python industry/score_themes.py</code> to generate <code>theme_scores.json</code><br><span style="color:var(--ngo);">'+indEsc(e.message||String(e))+'</span></td></tr>';
+    if(body) body.innerHTML = '<tr><td colspan="11" class="ind-empty">No data yet — run <code>python industry/score_themes.py</code> to generate <code>theme_scores.json</code><br><span style="color:var(--ngo);">'+indEsc(e.message||String(e))+'</span></td></tr>';
   });
+}
+
+function indCopyMembers(themeName, btnEl){
+  if(!IND.data || !IND.data.themes) return;
+  var t = IND.data.themes[themeName];
+  if(!t || !t.members) return;
+  var csv = t.members.join(',');
+  var done = function(){
+    if(!btnEl) return;
+    var orig = btnEl.textContent;
+    btnEl.textContent = '✓ COPIED';
+    btnEl.classList.add('copied');
+    setTimeout(function(){ btnEl.textContent = orig; btnEl.classList.remove('copied'); }, 1400);
+  };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(csv).then(done, function(){ indCopyFallback(csv); done(); });
+  } else {
+    indCopyFallback(csv);
+    done();
+  }
+}
+
+function indCopyFallback(text){
+  var ta = document.createElement('textarea');
+  ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); } catch(e) {}
+  document.body.removeChild(ta);
+}
+
+function indRenderUnassigned(){
+  var box = document.getElementById('ind-unassigned');
+  var cnt = document.getElementById('ind-unassigned-count');
+  if(!box) return;
+  if(!IND.unassigned){
+    box.innerHTML = '<div class="ind-empty" style="padding:14px;">No audit data — run <code>python3 industry/audit_unassigned.py</code></div>';
+    if(cnt) cnt.textContent = '--';
+    return;
+  }
+  var data = IND.unassigned;
+  if(cnt) cnt.textContent = (data.unassigned_count||0) + ' tickers';
+  var bySugg = data.by_suggestion || {};
+  // Order: known themes first by member count desc, "(no suggestion)" last
+  var keys = Object.keys(bySugg).sort(function(a,b){
+    var aN = a === '(no suggestion)';
+    var bN = b === '(no suggestion)';
+    if(aN !== bN) return aN ? 1 : -1;
+    return (bySugg[b].length - bySugg[a].length);
+  });
+  if(!keys.length){
+    box.innerHTML = '<div class="ind-empty" style="padding:14px;">All tickers are assigned to themes.</div>';
+    return;
+  }
+  box.innerHTML = keys.map(function(sugg){
+    var rows = bySugg[sugg];
+    var label = sugg === '(no suggestion)' ? 'No clear theme' : '→ ' + sugg;
+    return '<details class="ind-ubucket"><summary><span>'+indEsc(label)+'</span><span class="cnt">'+rows.length+'</span></summary>'
+      + '<div class="ulist">'
+      + rows.map(function(r){ return '<span class="ind-utag" title="'+indEsc(r.name||'')+(r.tv_sector?' · '+indEsc(r.tv_sector):'')+'">'+indEsc(r.ticker)+'</span>'; }).join('')
+      + '</div></details>';
+  }).join('');
 }
 
 function indSetTF(tf){
@@ -14417,6 +14503,7 @@ function indDraw(){
     var tagHTML = isTV ? '<span class="ind-tv">[TV]</span>' : '';
     var expanded = !!IND.expanded[r.name];
     var rk = t.rs_rank || {};
+    var memberPerf = t.member_perf || {};
     var html = '<tr data-theme="'+indEsc(r.name)+'" class="'+(expanded?'expanded':'')+'">'
       + '<td><span class="ind-rank">'+(i+1)+'</span></td>'
       + '<td class="tname">'+tagHTML+indEsc(disp)+'</td>'
@@ -14428,25 +14515,54 @@ function indDraw(){
       + '<td class="r">'+indFmt(t.breadth_50,0)+'%</td>'
       + '<td class="r '+(t.trend_above_50ema?'ind-trend-up':'ind-trend-dn')+'">'+(t.trend_above_50ema?'▲':'▼')+'</td>'
       + '<td class="r" style="color:var(--gry2);">'+(t.member_count||(t.members||[]).length)+'</td>'
+      + '<td class="r"><button class="ind-copy-btn" data-copy-theme="'+indEsc(r.name)+'" title="Copy member tickers as CSV">⧉ COPY</button></td>'
       + '</tr>';
     if(expanded){
       var rx = t.rs_excess_pct || {};
-      html += '<tr class="ind-expand"><td colspan="10">'
-        + '<div class="ind-mhead">MEMBERS ('+(t.members||[]).length+') · RS_excess vs '+indEsc(d.benchmark||'SPY')+': '
+      // Sort members by daily perf descending; tickers without perf go to the end alphabetically
+      var members = (t.members || []).slice().sort(function(a,b){
+        var pa = memberPerf[a], pb = memberPerf[b];
+        if(pa == null && pb == null) return a.localeCompare(b);
+        if(pa == null) return 1;
+        if(pb == null) return -1;
+        return pb - pa;
+      });
+      var memberHTML = members.map(function(m){
+        var p = memberPerf[m];
+        var perfHTML = '';
+        if(p != null){
+          var cls = p > 0.05 ? 'up' : (p < -0.05 ? 'dn' : 'flat');
+          var sign = p > 0 ? '+' : '';
+          perfHTML = '<span class="perf '+cls+'">'+sign+p.toFixed(2)+'%</span>';
+        } else {
+          perfHTML = '<span class="perf flat">—</span>';
+        }
+        return '<div class="ind-mtag"><span class="sym">'+indEsc(m)+'</span>'+perfHTML+'</div>';
+      }).join('');
+      html += '<tr class="ind-expand"><td colspan="11">'
+        + '<div class="ind-mhead">MEMBERS ('+members.length+', sorted by today’s % change) · RS_excess vs '+indEsc(d.benchmark||'SPY')+': '
         + '1W '+indFmt(rx['1W'])+'pp · 1M '+indFmt(rx['1M'])+'pp · 3M '+indFmt(rx['3M'])+'pp · 6M '+indFmt(rx['6M'])+'pp · breadth_200 '+indFmt(t.breadth_200,0)+'%</div>'
-        + '<div class="ind-mgrid">'+(t.members||[]).map(function(m){return '<div class="ind-mtag">'+indEsc(m)+'</div>';}).join('')+'</div>'
-        + '<div class="ind-copy">COPY-READY: <span>'+indEsc((t.members||[]).join(','))+'</span></div>'
+        + '<div class="ind-mgrid">'+memberHTML+'</div>'
+        + '<div class="ind-copy">COPY-READY: <span>'+indEsc(members.join(','))+'</span></div>'
         + '</td></tr>';
     }
     return html;
   }).join('');
   var body = document.getElementById('ind-body');
-  body.innerHTML = rows || '<tr><td colspan="10" class="ind-empty">No themes scored.</td></tr>';
+  body.innerHTML = rows || '<tr><td colspan="11" class="ind-empty">No themes scored.</td></tr>';
   body.querySelectorAll('tr[data-theme]').forEach(function(tr){
-    tr.addEventListener('click', function(){
+    tr.addEventListener('click', function(ev){
+      // Don't expand when clicking the copy button itself
+      if(ev.target.closest('.ind-copy-btn')) return;
       var nm = tr.getAttribute('data-theme');
       if(IND.expanded[nm]) delete IND.expanded[nm]; else IND.expanded[nm] = true;
       indDraw();
+    });
+  });
+  body.querySelectorAll('.ind-copy-btn').forEach(function(btn){
+    btn.addEventListener('click', function(ev){
+      ev.stopPropagation();
+      indCopyMembers(btn.getAttribute('data-copy-theme'), btn);
     });
   });
 
