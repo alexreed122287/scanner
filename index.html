@@ -3732,8 +3732,9 @@ function populateAsrMonths(sym, savedValue){
   // or fall back to current value
   var saved = (savedValue !== undefined) ? savedValue : el.value;
   el.innerHTML='<option value="">Any (10\u201335 DTE)</option>';
-  fetch(creds.host+'/v1/markets/options/expirations?symbol='+sym,
-    {headers:{Authorization:'Bearer '+creds.key,Accept:'application/json'}})
+  // Expirations don't change intraday — cache for 6h (covers a trading session)
+  tradierFetch(creds.host+'/v1/markets/options/expirations?symbol='+sym,
+    {headers:{Authorization:'Bearer '+creds.key,Accept:'application/json'}}, 6*60*60*1000)
   .then(function(r){return r.json();})
   .then(function(d){
     var dates=[];
@@ -5272,8 +5273,9 @@ function fetchOptionContract(ticker,simPrice,callback,monthFilter){
      catch(e){return simPrice;}
    }).catch(function(){return simPrice;});
 
- var expP = fetch(host+'/v1/markets/options/expirations?symbol='+ticker,
-   {headers:{Authorization:'Bearer '+key,Accept:'application/json'}})
+ // Expirations cached 6h (intraday-stable)
+ var expP = tradierFetch(host+'/v1/markets/options/expirations?symbol='+ticker,
+   {headers:{Authorization:'Bearer '+key,Accept:'application/json'}}, 6*60*60*1000)
    .then(function(r){return r.json();})
    .then(function(d){
      var dates=[];
@@ -5302,8 +5304,9 @@ function fetchOptionContract(ticker,simPrice,callback,monthFilter){
 
    // Fetch all valid expiry chains in parallel
    var chainFetches = validExps.map(function(expDate){
-     return fetch(host+'/v1/markets/options/chains?symbol='+ticker+'&expiration='+expDate+'&greeks=true',
-       {headers:{Authorization:'Bearer '+key,Accept:'application/json'}})
+     // Chain cached 5 min per (ticker, expiry) — biggest single API consumer
+     return tradierFetch(host+'/v1/markets/options/chains?symbol='+ticker+'&expiration='+expDate+'&greeks=true',
+       {headers:{Authorization:'Bearer '+key,Accept:'application/json'}}, 5*60*1000)
      .then(function(r){return r.json();})
      .then(function(cdata){
        var opts=[];
@@ -6260,9 +6263,9 @@ async function loadOptionChain(ticker){
   // Fetch expirations
   var expRes;
   try{
-    expRes = await fetch(creds.host+'/v1/markets/options/expirations?symbol='+encodeURIComponent(ticker)+'&includeAllRoots=true',{
+    expRes = await tradierFetch(creds.host+'/v1/markets/options/expirations?symbol='+encodeURIComponent(ticker)+'&includeAllRoots=true',{
       headers:{Authorization:'Bearer '+creds.key,Accept:'application/json'}
-    }).then(function(r){return r.json();});
+    }, 6*60*60*1000).then(function(r){return r.json();});
   }catch(e){ chainDiv.innerHTML = '<div class="chain-loading" style="color:var(--red);">Error: '+e.message+'</div>'; return; }
 
   var dates = [];
@@ -7861,6 +7864,7 @@ function renderScan(){
     var lbl=(c.l||'').toUpperCase();
     if(lbl==='SIG'||lbl==='SIGNAL'||lbl==='GO/NO-GO'||lbl==='GO'){
       th+='<th style="cursor:default;color:var(--amb);font-size:10px;letter-spacing:1px;">BUY</th>';
+      th+='<th style="cursor:default;color:var(--amb);font-size:10px;letter-spacing:1px;" title="Strongest industry theme this ticker belongs to (top score; hover row cell for full list)">THEME</th>';
     }
   });
 
@@ -7884,12 +7888,38 @@ function renderScan(){
     var techCls=tech>=60?'pnl-pos':tech>=40?'':'pnl-neg';
     var fundCls=fund>=15?'pnl-pos':fund>=8?'':'pnl-neg';
 
+    // THEME cell — strongest industry theme containing this ticker (from IND.tickerAllThemes,
+    // populated by indDraw which is pre-fetched on boot). Color reflects that theme's
+    // current daily score. Tooltip lists all themes the ticker belongs to.
+    var themesForTk = (IND.tickerAllThemes && IND.tickerAllThemes[tk]) || [];
+    var themeCell;
+    if(themesForTk.length){
+      var top = themesForTk[0];
+      var tColor = top.score >= 90 ? 'var(--grn)'
+                 : top.score >= 70 ? 'var(--ambb)'
+                 : top.score >= 40 ? 'var(--wrn)'
+                 :                   'var(--gry)';
+      var tipLines = themesForTk.slice(0, 6).map(function(h){
+        return h.themeDisplay + '  ' + h.score.toFixed(1) + (h.isCurated ? '' : '  (auto)');
+      });
+      if(themesForTk.length > 6) tipLines.push('… +' + (themesForTk.length - 6) + ' more');
+      var tip = 'Themes containing ' + tk + ' (sorted by current daily score):\n' + tipLines.join('\n');
+      themeCell = '<td style="font-size:11px;color:'+tColor+';max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:help;" '
+        + 'title="'+tip.replace(/"/g,'&quot;')+'">'
+        + (top.isCurated ? '' : '<span style="opacity:.6;">·</span> ')
+        + top.themeDisplay + (themesForTk.length > 1 ? ' <span style="color:var(--gry2);">+'+(themesForTk.length-1)+'</span>' : '')
+        + '</td>';
+    } else {
+      themeCell = '<td style="font-size:11px;color:var(--gry2);">—</td>';
+    }
+
     rows+='<tr data-ticker="'+tk+'" onclick="viewDetail(this.dataset.ticker,\'sc-detail\',\'sc-det-empty\')">'
       +'<td style="text-align:center;padding:0;">'+starHTML(tk,14)+'</td>'
       +'<td><b>'+tk+'</b></td>'
       +'<td>'+scoreBar+'</td>'
       +'<td>'+sigBadge+'</td>'
       +'<td><button class="btn" style="font-size:10px;padding:3px 10px;white-space:nowrap;border-color:var(--amb);color:var(--amb);background:var(--amb3);" onclick="event.stopPropagation();openContractPanel(\''+tk+'\')" title="View all call contracts">▲ BUY</button></td>'
+      +themeCell
       +'<td style="font-size:11px;color:var(--gry);">'+r.sector+'</td>'
       +'<td>$'+fmt2(r.price)+'</td>'
       +'<td class="'+chgCls+'">'+(r.changePct>=0?'+':'')+fmtP(r.changePct)+'</td>'
@@ -7971,9 +8001,9 @@ function runGex(){
   }
 
   var expPromises = gexTickers.map(function(t){
-    return fetch(host+'/v1/markets/options/expirations?symbol='+t+'&includeAllRoots=true', {
+    return tradierFetch(host+'/v1/markets/options/expirations?symbol='+t+'&includeAllRoots=true', {
       headers:{Authorization:'Bearer '+key, Accept:'application/json'}
-    })
+    }, 6*60*60*1000)
     .then(function(r){return r.json();})
     .then(function(d){
       var dates = [];
@@ -7995,9 +8025,9 @@ function runGex(){
     // Step 2: fetch options chains for tickers that have a valid expiry
     var chainPromises = expiries.map(function(e){
       if(!e.expiry) return Promise.resolve({ticker:e.ticker, chain:[], expiry:null});
-      return fetch(host+'/v1/markets/options/chains?symbol='+e.ticker+'&expiration='+e.expiry.date+'&greeks=false', {
+      return tradierFetch(host+'/v1/markets/options/chains?symbol='+e.ticker+'&expiration='+e.expiry.date+'&greeks=false', {
         headers:{Authorization:'Bearer '+key, Accept:'application/json'}
-      })
+      }, 5*60*1000)
       .then(function(r){return r.json();})
       .then(function(d){
         var opts = [];
@@ -8294,9 +8324,10 @@ function wlRenderChart(ticker){
   if(G._wlChartTf === 'D'){
     var end = new Date(), start = new Date(); start.setDate(start.getDate() - 120);
     var fmtD = function(d){ return d.toISOString().slice(0,10); };
-    fetch(host+'/v1/markets/history?symbol='+ticker+'&interval=daily&start='+fmtD(start)+'&end='+fmtD(end),{
+    // Daily history doesn't change intraday — cache 30 min
+    tradierFetch(host+'/v1/markets/history?symbol='+ticker+'&interval=daily&start='+fmtD(start)+'&end='+fmtD(end),{
       headers:{Authorization:'Bearer '+key,Accept:'application/json'}
-    }).then(function(r){return r.json();})
+    }, 30*60*1000).then(function(r){return r.json();})
     .then(function(data){
       var days = (data.history && data.history.day) ? data.history.day : [];
       if(!Array.isArray(days)) days = [days];
@@ -8304,15 +8335,15 @@ function wlRenderChart(ticker){
       _wlDrawCandles(ticker, days, 'daily');
     }).catch(function(e){ if(loading) loading.textContent = 'Chart error: '+e.message; });
   } else {
-    // 1-minute intraday
+    // 1-minute intraday — cache 60s (each bar is 1 min anyway)
     var now = new Date(), mStart = new Date(now); mStart.setHours(9,30,0,0);
     var mEnd = new Date(now); mEnd.setHours(16,0,0,0);
     if(now.getDay()===0) mStart.setDate(mStart.getDate()-2);
     if(now.getDay()===6) mStart.setDate(mStart.getDate()-1);
     var fmtTs = function(d){ return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2)+' '+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)+':00'; };
-    fetch(host+'/v1/markets/timesales?symbol='+ticker+'&interval=1min&start='+encodeURIComponent(fmtTs(mStart))+'&end='+encodeURIComponent(fmtTs(mEnd))+'&session_filter=open',{
+    tradierFetch(host+'/v1/markets/timesales?symbol='+ticker+'&interval=1min&start='+encodeURIComponent(fmtTs(mStart))+'&end='+encodeURIComponent(fmtTs(mEnd))+'&session_filter=open',{
       headers:{Authorization:'Bearer '+key,Accept:'application/json'}
-    }).then(function(r){return r.json();})
+    }, 60*1000).then(function(r){return r.json();})
     .then(function(data){
       var series = (data.series && data.series.data) ? data.series.data : [];
       if(!Array.isArray(series)) series = [series];
@@ -12284,9 +12315,9 @@ async function fetchAllContracts(ticker){
   for(var i=0; i<dates.length; i+=4){
     var batch = dates.slice(i, i+4);
     var batchPromises = batch.map(function(expDate){
-      return fetch(creds.host+'/v1/markets/options/chains?symbol='+encodeURIComponent(ticker)+'&expiration='+expDate+'&greeks=true',{
+      return tradierFetch(creds.host+'/v1/markets/options/chains?symbol='+encodeURIComponent(ticker)+'&expiration='+expDate+'&greeks=true',{
         headers:{Authorization:'Bearer '+creds.key, Accept:'application/json'}
-      }).then(function(r){return r.json();})
+      }, 5*60*1000).then(function(r){return r.json();})
       .then(function(d){
         var opts = [];
         try{ opts=d.options.option; if(!Array.isArray(opts)) opts=[opts]; }catch(e){}
@@ -12703,6 +12734,84 @@ function cacheSet(key, val){
 }
 function cacheGet(key){
   try{ var v=localStorage.getItem(key); return v?JSON.parse(v):null; }catch(e){return null;}
+}
+
+// ── Tradier fetch wrapper: TTL cache + global rate limiter ───────────────
+// Solves three problems from the API breakdown report:
+//   1. Burst-throttle errors (peaked at 428/min vs Tradier's 120/min cap) —
+//      _T_RATE queue paces calls so we never burst past T_RATE_CAP_PER_MIN
+//   2. Repeated /options/expirations + /options/chains + /markets/history
+//      hits for the same ticker — T_CACHE returns cached JSON within TTL
+//   3. /markets/timesales re-fetched per chart re-open — cache for 60s
+// Callers replace `fetch(url, opts)` with `tradierFetch(url, opts, ttlMs)`;
+// the returned Promise resolves to a Response-like object so existing
+// `.then(r => r.json())` chains work unchanged. ttlMs=0 disables caching
+// (still goes through the rate limiter).
+var T_CACHE = {};                     // url → {data, ts}
+var T_RATE = { recent: [], pending: [], drainScheduled: false };
+var T_RATE_CAP_PER_MIN = 100;         // stay safely under Tradier's 120/min ceiling
+var T_CACHE_GC_LAST = 0;
+
+function _tradierGcCache(){
+  // GC entries older than 6h (longest TTL we use). Cheap full-pass — run
+  // at most every 5 min on demand.
+  var now = Date.now();
+  if(now - T_CACHE_GC_LAST < 5*60*1000) return;
+  T_CACHE_GC_LAST = now;
+  Object.keys(T_CACHE).forEach(function(k){
+    if(now - T_CACHE[k].ts > 6*60*60*1000) delete T_CACHE[k];
+  });
+}
+
+function _drainTradierQueue(){
+  T_RATE.drainScheduled = false;
+  var now = Date.now();
+  T_RATE.recent = T_RATE.recent.filter(function(t){ return now - t < 60000; });
+  while(T_RATE.pending.length && T_RATE.recent.length < T_RATE_CAP_PER_MIN){
+    var item = T_RATE.pending.shift();
+    T_RATE.recent.push(Date.now());
+    fetch(item.url, item.opts).then(item.resolve, item.reject);
+  }
+  if(T_RATE.pending.length && !T_RATE.drainScheduled){
+    var waitMs = Math.max(50, 60000 - (now - T_RATE.recent[0]) + 50);
+    T_RATE.drainScheduled = true;
+    setTimeout(_drainTradierQueue, waitMs);
+  }
+}
+
+function tradierFetch(url, opts, ttlMs){
+  ttlMs = ttlMs || 0;
+  // Cache hit — synth Response-like object so callers' .then(r=>r.json()) works
+  if(ttlMs > 0){
+    _tradierGcCache();
+    var cached = T_CACHE[url];
+    if(cached && (Date.now() - cached.ts) < ttlMs){
+      var clone = JSON.parse(JSON.stringify(cached.data));
+      return Promise.resolve({
+        ok: true, status: 200, _cached: true,
+        json: function(){ return Promise.resolve(clone); },
+        text: function(){ return Promise.resolve(JSON.stringify(clone)); },
+        clone: function(){ return this; }
+      });
+    }
+  }
+  // Cache miss → enqueue through rate limiter
+  return new Promise(function(resolve, reject){
+    T_RATE.pending.push({
+      url: url, opts: opts,
+      resolve: function(r){
+        // Cache successful JSON responses
+        if(ttlMs > 0 && r.ok){
+          r.clone().json().then(function(j){
+            T_CACHE[url] = { data: j, ts: Date.now() };
+          }).catch(function(){ /* not JSON, don't cache */ });
+        }
+        resolve(r);
+      },
+      reject: reject
+    });
+    if(!T_RATE.drainScheduled) _drainTradierQueue();
+  });
 }
 
 // ── Bounded localStorage for per-ticker caches ─────────────────────────────
@@ -14828,25 +14937,34 @@ function indDraw(){
 
   indDrawHist(ranked.slice(0,5).map(function(r){ return r.name; }));
 
-  // Build the ticker -> strong-themes map for cross-tab badges in BS/SC.
-  // Strong = current daily score >= IND_STRONG_THRESHOLD. Includes both
-  // curated and auto members of those themes.
+  // Build TWO ticker→themes lookups for cross-tab use:
+  //   tickerThemes    — only themes scoring ≥ IND_STRONG_THRESHOLD (drives the
+  //                     ⚡ "in a strong theme" badge in BS/SC rows)
+  //   tickerAllThemes — every theme a ticker belongs to (drives the THEME
+  //                     column in FULL SCANNER — shows what the ticker plays in
+  //                     regardless of how that theme is currently scoring)
+  // Strip the legacy "[TV] " prefix from theme names so the display is clean.
+  var stripTV = function(n){ return n.indexOf('[TV] ')===0 ? n.slice(5) : n; };
   var tickerThemes = {};
+  var tickerAllThemes = {};
   ranked.forEach(function(r){
-    if(r.score < IND_STRONG_THRESHOLD) return;
     var t = r.t;
     var autoSet = {}; (t.auto_members || []).forEach(function(m){ autoSet[m]=1; });
     (t.members || []).forEach(function(m){
-      (tickerThemes[m] = tickerThemes[m] || []).push({
-        theme: r.name, score: r.score, isCurated: !autoSet[m]
-      });
+      var entry = { theme: r.name, themeDisplay: stripTV(r.name),
+                    score: r.score, isCurated: !autoSet[m] };
+      (tickerAllThemes[m] = tickerAllThemes[m] || []).push(entry);
+      if(r.score >= IND_STRONG_THRESHOLD){
+        (tickerThemes[m] = tickerThemes[m] || []).push(entry);
+      }
     });
   });
-  // Sort each ticker's themes by score desc so the badge tooltip leads with the strongest
-  Object.keys(tickerThemes).forEach(function(m){
-    tickerThemes[m].sort(function(a,b){ return b.score - a.score; });
-  });
-  IND.tickerThemes = tickerThemes;
+  // Sort each ticker's themes by score desc so first entry is the "best fit"
+  var sortByScoreDesc = function(a,b){ return b.score - a.score; };
+  Object.keys(tickerThemes).forEach(function(m){ tickerThemes[m].sort(sortByScoreDesc); });
+  Object.keys(tickerAllThemes).forEach(function(m){ tickerAllThemes[m].sort(sortByScoreDesc); });
+  IND.tickerThemes    = tickerThemes;
+  IND.tickerAllThemes = tickerAllThemes;
   // Repaint scanner/buy-signals badges if their tabs are visible
   if(typeof decorateIndustry === 'function') decorateIndustry();
 }
