@@ -1380,9 +1380,13 @@ tr.sel-row td{background:var(--blu3);}
 </div>
 
 <div class="tab-pane" id="tab-sent">
-  <div class="page-wrap" id="tab-sent-body">
-    <div style="color:var(--gry);font-family:var(--ff-mono);font-size:11px;padding:20px;">Loading sentiment data...</div>
-  </div>
+  <iframe id="sent-iframe"
+    title="Sentiment Panel"
+    src="about:blank"
+    style="border:0;width:100%;height:100%;flex:1;background:var(--bg0);"
+    referrerpolicy="no-referrer"
+    loading="lazy"
+    sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>
 </div>
 
 <div class="tab-pane" id="tab-al">
@@ -7461,7 +7465,6 @@ function sortTable(col){
 var SENT = { regime: null, loudMap: {}, loadedAt: 0, status: 'idle' };
 var SENT_URL = 'https://alexreed122287.github.io/sentiment-panel/data/latest.json';
 var SENT_REFRESH_MS = 30 * 60 * 1000;  // 30 minutes (client poll). Underlying snapshot rebuilds hourly 9a-3p ET, weekdays.
-var SENT_COUNTDOWN_TIMER = null;
 
 function loadSentiment(){
   SENT.status = 'loading';
@@ -7604,155 +7607,19 @@ function decorateSentiment(){
 }
 
 // ── SENT tab renderer ──────────────────────────────────────────────────
+// Tab body is now a full-pane iframe to https://alexreed122287.github.io/sentiment-panel/
+// (the standalone React/Vite dashboard from the sentiment-panel repo). The legacy
+// SENT loader still runs on its 30-min poll because the header F&G badge and per-row
+// loud-ticker decorations consume SENT.regime / SENT.loudMap independently of this tab.
+var SENT_PANEL_URL = 'https://alexreed122287.github.io/sentiment-panel/';
 function renderSentimentTab(){
-  var host = document.getElementById('tab-sent-body');
-  if(!host) return;
-  if(SENT.status !== 'ok'){
-    host.innerHTML = '<div style="color:var(--gry);font-family:var(--ff-mono);font-size:11px;padding:20px;">' +
-      (SENT.status === 'error' ? 'Sentiment feed error: ' + (SENT.error||'unknown') : 'Loading sentiment data...') +
-      '</div>';
-    return;
-  }
-  var r = SENT.regime || {};
-
-  // ── F&G 30-day history bar chart ──
-  var hist = r.history || [];
-  var chartH = 80;
-  var chartW = 600;
-  var barW = hist.length ? Math.max(4, Math.floor(chartW / hist.length) - 2) : 0;
-  var bars = hist.map(function(p, i){
-    var x = i * (barW + 2);
-    var h = Math.max(1, (p.score / 100) * chartH);
-    var y = chartH - h;
-    return '<rect x="' + x + '" y="' + y + '" width="' + barW + '" height="' + h +
-           '" fill="' + regimeColor(p.score) + '" opacity="0.85"><title>' +
-           p.t + ': ' + p.score + ' (' + p.rating + ')</title></rect>';
-  }).join('');
-  // Horizontal reference lines at 25/55/75 (fear/neutral/greed boundaries)
-  var gridLines = [25, 55, 75].map(function(v){
-    var y = chartH - (v / 100) * chartH;
-    return '<line x1="0" y1="' + y + '" x2="' + chartW + '" y2="' + y +
-           '" stroke="var(--bg3)" stroke-width="0.5" stroke-dasharray="2,3"/>';
-  }).join('');
-  var regimeHTML =
-    '<div class="card"><div class="card-hdr">\u25ce MARKET REGIME \u2014 CNN FEAR &amp; GREED</div>' +
-    '<div class="card-body" style="padding:16px;">' +
-      '<div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap;margin-bottom:12px;">' +
-        '<div style="font-family:var(--ff-mono);">' +
-          '<div style="font-size:36px;font-weight:700;color:' + regimeColor(r.score) + ';line-height:1;">' +
-          Math.round(r.score || 0) + '</div>' +
-          '<div style="font-size:11px;color:' + regimeColor(r.score) + ';letter-spacing:1px;margin-top:4px;">' +
-          (r.rating || '').toUpperCase() + '</div>' +
-        '</div>' +
-        '<div style="font-family:var(--ff-mono);font-size:11px;color:var(--gry);line-height:1.8;">' +
-          'Prev close: <span style="color:var(--wht);">' + (r.previous_close ?? '--') + '</span><br>' +
-          '1 week ago: <span style="color:var(--wht);">' + (r.previous_1_week ?? '--') + '</span><br>' +
-          '1 month ago: <span style="color:var(--wht);">' + (r.previous_1_month ?? '--') + '</span>' +
-        '</div>' +
-      '</div>' +
-      '<svg width="100%" viewBox="0 0 ' + chartW + ' ' + (chartH + 18) + '" style="display:block;">' +
-        gridLines + bars +
-        '<text x="0" y="' + (chartH + 14) + '" fill="var(--gry)" font-size="9" font-family="var(--ff-mono)">' +
-          (hist.length ? hist[0].t : '') + '</text>' +
-        '<text x="' + chartW + '" y="' + (chartH + 14) + '" fill="var(--gry)" font-size="9" font-family="var(--ff-mono)" text-anchor="end">' +
-          (hist.length ? hist[hist.length - 1].t : '') + '</text>' +
-      '</svg>' +
-      '<div style="font-size:10px;color:var(--gry);font-family:var(--ff-mono);margin-top:6px;">' +
-        'Hover bars for daily values. Dashed lines at 25 (fear), 55 (neutral), 75 (greed) thresholds.' +
-      '</div>' +
-    '</div></div>';
-
-  // ── Stocktwits trending ──
-  var trending = SENT.trending || [];
-  var stwRows = trending.map(function(s){
-    var sent = SENT.tickerSent[s.ticker];
-    var net = sent && sent.net;
-    var netTxt = net == null ? '<span style="color:var(--gry);">--</span>' :
-      '<span style="color:' + (net >= 0.3 ? 'var(--grn)' : net <= -0.3 ? 'var(--red)' : 'var(--amb)') + ';">' +
-      (net >= 0 ? '+' : '') + net.toFixed(2) + '</span>';
-    var bullTxt = sent && sent.bull_pct != null ? sent.bull_pct + '%' : '--';
-    return '<tr data-ticker="' + s.ticker + '" onclick="addToScanner(\'' + s.ticker + '\')">' +
-      '<td><b>' + s.ticker + '</b></td>' +
-      '<td style="color:var(--gry);font-size:11px;">' + (s.title || '') + '</td>' +
-      '<td style="text-align:right;">' + (s.score != null ? s.score.toFixed(1) : '--') + '</td>' +
-      '<td style="text-align:right;color:var(--gry);font-size:11px;">' + fmtK(s.watchlist_count || 0) + '</td>' +
-      '<td style="text-align:right;">' + netTxt + '</td>' +
-      '<td style="text-align:right;color:var(--gry);font-size:11px;">' + bullTxt + '</td>' +
-      '</tr>';
-  }).join('');
-
-  // ── Reddit cashtags ──
-  var reddit = SENT.redditCashtags || [];
-  var rdRows = reddit.map(function(s){
-    var sent = SENT.tickerSent[s.ticker];
-    var net = sent && sent.net;
-    var netTxt = net == null ? '<span style="color:var(--gry);">--</span>' :
-      '<span style="color:' + (net >= 0.3 ? 'var(--grn)' : net <= -0.3 ? 'var(--red)' : 'var(--amb)') + ';">' +
-      (net >= 0 ? '+' : '') + net.toFixed(2) + '</span>';
-    var subsTxt = (s.subs || []).map(function(sub){ return 'r/' + sub; }).join(', ');
-    return '<tr data-ticker="' + s.ticker + '" onclick="addToScanner(\'' + s.ticker + '\')">' +
-      '<td><b>' + s.ticker + '</b></td>' +
-      '<td style="text-align:right;">' + s.mentions + '</td>' +
-      '<td style="color:var(--gry);font-size:11px;">' + subsTxt + '</td>' +
-      '<td style="text-align:right;">' + netTxt + '</td>' +
-      '</tr>';
-  }).join('');
-
-  var ts = SENT.raw && SENT.raw.fetched_at ? new Date(SENT.raw.fetched_at).toLocaleString() : '--';
-  var fetchedAgo = SENT.loadedAt ? Math.max(0, Math.round((Date.now() - SENT.loadedAt) / 60000)) : null;
-  var nextMs = SENT.loadedAt ? Math.max(0, (SENT.loadedAt + SENT_REFRESH_MS) - Date.now()) : 0;
-  var nextMin = Math.ceil(nextMs / 60000);
-  var fetchedTxt = fetchedAgo == null ? '--' : (fetchedAgo === 0 ? 'just now' : fetchedAgo + ' min ago');
-  var refreshing = SENT.status === 'loading';
-  var btnLabel = refreshing ? '\u21bb Refreshing\u2026' : '\u21bb Refresh now';
-  var toolbarHTML =
-    '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;' +
-    'padding:10px 14px;margin-bottom:12px;border:1px solid var(--bg3);border-radius:6px;' +
-    'background:var(--bg2);font-family:var(--ff-mono);font-size:11px;">' +
-      '<div style="color:var(--gry);line-height:1.6;">' +
-        '<span style="color:var(--wht);">Snapshot:</span> ' + ts +
-        ' &nbsp;\u00b7&nbsp; <span style="color:var(--wht);">Fetched:</span> <span id="sent-fetched-ago">' + fetchedTxt + '</span>' +
-        ' &nbsp;\u00b7&nbsp; <span style="color:var(--wht);">Next auto:</span> <span id="sent-next-auto">' + nextMin + 'm</span>' +
-        '<br><span style="font-size:10px;opacity:0.75;">Auto-refreshes every 30 min in your browser \u00b7 source rebuilds hourly 9a\u20133p ET on weekdays</span>' +
-      '</div>' +
-      '<button onclick="loadSentiment()" ' + (refreshing ? 'disabled ' : '') +
-        'style="font-family:var(--ff-mono);font-size:11px;padding:6px 14px;border:1px solid var(--gry2);' +
-        'border-radius:4px;background:var(--bg);color:' + (refreshing ? 'var(--gry)' : 'var(--wht)') + ';' +
-        'cursor:' + (refreshing ? 'wait' : 'pointer') + ';white-space:nowrap;">' + btnLabel + '</button>' +
-    '</div>';
-
-  // Maintain a 30s ticker that updates the "Fetched" / "Next auto" labels in place
-  if(SENT_COUNTDOWN_TIMER){ clearInterval(SENT_COUNTDOWN_TIMER); SENT_COUNTDOWN_TIMER = null; }
-  SENT_COUNTDOWN_TIMER = setInterval(function(){
-    var pane = document.getElementById('tab-sent');
-    var ageEl = document.getElementById('sent-fetched-ago');
-    var nextEl = document.getElementById('sent-next-auto');
-    if(!pane || !pane.classList.contains('active') || !ageEl || !nextEl){
-      clearInterval(SENT_COUNTDOWN_TIMER); SENT_COUNTDOWN_TIMER = null; return;
-    }
-    if(!SENT.loadedAt) return;
-    var a = Math.max(0, Math.round((Date.now() - SENT.loadedAt) / 60000));
-    var n = Math.max(0, Math.ceil(((SENT.loadedAt + SENT_REFRESH_MS) - Date.now()) / 60000));
-    ageEl.textContent = a === 0 ? 'just now' : a + ' min ago';
-    nextEl.textContent = n + 'm';
-  }, 30000);
-
-  host.innerHTML = toolbarHTML + regimeHTML +
-    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;" id="sent-lists">' +
-      '<div class="card"><div class="card-hdr">\u25b2 STOCKTWITS TRENDING (top ' + trending.length + ')</div>' +
-      '<div class="tbl-wrap" style="max-height:420px;overflow:auto;">' +
-        '<table><thead><tr><th>SYMBOL</th><th>NAME</th><th style="text-align:right;">SCORE</th><th style="text-align:right;">WATCH</th><th style="text-align:right;">NET</th><th style="text-align:right;">BULL%</th></tr></thead>' +
-        '<tbody>' + (stwRows || '<tr><td colspan="6" style="color:var(--gry);text-align:center;padding:20px;">No trending data</td></tr>') + '</tbody></table>' +
-      '</div></div>' +
-      '<div class="card"><div class="card-hdr">\u25c9 REDDIT CASHTAGS (r/wsb · r/stocks · r/options, top ' + reddit.length + ')</div>' +
-      '<div class="tbl-wrap" style="max-height:420px;overflow:auto;">' +
-        '<table><thead><tr><th>SYMBOL</th><th style="text-align:right;">MENTIONS</th><th>SUBREDDITS</th><th style="text-align:right;">NET</th></tr></thead>' +
-        '<tbody>' + (rdRows || '<tr><td colspan="4" style="color:var(--gry);text-align:center;padding:20px;">No cashtag data</td></tr>') + '</tbody></table>' +
-      '</div></div>' +
-    '</div>' +
-    '<div style="font-family:var(--ff-mono);font-size:10px;color:var(--gry);text-align:right;margin-top:12px;">' +
-      'Click any row to prefill the scanner with that ticker.' +
-    '</div>';
+  var iframe = document.getElementById('sent-iframe');
+  if(!iframe) return;
+  // Lazy-load on first activation: src defaults to about:blank in the HTML so the
+  // panel doesn't fetch until the user opens this tab. Subsequent tab switches
+  // are no-ops (the panel keeps its own state inside the iframe).
+  if(iframe.src && iframe.src.indexOf('alexreed122287.github.io') >= 0) return;
+  iframe.src = SENT_PANEL_URL;
 }
 
 // Helper: called from SENT tab row clicks — drops ticker into the scanner's

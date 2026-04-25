@@ -3,3 +3,5 @@
 index.html.bak.*
 *.bak.*
 industry/.venv/
+industry/__pycache__/
+**/__pycache__/
