@@ -42,6 +42,11 @@ from urllib.parse import quote
 
 import requests
 
+# Make sibling industry/ scripts importable when run from the repo root
+# (so we can reuse audit_unassigned's heuristic suggester for auto-assigning
+# unassigned tickers to themes after the curated pass).
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
 ROOT = Path(__file__).resolve().parents[1]
 TICKERS_CSV = ROOT / "alex_tickers.csv"
 OUT_JSON = ROOT / "industry" / "master_tickers.json"
@@ -405,6 +410,41 @@ def main(industry_scrape_limit: int | None = 0) -> None:
     print(f"      {tagged} tickers tagged with at least one theme")
     print(f"      {dropped_total} curated ticker-slot(s) dropped (not in alex_tickers.csv)")
     write_missing_report(missing)
+
+    # Auto-assignment pass: for every ticker NOT placed by a curated theme,
+    # use audit_unassigned's heuristic (TV sector + stockanalysis.com industry
+    # tag) to suggest a theme and add the ticker as a theme member. Healthcare
+    # is intentionally skipped (per user preference: no healthcare in themes).
+    # Tickers with no clear suggestion (mostly ETFs / miscellaneous) stay
+    # unassigned and surface in unassigned_tickers.md for review.
+    try:
+        import audit_unassigned
+    except ImportError:
+        print("      WARN: could not import audit_unassigned; skipping auto-assignment")
+        audit_unassigned = None
+    if audit_unassigned is not None:
+        added_total = 0
+        added_per_theme: dict[str, int] = {}
+        for sym, meta in tickers.items():
+            if meta.get("themes"):       # already curated → leave alone
+                continue
+            if audit_unassigned.is_healthcare(meta):
+                continue
+            suggestion = audit_unassigned.suggest_theme(meta)
+            if not suggestion:
+                continue
+            themes.setdefault(suggestion, []).append(sym)
+            meta["themes"].append(suggestion)
+            meta["auto_theme"] = True   # mark as heuristic so the frontend can flag it
+            added_total += 1
+            added_per_theme[suggestion] = added_per_theme.get(suggestion, 0) + 1
+        tagged = sum(1 for t in tickers.values() if t.get("themes"))
+        print(f"      auto-assigned {added_total} additional tickers to existing themes "
+              f"(via INDUSTRY_HINTS / SECTOR_HINTS heuristic)")
+        print(f"      {tagged} tickers now have at least one theme")
+        for theme, n in sorted(added_per_theme.items(), key=lambda kv: -kv[1])[:15]:
+            curated_n = len(CURATED_THEMES.get(theme, []))
+            print(f"        +{n:4d}  {theme}  (was {curated_n} curated)")
 
     if industry_scrape_limit != 0:
         print(f"[3/3] scraping stockanalysis.com industry tags "
