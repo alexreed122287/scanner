@@ -1701,6 +1701,11 @@ tr.sel-row td{background:var(--blu3);}
         <input id="api-acct" placeholder="e.g. VA12345678" oninput="this.value=this.value.toUpperCase()">
         <div class="api-status" id="acct-status"></div>
       </div>
+      <div class="api-row">
+        <label title="Optional Cloudflare Worker that proxies Tradier requests so your API key never lives in the browser. See worker/tradier-proxy/README.md to deploy.">TRADIER PROXY URL <span style="color:var(--gry);font-weight:400;font-size:10px;">(optional — see worker/tradier-proxy/README.md)</span></label>
+        <input id="api-tr-proxy" placeholder="e.g. https://tradier-proxy.you.workers.dev (leave blank for direct mode)">
+        <div class="api-status" id="tr-proxy-status"></div>
+      </div>
       <div class="ord-row" style="margin-top:4px;">
         <button class="btn blu" onclick="saveKeys()">SAVE KEYS</button>
         <button class="btn wrn" onclick="clearKeys()">CLEAR KEYS</button>
@@ -2251,8 +2256,41 @@ tr.sel-row td{background:var(--blu3);}
   var _fetch = window.fetch.bind(window);
   window.fetch = function(input, init){
     if(isTradier(input)){
+      // PROXY REWRITE — if user has configured a Tradier proxy URL, rewrite
+      // every api.tradier.com / sandbox.tradier.com request to go through it.
+      // Worker injects the API key server-side; we strip the Authorization
+      // header so the user's local key (if any) doesn't leak. Mode is
+      // signaled via ?mode=live|sandbox (worker strips it before forwarding).
+      // Backward-compatible: if no proxy URL set, behavior is unchanged.
+      try {
+        var proxy = localStorage.getItem('rrjcar_tradier_proxy') || '';
+        if (proxy) {
+          var rawUrl = (typeof input === 'string') ? input : (input && input.url);
+          if (rawUrl) {
+            var isLive = rawUrl.indexOf('api.tradier.com') >= 0
+                      && rawUrl.indexOf('sandbox.tradier.com') < 0;
+            var u = new URL(rawUrl);
+            var newUrl = proxy.replace(/\/+$/, '') + u.pathname + u.search;
+            newUrl += (newUrl.indexOf('?') >= 0 ? '&' : '?') + 'mode=' + (isLive ? 'live' : 'sandbox');
+            input = newUrl;
+            // Strip Authorization — worker injects its own; passing the local
+            // (likely stale) key is wasted bytes + minor info leak.
+            init = init ? Object.assign({}, init) : {};
+            if (init.headers) {
+              if (init.headers instanceof Headers) {
+                init.headers = new Headers(init.headers);
+                init.headers.delete('Authorization');
+              } else if (typeof init.headers === 'object') {
+                init.headers = Object.assign({}, init.headers);
+                delete init.headers.Authorization;
+                delete init.headers.authorization;
+              }
+            }
+          }
+        }
+      } catch (e) { /* if anything goes wrong, fall through to original fetch */ }
       var method = (init&&init.method)||'GET';
-      var label = endpointLabel(input);
+      var label = endpointLabel(typeof input === 'string' ? input : (input && input.url));
       record(label, method);
     }
     return _fetch(input, init);
@@ -11984,6 +12022,28 @@ function saveKeys(){
   // Paste from iOS / email / docs often sneaks these in and Safari rejects them in headers.
   function _cleanKey(s){ return (s||'').replace(/[^\x20-\x7E]/g,'').trim(); }
   var fmp=_cleanKey(eid('api-fmp').value),tr=_cleanKey(eid('api-tr').value),mode=eid('api-mode').value,acct=_cleanKey(eid('api-acct').value);
+  // Optional Tradier proxy URL — when set, all api.tradier.com / sandbox.tradier.com
+  // requests get rewritten to go through it (and the local key gets ignored — worker
+  // injects its own from a Cloudflare secret). See worker/tradier-proxy/README.md.
+  var trProxy = _cleanKey(eid('api-tr-proxy') ? eid('api-tr-proxy').value : '');
+  // Allow trailing slash variants; strip
+  trProxy = trProxy.replace(/\/+$/, '');
+  // Validate: must be https:// (or localhost http for dev) and no trailing path
+  if (trProxy && !/^(https:\/\/|http:\/\/localhost)/i.test(trProxy)){
+    if(eid('tr-proxy-status')){
+      eid('tr-proxy-status').textContent = 'Invalid URL — must start with https:// (or http://localhost)';
+      eid('tr-proxy-status').className = 'api-status miss';
+    }
+    return;
+  }
+  if (trProxy) localStorage.setItem('rrjcar_tradier_proxy', trProxy);
+  else         localStorage.removeItem('rrjcar_tradier_proxy');
+  if(eid('tr-proxy-status')){
+    eid('tr-proxy-status').textContent = trProxy
+      ? 'Proxy active — local Tradier key will be ignored. Worker injects key server-side.'
+      : 'Direct mode — using local Tradier key.';
+    eid('tr-proxy-status').className = 'api-status ' + (trProxy ? 'ok' : 'miss');
+  }
   if(fmp)localStorage.setItem('rrjcar_fmp',fmp);
   // Mode-specific Tradier key + account (live/sandbox use different tokens)
   var trKey = mode==='live' ? 'rrjcar_tradier_live' : 'rrjcar_tradier_sandbox';
@@ -12229,6 +12289,15 @@ function loadKeys(){
   eid('api-mode').value=mode;
   var badge=eid('mode-badge');badge.textContent=mode==='live'?'LIVE MODE':'SANDBOX';
   if(mode==='live'){badge.style.background='var(--wrn3)';badge.style.color='var(--wrn)';}
+  // Tradier proxy URL — restore + label status
+  var trProxy = localStorage.getItem('rrjcar_tradier_proxy') || '';
+  if (eid('api-tr-proxy')) eid('api-tr-proxy').value = trProxy;
+  if (eid('tr-proxy-status')) {
+    eid('tr-proxy-status').textContent = trProxy
+      ? 'Proxy active — local Tradier key ignored. Worker injects key server-side.'
+      : 'Direct mode — using local Tradier key. (Optional: deploy worker/tradier-proxy for server-side key.)';
+    eid('tr-proxy-status').className = 'api-status ' + (trProxy ? 'ok' : 'miss');
+  }
 }
 function updateClock(){
   var now=new Date();var h=now.getHours(),m=now.getMinutes(),s=now.getSeconds();

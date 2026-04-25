@@ -1,0 +1,14 @@
+name = "tradier-proxy"
+main = "src/index.js"
+compatibility_date = "2025-01-01"
+
+# Origins allowed to call this worker. Update if your scanner is hosted elsewhere.
+# CORS allowlist is browser-only — the worker also enforces a path allowlist
+# and per-IP rate limit so non-browser callers (curl etc.) can't abuse it.
+[vars]
+ALLOWED_ORIGINS = "https://alexreed122287.github.io,http://localhost:8000,http://localhost:8765"
+
+# Secrets are set via:
+#   npx wrangler secret put TRADIER_LIVE_TOKEN       (your production key)
+#   npx wrangler secret put TRADIER_SANDBOX_TOKEN    (optional — falls back to live if missing)
+# DO NOT put tokens in this file.
