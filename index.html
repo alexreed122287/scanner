@@ -872,7 +872,7 @@ tr.sel-row td{background:var(--blu3);}
     </div>
   </div>
   <div class="flt-bar" style="padding:4px 10px;gap:8px;">
-    <input type="text" id="bs-search" placeholder="&#128269; Search ticker..." oninput="onBsSearch()" style="flex:1;min-width:160px;font-family:var(--ff-mono);font-size:11px;padding:5px 10px;background:var(--bg1);border:1px solid var(--bg3);border-radius:3px;color:var(--amb);">
+    <input type="text" id="bs-search" placeholder="Search ticker..." oninput="onBsSearch()" style="flex:1;min-width:160px;font-family:var(--ff-mono);font-size:11px;padding:5px 10px;background:var(--bg1);border:1px solid var(--bg3);border-radius:3px;color:var(--amb);">
   </div>
   <div class="split">
     <div class="split-l">
@@ -945,7 +945,7 @@ tr.sel-row td{background:var(--blu3);}
     <label class="ind-filter-lbl" title="LuxAlgo SMC: price at or within 1% above an active bullish support OB (daily)"><input type="checkbox" class="ind-filter" id="filt-obsupport" onchange="onOBFilterChange()"> <span>At Bull OB &#8804;1% (SMC)</span></label>
     <label class="ind-filter-lbl" title="LuxAlgo Institutional Order Flow: nearest bearish OB ≥5% above price (daily)"><input type="checkbox" class="ind-filter" id="filt-inst-obclear" onchange="onOBFilterChange()"> <span>Clear Bear OB &#8805;5% (Inst)</span></label>
     <label class="ind-filter-lbl" title="LuxAlgo Institutional Order Flow: price at or within 1% above an active bullish support OB (daily)"><input type="checkbox" class="ind-filter" id="filt-inst-obsupport" onchange="onOBFilterChange()"> <span>At Bull OB &#8804;1% (Inst)</span></label>
-    <input type="text" id="sc-search" placeholder="&#128269; Search ticker..." oninput="onScSearch()" style="margin-left:auto;font-family:var(--ff-mono);font-size:11px;padding:3px 8px;background:var(--bg1);border:1px solid var(--bg3);border-radius:3px;color:var(--amb);width:160px;">
+    <input type="text" id="sc-search" placeholder="Search ticker..." oninput="onScSearch()" style="margin-left:auto;font-family:var(--ff-mono);font-size:11px;padding:3px 8px;background:var(--bg1);border:1px solid var(--bg3);border-radius:3px;color:var(--amb);width:160px;">
     <span id="sc-filter-count" style="font-family:var(--ff-mono);font-size:10px;color:var(--gry);"></span>
   </div>
   <div class="flt-bar" style="flex-wrap:wrap;gap:6px;">
@@ -959,16 +959,6 @@ tr.sel-row td{background:var(--blu3);}
       <label style="font-size:11px;color:var(--gry);" title="Filter OUT tickers where the option contract costs more than this amount. Uses last scanned option price.">Max Opt $ <input type="number" id="sc-maxoptprice" placeholder="any" min="0" step="0.50" style="width:58px;font-size:11px;"></label>
     </div>
     <span id="sc-universe-label" style="font-size:10px;color:var(--gry);font-family:var(--ff-mono);margin-left:4px;"></span>
-    <div style="display:flex;align-items:center;gap:6px;margin-left:auto;border-left:1px solid var(--gry2);padding-left:10px;">
-      <span style="color:var(--amb);font-size:10px;letter-spacing:.5px;white-space:nowrap;">+ CUSTOM</span>
-      <input type="text" id="sc-custom-tickers" placeholder="TSLA, COIN, PLTR..." 
-        style="background:var(--bg2);border:var(--bdr);border-radius:3px;color:var(--wht);font-family:var(--ff-mono);font-size:11px;padding:4px 8px;width:180px;"
-        title="Manually add tickers to scan — always included regardless of screener filters"
-        onchange="saveCustomTickers()"
-        onkeydown="if(event.key==='Enter'){event.preventDefault();searchCustomTicker();}">
-      <button class="btn blu" style="font-size:10px;padding:2px 10px;" onclick="searchCustomTicker()" title="Save custom tickers and immediately run a scan">&#128269; SEARCH</button>
-      <button class="btn" style="font-size:10px;padding:2px 8px;" onclick="clearCustomTickers()">CLR</button>
-    </div>
   </div>
   </div><!-- /#sc-filter-bars -->
   <!-- Export row (always visible, not part of collapsible filters) -->
@@ -7161,16 +7151,17 @@ function finishScan(){
   G.results.sort(function(a,b){ return b.score - a.score; });
   G.filtered = excludedFilteredResults();
 
-  // Compute the breakdown for the completion summary.
-  var goCount = G.results.filter(function(r){ return r.isGo; }).length;
-  var nogoCount = G.results.length - goCount;
-  setScanComplete({
-    scanned: (typeof UNIVERSE_FULL !== 'undefined') ? UNIVERSE_FULL.length : 0,
-    passed:  (typeof G.lastPassedCount === 'number') ? G.lastPassedCount : G.results.length,
-    scored:  G.results.length,
-    go:      goCount,
-    nogo:    nogoCount
-  });
+  // Bulk pass done \u2014 preliminary scores are populated for ALL ~750 passed
+  // tickers. Enrichment (FMP analyst grades + Tradier indicator history) for
+  // the top SC_ENRICH_LIMIT continues in the background and updates scores
+  // as it completes. The final green \u2713 DONE state fires from _maybeFinishScan
+  // after BOTH enrichment passes finish.
+  setScanProgress(60, 'Preliminary scoring done (' + G.results.length + ' tickers) \u2014 enriching top ' +
+                  Math.min(200, G.results.length) + ' with FMP + indicator history\u2026');
+  // Reset the finished latch so this run's completion event fires once.
+  window._scanFinished = false;
+  // Mark all results as preliminary (frontend will flag with "~" until enriched)
+  G.results.forEach(function(r){ r.fmpEnriched = false; r.indEnriched = false; });
 
   // Update stats bar
   eid('bs-scan').textContent = G.results.length;
@@ -7179,16 +7170,40 @@ function finishScan(){
 
   var btn = eid('sc-run-btn');
   if(btn){ btn.disabled = false; btn.textContent = '\u21bb SCAN'; }
-  // Note: setScanComplete schedules its own hide-after-8s for the in-pane
-  // bar; the header pill stays green until the next scan starts.
 
   // Pre-fetch FMP data for top scored tickers in background \u2014 warms cache before user clicks.
-  // Capped at 100 to stay under FMP plan rate limits. Queue respects rate-limit cooldowns instead
-  // of firing N setTimeouts that all get rejected when 429 hits mid-scan.
+  // SC_ENRICH_LIMIT bumped from 50 \u2192 200 so the user has to click far fewer
+  // tickers to get full (FMP analyst grades + Tradier indicator history) scores.
+  // Queue respects rate-limit cooldowns instead of firing N setTimeouts that all
+  // get rejected when 429 hits mid-scan. FMP @ 250ms = 240 req/min (Starter cap = 300).
+  var SC_ENRICH_LIMIT = 200;
+  var enrichTotal = Math.min(SC_ENRICH_LIMIT, G.results.length);
+  var fmpDone = 0, indDone = 0;
+  function _maybeFinishScan(){
+    // Both background passes done \u2192 header pill goes green with the final count.
+    // (Scan results were already shown immediately after the bulk pass; this is
+    // the "fully enriched" milestone.)
+    if(fmpDone < enrichTotal || indDone < enrichTotal) return;
+    if(window._scanFinished) return;
+    window._scanFinished = true;
+    var goCountFinal = G.results.filter(function(r){ return r.isGo; }).length;
+    setScanComplete({
+      scanned: (typeof UNIVERSE_FULL !== 'undefined') ? UNIVERSE_FULL.length : 0,
+      passed:  (typeof G.lastPassedCount === 'number') ? G.lastPassedCount : G.results.length,
+      scored:  G.results.length,
+      go:      goCountFinal,
+      nogo:    G.results.length - goCountFinal
+    });
+  }
   var fmpKey='';try{fmpKey=localStorage.getItem('rrjcar_fmp')||'';}catch(e){}
   if(!fmpKey && typeof FMP_KEY_DEFAULT !== 'undefined') fmpKey = FMP_KEY_DEFAULT;
+  if(!fmpKey){
+    // No FMP key — skip the FMP queue entirely. Mark fmpDone as complete so
+    // _maybeFinishScan can finalize based on the indicator-history pass alone.
+    fmpDone = enrichTotal;
+  }
   if(fmpKey){
-    var goTickers = G.results.slice(0,50).map(function(r){ return r.ticker; });
+    var goTickers = G.results.slice(0,SC_ENRICH_LIMIT).map(function(r){ return r.ticker; });
     var _fmpIdx = 0;
     function _fmpNext(){
       if(_fmpIdx >= goTickers.length) return;
@@ -7213,6 +7228,7 @@ function finishScan(){
             var updated = scoreIt(t, r.ind, r.opt);
             r.score=updated.score; r.techScore=updated.techScore; r.fundScore=updated.fundScore;
             r.isGo=updated.isGo; r.rules=updated.rules; r.passes=updated.passes;
+            r.fmpEnriched = true;   // mark so the table can flag preliminary vs full
             if(typeof window._rescoredCount==='undefined') window._rescoredCount=0;
             window._rescoredCount++;
             if(window._rescoredCount % 25 === 0){
@@ -7222,15 +7238,17 @@ function finishScan(){
             }
           }
         }
-      }).catch(function(){/* cooldown rejection \u2014 will retry this ticker? no: idx already incremented. fine. */});
+        fmpDone++; _maybeFinishScan();
+      }).catch(function(){ fmpDone++; _maybeFinishScan(); });
       // Pace: 250ms between calls = ~240 req/min \u2014 under FMP Starter 300/min limit
       setTimeout(_fmpNext, 250);
     }
     setTimeout(_fmpNext, 500); // small delay so base scan renders first
   }
 
-  // Sequential enrichment queue — one ticker at a time, no browser lockup
-  var enrichQueue = G.results.slice(0, 50).map(function(r){ return r.ticker; });
+  // Sequential enrichment queue — one ticker at a time, no browser lockup.
+  // Same SC_ENRICH_LIMIT (200) as the FMP queue.
+  var enrichQueue = G.results.slice(0, SC_ENRICH_LIMIT).map(function(r){ return r.ticker; });
   var enrichIdx = 0;
   function enrichNext(){
     if(enrichIdx >= enrichQueue.length) return;
@@ -7240,6 +7258,17 @@ function finishScan(){
     var tradierKey='';try{tradierKey=localStorage.getItem('rrjcar_tradier')||'';}catch(e){}
     var fmpKey='';try{fmpKey=localStorage.getItem('rrjcar_fmp')||'';}catch(e){}
     setScanProgress(62 + Math.round((enrichIdx/enrichQueue.length)*35), 'Enriching '+enrichIdx+'/'+enrichQueue.length+': '+t+'...');
+    // Mirror enrichment progress to the persistent header pill so the user can
+    // see "ENRICH 47/200" from any tab without watching the in-pane bar.
+    var hdrPill = eid('hdr-scan-status');
+    if(hdrPill){
+      hdrPill.style.display = '';
+      hdrPill.style.color = 'var(--ambb)';
+      hdrPill.style.borderColor = 'rgba(0,212,255,0.5)';
+      hdrPill.style.background = 'rgba(0,212,255,0.10)';
+      hdrPill.textContent = 'ENRICH ' + enrichIdx + '/' + enrichQueue.length;
+      hdrPill.title = 'Enriching top ' + enrichQueue.length + ' results with FMP + indicator history (' + t + ')';
+    }
     fetchIndicatorHistory(t).then(function(days){
       if(days) G_HIST_CACHE[t]=days;
       // Skip FMP if in cooldown or circuit breaker open \u2014 history alone still improves score
@@ -7249,11 +7278,14 @@ function finishScan(){
         var u=scoreIt(t,r.ind,r.opt);
         r.score=u.score; r.techScore=u.techScore; r.fundScore=u.fundScore;
         r.isGo=u.isGo; r.rules=u.rules; r.passes=u.passes;
+        r.indEnriched = true;   // mark so the table can flag preliminary vs full
         G.results.sort(function(a,b){ return b.score-a.score; });
         G.filtered=G.results.slice();
         renderBuySig(); renderScan();
+        indDone++; _maybeFinishScan();
         setTimeout(enrichNext, 100);
       }).catch(function(){
+        indDone++; _maybeFinishScan();
         setTimeout(enrichNext, 100);
       });
     });
