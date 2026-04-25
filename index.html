@@ -14651,18 +14651,18 @@ function indSetTF(tf){
 }
 
 function indFmtAsOf(genAt, asOf){
-  // Prefer generated_at (full ISO timestamp) for time precision; fall back to
-  // as_of (date-only) when the generator didn't emit a timestamp.
+  // MM-DD HH:MM. Prefer generated_at (full ISO timestamp) for time precision;
+  // fall back to as_of (date-only) when the generator didn't emit a timestamp.
   if(genAt){
     var dt = new Date(genAt);
     if(!isNaN(dt.getTime())){
       var pad = function(n){ return String(n).padStart(2,'0'); };
-      return pad(dt.getDate()) + '-' + pad(dt.getMonth()+1) + ' ' + pad(dt.getHours()) + ':' + pad(dt.getMinutes());
+      return pad(dt.getMonth()+1) + '-' + pad(dt.getDate()) + ' ' + pad(dt.getHours()) + ':' + pad(dt.getMinutes());
     }
   }
   if(asOf){
     var m = String(asOf).match(/^(\d{4})-(\d{2})-(\d{2})/);
-    if(m) return m[3] + '-' + m[2];
+    if(m) return m[2] + '-' + m[3];
   }
   return '--';
 }
