@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-04-25T19:49:29+00:00",
+  "generated_at": "2026-04-25T21:19:47+00:00",
   "universe_size": 2548,
-  "theme_count": 103,
+  "theme_count": 102,
   "themes": {
     "AI Infrastructure": [
       "NVDA",
@@ -1816,20 +1816,6 @@
       "FUN",
       "DIS"
     ],
-    "Top Recurring": [
-      "NVDA",
-      "PLTR",
-      "AMZN",
-      "MSFT",
-      "GOOGL",
-      "META",
-      "TSLA",
-      "AMD",
-      "MRVL",
-      "ZS",
-      "SMCI",
-      "MU"
-    ],
     "Software (Broad)": [
       "UBER",
       "ACN",
@@ -2314,8 +2300,7 @@
       "themes": [
         "AI Infrastructure",
         "Semiconductors",
-        "Big Tech",
-        "Top Recurring"
+        "Big Tech"
       ]
     },
     "GOOG": {
@@ -2339,8 +2324,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Big Tech",
-        "Top Recurring"
+        "Big Tech"
       ]
     },
     "AMZN": {
@@ -2349,8 +2333,7 @@
       "industry": "Internet Retail",
       "themes": [
         "Big Tech",
-        "E-Commerce",
-        "Top Recurring"
+        "E-Commerce"
       ]
     },
     "AVGO": {
@@ -2367,8 +2350,7 @@
       "tv_sector": "Technology services",
       "industry": "Internet Content & Information",
       "themes": [
-        "Big Tech",
-        "Top Recurring"
+        "Big Tech"
       ]
     },
     "TSLA": {
@@ -2377,8 +2359,7 @@
       "industry": "Auto Manufacturers",
       "themes": [
         "Big Tech",
-        "Auto OEMs",
-        "Top Recurring"
+        "Auto OEMs"
       ]
     },
     "WMT": {
@@ -2431,8 +2412,7 @@
       "industry": "Semiconductors",
       "themes": [
         "Memory & Storage",
-        "Semiconductors",
-        "Top Recurring"
+        "Semiconductors"
       ]
     },
     "ORCL": {
@@ -2473,8 +2453,7 @@
       "industry": "Semiconductors",
       "themes": [
         "AI Infrastructure",
-        "Semiconductors",
-        "Top Recurring"
+        "Semiconductors"
       ]
     },
     "BAC": {
@@ -2513,8 +2492,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Defense",
-        "Top Recurring"
+        "Defense"
       ]
     },
     "HD": {
@@ -3141,8 +3119,7 @@
       "industry": "Semiconductors",
       "themes": [
         "AI Infrastructure",
-        "Semiconductors",
-        "Top Recurring"
+        "Semiconductors"
       ]
     },
     "VRT": {
@@ -5927,8 +5904,7 @@
       "tv_sector": "Technology services",
       "industry": "Software - Infrastructure",
       "themes": [
-        "Cybersecurity",
-        "Top Recurring"
+        "Cybersecurity"
       ]
     },
     "AS": {
@@ -6502,8 +6478,7 @@
       "industry": "Computer Hardware",
       "themes": [
         "AI Infrastructure",
-        "Semiconductors",
-        "Top Recurring"
+        "Semiconductors"
       ]
     },
     "SN": {
@@ -22246,8 +22221,7 @@
       "tv_sector": "Technology services",
       "industry": "Internet Content & Information",
       "themes": [
-        "Big Tech",
-        "Top Recurring"
+        "Big Tech"
       ]
     },
     "GPI": {

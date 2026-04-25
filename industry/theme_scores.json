@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-25T19:50:54+00:00",
+  "generated_at": "2026-04-25T21:21:30+00:00",
   "as_of": "2026-04-24",
   "benchmark": "SPY",
   "windows": {
@@ -69,16 +69,16 @@
       "rs_rank": {
         "1W": 97.5,
         "1M": 91.7,
-        "3M": 95.9,
-        "6M": 85.1
+        "3M": 95.8,
+        "6M": 85.0
       },
       "breadth_50": 100.0,
       "breadth_200": 85.7,
       "trend_above_50ema": true,
       "scores": {
         "daily": 96.7,
-        "weekly": 94.8,
-        "monthly": 90.5
+        "weekly": 94.7,
+        "monthly": 90.4
       }
     },
     "Photonics": {
@@ -175,8 +175,8 @@
         "6M": 281.2
       },
       "rs_rank": {
-        "1W": 75.2,
-        "1M": 93.4,
+        "1W": 75.8,
+        "1M": 93.3,
         "3M": 100.0,
         "6M": 100.0
       },
@@ -184,8 +184,8 @@
       "breadth_200": 100.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 86.0,
-        "weekly": 91.7,
+        "daily": 86.2,
+        "weekly": 91.8,
         "monthly": 99.0
       }
     },
@@ -220,7 +220,7 @@
         "6M": 179.45
       },
       "rs_rank": {
-        "1W": 95.9,
+        "1W": 95.8,
         "1M": 100.0,
         "3M": 98.3,
         "6M": 99.2
@@ -292,9 +292,9 @@
       "breadth_200": 100.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 96.1,
+        "daily": 96.0,
         "weekly": 95.6,
-        "monthly": 97.1
+        "monthly": 97.0
       }
     },
     "Semiconductors": {
@@ -634,7 +634,7 @@
       "scores": {
         "daily": 97.0,
         "weekly": 96.1,
-        "monthly": 91.6
+        "monthly": 91.5
       }
     },
     "Big Tech": {
@@ -677,18 +677,18 @@
         "6M": 1.49
       },
       "rs_rank": {
-        "1W": 66.1,
-        "1M": 77.7,
-        "3M": 57.0,
-        "6M": 56.2
+        "1W": 66.7,
+        "1M": 78.3,
+        "3M": 57.5,
+        "6M": 56.7
       },
       "breadth_50": 87.5,
       "breadth_200": 62.5,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 75.6,
-        "weekly": 73.7,
-        "monthly": 60.7
+        "daily": 76.0,
+        "weekly": 74.2,
+        "monthly": 61.1
       }
     },
     "Defense": {
@@ -829,9 +829,9 @@
       },
       "rs_rank": {
         "1W": 2.5,
-        "1M": 6.6,
-        "3M": 12.4,
-        "6M": 67.8
+        "1M": 6.7,
+        "3M": 12.5,
+        "6M": 67.5
       },
       "breadth_50": 27.5,
       "breadth_200": 42.9,
@@ -891,18 +891,18 @@
         "6M": -13.19
       },
       "rs_rank": {
-        "1W": 12.4,
-        "1M": 20.7,
+        "1W": 12.5,
+        "1M": 20.8,
         "3M": 3.3,
-        "6M": 22.3
+        "6M": 22.5
       },
       "breadth_50": 27.3,
       "breadth_200": 36.4,
       "trend_above_50ema": false,
       "scores": {
         "daily": 15.5,
-        "weekly": 17.4,
-        "monthly": 16.6
+        "weekly": 17.5,
+        "monthly": 16.7
       }
     },
     "Space": {
@@ -946,16 +946,16 @@
       },
       "rs_rank": {
         "1W": 5.0,
-        "1M": 82.6,
-        "3M": 76.0,
-        "6M": 93.4
+        "1M": 83.3,
+        "3M": 75.8,
+        "6M": 93.3
       },
       "breadth_50": 87.5,
       "breadth_200": 87.5,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 46.3,
-        "weekly": 66.8,
+        "daily": 46.5,
+        "weekly": 67.2,
         "monthly": 84.0
       }
     },
@@ -1011,18 +1011,18 @@
         "6M": -9.98
       },
       "rs_rank": {
-        "1W": 62.0,
-        "1M": 59.5,
-        "3M": 16.5,
-        "6M": 28.1
+        "1W": 62.5,
+        "1M": 60.0,
+        "3M": 16.7,
+        "6M": 28.3
       },
       "breadth_50": 83.3,
       "breadth_200": 58.3,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 68.4,
-        "weekly": 57.1,
-        "monthly": 32.7
+        "daily": 68.8,
+        "weekly": 57.5,
+        "monthly": 32.9
       }
     },
     "AI Power": {
@@ -1237,18 +1237,18 @@
         "6M": 5.61
       },
       "rs_rank": {
-        "1W": 69.4,
-        "1M": 39.7,
-        "3M": 74.4,
-        "6M": 62.8
+        "1W": 70.0,
+        "1M": 40.0,
+        "3M": 74.2,
+        "6M": 62.5
       },
       "breadth_50": 58.5,
       "breadth_200": 85.9,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 63.4,
-        "weekly": 53.6,
-        "monthly": 67.4
+        "daily": 63.8,
+        "weekly": 53.9,
+        "monthly": 67.3
       }
     },
     "Solar": {
@@ -1307,18 +1307,18 @@
         "6M": 10.45
       },
       "rs_rank": {
-        "1W": 85.1,
-        "1M": 23.1,
-        "3M": 56.2,
-        "6M": 71.1
+        "1W": 85.8,
+        "1M": 23.3,
+        "3M": 56.7,
+        "6M": 70.8
       },
       "breadth_50": 30.8,
       "breadth_200": 30.8,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 63.0,
-        "weekly": 41.6,
-        "monthly": 51.9
+        "daily": 63.4,
+        "weekly": 41.9,
+        "monthly": 52.0
       }
     },
     "Oil & Gas E&P": {
@@ -1485,10 +1485,10 @@
         "6M": 25.99
       },
       "rs_rank": {
-        "1W": 92.6,
-        "1M": 4.1,
-        "3M": 86.8,
-        "6M": 81.8
+        "1W": 92.5,
+        "1M": 4.2,
+        "3M": 86.7,
+        "6M": 81.7
       },
       "breadth_50": 59.2,
       "breadth_200": 75.5,
@@ -1496,7 +1496,7 @@
       "scores": {
         "daily": 66.2,
         "weekly": 42.5,
-        "monthly": 71.2
+        "monthly": 71.1
       }
     },
     "Crypto / Miners": {
@@ -1548,17 +1548,17 @@
         "6M": -10.56
       },
       "rs_rank": {
-        "1W": 78.5,
-        "1M": 95.9,
-        "3M": 71.9,
-        "6M": 26.4
+        "1W": 79.2,
+        "1M": 95.8,
+        "3M": 71.7,
+        "6M": 26.7
       },
       "breadth_50": 100.0,
       "breadth_200": 63.6,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 88.2,
-        "weekly": 89.4,
+        "daily": 88.5,
+        "weekly": 89.5,
         "monthly": 60.6
       }
     },
@@ -1605,18 +1605,18 @@
         "6M": -28.02
       },
       "rs_rank": {
-        "1W": 20.7,
-        "1M": 73.6,
+        "1W": 20.8,
+        "1M": 74.2,
         "3M": 5.8,
-        "6M": 6.6
+        "6M": 6.7
       },
       "breadth_50": 77.8,
       "breadth_200": 0.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 50.4,
-        "weekly": 53.4,
-        "monthly": 15.3
+        "daily": 50.6,
+        "weekly": 53.8,
+        "monthly": 15.5
       }
     },
     "Mega Banks": {
@@ -1699,18 +1699,18 @@
         "6M": 6.5
       },
       "rs_rank": {
-        "1W": 26.4,
-        "1M": 86.8,
-        "3M": 76.9,
-        "6M": 63.6
+        "1W": 26.7,
+        "1M": 87.5,
+        "3M": 76.7,
+        "6M": 63.3
       },
       "breadth_50": 85.7,
       "breadth_200": 75.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 57.8,
-        "weekly": 73.1,
-        "monthly": 74.1
+        "daily": 58.1,
+        "weekly": 73.4,
+        "monthly": 74.0
       }
     },
     "Cybersecurity": {
@@ -1756,18 +1756,18 @@
         "6M": -27.84
       },
       "rs_rank": {
-        "1W": 83.5,
-        "1M": 25.6,
-        "3M": 20.7,
-        "6M": 7.4
+        "1W": 84.2,
+        "1M": 25.8,
+        "3M": 20.8,
+        "6M": 7.5
       },
       "breadth_50": 66.7,
       "breadth_200": 22.2,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 68.1,
-        "weekly": 42.6,
-        "monthly": 17.7
+        "daily": 68.5,
+        "weekly": 42.9,
+        "monthly": 17.8
       }
     },
     "Quantum": {
@@ -1805,7 +1805,7 @@
       },
       "rs_rank": {
         "1W": 1.7,
-        "1M": 79.3,
+        "1M": 80.0,
         "3M": 2.5,
         "6M": 2.5
       },
@@ -1813,9 +1813,9 @@
       "breadth_200": 0.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 40.7,
-        "weekly": 50.4,
-        "monthly": 13.6
+        "daily": 40.8,
+        "weekly": 50.7,
+        "monthly": 13.8
       }
     },
     "Industrial / Picks": {
@@ -1865,18 +1865,18 @@
         "6M": -4.58
       },
       "rs_rank": {
-        "1W": 86.0,
-        "1M": 48.8,
-        "3M": 36.4,
-        "6M": 43.0
+        "1W": 86.7,
+        "1M": 49.2,
+        "3M": 36.7,
+        "6M": 43.3
       },
       "breadth_50": 70.0,
       "breadth_200": 80.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 75.7,
-        "weekly": 57.5,
-        "monthly": 46.8
+        "daily": 76.1,
+        "weekly": 57.9,
+        "monthly": 47.0
       }
     },
     "Travel & Leisure": {
@@ -1989,18 +1989,18 @@
         "6M": -2.94
       },
       "rs_rank": {
-        "1W": 18.2,
-        "1M": 42.1,
-        "3M": 65.3,
-        "6M": 47.1
+        "1W": 18.3,
+        "1M": 42.5,
+        "3M": 65.8,
+        "6M": 47.5
       },
       "breadth_50": 54.8,
       "breadth_200": 41.9,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 37.9,
-        "weekly": 42.7,
-        "monthly": 52.9
+        "daily": 38.0,
+        "weekly": 43.0,
+        "monthly": 53.2
       }
     },
     "Retail / Consumer": {
@@ -2040,18 +2040,18 @@
         "6M": 4.07
       },
       "rs_rank": {
-        "1W": 42.1,
-        "1M": 21.5,
-        "3M": 33.1,
-        "6M": 60.3
+        "1W": 42.5,
+        "1M": 21.7,
+        "3M": 33.3,
+        "6M": 60.0
       },
       "breadth_50": 42.9,
       "breadth_200": 57.1,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 42.9,
-        "weekly": 30.6,
-        "monthly": 43.1
+        "daily": 43.1,
+        "weekly": 30.8,
+        "monthly": 43.2
       }
     },
     "Regional Banks": {
@@ -2269,18 +2269,18 @@
         "6M": 8.63
       },
       "rs_rank": {
-        "1W": 34.7,
-        "1M": 45.5,
-        "3M": 58.7,
-        "6M": 66.1
+        "1W": 35.0,
+        "1M": 45.8,
+        "3M": 59.2,
+        "6M": 65.8
       },
       "breadth_50": 89.4,
       "breadth_200": 89.2,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 52.1,
-        "weekly": 51.9,
-        "monthly": 63.5
+        "daily": 52.4,
+        "weekly": 52.2,
+        "monthly": 63.7
       }
     },
     "Custody Banks": {
@@ -2308,17 +2308,17 @@
         "6M": 23.98
       },
       "rs_rank": {
-        "1W": 77.7,
-        "1M": 85.1,
-        "3M": 81.8,
-        "6M": 80.2
+        "1W": 78.3,
+        "1M": 85.8,
+        "3M": 81.7,
+        "6M": 80.0
       },
       "breadth_50": 100.0,
       "breadth_200": 100.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 85.1,
-        "weekly": 85.4,
+        "daily": 85.6,
+        "weekly": 85.8,
         "monthly": 84.5
       }
     },
@@ -2570,18 +2570,18 @@
         "6M": -15.23
       },
       "rs_rank": {
-        "1W": 43.0,
-        "1M": 76.9,
-        "3M": 26.4,
-        "6M": 19.8
+        "1W": 43.3,
+        "1M": 77.5,
+        "3M": 26.7,
+        "6M": 20.0
       },
       "breadth_50": 75.3,
       "breadth_200": 35.6,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 62.0,
-        "weekly": 62.3,
-        "monthly": 33.4
+        "daily": 62.3,
+        "weekly": 62.7,
+        "monthly": 33.6
       }
     },
     "P&C Insurance": {
@@ -2685,18 +2685,18 @@
         "6M": -6.79
       },
       "rs_rank": {
-        "1W": 36.4,
-        "1M": 26.4,
-        "3M": 55.4,
-        "6M": 37.2
+        "1W": 36.7,
+        "1M": 26.7,
+        "3M": 55.8,
+        "6M": 37.5
       },
       "breadth_50": 64.3,
       "breadth_200": 64.3,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 44.4,
-        "weekly": 38.4,
-        "monthly": 46.9
+        "daily": 44.6,
+        "weekly": 38.7,
+        "monthly": 47.2
       }
     },
     "Life Insurance": {
@@ -2764,18 +2764,18 @@
         "6M": 4.89
       },
       "rs_rank": {
-        "1W": 67.8,
-        "1M": 67.8,
-        "3M": 59.5,
-        "6M": 62.0
+        "1W": 68.3,
+        "1M": 68.3,
+        "3M": 60.0,
+        "6M": 61.7
       },
       "breadth_50": 93.8,
       "breadth_200": 73.3,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 74.9,
-        "weekly": 70.4,
-        "monthly": 63.6
+        "daily": 75.3,
+        "weekly": 70.9,
+        "monthly": 63.8
       }
     },
     "Insurance Brokers": {
@@ -2825,8 +2825,8 @@
         "6M": -28.8
       },
       "rs_rank": {
-        "1W": 33.1,
-        "1M": 44.6,
+        "1W": 33.3,
+        "1M": 45.0,
         "3M": 5.0,
         "6M": 5.8
       },
@@ -2834,9 +2834,9 @@
       "breadth_200": 0.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 42.2,
-        "weekly": 34.2,
-        "monthly": 10.4
+        "daily": 42.4,
+        "weekly": 34.4,
+        "monthly": 10.5
       }
     },
     "Reinsurance": {
@@ -2871,18 +2871,18 @@
         "6M": 8.36
       },
       "rs_rank": {
-        "1W": 46.3,
-        "1M": 34.7,
-        "3M": 73.6,
-        "6M": 65.3
+        "1W": 46.7,
+        "1M": 35.0,
+        "3M": 73.3,
+        "6M": 65.0
       },
       "breadth_50": 60.0,
       "breadth_200": 100.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 50.8,
-        "weekly": 46.6,
-        "monthly": 69.2
+        "daily": 51.1,
+        "weekly": 46.8,
+        "monthly": 69.1
       }
     },
     "Specialty Finance": {
@@ -2962,18 +2962,18 @@
         "6M": -13.32
       },
       "rs_rank": {
-        "1W": 38.0,
-        "1M": 75.2,
-        "3M": 38.8,
-        "6M": 20.7
+        "1W": 38.3,
+        "1M": 75.8,
+        "3M": 39.2,
+        "6M": 20.8
       },
       "breadth_50": 70.0,
       "breadth_200": 31.6,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 58.3,
-        "weekly": 61.5,
-        "monthly": 37.8
+        "daily": 58.6,
+        "weekly": 62.0,
+        "monthly": 38.0
       }
     },
     "Exchanges": {
@@ -3029,18 +3029,18 @@
         "6M": -7.93
       },
       "rs_rank": {
-        "1W": 35.5,
-        "1M": 36.4,
-        "3M": 25.6,
-        "6M": 35.5
+        "1W": 35.8,
+        "1M": 36.7,
+        "3M": 25.8,
+        "6M": 35.8
       },
       "breadth_50": 58.3,
       "breadth_200": 25.0,
       "trend_above_50ema": false,
       "scores": {
-        "daily": 35.6,
-        "weekly": 37.9,
-        "monthly": 30.1
+        "daily": 35.8,
+        "weekly": 38.1,
+        "monthly": 30.3
       }
     },
     "Tower REITs": {
@@ -3099,18 +3099,18 @@
         "6M": 1.24
       },
       "rs_rank": {
-        "1W": 28.9,
-        "1M": 69.4,
-        "3M": 64.5,
-        "6M": 54.5
+        "1W": 29.2,
+        "1M": 70.0,
+        "3M": 65.0,
+        "6M": 55.0
       },
       "breadth_50": 76.9,
       "breadth_200": 75.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 53.4,
-        "weekly": 61.7,
-        "monthly": 63.8
+        "daily": 53.6,
+        "weekly": 62.1,
+        "monthly": 64.2
       }
     },
     "Industrial REITs": {
@@ -3214,18 +3214,18 @@
         "6M": -12.37
       },
       "rs_rank": {
-        "1W": 40.5,
-        "1M": 62.0,
-        "3M": 32.2,
-        "6M": 24.8
+        "1W": 40.8,
+        "1M": 62.5,
+        "3M": 32.5,
+        "6M": 25.0
       },
       "breadth_50": 85.7,
       "breadth_200": 46.4,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 58.6,
-        "weekly": 56.8,
-        "monthly": 36.6
+        "daily": 58.9,
+        "weekly": 57.1,
+        "monthly": 36.8
       }
     },
     "Self-Storage REITs": {
@@ -3256,18 +3256,18 @@
         "6M": 0.11
       },
       "rs_rank": {
-        "1W": 52.9,
-        "1M": 76.0,
-        "3M": 77.7,
-        "6M": 53.7
+        "1W": 53.3,
+        "1M": 76.7,
+        "3M": 77.5,
+        "6M": 54.2
       },
       "breadth_50": 100.0,
       "breadth_200": 100.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 70.5,
-        "weekly": 75.2,
-        "monthly": 73.6
+        "daily": 70.8,
+        "weekly": 75.6,
+        "monthly": 73.8
       }
     },
     "Residential REITs": {
@@ -3335,18 +3335,18 @@
         "6M": -7.32
       },
       "rs_rank": {
-        "1W": 51.2,
-        "1M": 37.2,
-        "3M": 47.1,
-        "6M": 36.4
+        "1W": 51.7,
+        "1M": 37.5,
+        "3M": 47.5,
+        "6M": 36.7
       },
       "breadth_50": 68.8,
       "breadth_200": 43.8,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 55.2,
-        "weekly": 46.2,
-        "monthly": 41.9
+        "daily": 55.5,
+        "weekly": 46.5,
+        "monthly": 42.2
       }
     },
     "Retail REITs": {
@@ -3429,18 +3429,18 @@
         "6M": 4.73
       },
       "rs_rank": {
-        "1W": 29.8,
-        "1M": 50.4,
-        "3M": 75.2,
-        "6M": 61.2
+        "1W": 30.0,
+        "1M": 50.8,
+        "3M": 75.0,
+        "6M": 60.8
       },
       "breadth_50": 76.2,
       "breadth_200": 95.2,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 48.9,
-        "weekly": 53.9,
-        "monthly": 70.3
+        "daily": 49.1,
+        "weekly": 54.1,
+        "monthly": 70.2
       }
     },
     "Office REITs": {
@@ -3499,18 +3499,18 @@
         "6M": -25.97
       },
       "rs_rank": {
-        "1W": 73.6,
-        "1M": 81.0,
-        "3M": 31.4,
-        "6M": 9.1
+        "1W": 74.2,
+        "1M": 81.7,
+        "3M": 31.7,
+        "6M": 9.2
       },
       "breadth_50": 92.3,
       "breadth_200": 15.4,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 80.9,
-        "weekly": 73.8,
-        "monthly": 29.7
+        "daily": 81.3,
+        "weekly": 74.3,
+        "monthly": 30.0
       }
     },
     "Hotel REITs": {
@@ -3563,18 +3563,18 @@
         "6M": 3.78
       },
       "rs_rank": {
-        "1W": 61.2,
-        "1M": 47.1,
-        "3M": 62.8,
-        "6M": 59.5
+        "1W": 61.7,
+        "1M": 47.5,
+        "3M": 63.3,
+        "6M": 59.2
       },
       "breadth_50": 90.9,
       "breadth_200": 81.8,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 66.0,
-        "weekly": 58.8,
-        "monthly": 62.3
+        "daily": 66.3,
+        "weekly": 59.2,
+        "monthly": 62.5
       }
     },
     "Mortgage REITs": {
@@ -3684,18 +3684,18 @@
         "6M": -9.03
       },
       "rs_rank": {
-        "1W": 37.2,
-        "1M": 53.7,
-        "3M": 22.3,
-        "6M": 29.8
+        "1W": 37.5,
+        "1M": 54.2,
+        "3M": 22.5,
+        "6M": 30.0
       },
       "breadth_50": 76.7,
       "breadth_200": 63.3,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 53.5,
-        "weekly": 49.1,
-        "monthly": 35.4
+        "daily": 53.8,
+        "weekly": 49.5,
+        "monthly": 35.6
       }
     },
     "Auto OEMs": {
@@ -3766,18 +3766,18 @@
         "6M": -12.71
       },
       "rs_rank": {
-        "1W": 14.9,
-        "1M": 19.0,
-        "3M": 13.2,
-        "6M": 23.1
+        "1W": 15.0,
+        "1M": 19.2,
+        "3M": 13.3,
+        "6M": 23.3
       },
       "breadth_50": 47.1,
       "breadth_200": 41.2,
       "trend_above_50ema": false,
       "scores": {
-        "daily": 19.2,
-        "weekly": 21.5,
-        "monthly": 21.3
+        "daily": 19.4,
+        "weekly": 21.6,
+        "monthly": 21.4
       }
     },
     "Auto Suppliers": {
@@ -3887,18 +3887,18 @@
         "6M": -1.74
       },
       "rs_rank": {
-        "1W": 76.9,
-        "1M": 62.8,
-        "3M": 47.9,
-        "6M": 49.6
+        "1W": 77.5,
+        "1M": 63.3,
+        "3M": 48.3,
+        "6M": 50.0
       },
       "breadth_50": 70.0,
       "breadth_200": 53.3,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 74.6,
-        "weekly": 64.5,
-        "monthly": 51.5
+        "daily": 75.1,
+        "weekly": 64.9,
+        "monthly": 51.8
       }
     },
     "Auto Dealers": {
@@ -3938,18 +3938,18 @@
         "6M": -18.02
       },
       "rs_rank": {
-        "1W": 25.6,
-        "1M": 28.1,
-        "3M": 24.0,
-        "6M": 17.4
+        "1W": 25.8,
+        "1M": 28.3,
+        "3M": 24.2,
+        "6M": 17.5
       },
       "breadth_50": 71.4,
       "breadth_200": 14.3,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 40.5,
-        "weekly": 33.5,
-        "monthly": 21.2
+        "daily": 40.7,
+        "weekly": 33.7,
+        "monthly": 21.3
       }
     },
     "Auto Parts Retail": {
@@ -3980,18 +3980,18 @@
         "6M": -10.04
       },
       "rs_rank": {
-        "1W": 50.4,
-        "1M": 38.8,
-        "3M": 50.4,
-        "6M": 27.3
+        "1W": 50.8,
+        "1M": 39.2,
+        "3M": 50.8,
+        "6M": 27.5
       },
       "breadth_50": 75.0,
       "breadth_200": 25.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 56.2,
-        "weekly": 48.3,
-        "monthly": 37.9
+        "daily": 56.5,
+        "weekly": 48.6,
+        "monthly": 38.2
       }
     },
     "EV Charging": {
@@ -4023,17 +4023,17 @@
       },
       "rs_rank": {
         "1W": 96.7,
-        "1M": 90.9,
-        "3M": 24.8,
+        "1M": 90.8,
+        "3M": 25.0,
         "6M": 0.8
       },
       "breadth_50": 100.0,
       "breadth_200": 0.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 96.1,
+        "daily": 96.0,
         "weekly": 83.5,
-        "monthly": 23.8
+        "monthly": 23.9
       }
     },
     "Restaurants - QSR": {
@@ -4122,18 +4122,18 @@
         "6M": -13.2
       },
       "rs_rank": {
-        "1W": 52.1,
-        "1M": 56.2,
-        "3M": 34.7,
-        "6M": 21.5
+        "1W": 52.5,
+        "1M": 56.7,
+        "3M": 35.0,
+        "6M": 21.7
       },
       "breadth_50": 52.2,
       "breadth_200": 34.8,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 57.9,
-        "weekly": 51.5,
-        "monthly": 34.0
+        "daily": 58.2,
+        "weekly": 51.9,
+        "monthly": 34.2
       }
     },
     "Restaurants - Casual": {
@@ -4173,18 +4173,18 @@
         "6M": -1.04
       },
       "rs_rank": {
-        "1W": 22.3,
-        "1M": 32.2,
-        "3M": 27.3,
-        "6M": 51.2
+        "1W": 22.5,
+        "1M": 32.5,
+        "3M": 27.5,
+        "6M": 51.7
       },
       "breadth_50": 71.4,
       "breadth_200": 57.1,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 39.9,
-        "weekly": 35.4,
-        "monthly": 39.7
+        "daily": 40.1,
+        "weekly": 35.6,
+        "monthly": 39.9
       }
     },
     "Coffee": {
@@ -4215,18 +4215,18 @@
         "6M": -8.41
       },
       "rs_rank": {
-        "1W": 89.3,
-        "1M": 60.3,
-        "3M": 51.2,
-        "6M": 33.1
+        "1W": 90.0,
+        "1M": 60.8,
+        "3M": 51.7,
+        "6M": 33.3
       },
       "breadth_50": 75.0,
       "breadth_200": 50.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 81.0,
-        "weekly": 67.0,
-        "monthly": 47.0
+        "daily": 81.5,
+        "weekly": 67.4,
+        "monthly": 47.3
       }
     },
     "Athletic Apparel": {
@@ -4291,18 +4291,18 @@
         "6M": 0.07
       },
       "rs_rank": {
-        "1W": 14.0,
-        "1M": 55.4,
-        "3M": 42.1,
-        "6M": 52.9
+        "1W": 14.2,
+        "1M": 55.8,
+        "3M": 42.5,
+        "6M": 53.3
       },
       "breadth_50": 60.0,
       "breadth_200": 60.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 39.9,
-        "weekly": 45.8,
-        "monthly": 50.0
+        "daily": 40.0,
+        "weekly": 46.1,
+        "monthly": 50.4
       }
     },
     "Luxury / Fashion": {
@@ -4396,8 +4396,8 @@
       "rs_rank": {
         "1W": 8.3,
         "1M": 95.0,
-        "3M": 78.5,
-        "6M": 77.7
+        "3M": 78.3,
+        "6M": 77.5
       },
       "breadth_50": 62.5,
       "breadth_200": 58.3,
@@ -4405,7 +4405,7 @@
       "scores": {
         "daily": 47.3,
         "weekly": 70.3,
-        "monthly": 77.7
+        "monthly": 77.6
       }
     },
     "Airlines": {
@@ -4459,17 +4459,17 @@
       },
       "rs_rank": {
         "1W": 3.3,
-        "1M": 16.5,
-        "3M": 14.9,
-        "6M": 52.1
+        "1M": 16.7,
+        "3M": 15.0,
+        "6M": 52.5
       },
       "breadth_50": 27.3,
       "breadth_200": 45.5,
       "trend_above_50ema": false,
       "scores": {
         "daily": 9.9,
-        "weekly": 15.2,
-        "monthly": 30.9
+        "weekly": 15.3,
+        "monthly": 31.1
       }
     },
     "Cruise Lines": {
@@ -4500,18 +4500,18 @@
         "6M": -11.68
       },
       "rs_rank": {
-        "1W": 4.1,
-        "1M": 12.4,
-        "3M": 49.6,
-        "6M": 25.6
+        "1W": 4.2,
+        "1M": 12.5,
+        "3M": 50.0,
+        "6M": 25.8
       },
       "breadth_50": 25.0,
       "breadth_200": 25.0,
       "trend_above_50ema": false,
       "scores": {
-        "daily": 8.9,
-        "weekly": 18.2,
-        "monthly": 33.1
+        "daily": 9.0,
+        "weekly": 18.3,
+        "monthly": 33.4
       }
     },
     "Hotels & Lodging": {
@@ -4555,18 +4555,18 @@
         "6M": 7.19
       },
       "rs_rank": {
-        "1W": 32.2,
-        "1M": 72.7,
-        "3M": 70.2,
-        "6M": 64.5
+        "1W": 32.5,
+        "1M": 73.3,
+        "3M": 70.0,
+        "6M": 64.2
       },
       "breadth_50": 100.0,
       "breadth_200": 100.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 59.3,
-        "weekly": 68.3,
-        "monthly": 73.3
+        "daily": 59.6,
+        "weekly": 68.7,
+        "monthly": 73.2
       }
     },
     "Online Travel": {
@@ -4617,17 +4617,17 @@
       },
       "rs_rank": {
         "1W": 5.8,
-        "1M": 30.6,
+        "1M": 30.8,
         "3M": 1.7,
-        "6M": 57.0
+        "6M": 57.5
       },
       "breadth_50": 50.0,
       "breadth_200": 44.4,
       "trend_above_50ema": false,
       "scores": {
-        "daily": 18.0,
-        "weekly": 24.2,
-        "monthly": 29.0
+        "daily": 18.1,
+        "weekly": 24.3,
+        "monthly": 29.2
       }
     },
     "Casinos": {
@@ -4698,18 +4698,18 @@
         "6M": -8.35
       },
       "rs_rank": {
-        "1W": 64.5,
-        "1M": 28.9,
-        "3M": 60.3,
-        "6M": 33.9
+        "1W": 65.0,
+        "1M": 29.2,
+        "3M": 60.8,
+        "6M": 34.2
       },
       "breadth_50": 64.7,
       "breadth_200": 52.9,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 59.2,
-        "weekly": 46.1,
-        "monthly": 46.6
+        "daily": 59.5,
+        "weekly": 46.4,
+        "monthly": 46.9
       }
     },
     "Online Gambling": {
@@ -4743,18 +4743,18 @@
         "6M": -25.61
       },
       "rs_rank": {
-        "1W": 59.5,
-        "1M": 66.1,
-        "3M": 23.1,
-        "6M": 9.9
+        "1W": 60.0,
+        "1M": 66.7,
+        "3M": 23.3,
+        "6M": 10.0
       },
       "breadth_50": 80.0,
       "breadth_200": 20.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 68.3,
-        "weekly": 60.4,
-        "monthly": 25.1
+        "daily": 68.7,
+        "weekly": 60.8,
+        "monthly": 25.3
       }
     },
     "Class I Rails": {
@@ -4795,17 +4795,17 @@
         "6M": 10.38
       },
       "rs_rank": {
-        "1W": 84.3,
-        "1M": 51.2,
-        "3M": 82.6,
-        "6M": 70.2
+        "1W": 85.0,
+        "1M": 51.7,
+        "3M": 82.5,
+        "6M": 70.0
       },
       "breadth_50": 71.4,
       "breadth_200": 100.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 75.7,
-        "weekly": 65.6,
+        "daily": 76.1,
+        "weekly": 65.9,
         "monthly": 76.8
       }
     },
@@ -4865,18 +4865,18 @@
         "6M": 37.33
       },
       "rs_rank": {
-        "1W": 80.2,
-        "1M": 86.0,
-        "3M": 88.4,
-        "6M": 89.3
+        "1W": 80.8,
+        "1M": 86.7,
+        "3M": 88.3,
+        "6M": 89.2
       },
       "breadth_50": 100.0,
       "breadth_200": 100.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 86.6,
-        "weekly": 87.3,
-        "monthly": 90.0
+        "daily": 87.1,
+        "weekly": 87.8,
+        "monthly": 90.1
       }
     },
     "Logistics & Parcels": {
@@ -4929,18 +4929,18 @@
         "6M": 11.03
       },
       "rs_rank": {
-        "1W": 87.6,
+        "1W": 88.3,
         "1M": 99.2,
-        "3M": 84.3,
-        "6M": 71.9
+        "3M": 84.2,
+        "6M": 71.7
       },
       "breadth_50": 81.8,
       "breadth_200": 72.7,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 90.9,
-        "weekly": 92.0,
-        "monthly": 81.1
+        "daily": 91.2,
+        "weekly": 92.1,
+        "monthly": 81.0
       }
     },
     "Marine Shipping": {
@@ -4999,17 +4999,17 @@
         "6M": 27.76
       },
       "rs_rank": {
-        "1W": 81.8,
-        "1M": 66.9,
-        "3M": 81.0,
-        "6M": 84.3
+        "1W": 82.5,
+        "1M": 67.5,
+        "3M": 80.8,
+        "6M": 84.2
       },
       "breadth_50": 61.5,
       "breadth_200": 92.3,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 76.9,
-        "weekly": 71.2,
+        "daily": 77.4,
+        "weekly": 71.6,
         "monthly": 81.6
       }
     },
@@ -5111,18 +5111,18 @@
         "6M": -15.9
       },
       "rs_rank": {
-        "1W": 62.8,
-        "1M": 52.1,
-        "3M": 43.0,
-        "6M": 19.0
+        "1W": 63.3,
+        "1M": 52.5,
+        "3M": 43.3,
+        "6M": 19.2
       },
       "breadth_50": 55.6,
       "breadth_200": 51.9,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 62.8,
-        "weekly": 53.4,
-        "monthly": 38.5
+        "daily": 63.1,
+        "weekly": 53.8,
+        "monthly": 38.7
       }
     },
     "Homebuilders": {
@@ -5187,18 +5187,18 @@
         "6M": -8.72
       },
       "rs_rank": {
-        "1W": 71.1,
-        "1M": 47.9,
-        "3M": 43.8,
-        "6M": 30.6
+        "1W": 71.7,
+        "1M": 48.3,
+        "3M": 44.2,
+        "6M": 30.8
       },
       "breadth_50": 60.0,
       "breadth_200": 46.7,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 66.5,
-        "weekly": 53.8,
-        "monthly": 40.9
+        "daily": 66.9,
+        "weekly": 54.1,
+        "monthly": 41.2
       }
     },
     "Heavy Machinery": {
@@ -5257,17 +5257,17 @@
         "6M": 38.85
       },
       "rs_rank": {
-        "1W": 81.0,
-        "1M": 33.1,
+        "1W": 81.7,
+        "1M": 33.3,
         "3M": 94.2,
-        "6M": 90.1
+        "6M": 90.0
       },
       "breadth_50": 23.1,
       "breadth_200": 46.2,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 62.2,
-        "weekly": 50.3,
+        "daily": 62.6,
+        "weekly": 50.6,
         "monthly": 76.6
       }
     },
@@ -5314,18 +5314,18 @@
         "6M": 16.92
       },
       "rs_rank": {
-        "1W": 57.9,
-        "1M": 43.8,
-        "3M": 66.1,
-        "6M": 76.0
+        "1W": 58.3,
+        "1M": 44.2,
+        "3M": 66.7,
+        "6M": 75.8
       },
       "breadth_50": 77.8,
       "breadth_200": 88.9,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 61.5,
-        "weekly": 55.1,
-        "monthly": 69.2
+        "daily": 61.9,
+        "weekly": 55.4,
+        "monthly": 69.4
       }
     },
     "Aerospace OEM": {
@@ -5365,18 +5365,18 @@
         "6M": -4.53
       },
       "rs_rank": {
-        "1W": 10.7,
-        "1M": 11.6,
-        "3M": 19.0,
-        "6M": 43.8
+        "1W": 10.8,
+        "1M": 11.7,
+        "3M": 19.2,
+        "6M": 44.2
       },
       "breadth_50": 28.6,
       "breadth_200": 42.9,
       "trend_above_50ema": false,
       "scores": {
         "daily": 12.6,
-        "weekly": 15.1,
-        "monthly": 28.9
+        "weekly": 15.2,
+        "monthly": 29.1
       }
     },
     "Cement & Aggregates": {
@@ -5410,18 +5410,18 @@
         "6M": -9.68
       },
       "rs_rank": {
-        "1W": 90.9,
-        "1M": 84.3,
-        "3M": 11.6,
-        "6M": 28.9
+        "1W": 90.8,
+        "1M": 85.0,
+        "3M": 11.7,
+        "6M": 29.2
       },
       "breadth_50": 80.0,
       "breadth_200": 40.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 88.5,
-        "weekly": 74.1,
-        "monthly": 32.0
+        "daily": 88.7,
+        "weekly": 74.4,
+        "monthly": 32.2
       }
     },
     "Steel": {
@@ -5480,17 +5480,17 @@
         "6M": 36.53
       },
       "rs_rank": {
-        "1W": 76.0,
-        "1M": 83.5,
-        "3M": 71.1,
-        "6M": 88.4
+        "1W": 76.7,
+        "1M": 84.2,
+        "3M": 70.8,
+        "6M": 88.3
       },
       "breadth_50": 100.0,
       "breadth_200": 84.6,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 83.9,
-        "weekly": 82.6,
+        "daily": 84.4,
+        "weekly": 83.0,
         "monthly": 80.2
       }
     },
@@ -5568,18 +5568,18 @@
         "6M": 9.0
       },
       "rs_rank": {
-        "1W": 9.9,
-        "1M": 81.8,
-        "3M": 10.7,
-        "6M": 66.9
+        "1W": 10.0,
+        "1M": 82.5,
+        "3M": 10.8,
+        "6M": 66.7
       },
       "breadth_50": 57.9,
       "breadth_200": 73.7,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 44.1,
-        "weekly": 53.2,
-        "monthly": 47.7
+        "daily": 44.3,
+        "weekly": 53.6,
+        "monthly": 47.8
       }
     },
     "Gold Miners": {
@@ -5671,18 +5671,18 @@
         "6M": 44.29
       },
       "rs_rank": {
-        "1W": 6.6,
-        "1M": 68.6,
-        "3M": 15.7,
-        "6M": 90.9
+        "1W": 6.7,
+        "1M": 69.2,
+        "3M": 15.8,
+        "6M": 90.8
       },
       "breadth_50": 29.2,
       "breadth_200": 87.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 34.8,
-        "weekly": 42.4,
-        "monthly": 56.9
+        "daily": 35.0,
+        "weekly": 42.7,
+        "monthly": 57.0
       }
     },
     "Lithium": {
@@ -5713,18 +5713,18 @@
         "6M": 84.72
       },
       "rs_rank": {
-        "1W": 30.6,
+        "1W": 30.8,
         "1M": 96.7,
-        "3M": 57.9,
+        "3M": 58.3,
         "6M": 96.7
       },
       "breadth_50": 100.0,
       "breadth_200": 75.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 64.5,
-        "weekly": 78.1,
-        "monthly": 77.9
+        "daily": 64.6,
+        "weekly": 78.2,
+        "monthly": 78.1
       }
     },
     "Specialty Chemicals": {
@@ -5825,17 +5825,17 @@
         "6M": 36.23
       },
       "rs_rank": {
-        "1W": 74.4,
-        "1M": 57.9,
-        "3M": 90.1,
-        "6M": 87.6
+        "1W": 75.0,
+        "1M": 58.3,
+        "3M": 90.0,
+        "6M": 87.5
       },
       "breadth_50": 70.4,
       "breadth_200": 76.9,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 72.2,
-        "weekly": 67.9,
+        "daily": 72.6,
+        "weekly": 68.2,
         "monthly": 82.5
       }
     },
@@ -5889,17 +5889,17 @@
         "6M": 57.09
       },
       "rs_rank": {
-        "1W": 88.4,
-        "1M": 7.4,
-        "3M": 93.4,
+        "1W": 89.2,
+        "1M": 7.5,
+        "3M": 93.3,
         "6M": 94.2
       },
       "breadth_50": 81.8,
       "breadth_200": 100.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 68.3,
-        "weekly": 47.7,
+        "daily": 68.7,
+        "weekly": 47.9,
         "monthly": 81.7
       }
     },
@@ -5965,18 +5965,18 @@
         "6M": -20.02
       },
       "rs_rank": {
-        "1W": 7.4,
+        "1W": 7.5,
         "1M": 3.3,
-        "3M": 14.0,
-        "6M": 14.9
+        "3M": 14.2,
+        "6M": 15.0
       },
       "breadth_50": 13.3,
       "breadth_200": 46.7,
       "trend_above_50ema": false,
       "scores": {
-        "daily": 6.5,
-        "weekly": 7.2,
-        "monthly": 17.6
+        "daily": 6.6,
+        "weekly": 7.3,
+        "monthly": 17.7
       }
     },
     "Ag Inputs": {
@@ -6035,18 +6035,18 @@
         "6M": -5.96
       },
       "rs_rank": {
-        "1W": 60.3,
+        "1W": 60.8,
         "1M": 5.8,
-        "3M": 41.3,
-        "6M": 38.0
+        "3M": 41.7,
+        "6M": 38.3
       },
       "breadth_50": 38.5,
       "breadth_200": 61.5,
       "trend_above_50ema": false,
       "scores": {
-        "daily": 37.4,
-        "weekly": 26.9,
-        "monthly": 38.0
+        "daily": 37.6,
+        "weekly": 27.1,
+        "monthly": 38.3
       }
     },
     "Pipelines / Midstream": {
@@ -6150,18 +6150,18 @@
         "6M": 20.22
       },
       "rs_rank": {
-        "1W": 72.7,
-        "1M": 10.7,
-        "3M": 86.0,
-        "6M": 78.5
+        "1W": 73.3,
+        "1M": 10.8,
+        "3M": 85.8,
+        "6M": 78.3
       },
       "breadth_50": 64.3,
       "breadth_200": 96.4,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 58.7,
-        "weekly": 42.5,
-        "monthly": 74.0
+        "daily": 59.0,
+        "weekly": 42.6,
+        "monthly": 73.9
       }
     },
     "Refiners": {
@@ -6219,8 +6219,8 @@
       "rs_rank": {
         "1W": 94.2,
         "1M": 5.0,
-        "3M": 90.9,
-        "6M": 72.7
+        "3M": 90.8,
+        "6M": 72.5
       },
       "breadth_50": 66.7,
       "breadth_200": 91.7,
@@ -6228,7 +6228,7 @@
       "scores": {
         "daily": 68.3,
         "weekly": 45.0,
-        "monthly": 72.7
+        "monthly": 72.6
       }
     },
     "Oilfield Services": {
@@ -6357,16 +6357,16 @@
       },
       "rs_rank": {
         "1W": 98.3,
-        "1M": 38.0,
-        "3M": 92.6,
-        "6M": 95.9
+        "1M": 38.3,
+        "3M": 92.5,
+        "6M": 95.8
       },
       "breadth_50": 88.9,
       "breadth_200": 94.4,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 82.0,
-        "weekly": 65.9,
+        "daily": 82.1,
+        "weekly": 66.0,
         "monthly": 85.7
       }
     },
@@ -6429,18 +6429,18 @@
         "6M": -8.02
       },
       "rs_rank": {
-        "1W": 15.7,
-        "1M": 46.3,
-        "3M": 46.3,
-        "6M": 34.7
+        "1W": 15.8,
+        "1M": 46.7,
+        "3M": 46.7,
+        "6M": 35.0
       },
       "breadth_50": 57.1,
       "breadth_200": 42.9,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 38.0,
-        "weekly": 41.8,
-        "monthly": 42.3
+        "daily": 38.2,
+        "weekly": 42.1,
+        "monthly": 42.6
       }
     },
     "Cable": {
@@ -6470,8 +6470,8 @@
       "rs_rank": {
         "1W": 0.8,
         "1M": 1.7,
-        "3M": 33.9,
-        "6M": 39.7
+        "3M": 34.2,
+        "6M": 40.0
       },
       "breadth_50": 0.0,
       "breadth_200": 33.3,
@@ -6479,7 +6479,7 @@
       "scores": {
         "daily": 0.8,
         "weekly": 6.1,
-        "monthly": 30.7
+        "monthly": 30.9
       }
     },
     "Streaming / Media": {
@@ -6595,18 +6595,18 @@
         "6M": 16.58
       },
       "rs_rank": {
-        "1W": 38.8,
-        "1M": 90.1,
-        "3M": 80.2,
-        "6M": 75.2
+        "1W": 39.2,
+        "1M": 90.0,
+        "3M": 80.0,
+        "6M": 75.0
       },
       "breadth_50": 68.8,
       "breadth_200": 63.3,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 62.3,
+        "daily": 62.4,
         "weekly": 75.1,
-        "monthly": 77.6
+        "monthly": 77.5
       }
     },
     "Video Games": {
@@ -6647,18 +6647,18 @@
         "6M": -19.34
       },
       "rs_rank": {
-        "1W": 33.9,
-        "1M": 65.3,
-        "3M": 29.8,
-        "6M": 15.7
+        "1W": 34.2,
+        "1M": 65.8,
+        "3M": 30.0,
+        "6M": 15.8
       },
       "breadth_50": 71.4,
       "breadth_200": 14.3,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 54.0,
-        "weekly": 54.6,
-        "monthly": 28.5
+        "daily": 54.3,
+        "weekly": 55.0,
+        "monthly": 28.8
       }
     },
     "AdTech": {
@@ -6720,18 +6720,18 @@
         "6M": -17.19
       },
       "rs_rank": {
-        "1W": 24.8,
-        "1M": 57.0,
-        "3M": 28.9,
-        "6M": 18.2
+        "1W": 25.0,
+        "1M": 57.5,
+        "3M": 29.2,
+        "6M": 18.3
       },
       "breadth_50": 78.6,
       "breadth_200": 35.7,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 48.4,
-        "weekly": 49.6,
-        "monthly": 30.9
+        "daily": 48.7,
+        "weekly": 49.9,
+        "monthly": 31.1
       }
     },
     "Tobacco": {
@@ -6766,18 +6766,18 @@
         "6M": -2.53
       },
       "rs_rank": {
-        "1W": 79.3,
-        "1M": 9.9,
-        "3M": 21.5,
-        "6M": 47.9
+        "1W": 80.0,
+        "1M": 10.0,
+        "3M": 21.7,
+        "6M": 48.3
       },
       "breadth_50": 20.0,
       "breadth_200": 60.0,
       "trend_above_50ema": false,
       "scores": {
-        "daily": 45.1,
-        "weekly": 27.0,
-        "monthly": 33.5
+        "daily": 45.5,
+        "weekly": 27.2,
+        "monthly": 33.7
       }
     },
     "Beverages": {
@@ -6842,18 +6842,18 @@
         "6M": -2.35
       },
       "rs_rank": {
-        "1W": 54.5,
-        "1M": 24.8,
-        "3M": 53.7,
-        "6M": 48.8
+        "1W": 55.0,
+        "1M": 25.0,
+        "3M": 54.2,
+        "6M": 49.2
       },
       "breadth_50": 40.0,
       "breadth_200": 66.7,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 49.5,
-        "weekly": 37.4,
-        "monthly": 49.8
+        "daily": 49.8,
+        "weekly": 37.6,
+        "monthly": 50.2
       }
     },
     "Packaged Food": {
@@ -6945,18 +6945,18 @@
         "6M": -8.58
       },
       "rs_rank": {
-        "1W": 55.4,
-        "1M": 18.2,
-        "3M": 38.0,
-        "6M": 31.4
+        "1W": 55.8,
+        "1M": 18.3,
+        "3M": 38.3,
+        "6M": 31.7
       },
       "breadth_50": 29.2,
       "breadth_200": 37.5,
       "trend_above_50ema": false,
       "scores": {
-        "daily": 36.6,
-        "weekly": 30.2,
-        "monthly": 33.0
+        "daily": 36.9,
+        "weekly": 30.5,
+        "monthly": 33.2
       }
     },
     "Grocery": {
@@ -6987,18 +6987,18 @@
         "6M": -31.11
       },
       "rs_rank": {
-        "1W": 65.3,
-        "1M": 19.8,
-        "3M": 44.6,
-        "6M": 4.1
+        "1W": 65.8,
+        "1M": 20.0,
+        "3M": 45.0,
+        "6M": 4.2
       },
       "breadth_50": 25.0,
       "breadth_200": 25.0,
       "trend_above_50ema": false,
       "scores": {
-        "daily": 41.4,
-        "weekly": 33.4,
-        "monthly": 25.8
+        "daily": 41.7,
+        "weekly": 33.7,
+        "monthly": 26.0
       }
     },
     "Personal Care": {
@@ -7093,18 +7093,18 @@
         "6M": -19.17
       },
       "rs_rank": {
-        "1W": 66.9,
-        "1M": 71.9,
-        "3M": 19.8,
-        "6M": 16.5
+        "1W": 67.5,
+        "1M": 72.5,
+        "3M": 20.0,
+        "6M": 16.7
       },
       "breadth_50": 48.0,
       "breadth_200": 36.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 68.6,
-        "weekly": 59.5,
-        "monthly": 29.1
+        "daily": 69.1,
+        "weekly": 60.0,
+        "monthly": 29.3
       }
     },
     "Enterprise SaaS": {
@@ -7159,8 +7159,8 @@
         "6M": -47.6
       },
       "rs_rank": {
-        "1W": 47.1,
-        "1M": 9.1,
+        "1W": 47.5,
+        "1M": 9.2,
         "3M": 0.8,
         "6M": 1.7
       },
@@ -7168,8 +7168,8 @@
       "breadth_200": 0.0,
       "trend_above_50ema": false,
       "scores": {
-        "daily": 28.3,
-        "weekly": 16.6,
+        "daily": 28.5,
+        "weekly": 16.7,
         "monthly": 2.2
       }
     },
@@ -7198,7 +7198,7 @@
         "6M": 59.04
       },
       "rs_rank": {
-        "1W": 57.0,
+        "1W": 57.5,
         "1M": 0.8,
         "3M": 97.5,
         "6M": 95.0
@@ -7207,8 +7207,8 @@
       "breadth_200": 100.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 43.7,
-        "weekly": 31.4,
+        "daily": 44.0,
+        "weekly": 31.5,
         "monthly": 82.6
       }
     },
@@ -7264,17 +7264,17 @@
         "6M": -38.66
       },
       "rs_rank": {
-        "1W": 56.2,
-        "1M": 13.2,
-        "3M": 4.1,
+        "1W": 56.7,
+        "1M": 13.3,
+        "3M": 4.2,
         "6M": 3.3
       },
       "breadth_50": 33.3,
       "breadth_200": 8.3,
       "trend_above_50ema": false,
       "scores": {
-        "daily": 36.4,
-        "weekly": 23.5,
+        "daily": 36.7,
+        "weekly": 23.6,
         "monthly": 5.9
       }
     },
@@ -7327,18 +7327,18 @@
         "6M": -12.56
       },
       "rs_rank": {
-        "1W": 23.1,
-        "1M": 24.0,
-        "3M": 35.5,
-        "6M": 24.0
+        "1W": 23.3,
+        "1M": 24.2,
+        "3M": 35.8,
+        "6M": 24.2
       },
       "breadth_50": 36.4,
       "breadth_200": 36.4,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 33.0,
-        "weekly": 27.4,
-        "monthly": 30.5
+        "daily": 33.2,
+        "weekly": 27.6,
+        "monthly": 30.7
       }
     },
     "BNPL / Consumer Lending": {
@@ -7375,18 +7375,18 @@
         "6M": -5.87
       },
       "rs_rank": {
-        "1W": 31.4,
-        "1M": 88.4,
-        "3M": 28.1,
-        "6M": 38.8
+        "1W": 31.7,
+        "1M": 89.2,
+        "3M": 28.3,
+        "6M": 39.2
       },
       "breadth_50": 83.3,
       "breadth_200": 50.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 60.3,
-        "weekly": 67.2,
-        "monthly": 43.7
+        "daily": 60.6,
+        "weekly": 67.7,
+        "monthly": 44.0
       }
     },
     "E-Commerce": {
@@ -7469,18 +7469,18 @@
         "6M": -27.51
       },
       "rs_rank": {
-        "1W": 16.5,
-        "1M": 54.5,
-        "3M": 7.4,
+        "1W": 16.7,
+        "1M": 55.0,
+        "3M": 7.5,
         "6M": 8.3
       },
       "breadth_50": 76.2,
       "breadth_200": 33.3,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 43.3,
-        "weekly": 43.1,
-        "monthly": 18.6
+        "daily": 43.5,
+        "weekly": 43.4,
+        "monthly": 18.8
       }
     },
     "China ADRs": {
@@ -7547,18 +7547,18 @@
         "6M": -24.65
       },
       "rs_rank": {
-        "1W": 9.1,
-        "1M": 14.0,
-        "3M": 9.1,
-        "6M": 10.7
+        "1W": 9.2,
+        "1M": 14.2,
+        "3M": 9.2,
+        "6M": 10.8
       },
       "breadth_50": 50.0,
       "breadth_200": 25.0,
       "trend_above_50ema": false,
       "scores": {
         "daily": 15.6,
-        "weekly": 17.7,
-        "monthly": 12.7
+        "weekly": 17.8,
+        "monthly": 12.8
       }
     },
     "LATAM": {
@@ -7607,18 +7607,18 @@
         "6M": 16.3
       },
       "rs_rank": {
-        "1W": 19.0,
-        "1M": 49.6,
-        "3M": 62.0,
-        "6M": 74.4
+        "1W": 19.2,
+        "1M": 50.0,
+        "3M": 62.5,
+        "6M": 74.2
       },
       "breadth_50": 70.0,
       "breadth_200": 70.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 42.4,
-        "weekly": 48.4,
-        "monthly": 65.0
+        "daily": 42.6,
+        "weekly": 48.7,
+        "monthly": 65.2
       }
     },
     "Cannabis": {
@@ -7655,84 +7655,18 @@
         "6M": -28.93
       },
       "rs_rank": {
-        "1W": 45.5,
-        "1M": 40.5,
-        "3M": 9.9,
+        "1W": 45.8,
+        "1M": 40.8,
+        "3M": 10.0,
         "6M": 5.0
       },
       "breadth_50": 66.7,
       "breadth_200": 16.7,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 52.9,
-        "weekly": 40.8,
-        "monthly": 14.0
-      }
-    },
-    "Top Recurring": {
-      "members": [
-        "NVDA",
-        "PLTR",
-        "AMZN",
-        "MSFT",
-        "GOOGL",
-        "META",
-        "TSLA",
-        "AMD",
-        "MRVL",
-        "ZS",
-        "SMCI",
-        "MU"
-      ],
-      "curated_members": [
-        "NVDA",
-        "PLTR",
-        "AMZN",
-        "MSFT",
-        "GOOGL",
-        "META",
-        "TSLA",
-        "AMD",
-        "MRVL",
-        "ZS",
-        "SMCI",
-        "MU"
-      ],
-      "auto_members": [],
-      "member_count": 12,
-      "member_perf": {
-        "NVDA": 4.32,
-        "PLTR": 1.07,
-        "AMZN": 3.49,
-        "MSFT": 2.13,
-        "GOOGL": 1.63,
-        "META": 2.41,
-        "TSLA": 0.69,
-        "AMD": 13.91,
-        "MRVL": -0.76,
-        "ZS": 1.9,
-        "SMCI": 8.71,
-        "MU": 3.11
-      },
-      "rs_excess_pct": {
-        "1W": 3.82,
-        "1M": 11.32,
-        "3M": 3.97,
-        "6M": 3.0
-      },
-      "rs_rank": {
-        "1W": 90.1,
-        "1M": 89.3,
-        "3M": 67.8,
-        "6M": 58.7
-      },
-      "breadth_50": 75.0,
-      "breadth_200": 50.0,
-      "trend_above_50ema": true,
-      "scores": {
-        "daily": 88.6,
-        "weekly": 84.1,
-        "monthly": 65.6
+        "daily": 53.1,
+        "weekly": 41.1,
+        "monthly": 14.1
       }
     },
     "Software (Broad)": {
@@ -8468,18 +8402,18 @@
         "6M": -24.45
       },
       "rs_rank": {
-        "1W": 21.5,
-        "1M": 71.1,
-        "3M": 17.4,
-        "6M": 11.6
+        "1W": 21.7,
+        "1M": 71.7,
+        "3M": 17.5,
+        "6M": 11.7
       },
       "breadth_50": 57.7,
       "breadth_200": 23.9,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 47.2,
-        "weekly": 51.1,
-        "monthly": 24.7
+        "daily": 47.4,
+        "weekly": 51.5,
+        "monthly": 24.8
       }
     },
     "Industrials (Broad)": {
@@ -8873,17 +8807,17 @@
         "6M": 21.71
       },
       "rs_rank": {
-        "1W": 70.2,
-        "1M": 52.9,
-        "3M": 87.6,
-        "6M": 79.3
+        "1W": 70.8,
+        "1M": 53.3,
+        "3M": 87.5,
+        "6M": 79.2
       },
       "breadth_50": 57.6,
       "breadth_200": 50.8,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 67.0,
-        "weekly": 62.3,
+        "daily": 67.4,
+        "weekly": 62.6,
         "monthly": 74.4
       }
     },
@@ -9128,18 +9062,18 @@
         "6M": -3.26
       },
       "rs_rank": {
-        "1W": 41.3,
-        "1M": 78.5,
-        "3M": 52.1,
-        "6M": 45.5
+        "1W": 41.7,
+        "1M": 79.2,
+        "3M": 52.5,
+        "6M": 45.8
       },
       "breadth_50": 65.3,
       "breadth_200": 48.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 60.1,
-        "weekly": 65.1,
-        "monthly": 53.4
+        "daily": 60.4,
+        "weekly": 65.6,
+        "monthly": 53.8
       }
     },
     "Internet & Content (Broad)": {
@@ -9239,18 +9173,18 @@
         "6M": -24.28
       },
       "rs_rank": {
-        "1W": 49.6,
-        "1M": 80.2,
-        "3M": 6.6,
-        "6M": 12.4
+        "1W": 50.0,
+        "1M": 80.8,
+        "3M": 6.7,
+        "6M": 12.5
       },
       "breadth_50": 74.1,
       "breadth_200": 19.2,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 65.9,
-        "weekly": 62.1,
-        "monthly": 21.3
+        "daily": 66.3,
+        "weekly": 62.5,
+        "monthly": 21.4
       }
     },
     "[TV] Electronic technology": {
@@ -9360,18 +9294,18 @@
         "6M": 48.48
       },
       "rs_rank": {
-        "1W": 93.4,
-        "1M": 87.6,
+        "1W": 93.3,
+        "1M": 88.3,
         "3M": 91.7,
-        "6M": 92.6
+        "6M": 92.5
       },
       "breadth_50": 76.7,
       "breadth_200": 80.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 90.1,
-        "weekly": 87.7,
-        "monthly": 89.6
+        "daily": 90.2,
+        "weekly": 88.1,
+        "monthly": 89.7
       }
     },
     "[TV] Technology services": {
@@ -9481,18 +9415,18 @@
         "6M": -23.41
       },
       "rs_rank": {
-        "1W": 43.8,
-        "1M": 43.0,
-        "3M": 30.6,
-        "6M": 13.2
+        "1W": 44.2,
+        "1M": 43.3,
+        "3M": 30.8,
+        "6M": 13.3
       },
       "breadth_50": 56.7,
       "breadth_200": 26.7,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 51.1,
-        "weekly": 43.3,
-        "monthly": 26.6
+        "daily": 51.4,
+        "weekly": 43.6,
+        "monthly": 26.8
       }
     },
     "[TV] Retail trade": {
@@ -9602,18 +9536,18 @@
         "6M": -5.72
       },
       "rs_rank": {
-        "1W": 27.3,
-        "1M": 29.8,
-        "3M": 39.7,
-        "6M": 41.3
+        "1W": 27.5,
+        "1M": 30.0,
+        "3M": 40.0,
+        "6M": 41.7
       },
       "breadth_50": 53.3,
       "breadth_200": 53.3,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 39.1,
-        "weekly": 34.3,
-        "monthly": 40.7
+        "daily": 39.2,
+        "weekly": 34.5,
+        "monthly": 41.0
       }
     },
     "[TV] Consumer durables": {
@@ -9723,18 +9657,18 @@
         "6M": -3.19
       },
       "rs_rank": {
-        "1W": 47.9,
-        "1M": 35.5,
-        "3M": 37.2,
-        "6M": 46.3
+        "1W": 48.3,
+        "1M": 35.8,
+        "3M": 37.5,
+        "6M": 46.7
       },
       "breadth_50": 60.0,
       "breadth_200": 63.3,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 51.9,
-        "weekly": 41.9,
-        "monthly": 43.6
+        "daily": 52.1,
+        "weekly": 42.2,
+        "monthly": 43.9
       }
     },
     "[TV] Health technology": {
@@ -9843,18 +9777,18 @@
         "6M": -8.44
       },
       "rs_rank": {
-        "1W": 13.2,
+        "1W": 13.3,
         "1M": 8.3,
-        "3M": 18.2,
-        "6M": 32.2
+        "3M": 18.3,
+        "6M": 32.5
       },
       "breadth_50": 10.0,
       "breadth_200": 31.0,
       "trend_above_50ema": false,
       "scores": {
         "daily": 10.2,
-        "weekly": 11.0,
-        "monthly": 22.8
+        "weekly": 11.1,
+        "monthly": 23.0
       }
     },
     "[TV] Finance": {
@@ -9964,18 +9898,18 @@
         "6M": -3.71
       },
       "rs_rank": {
-        "1W": 24.0,
-        "1M": 41.3,
-        "3M": 48.8,
-        "6M": 44.6
+        "1W": 24.2,
+        "1M": 41.7,
+        "3M": 49.2,
+        "6M": 45.0
       },
       "breadth_50": 60.0,
       "breadth_200": 46.7,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 41.3,
-        "weekly": 41.8,
-        "monthly": 46.1
+        "daily": 41.5,
+        "weekly": 42.0,
+        "monthly": 46.4
       }
     },
     "[TV] Energy minerals": {
@@ -10087,8 +10021,8 @@
       "rs_rank": {
         "1W": 91.7,
         "1M": 2.5,
-        "3M": 89.3,
-        "6M": 81.0
+        "3M": 89.2,
+        "6M": 80.8
       },
       "breadth_50": 66.7,
       "breadth_200": 93.3,
@@ -10096,7 +10030,7 @@
       "scores": {
         "daily": 66.5,
         "weekly": 43.0,
-        "monthly": 74.4
+        "monthly": 74.3
       }
     },
     "[TV] Producer manufacturing": {
@@ -10206,18 +10140,18 @@
         "6M": 34.86
       },
       "rs_rank": {
-        "1W": 68.6,
-        "1M": 64.5,
-        "3M": 85.1,
-        "6M": 86.8
+        "1W": 69.2,
+        "1M": 65.0,
+        "3M": 85.0,
+        "6M": 86.7
       },
       "breadth_50": 76.7,
       "breadth_200": 90.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 71.9,
-        "weekly": 70.2,
-        "monthly": 83.3
+        "daily": 72.3,
+        "weekly": 70.6,
+        "monthly": 83.2
       }
     },
     "[TV] Consumer non-durables": {
@@ -10327,18 +10261,18 @@
         "6M": -5.75
       },
       "rs_rank": {
-        "1W": 44.6,
-        "1M": 15.7,
-        "3M": 40.5,
-        "6M": 40.5
+        "1W": 45.0,
+        "1M": 15.8,
+        "3M": 40.8,
+        "6M": 40.8
       },
       "breadth_50": 30.0,
       "breadth_200": 56.7,
       "trend_above_50ema": false,
       "scores": {
-        "daily": 30.7,
-        "weekly": 27.4,
-        "monthly": 39.2
+        "daily": 31.0,
+        "weekly": 27.5,
+        "monthly": 39.5
       }
     },
     "[TV] Health services": {
@@ -10447,18 +10381,18 @@
         "6M": 1.44
       },
       "rs_rank": {
-        "1W": 71.9,
-        "1M": 58.7,
-        "3M": 54.5,
-        "6M": 55.4
+        "1W": 72.5,
+        "1M": 59.2,
+        "3M": 55.0,
+        "6M": 55.8
       },
       "breadth_50": 60.0,
       "breadth_200": 58.6,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 69.6,
-        "weekly": 60.9,
-        "monthly": 56.0
+        "daily": 70.0,
+        "weekly": 61.3,
+        "monthly": 56.4
       }
     },
     "[TV] Process industries": {
@@ -10568,18 +10502,18 @@
         "6M": 13.55
       },
       "rs_rank": {
-        "1W": 48.8,
-        "1M": 14.9,
-        "3M": 66.9,
-        "6M": 73.6
+        "1W": 49.2,
+        "1M": 15.0,
+        "3M": 67.5,
+        "6M": 73.3
       },
       "breadth_50": 43.3,
       "breadth_200": 65.5,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 44.6,
-        "weekly": 33.7,
-        "monthly": 60.9
+        "daily": 44.8,
+        "weekly": 34.0,
+        "monthly": 61.1
       }
     },
     "[TV] Consumer services": {
@@ -10689,18 +10623,18 @@
         "6M": -5.62
       },
       "rs_rank": {
-        "1W": 19.8,
-        "1M": 22.3,
-        "3M": 45.5,
-        "6M": 42.1
+        "1W": 20.0,
+        "1M": 22.5,
+        "3M": 45.8,
+        "6M": 42.5
       },
       "breadth_50": 53.3,
       "breadth_200": 50.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 33.5,
-        "weekly": 29.9,
-        "monthly": 41.7
+        "daily": 33.6,
+        "weekly": 30.1,
+        "monthly": 42.0
       }
     },
     "[TV] Communications": {
@@ -10765,18 +10699,18 @@
         "6M": 1.72
       },
       "rs_rank": {
-        "1W": 17.4,
-        "1M": 33.9,
-        "3M": 63.6,
-        "6M": 57.9
+        "1W": 17.5,
+        "1M": 34.2,
+        "3M": 64.2,
+        "6M": 58.3
       },
       "breadth_50": 53.3,
       "breadth_200": 60.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 35.1,
-        "weekly": 38.0,
-        "monthly": 56.9
+        "daily": 35.3,
+        "weekly": 38.2,
+        "monthly": 57.3
       }
     },
     "[TV] Utilities": {
@@ -10886,18 +10820,18 @@
         "6M": -1.42
       },
       "rs_rank": {
-        "1W": 53.7,
-        "1M": 17.4,
-        "3M": 72.7,
-        "6M": 50.4
+        "1W": 54.2,
+        "1M": 17.5,
+        "3M": 72.5,
+        "6M": 50.8
       },
       "breadth_50": 40.0,
       "breadth_200": 86.7,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 47.2,
-        "weekly": 36.3,
-        "monthly": 59.8
+        "daily": 47.5,
+        "weekly": 36.5,
+        "monthly": 59.9
       }
     },
     "[TV] Commercial services": {
@@ -11004,18 +10938,18 @@
         "6M": -22.61
       },
       "rs_rank": {
-        "1W": 11.6,
-        "1M": 27.3,
+        "1W": 11.7,
+        "1M": 27.5,
         "3M": 8.3,
-        "6M": 14.0
+        "6M": 14.2
       },
       "breadth_50": 51.7,
       "breadth_200": 21.4,
       "trend_above_50ema": false,
       "scores": {
-        "daily": 20.4,
-        "weekly": 24.9,
-        "monthly": 14.8
+        "daily": 20.5,
+        "weekly": 25.1,
+        "monthly": 14.9
       }
     },
     "[TV] Transportation": {
@@ -11125,18 +11059,18 @@
         "6M": 9.49
       },
       "rs_rank": {
-        "1W": 39.7,
-        "1M": 61.2,
-        "3M": 61.2,
-        "6M": 68.6
+        "1W": 40.0,
+        "1M": 61.7,
+        "3M": 61.7,
+        "6M": 68.3
       },
       "breadth_50": 73.3,
       "breadth_200": 63.3,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 56.1,
-        "weekly": 58.7,
-        "monthly": 63.7
+        "daily": 56.4,
+        "weekly": 59.1,
+        "monthly": 63.9
       }
     },
     "[TV] Non-energy minerals": {
@@ -11246,18 +11180,18 @@
         "6M": 26.02
       },
       "rs_rank": {
-        "1W": 28.1,
-        "1M": 74.4,
-        "3M": 52.9,
-        "6M": 82.6
+        "1W": 28.3,
+        "1M": 75.0,
+        "3M": 53.3,
+        "6M": 82.5
       },
       "breadth_50": 66.7,
       "breadth_200": 75.9,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 52.6,
-        "weekly": 60.7,
-        "monthly": 68.5
+        "daily": 52.9,
+        "weekly": 61.2,
+        "monthly": 68.7
       }
     },
     "[TV] Distribution services": {
@@ -11367,18 +11301,18 @@
         "6M": 10.24
       },
       "rs_rank": {
-        "1W": 58.7,
-        "1M": 63.6,
-        "3M": 68.6,
-        "6M": 69.4
+        "1W": 59.2,
+        "1M": 64.2,
+        "3M": 68.3,
+        "6M": 69.2
       },
       "breadth_50": 73.3,
       "breadth_200": 73.3,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 66.2,
-        "weekly": 64.8,
-        "monthly": 68.8
+        "daily": 66.6,
+        "weekly": 65.2,
+        "monthly": 68.7
       }
     },
     "[TV] Industrial services": {
@@ -11488,18 +11422,18 @@
         "6M": 27.71
       },
       "rs_rank": {
-        "1W": 86.8,
-        "1M": 31.4,
-        "3M": 83.5,
-        "6M": 83.5
+        "1W": 87.5,
+        "1M": 31.7,
+        "3M": 83.3,
+        "6M": 83.3
       },
       "breadth_50": 70.0,
       "breadth_200": 86.2,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 71.7,
-        "weekly": 56.1,
-        "monthly": 76.1
+        "daily": 72.2,
+        "weekly": 56.3,
+        "monthly": 76.0
       }
     },
     "[TV] Miscellaneous": {
@@ -11549,18 +11483,18 @@
         "6M": 31.87
       },
       "rs_rank": {
-        "1W": 82.6,
-        "1M": 70.2,
-        "3M": 79.3,
-        "6M": 86.0
+        "1W": 83.3,
+        "1M": 70.8,
+        "3M": 79.2,
+        "6M": 85.8
       },
       "breadth_50": 80.0,
       "breadth_200": 80.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 80.9,
-        "weekly": 75.6,
-        "monthly": 80.1
+        "daily": 81.4,
+        "weekly": 76.0,
+        "monthly": 80.0
       }
     },
     "[TV] 3X": {
@@ -11669,18 +11603,18 @@
         "6M": 17.96
       },
       "rs_rank": {
-        "1W": 63.6,
-        "1M": 92.6,
-        "3M": 69.4,
-        "6M": 76.9
+        "1W": 64.2,
+        "1M": 92.5,
+        "3M": 69.2,
+        "6M": 76.7
       },
       "breadth_50": 83.3,
       "breadth_200": 69.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 77.5,
-        "weekly": 81.9,
-        "monthly": 75.1
+        "daily": 77.7,
+        "weekly": 82.0,
+        "monthly": 74.9
       }
     }
   }

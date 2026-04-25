@@ -1,6 +1,6 @@
 # Unassigned Tickers Audit
 
-_Generated: 2026-04-25T19:40:58+00:00_
+_Generated: 2026-04-25T21:21:44+00:00_
 
 **33 of 2548 tickers** in `alex_tickers.csv` have no curated theme (excluding healthcare).
 

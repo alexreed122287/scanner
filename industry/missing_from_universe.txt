@@ -1,7 +1,7 @@
 Tickers referenced by curated themes in build_master_list.py but NOT
 present in alex_tickers.csv. They were filtered out of the INDUSTRY tab.
 Add to alex_tickers.csv if you want them scored.
-Generated: 2026-04-25T19:49:29+00:00
+Generated: 2026-04-25T21:19:47+00:00
 
 21 ticker-slot(s) across 17 theme(s):
 

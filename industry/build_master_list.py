@@ -241,10 +241,6 @@ CURATED_THEMES = {
                             "PBR", "ABEV", "SBS"],
     "Cannabis":            ["TLRY", "CGC", "SNDL", "ACB", "OGI", "CRON"],
     "Theme Parks":         ["SIX", "FUN", "DIS"],
-
-    # --- Recurring high-conviction picks ---
-    "Top Recurring":       ["NVDA", "PLTR", "AMZN", "MSFT", "GOOGL", "META", "TSLA",
-                            "AMD", "MRVL", "ZS", "SMCI", "MU"],
 }
 
 # ---------------------------------------------------------------------------
