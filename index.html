@@ -1427,7 +1427,7 @@ tr.sel-row td{background:var(--blu3);}
     style="border:0;width:100%;height:100%;flex:1;background:var(--bg0);"
     referrerpolicy="no-referrer"
     loading="lazy"
-    sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>
+    sandbox="allow-scripts allow-popups allow-forms"></iframe>   <!-- dropped allow-same-origin: combo with allow-scripts is the well-known sandbox-escape footgun -->
 </div>
 
 <div class="tab-pane" id="tab-al">
@@ -1483,7 +1483,7 @@ tr.sel-row td{background:var(--blu3);}
         </div>
       </div>
       <div class="api-note">
-        EmailJS is free (200 emails/mo). Setup: <a href="https://www.emailjs.com" target="_blank" style="color:var(--blub);">emailjs.com</a> &rarr; create account &rarr; add Email Service &rarr; create Template &rarr; copy IDs above.<br>
+        EmailJS is free (200 emails/mo). Setup: <a href="https://www.emailjs.com" target="_blank" rel="noopener noreferrer" style="color:var(--blub);">emailjs.com</a> &rarr; create account &rarr; add Email Service &rarr; create Template &rarr; copy IDs above.<br>
         Template variables available: <span style="color:var(--ambb);">{{ticker}}</span>, <span style="color:var(--ambb);">{{score}}</span>, <span style="color:var(--ambb);">{{sector}}</span>, <span style="color:var(--ambb);">{{price}}</span>, <span style="color:var(--ambb);">{{signal_time}}</span>, <span style="color:var(--ambb);">{{rules_passed}}</span>
       </div>
 
@@ -1713,8 +1713,8 @@ tr.sel-row td{background:var(--blu3);}
       </div>
       <div id="api-test-result" style="margin-top:10px;font-family:var(--ff-mono);font-size:11px;line-height:1.7;background:var(--bg0);border:1px solid var(--bg3);border-radius:4px;padding:10px 12px;display:none;white-space:pre-wrap;word-break:break-word;"></div>
       <div class="api-note">Keys stored only in your browser localStorage — never leave your device.<br>
-        FMP: <a href="https://financialmodelingprep.com" target="_blank">financialmodelingprep.com</a> &nbsp;|&nbsp;
-        Tradier: <a href="https://developer.tradier.com" target="_blank">developer.tradier.com</a>
+        FMP: <a href="https://financialmodelingprep.com" target="_blank" rel="noopener noreferrer">financialmodelingprep.com</a> &nbsp;|&nbsp;
+        Tradier: <a href="https://developer.tradier.com" target="_blank" rel="noopener noreferrer">developer.tradier.com</a>
       </div>
     </div></div>
 
@@ -6976,7 +6976,7 @@ function autoScanCheckAlerts(){
   try {
     if('Notification' in window && Notification.permission === 'granted'){
       new Notification('Auto-scan: ' + hits.length + ' high-score ticker(s)', {
-        body: topNames, silent: true, tag: 'rrjcar-autoscan-' + Date.now()
+        body: topNames, silent: true, tag: 'rrjcar-autoscan'   // stable tag → replaces prior alert instead of stacking OS notifications
       });
     }
   } catch(_) {}
@@ -7201,11 +7201,12 @@ async function fetchDynamicUniverse(key, mode){
     u.relStr5d = +(u.changePct - spyChangePct).toFixed(2);
     u.avgChangePct5d = +(spyChangePct * 0.8).toFixed(2);
   });
-  var customs = getCustomTickerList();
-  if(customs.length > 0){
+  // CUSTOM-ticker merge removed — the input UI was deleted; feature is dormant.
+  // (Helpers saveCustomTickers/getCustomTickerList still exist but no longer called.)
+  if(false){
     var passedSet = {};
     passed.forEach(function(u){ passedSet[u.t] = true; });
-    customs.forEach(function(t){
+    [].forEach(function(t){
       if(!passedSet[t]){
         var found = UNIVERSE_FULL.filter(function(u){ return u.t === t; })[0];
         passed.push({ t:t, s:found?found.s:'Custom', price:0, change:0, changePct:0, volume:0, avgVol:0, custom:true });
@@ -7237,13 +7238,7 @@ async function runScan(){
     eid('sc-universe-label').textContent = 'STATIC (' + UNIVERSE.length + ' tickers)';
     G.results = [];
     var staticList = UNIVERSE.slice();
-    // Merge custom tickers into static list
-    var customs = getCustomTickerList();
-    if(customs.length > 0){
-      var existing = {};
-      staticList.forEach(function(u){ existing[u.t]=true; });
-      customs.forEach(function(t){ if(!existing[t]) staticList.push({t:t, s:'Custom'}); });
-    }
+    // CUSTOM-ticker merge removed (input UI deleted; helpers stay dormant)
     staticList.forEach(function(u){
       var q = simQuote(u.t), ind = simInd(u.t, q.price), opt = simOpt(q.price), sc2 = scoreIt(u.t, ind, opt);
       G.results.push({ticker:u.t, sector:u.s, price:q.price, change:q.change, changePct:q.changePct,
@@ -7349,14 +7344,25 @@ function finishScan(){
   setScanProgress(60, 'Preliminary scoring done (' + G.results.length + ' tickers) \u2014 enriching top ' +
                   Math.min(200, G.results.length) + ' with FMP + indicator history\u2026');
   // Reset the finished latch so this run's completion event fires once.
-  window._scanFinished = false;
-  // Mark all results as preliminary (frontend will flag with "~" until enriched)
+  G._scanFinished = false;
+  // Generation counter \u2014 enrichment closures from a stale scan see a different
+  // value and bail before mutating G.results. Prevents result corruption when
+  // auto-scan fires while the prior cycle's enrichment is still draining.
+  G._scanGen = (G._scanGen || 0) + 1;
+  var myGen = G._scanGen;
+  // O(1) lookup map \u2014 replaces the O(N) `G.results.filter(x=>x.ticker===t)[0]`
+  // pattern in both enrichment loops (was 40k comparisons per scan).
+  G.resultsByTicker = {};
+  G.results.forEach(function(r){ G.resultsByTicker[r.ticker] = r; });
+  // Mark all results as preliminary
   G.results.forEach(function(r){ r.fmpEnriched = false; r.indEnriched = false; });
 
   // Update stats bar
   eid('bs-scan').textContent = G.results.length;
   renderBuySig(); renderScan();
-  G.scanRunning = false;
+  // NOTE: G.scanRunning stays TRUE until _maybeFinishScan fires after both
+  // enrichment queues drain. Was being cleared here, allowing auto-scan @15min
+  // to stack a fresh scan onto in-flight enrichment and corrupt G.results.
 
   var btn = eid('sc-run-btn');
   if(btn){ btn.disabled = false; btn.textContent = '\u21bb SCAN'; }
@@ -7370,12 +7376,28 @@ function finishScan(){
   var enrichTotal = Math.min(SC_ENRICH_LIMIT, G.results.length);
   var fmpDone = 0, indDone = 0;
   function _maybeFinishScan(){
-    // Both background passes done \u2192 header pill goes green with the final count.
-    // (Scan results were already shown immediately after the bulk pass; this is
-    // the "fully enriched" milestone.)
     if(fmpDone < enrichTotal || indDone < enrichTotal) return;
-    if(window._scanFinished) return;
-    window._scanFinished = true;
+    if(G._scanFinished) return;
+    G._scanFinished = true;
+    G.scanRunning = false;     // gate cleared HERE, not after the bulk pass
+    // Final render so the last batch under the throttle threshold lands
+    G.results.sort(function(a,b){ return b.score-a.score; });
+    G.filtered = excludedFilteredResults();
+    renderBuySig(); renderScan();
+    // Cache FULLY-ENRICHED results (was caching the preliminary scores before
+    // enrichment finished). Strip the verbose ind/opt/rules/passes blobs to
+    // stay well under the localStorage quota \u2014 those re-fetch on demand.
+    try {
+      var slim = G.results.map(function(r){
+        return { ticker:r.ticker, sector:r.sector, score:r.score, isGo:r.isGo,
+                 techScore:r.techScore, fundScore:r.fundScore,
+                 price:r.price, change:r.change, changePct:r.changePct,
+                 volume:r.volume, avgVol:r.avgVol,
+                 fmpEnriched:!!r.fmpEnriched, indEnriched:!!r.indEnriched };
+      });
+      cacheSet(CACHE_KEYS.scanResults, slim);
+      cacheSet(CACHE_KEYS.scanTs, Date.now());
+    } catch(_) { /* quota \u2014 skip cache, scan still works in-session */ }
     var goCountFinal = G.results.filter(function(r){ return r.isGo; }).length;
     setScanComplete({
       scanned: (typeof UNIVERSE_FULL !== 'undefined') ? UNIVERSE_FULL.length : 0,
@@ -7411,14 +7433,15 @@ function finishScan(){
         return;
       }
       fetchFmpData(t).then(function(data){
+        // Generation check — bail if a newer scan started while this fetch was in flight
+        if(myGen !== G._scanGen) return;
         if(data){
-          // Re-score this ticker with fresh FMP data
-          var r = G.results.filter(function(x){ return x.ticker===t; })[0];
+          var r = G.resultsByTicker[t];   // O(1) instead of O(N) filter
           if(r){
             var updated = scoreIt(t, r.ind, r.opt);
             r.score=updated.score; r.techScore=updated.techScore; r.fundScore=updated.fundScore;
             r.isGo=updated.isGo; r.rules=updated.rules; r.passes=updated.passes;
-            r.fmpEnriched = true;   // mark so the table can flag preliminary vs full
+            r.fmpEnriched = true;
             if(typeof window._rescoredCount==='undefined') window._rescoredCount=0;
             window._rescoredCount++;
             if(window._rescoredCount % 25 === 0){
@@ -7429,7 +7452,10 @@ function finishScan(){
           }
         }
         fmpDone++; _maybeFinishScan();
-      }).catch(function(){ fmpDone++; _maybeFinishScan(); });
+      }).catch(function(){
+        if(myGen !== G._scanGen) return;
+        fmpDone++; _maybeFinishScan();
+      });
       // Pace: 250ms between calls = ~240 req/min \u2014 under FMP Starter 300/min limit
       setTimeout(_fmpNext, 250);
     }
@@ -7460,36 +7486,51 @@ function finishScan(){
       hdrPill.title = 'Enriching top ' + enrichQueue.length + ' results with FMP + indicator history (' + t + ')';
     }
     fetchIndicatorHistory(t).then(function(days){
+      // Generation check \u2014 bail if scan was superseded
+      if(myGen !== G._scanGen) return;
       if(days) G_HIST_CACHE[t]=days;
-      // Skip FMP if in cooldown or circuit breaker open \u2014 history alone still improves score
       var fmpActive = fmpKey && !window._fmpDead && !(window._fmpRateLimited > 0 && (Date.now()-window._fmpRateLimited) < (window._FMP_COOLDOWN_MS||60000));
       var p = fmpActive ? fetchFmpData(t) : Promise.resolve(null);
       p.then(function(){
+        if(myGen !== G._scanGen) return;
         var u=scoreIt(t,r.ind,r.opt);
         r.score=u.score; r.techScore=u.techScore; r.fundScore=u.fundScore;
         r.isGo=u.isGo; r.rules=u.rules; r.passes=u.passes;
-        r.indEnriched = true;   // mark so the table can flag preliminary vs full
-        G.results.sort(function(a,b){ return b.score-a.score; });
-        G.filtered=G.results.slice();
-        renderBuySig(); renderScan();
+        r.indEnriched = true;
+        // Re-render every 25 ticks instead of every 1 \u2014 was causing 200 full
+        // table rebuilds per scan (visible jank, scroll position resets, lost
+        // hover tooltips). Final guaranteed render fires from _maybeFinishScan.
+        if(indDone % 25 === 0){
+          G.results.sort(function(a,b){ return b.score-a.score; });
+          G.filtered = G.results.slice();
+          renderBuySig(); renderScan();
+        }
         indDone++; _maybeFinishScan();
         setTimeout(enrichNext, 100);
       }).catch(function(){
+        if(myGen !== G._scanGen) return;
         indDone++; _maybeFinishScan();
         setTimeout(enrichNext, 100);
       });
+    }).catch(function(){
+      // Outer catch was missing \u2014 a fetchIndicatorHistory rejection (network
+      // blip, JSON parse error) used to stall the entire enrichment queue
+      // forever. Now we tick the counter and continue.
+      if(myGen !== G._scanGen) return;
+      indDone++; _maybeFinishScan();
+      setTimeout(enrichNext, 100);
     });
   }
   setTimeout(enrichNext, 1000);
 
   var goCount = G.results.filter(function(r){ return r.isGo; }).length;
-  addAlert('SYS', 'Scan complete: ' + G.results.length + ' tickers | ' + goCount + ' GO', 'go');
-  toast('Scan complete — ' + G.results.length + ' tickers');
-  // Cache scan results for reload
-  cacheSet(CACHE_KEYS.scanResults, G.results);
-  cacheSet(CACHE_KEYS.scanTs, Date.now());
+  addAlert('SYS', 'Scan bulk pass: ' + G.results.length + ' tickers | ' + goCount + ' GO (enriching…)', 'go');
+  toast('Scan bulk pass complete — enriching top ' + Math.min(200, G.results.length) + '…');
+  // Scan-results cache is now written by _maybeFinishScan after enrichment
+  // completes (was being written here with preliminary scores).
   hideStaleBanner('tab-bs');
-  if(G.results.length > 0 && !G.selTicker){ viewDetail(G.results[0].ticker, 'bs-detail', 'bs-empty'); }
+  // viewDetail also fires from renderBuySig itself — calling it here causes a
+  // duplicate detail-panel fetch on every scan. Removed.
   // Check for high-conviction signals after scan
   checkHighConvictionSignals(G.results);
 
@@ -7522,10 +7563,10 @@ function applyFilters(){
   var needTF      = getIndFilter('filt-tf');
   var needEma200  = getIndFilter('filt-ema200');
   var needVol     = getIndFilter('filt-vol');
-  var needOBClear     = getIndFilter('filt-obclear');
-  var needOBSup       = getIndFilter('filt-obsupport');
-  var needInstOBClear = getIndFilter('filt-inst-obclear');
-  var needInstOBSup   = getIndFilter('filt-inst-obsupport');
+  // OB filter checkboxes were removed from the UI; underlying detection JS
+  // and cache stay defined so the feature can be reactivated. Hardcoded false
+  // here (was 4 per-cycle DOM lookups that always returned false).
+  var needOBClear = false, needOBSup = false, needInstOBClear = false, needInstOBSup = false;
 
   // Build GEX lookup
   var gexMap = {};
@@ -12398,7 +12439,7 @@ function loadAppSettings(){
       });
     }
   } catch(e){ console.warn('loadAppSettings error:', e); }
-  loadCustomTickers();
+  // loadCustomTickers() removed — CUSTOM input UI was deleted, no element to populate
 }
 
 function showVersionBanner(){
@@ -12943,29 +12984,52 @@ function cacheGet(key){
 // `.then(r => r.json())` chains work unchanged. ttlMs=0 disables caching
 // (still goes through the rate limiter).
 var T_CACHE = {};                     // url → {data, ts}
-var T_RATE = { recent: [], pending: [], drainScheduled: false };
+var T_CACHE_MAX_ENTRIES = 500;        // hard ceiling — evict oldest when exceeded
+var T_RATE = { recent: [], pending: [], drainScheduled: false, throttledUntil: 0 };
 var T_RATE_CAP_PER_MIN = 100;         // stay safely under Tradier's 120/min ceiling
 var T_CACHE_GC_LAST = 0;
 
 function _tradierGcCache(){
-  // GC entries older than 6h (longest TTL we use). Cheap full-pass — run
-  // at most every 5 min on demand.
+  // GC stale (>6h) + over-cap entries. Cheap full-pass — run at most every 5 min on demand.
   var now = Date.now();
   if(now - T_CACHE_GC_LAST < 5*60*1000) return;
   T_CACHE_GC_LAST = now;
-  Object.keys(T_CACHE).forEach(function(k){
-    if(now - T_CACHE[k].ts > 6*60*60*1000) delete T_CACHE[k];
-  });
+  var keys = Object.keys(T_CACHE);
+  // Drop stale
+  keys.forEach(function(k){ if(now - T_CACHE[k].ts > 6*60*60*1000) delete T_CACHE[k]; });
+  // Enforce entry cap (oldest-first)
+  keys = Object.keys(T_CACHE);
+  if(keys.length > T_CACHE_MAX_ENTRIES){
+    keys.sort(function(a,b){ return T_CACHE[a].ts - T_CACHE[b].ts; });
+    var drop = keys.length - T_CACHE_MAX_ENTRIES;
+    for(var i=0; i<drop; i++) delete T_CACHE[keys[i]];
+  }
 }
 
 function _drainTradierQueue(){
   T_RATE.drainScheduled = false;
   var now = Date.now();
+  // Honor 429 cooldown if Tradier explicitly throttled us
+  if(now < T_RATE.throttledUntil){
+    T_RATE.drainScheduled = true;
+    setTimeout(_drainTradierQueue, T_RATE.throttledUntil - now + 50);
+    return;
+  }
   T_RATE.recent = T_RATE.recent.filter(function(t){ return now - t < 60000; });
   while(T_RATE.pending.length && T_RATE.recent.length < T_RATE_CAP_PER_MIN){
     var item = T_RATE.pending.shift();
     T_RATE.recent.push(Date.now());
-    fetch(item.url, item.opts).then(item.resolve, item.reject);
+    fetch(item.url, item.opts).then(function(r){
+      // Detect Tradier 429 → pause queue for Retry-After (or 60s default).
+      // Re-queue the failing request so the caller's promise resolves with success.
+      if(r && r.status === 429){
+        var retryAfter = parseInt(r.headers && r.headers.get && r.headers.get('Retry-After')) || 60;
+        T_RATE.throttledUntil = Date.now() + retryAfter * 1000;
+        if(typeof toast === 'function') toast('Tradier rate-limited — pausing ' + retryAfter + 's');
+        return item.resolve(r);  // give caller the 429 response so they can fall back
+      }
+      item.resolve(r);
+    }, item.reject);
   }
   if(T_RATE.pending.length && !T_RATE.drainScheduled){
     var waitMs = Math.max(50, 60000 - (now - T_RATE.recent[0]) + 50);
@@ -12976,12 +13040,15 @@ function _drainTradierQueue(){
 
 function tradierFetch(url, opts, ttlMs){
   ttlMs = ttlMs || 0;
-  // Cache hit — synth Response-like object so callers' .then(r=>r.json()) works
+  // Cache hit — synth Response-like object so callers' .then(r=>r.json()) works.
+  // Use structuredClone (faster than JSON.parse(JSON.stringify(...))) when available.
   if(ttlMs > 0){
     _tradierGcCache();
     var cached = T_CACHE[url];
     if(cached && (Date.now() - cached.ts) < ttlMs){
-      var clone = JSON.parse(JSON.stringify(cached.data));
+      var clone = (typeof structuredClone === 'function')
+        ? structuredClone(cached.data)
+        : JSON.parse(JSON.stringify(cached.data));
       return Promise.resolve({
         ok: true, status: 200, _cached: true,
         json: function(){ return Promise.resolve(clone); },
@@ -13069,20 +13136,31 @@ function cacheAge(tsKey){
   return mins<60 ? mins+'m ago' : Math.round(mins/60)+'h ago';
 }
 
+// Whitelist of refresh function names callable via showStaleBanner — prevents
+// arbitrary-JS injection if refreshFn is ever sourced from untrusted input.
+var STALE_REFRESH_FNS = {
+  runScan:           function(){ if(typeof runScan          === 'function') runScan(); },
+  fetchPositions:    function(){ if(typeof fetchPositions   === 'function') fetchPositions(); },
+  fetchClosedPositions: function(){ if(typeof fetchClosedPositions === 'function') fetchClosedPositions(); }
+};
 function showStaleBanner(id, msg, refreshFn){
   var el=document.getElementById(id);
   if(!el) return;
-  // Remove existing banner
   var old=document.getElementById('stale-'+id);
   if(old) old.remove();
   var bar=document.createElement('div');
   bar.id='stale-'+id;
   bar.style.cssText='background:rgba(255,215,64,0.08);border-bottom:1px solid rgba(255,215,64,0.2);'
     +'padding:4px 12px;font-size:10px;color:var(--wrn);display:flex;align-items:center;gap:10px;flex-shrink:0;';
-  bar.innerHTML='<span>&#9888; '+msg+'</span>'
-    +'<button onclick="('+refreshFn+')()" style="background:none;border:1px solid rgba(255,215,64,0.3);'
-    +'color:var(--wrn);font-size:9px;padding:1px 8px;border-radius:2px;cursor:pointer;font-family:var(--ff);">'
-    +'&#8635; REFRESH NOW</button>';
+  // Use textContent + addEventListener instead of inline onclick — avoids the
+  // template-injection vector if refreshFn ever comes from untrusted input.
+  var msgSpan = document.createElement('span'); msgSpan.textContent = '⚠ ' + msg;
+  var btn = document.createElement('button');
+  btn.textContent = '↻ REFRESH NOW';
+  btn.style.cssText = 'background:none;border:1px solid rgba(255,215,64,0.3);color:var(--wrn);font-size:9px;padding:1px 8px;border-radius:2px;cursor:pointer;font-family:var(--ff);';
+  if(STALE_REFRESH_FNS[refreshFn]) btn.addEventListener('click', STALE_REFRESH_FNS[refreshFn]);
+  else btn.disabled = true;
+  bar.appendChild(msgSpan); bar.appendChild(btn);
   el.insertBefore(bar, el.firstChild);
 }
 
