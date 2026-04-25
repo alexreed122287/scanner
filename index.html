@@ -5440,8 +5440,11 @@ async function fetchIndicatorHistory(ticker){
   var end  = new Date().toISOString().split('T')[0];
   var start= new Date(Date.now()-25*864e5).toISOString().split('T')[0];
   try{
-    var r = await fetch(host+'/v1/markets/history?symbol='+ticker+'&interval=daily&start='+start+'&end='+end,
-      {headers:{Authorization:'Bearer '+key,Accept:'application/json'}});
+    // 30-min in-memory TTL on top of the 24h localStorage cache (loadHistCache).
+    // The localStorage cache handles repeat sessions; the in-memory cache + rate
+    // limiter handles the scanner-enrichment burst (up to 200 tickers in <30 sec).
+    var r = await tradierFetch(host+'/v1/markets/history?symbol='+ticker+'&interval=daily&start='+start+'&end='+end,
+      {headers:{Authorization:'Bearer '+key,Accept:'application/json'}}, 30*60*1000);
     var d = await r.json();
     var days = d.history && d.history.day ? d.history.day : [];
     if(!Array.isArray(days)) days = [days];
@@ -5494,8 +5497,9 @@ async function fetchOBHistory(ticker){
   var end  = new Date().toISOString().split('T')[0];
   var start= new Date(Date.now()-(OB_HIST_DAYS+20)*864e5).toISOString().split('T')[0]; // buffer for weekends/holidays
   try{
-    var r = await fetch(host+'/v1/markets/history?symbol='+ticker+'&interval=daily&start='+start+'&end='+end,
-      {headers:{Authorization:'Bearer '+key,Accept:'application/json'}});
+    // OB history — 30-min in-memory TTL on top of 24h localStorage cache (loadOBCache).
+    var r = await tradierFetch(host+'/v1/markets/history?symbol='+ticker+'&interval=daily&start='+start+'&end='+end,
+      {headers:{Authorization:'Bearer '+key,Accept:'application/json'}}, 30*60*1000);
     var d = await r.json();
     var days = d.history && d.history.day ? d.history.day : [];
     if(!Array.isArray(days)) days = [days];
@@ -9120,6 +9124,14 @@ function renderTsStatusRow(){
 
 async function runTsCheck(){
   if(!G.tsActive||!G.positions.length){stopTsPoller();return;}
+  // Skip when market is closed — quotes won't move so the poll burns API
+  // calls for nothing. Includes weekend guard (isMarketHours doesn't gate by day).
+  var nowEt = new Date(new Date().toLocaleString('en-US',{timeZone:'America/New_York'}));
+  var dayEt = nowEt.getDay();
+  if(dayEt === 0 || dayEt === 6 || !isMarketHours()){
+    eid('ts-poll-status').textContent='Market closed — paused (resumes 9:45 ET weekdays)';
+    return;
+  }
   var defaultCloseMode=eid('ts-close-mode').value||'step';
   eid('ts-poll-status').textContent='Checking... '+new Date().toLocaleTimeString();
 
@@ -10012,9 +10024,10 @@ function rollLoadExpirations(){
   eid('roll-chain-wrap').style.display='none';
   eid('roll-leg2-info').textContent='-- loading expirations --';
 
-  fetch(c.host+'/v1/markets/options/expirations?symbol='+G_roll.ticker+'&includeAllRoots=true',{
+  // Roll-modal expirations — cached 6h (intraday-stable)
+  tradierFetch(c.host+'/v1/markets/options/expirations?symbol='+G_roll.ticker+'&includeAllRoots=true',{
     headers:{Authorization:'Bearer '+c.key,Accept:'application/json'}
-  }).then(function(r){return r.json();})
+  }, 6*60*60*1000).then(function(r){return r.json();})
   .then(function(data){
     var dates=(data.expirations&&data.expirations.date)?data.expirations.date:[];
     if(!Array.isArray(dates)) dates=[dates];
@@ -10053,9 +10066,10 @@ function rollLoadChain(){
   eid('roll-chain-body').innerHTML='<tr><td colspan="7" style="padding:8px;color:var(--gry);text-align:center;">Loading...</td></tr>';
   eid('roll-chain-wrap').style.display='block';
 
-  fetch(c.host+'/v1/markets/options/chains?symbol='+G_roll.ticker+'&expiration='+newExp+'&greeks=true',{
+  // Roll-modal chain pull — cached 5 min per (ticker, expiry)
+  tradierFetch(c.host+'/v1/markets/options/chains?symbol='+G_roll.ticker+'&expiration='+newExp+'&greeks=true',{
     headers:{Authorization:'Bearer '+c.key,Accept:'application/json'}
-  }).then(function(r){return r.json();})
+  }, 5*60*1000).then(function(r){return r.json();})
   .then(function(data){
     var chain=(data.options&&data.options.option)?data.options.option:[];
     if(!Array.isArray(chain)) chain=[chain];
@@ -10231,9 +10245,10 @@ function rollSelectBest(fromUser){
 
       // Load the chain for this expiry, then auto-select the contract
       var c2 = rollGetCreds();
-      fetch(c2.host+'/v1/markets/options/chains?symbol='+G_roll.ticker+'&expiration='+best.exp+'&greeks=true',{
+      // Roll-modal auto-suggest chain pull — cached 5 min per (ticker, expiry)
+      tradierFetch(c2.host+'/v1/markets/options/chains?symbol='+G_roll.ticker+'&expiration='+best.exp+'&greeks=true',{
         headers:{Authorization:'Bearer '+c2.key,Accept:'application/json'}
-      }).then(function(r2){return r2.json();})
+      }, 5*60*1000).then(function(r2){return r2.json();})
       .then(function(data){
         var chain2=(data.options&&data.options.option)?data.options.option:[];
         if(!Array.isArray(chain2)) chain2=[chain2];
@@ -12284,9 +12299,10 @@ async function fetchAllContracts(ticker){
   // Get all expirations within 365 days
   var expRes;
   try{
-    expRes = await fetch(creds.host+'/v1/markets/options/expirations?symbol='+encodeURIComponent(ticker),{
+    // CW-refresh expirations — cached 6h (intraday-stable)
+    expRes = await tradierFetch(creds.host+'/v1/markets/options/expirations?symbol='+encodeURIComponent(ticker),{
       headers:{Authorization:'Bearer '+creds.key, Accept:'application/json'}
-    }).then(function(r){return r.json();});
+    }, 6*60*60*1000).then(function(r){return r.json();});
   }catch(e){
     document.getElementById('cp-loading').textContent = 'Error fetching expirations';
     return;
@@ -12674,9 +12690,10 @@ async function cwRefreshAll(){
       var c = contracts[j].contract;
       var k = contracts[j].key;
       try{
-        var chainRes = await fetch(creds.host+'/v1/markets/options/chains?symbol='+encodeURIComponent(ticker)+'&expiration='+c.expDate+'&greeks=true',{
+        // CW-refresh chain pull — cached 5 min per (ticker, expiry)
+        var chainRes = await tradierFetch(creds.host+'/v1/markets/options/chains?symbol='+encodeURIComponent(ticker)+'&expiration='+c.expDate+'&greeks=true',{
           headers:{Authorization:'Bearer '+creds.key, Accept:'application/json'}
-        }).then(function(r){return r.json();});
+        }, 5*60*1000).then(function(r){return r.json();});
 
         var opts = [];
         try{ opts=chainRes.options.option; if(!Array.isArray(opts)) opts=[opts]; }catch(e){}
@@ -13333,7 +13350,7 @@ function pfTickerChanged(colId, rowId, tickerVal){
   // Fetch spot + expirations in parallel
   Promise.all([
     fetch(creds.host+'/v1/markets/quotes?symbols='+t, {headers:{Authorization:'Bearer '+creds.key, Accept:'application/json'}}).then(function(r){ return r.ok?r.json():null; }),
-    fetch(creds.host+'/v1/markets/options/expirations?symbol='+t+'&includeAllRoots=true', {headers:{Authorization:'Bearer '+creds.key, Accept:'application/json'}}).then(function(r){ return r.ok?r.json():null; })
+    tradierFetch(creds.host+'/v1/markets/options/expirations?symbol='+t+'&includeAllRoots=true', {headers:{Authorization:'Bearer '+creds.key, Accept:'application/json'}}, 6*60*60*1000).then(function(r){ return r.ok?r.json():null; })
   ]).then(function(results){
     var qData = results[0], eData = results[1];
     var spot = null;
@@ -13431,8 +13448,9 @@ function pfLoadStrikesFor(colId, rowId){
       // Attempt 2: fall back to /options/chains and extract strikes. Some
       // symbol/expiry combinations return empty from /strikes but populated
       // from /chains — particularly in sandbox for low-volume names.
-      fetch(creds.host+'/v1/markets/options/chains?symbol='+encodeURIComponent(ticker)+'&expiration='+encodeURIComponent(exp)+'&greeks=false',
-        {headers:{Authorization:'Bearer '+creds.key, Accept:'application/json'}})
+      // Strikes-fallback chain pull — cached 5 min per (ticker, expiry)
+      tradierFetch(creds.host+'/v1/markets/options/chains?symbol='+encodeURIComponent(ticker)+'&expiration='+encodeURIComponent(exp)+'&greeks=false',
+        {headers:{Authorization:'Bearer '+creds.key, Accept:'application/json'}}, 5*60*1000)
         .then(function(r){ return r.ok?r.json():null; })
         .then(function(cd){
           var opts = [];
