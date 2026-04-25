@@ -2182,14 +2182,26 @@ tr.sel-row td{background:var(--blu3);}
   function record(label, method){
     var log = loadLog();
     var today = todayStr();
-    if(log.date !== today){ log = {date:today, calls:[], counts:{}}; }
+    if(log.date !== today){ log = {date:today, calls:[], counts:{}, total:0}; }
+    // Backfill total from counts on first record() of a session if the log
+    // came from a pre-fix version (no total field). This races DOMContentLoaded
+    // because fetch is monkey-patched immediately; deriveTotal there is the
+    // fallback for the "no fetches yet" case.
+    if(typeof log.total !== 'number'){
+      var sum = 0;
+      Object.keys(log.counts || {}).forEach(function(k){ sum += (log.counts[k]||0); });
+      log.total = sum;
+    }
     var ts = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
     log.calls.push({t:ts, ep:label, m:method||'GET'});
     log.counts[label] = (log.counts[label]||0)+1;
-    // Keep last 500 entries only
+    // Recent-calls ring buffer is capped at 500 for the breakdown-modal table,
+    // but the true daily total is tracked separately so the header badge
+    // doesn't plateau at "API: 500" once we exceed the buffer.
+    log.total = log.total + 1;
     if(log.calls.length>500) log.calls=log.calls.slice(-500);
     saveLog(log);
-    updateBadge(log.calls.length);
+    updateBadge(log.total);
   }
 
   function updateBadge(n){
@@ -2213,10 +2225,20 @@ tr.sel-row td{background:var(--blu3);}
     return _fetch(input, init);
   };
 
-  // Init badge on load from stored log
+  // Init badge on load from stored log. Old logs from before total-tracking
+  // landed don't have log.total — derive it by summing log.counts (per-endpoint
+  // counts ARE unbounded) so the badge shows the true running total even
+  // for sessions that started under the buggy version.
+  function deriveTotal(log){
+    if(typeof log.total === 'number') return log.total;
+    var sum = 0;
+    Object.keys(log.counts || {}).forEach(function(k){ sum += (log.counts[k]||0); });
+    log.total = sum;
+    return sum;
+  }
   window.addEventListener('DOMContentLoaded', function(){
     var log = loadLog();
-    if(log.date===todayStr()) updateBadge(log.calls.length);
+    if(log.date===todayStr()) updateBadge(deriveTotal(log));
   });
 
   // Midnight reset
