@@ -7306,10 +7306,14 @@ function sortTable(col){
 // ══════════════════════════════════════════════════════════════════════════
 var SENT = { regime: null, loudMap: {}, loadedAt: 0, status: 'idle' };
 var SENT_URL = 'https://alexreed122287.github.io/sentiment-panel/data/latest.json';
-var SENT_REFRESH_MS = 30 * 60 * 1000;  // 30 minutes
+var SENT_REFRESH_MS = 30 * 60 * 1000;  // 30 minutes (client poll). Underlying snapshot rebuilds hourly 9a-3p ET, weekdays.
+var SENT_COUNTDOWN_TIMER = null;
 
 function loadSentiment(){
   SENT.status = 'loading';
+  // If sent tab is visible, re-render to show the "Refreshing…" state in the toolbar
+  var sp = document.getElementById('tab-sent');
+  if(sp && sp.classList.contains('active') && SENT.raw && typeof renderSentimentTab === 'function') renderSentimentTab();
   fetch(SENT_URL, {cache:'no-cache'}).then(function(r){
     if(!r.ok) throw new Error('HTTP '+r.status);
     return r.json();
@@ -7541,8 +7545,45 @@ function renderSentimentTab(){
   }).join('');
 
   var ts = SENT.raw && SENT.raw.fetched_at ? new Date(SENT.raw.fetched_at).toLocaleString() : '--';
+  var fetchedAgo = SENT.loadedAt ? Math.max(0, Math.round((Date.now() - SENT.loadedAt) / 60000)) : null;
+  var nextMs = SENT.loadedAt ? Math.max(0, (SENT.loadedAt + SENT_REFRESH_MS) - Date.now()) : 0;
+  var nextMin = Math.ceil(nextMs / 60000);
+  var fetchedTxt = fetchedAgo == null ? '--' : (fetchedAgo === 0 ? 'just now' : fetchedAgo + ' min ago');
+  var refreshing = SENT.status === 'loading';
+  var btnLabel = refreshing ? '\u21bb Refreshing\u2026' : '\u21bb Refresh now';
+  var toolbarHTML =
+    '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;' +
+    'padding:10px 14px;margin-bottom:12px;border:1px solid var(--bg3);border-radius:6px;' +
+    'background:var(--bg2);font-family:var(--ff-mono);font-size:11px;">' +
+      '<div style="color:var(--gry);line-height:1.6;">' +
+        '<span style="color:var(--wht);">Snapshot:</span> ' + ts +
+        ' &nbsp;\u00b7&nbsp; <span style="color:var(--wht);">Fetched:</span> <span id="sent-fetched-ago">' + fetchedTxt + '</span>' +
+        ' &nbsp;\u00b7&nbsp; <span style="color:var(--wht);">Next auto:</span> <span id="sent-next-auto">' + nextMin + 'm</span>' +
+        '<br><span style="font-size:10px;opacity:0.75;">Auto-refreshes every 30 min in your browser \u00b7 source rebuilds hourly 9a\u20133p ET on weekdays</span>' +
+      '</div>' +
+      '<button onclick="loadSentiment()" ' + (refreshing ? 'disabled ' : '') +
+        'style="font-family:var(--ff-mono);font-size:11px;padding:6px 14px;border:1px solid var(--gry2);' +
+        'border-radius:4px;background:var(--bg);color:' + (refreshing ? 'var(--gry)' : 'var(--wht)') + ';' +
+        'cursor:' + (refreshing ? 'wait' : 'pointer') + ';white-space:nowrap;">' + btnLabel + '</button>' +
+    '</div>';
 
-  host.innerHTML = regimeHTML +
+  // Maintain a 30s ticker that updates the "Fetched" / "Next auto" labels in place
+  if(SENT_COUNTDOWN_TIMER){ clearInterval(SENT_COUNTDOWN_TIMER); SENT_COUNTDOWN_TIMER = null; }
+  SENT_COUNTDOWN_TIMER = setInterval(function(){
+    var pane = document.getElementById('tab-sent');
+    var ageEl = document.getElementById('sent-fetched-ago');
+    var nextEl = document.getElementById('sent-next-auto');
+    if(!pane || !pane.classList.contains('active') || !ageEl || !nextEl){
+      clearInterval(SENT_COUNTDOWN_TIMER); SENT_COUNTDOWN_TIMER = null; return;
+    }
+    if(!SENT.loadedAt) return;
+    var a = Math.max(0, Math.round((Date.now() - SENT.loadedAt) / 60000));
+    var n = Math.max(0, Math.ceil(((SENT.loadedAt + SENT_REFRESH_MS) - Date.now()) / 60000));
+    ageEl.textContent = a === 0 ? 'just now' : a + ' min ago';
+    nextEl.textContent = n + 'm';
+  }, 30000);
+
+  host.innerHTML = toolbarHTML + regimeHTML +
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;" id="sent-lists">' +
       '<div class="card"><div class="card-hdr">\u25b2 STOCKTWITS TRENDING (top ' + trending.length + ')</div>' +
       '<div class="tbl-wrap" style="max-height:420px;overflow:auto;">' +
@@ -7556,7 +7597,7 @@ function renderSentimentTab(){
       '</div></div>' +
     '</div>' +
     '<div style="font-family:var(--ff-mono);font-size:10px;color:var(--gry);text-align:right;margin-top:12px;">' +
-      'Snapshot: ' + ts + ' · Click any row to prefill the scanner with that ticker.' +
+      'Click any row to prefill the scanner with that ticker.' +
     '</div>';
 }
 
