@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-04-25T18:08:50+00:00",
-  "universe_size": 2400,
+  "generated_at": "2026-04-25T18:37:34+00:00",
+  "universe_size": 2548,
   "theme_count": 99,
   "themes": {
     "AI Infrastructure": [
@@ -15,6 +15,7 @@
       "ETN",
       "PWR",
       "GEV",
+      "EME",
       "GNRC",
       "CEG"
     ],
@@ -23,6 +24,7 @@
       "COHR",
       "AAOI",
       "GLW",
+      "IPGP",
       "LASR",
       "FN",
       "MTSI",
@@ -49,6 +51,7 @@
       "LRCX",
       "TER",
       "KLAC",
+      "ASML",
       "ENTG",
       "MKSI",
       "ACLS",
@@ -75,6 +78,7 @@
     "Big Tech": [
       "AAPL",
       "MSFT",
+      "GOOGL",
       "GOOG",
       "AMZN",
       "META",
@@ -85,12 +89,14 @@
       "KTOS",
       "AVAV",
       "PLTR",
+      "HII",
       "LHX",
       "HWM",
       "NOC",
       "RTX",
       "LMT",
       "GD",
+      "TDG",
       "BA"
     ],
     "Drones": [
@@ -100,6 +106,8 @@
       "RCAT",
       "AVAV",
       "KTOS",
+      "AERT",
+      "DPRO",
       "EH",
       "ACHR",
       "JOBY"
@@ -112,10 +120,16 @@
       "PL",
       "IRDM",
       "VSAT",
-      "GSAT"
+      "GSAT",
+      "SATX"
     ],
     "Nuclear & Uranium": [
+      "UUUU",
+      "CCJ",
+      "DNN",
       "UEC",
+      "NXE",
+      "URG",
       "LEU",
       "BWXT",
       "OKLO",
@@ -128,6 +142,7 @@
       "ETN",
       "PWR",
       "GEV",
+      "EME",
       "GNRC",
       "CEG",
       "VST",
@@ -159,6 +174,7 @@
       "RIOT",
       "CLSK",
       "HUT",
+      "BITF",
       "CIFR",
       "WULF",
       "IREN",
@@ -192,6 +208,7 @@
       "PANW",
       "FTNT",
       "S",
+      "CYBR",
       "NET",
       "CHKP",
       "OKTA",
@@ -202,6 +219,7 @@
       "RGTI",
       "QBTS",
       "QUBT",
+      "ARQQ",
       "IBM"
     ],
     "Industrial / Picks": [
@@ -240,6 +258,7 @@
       "FITB",
       "MTB",
       "HBAN",
+      "CMA",
       "ZION",
       "PNC",
       "TFC",
@@ -265,6 +284,7 @@
       "TROW",
       "BEN",
       "IVZ",
+      "AMG",
       "SEIC"
     ],
     "P&C Insurance": [
@@ -277,6 +297,7 @@
       "WRB",
       "L",
       "CINF",
+      "ERIE",
       "RLI",
       "AFG"
     ],
@@ -298,7 +319,10 @@
       "RYAN"
     ],
     "Reinsurance": [
-      "ACGL"
+      "RNR",
+      "EG",
+      "ACGL",
+      "RGA"
     ],
     "Specialty Finance": [
       "ALLY",
@@ -315,6 +339,7 @@
       "CME",
       "NDAQ",
       "CBOE",
+      "MKTX",
       "TW"
     ],
     "Tower REITs": [
@@ -329,6 +354,7 @@
     "Industrial REITs": [
       "PLD",
       "REXR",
+      "EGP",
       "FR",
       "STAG",
       "TRNO",
@@ -395,27 +421,44 @@
       "F",
       "GM",
       "RIVN",
-      "LCID"
+      "LCID",
+      "STLA",
+      "TM",
+      "HMC"
     ],
     "Auto Suppliers": [
       "APTV",
       "BWA",
+      "MGA",
       "LEA",
       "DAN",
       "MOD",
       "GTX",
-      "ALV"
+      "ALV",
+      "PHIN",
+      "DORM",
+      "STRT"
     ],
     "Auto Dealers": [
-      "KMX"
+      "AN",
+      "KMX",
+      "PAG",
+      "GPI",
+      "ABG",
+      "LAD",
+      "SAH"
     ],
     "Auto Parts Retail": [
+      "AZO",
       "ORLY",
       "AAP",
       "MNRO"
     ],
     "EV Charging": [
-      "EVGO"
+      "CHPT",
+      "BLNK",
+      "EVGO",
+      "WBX"
     ],
     "Restaurants - QSR": [
       "MCD",
@@ -436,6 +479,7 @@
       "DRI",
       "EAT",
       "BLMN",
+      "BJRI",
       "CAKE",
       "CHEF",
       "BROS"
@@ -443,18 +487,22 @@
     "Coffee": [
       "SBUX",
       "DNUT",
-      "BROS"
+      "BROS",
+      "FARM"
     ],
     "Athletic Apparel": [
       "NKE",
       "LULU",
       "UA",
+      "UAA",
       "ONON",
       "DECK",
+      "SKX",
       "BIRK",
       "CROX",
       "VFC",
-      "COLM"
+      "COLM",
+      "GES"
     ],
     "Luxury / Fashion": [
       "TPR",
@@ -470,7 +518,9 @@
     ],
     "Sporting Goods": [
       "DKS",
-      "ASO"
+      "ASO",
+      "HIBB",
+      "BGFV"
     ],
     "Airlines": [
       "DAL",
@@ -479,7 +529,8 @@
       "LUV",
       "ALK",
       "JBLU",
-      "ALGT"
+      "ALGT",
+      "SKYW"
     ],
     "Cruise Lines": [
       "CCL",
@@ -491,15 +542,18 @@
       "MAR",
       "HLT",
       "H",
+      "IHG",
       "CHH",
       "HGV",
-      "WH"
+      "WH",
+      "PLYA"
     ],
     "Online Travel": [
       "BKNG",
       "EXPE",
       "ABNB",
-      "TRIP"
+      "TRIP",
+      "TRVG"
     ],
     "Casinos": [
       "LVS",
@@ -508,18 +562,25 @@
       "CZR",
       "BYD",
       "RRR",
-      "PENN"
+      "PENN",
+      "MCRI",
+      "FLL",
+      "GDEN"
     ],
     "Online Gambling": [
       "DKNG",
       "FLUT",
+      "BETZ",
       "RSI",
+      "GAN",
       "PLTK"
     ],
     "Class I Rails": [
       "UNP",
       "NSC",
-      "CSX"
+      "CSX",
+      "CNI",
+      "CP"
     ],
     "Trucking / LTL": [
       "ODFL",
@@ -528,18 +589,28 @@
       "XPO",
       "WERN",
       "CHRW",
+      "ARCB",
+      "LSTR",
       "SNDR",
+      "HTLD",
       "MRTN"
     ],
     "Logistics & Parcels": [
       "FDX",
       "UPS",
       "EXPD",
-      "GXO"
+      "GXO",
+      "ZTO",
+      "FWRD"
     ],
     "Marine Shipping": [
+      "ZIM",
+      "MATX",
       "KEX",
-      "SBLK"
+      "SBLK",
+      "DAC",
+      "GSL",
+      "CMRE"
     ],
     "Building Products": [
       "TT",
@@ -551,17 +622,23 @@
       "FBIN",
       "PNR",
       "WMS",
+      "CSL",
+      "AZEK",
       "TREX"
     ],
     "Homebuilders": [
       "DHI",
       "LEN",
+      "NVR",
       "PHM",
       "TOL",
       "KBH",
       "MTH",
       "TPH",
-      "BZH"
+      "MHO",
+      "BZH",
+      "GRBK",
+      "CCS"
     ],
     "Heavy Machinery": [
       "CAT",
@@ -579,39 +656,68 @@
       "WAB",
       "DOV",
       "FLS",
-      "GGG"
+      "GGG",
+      "WTS"
     ],
     "Aerospace OEM": [
       "BA",
+      "TDG",
       "HEI",
       "TXT",
       "GE",
       "RTX",
-      "HXL"
+      "HXL",
+      "SPR"
     ],
     "Cement & Aggregates": [
       "VMC",
-      "EXP"
+      "MLM",
+      "EXP",
+      "CX",
+      "EAF"
     ],
     "Steel": [
       "NUE",
       "STLD",
+      "X",
       "CLF",
+      "MT",
+      "TX",
       "ATI",
-      "CMC"
+      "RS",
+      "CMC",
+      "WOR"
     ],
     "Copper / Base Metal": [
       "FCX",
-      "SCCO"
+      "SCCO",
+      "TECK",
+      "BHP",
+      "RIO",
+      "VALE",
+      "ERO",
+      "HBM"
     ],
     "Gold Miners": [
       "NEM",
+      "AEM",
       "GOLD",
       "AU",
-      "SSRM"
+      "KGC",
+      "AGI",
+      "PAAS",
+      "WPM",
+      "FNV",
+      "SSRM",
+      "EGO",
+      "NGD",
+      "BTG"
     ],
     "Lithium": [
       "ALB",
+      "SQM",
+      "LAC",
+      "PLL",
       "SGML"
     ],
     "Specialty Chemicals": [
@@ -640,6 +746,8 @@
       "PKG",
       "IP",
       "AMCR",
+      "SEE",
+      "BERY",
       "SLGN",
       "OI",
       "BALL",
@@ -649,15 +757,21 @@
       "CTVA",
       "MOS",
       "CF",
+      "NTR",
       "FMC",
       "SMG"
     ],
     "Pipelines / Midstream": [
+      "ENB",
+      "ET",
+      "EPD",
+      "MPLX",
       "WMB",
       "OKE",
       "KMI",
       "TRGP",
       "PAA",
+      "WES",
       "DTM",
       "PAGP"
     ],
@@ -667,6 +781,7 @@
       "PSX",
       "DK",
       "PBF",
+      "HF",
       "DINO"
     ],
     "Oilfield Services": [
@@ -674,11 +789,13 @@
       "HAL",
       "BKR",
       "FTI",
+      "CHX",
       "WFRD",
       "NOV",
       "PUMP",
       "RIG",
-      "OII"
+      "OII",
+      "TS"
     ],
     "Telecom": [
       "T",
@@ -695,6 +812,7 @@
       "NFLX",
       "DIS",
       "WBD",
+      "PARA",
       "ROKU",
       "SIRI",
       "FUBO",
@@ -721,7 +839,8 @@
     ],
     "Tobacco": [
       "MO",
-      "PM"
+      "PM",
+      "BTI"
     ],
     "Beverages": [
       "KO",
@@ -730,11 +849,16 @@
       "MNST",
       "CELH",
       "STZ",
+      "BUD",
       "TAP",
+      "DEO",
+      "SAM",
+      "FIZZ",
       "COCO"
     ],
     "Packaged Food": [
       "GIS",
+      "K",
       "MDLZ",
       "CAG",
       "HRL",
@@ -743,7 +867,9 @@
       "MKC",
       "INGR",
       "POST",
-      "FLO"
+      "TR",
+      "FLO",
+      "LANC"
     ],
     "Grocery": [
       "KR",
@@ -759,7 +885,8 @@
       "KMB",
       "CLX",
       "ENR",
-      "REYN"
+      "REYN",
+      "SPB"
     ],
     "Enterprise SaaS": [
       "CRM",
@@ -767,7 +894,9 @@
       "ADBE",
       "INTU",
       "WDAY",
+      "ANSS",
       "TYL",
+      "SAP",
       "ORCL",
       "HUBS",
       "BSY",
@@ -777,7 +906,8 @@
     "Cloud / CDN": [
       "NET",
       "FSLY",
-      "AKAM"
+      "AKAM",
+      "DNB"
     ],
     "Data / DevOps": [
       "SNOW",
@@ -786,6 +916,7 @@
       "ESTC",
       "GTLB",
       "DT",
+      "CFLT",
       "S",
       "PATH",
       "AI",
@@ -809,7 +940,9 @@
       "AFRM",
       "UPST",
       "PAGS",
-      "STNE"
+      "STNE",
+      "OPRT",
+      "ENVA"
     ],
     "E-Commerce": [
       "AMZN",
@@ -831,23 +964,42 @@
       "BABA",
       "PDD",
       "JD",
+      "BIDU",
       "NTES",
+      "TCOM",
       "BILI",
+      "TME",
+      "ZTO",
       "VIPS",
       "IQ",
-      "NIO"
+      "WB",
+      "BEKE",
+      "LI",
+      "NIO",
+      "XPEV"
     ],
     "LATAM": [
       "MELI",
       "PAGS",
       "STNE",
-      "NU"
+      "NU",
+      "BBD",
+      "ITUB",
+      "VALE",
+      "PBR",
+      "ABEV",
+      "SBS"
     ],
     "Cannabis": [
       "TLRY",
-      "SNDL"
+      "CGC",
+      "SNDL",
+      "ACB",
+      "OGI",
+      "CRON"
     ],
     "Theme Parks": [
+      "SIX",
       "FUN",
       "DIS"
     ],
@@ -856,6 +1008,7 @@
       "PLTR",
       "AMZN",
       "MSFT",
+      "GOOGL",
       "META",
       "TSLA",
       "AMD",
@@ -16510,6 +16663,1195 @@
       "tv_sector": "3X",
       "industry": null,
       "themes": []
+    },
+    "ABEV": {
+      "name": "Ambev S.A.",
+      "tv_sector": "Consumer non-durables",
+      "industry": "Beverages - Brewers",
+      "themes": [
+        "LATAM"
+      ]
+    },
+    "ABG": {
+      "name": "Asbury Automotive Group, Inc.",
+      "tv_sector": "Consumer durables",
+      "industry": "Auto & Truck Dealerships",
+      "themes": [
+        "Auto Dealers"
+      ]
+    },
+    "ACB": {
+      "name": "Aurora Cannabis Inc.",
+      "tv_sector": "Health technology",
+      "industry": "Drug Manufacturers - Specialty & Generic",
+      "themes": [
+        "Cannabis"
+      ]
+    },
+    "AEM": {
+      "name": "Agnico Eagle Mines Limited",
+      "tv_sector": "Non-energy minerals",
+      "industry": "Gold",
+      "themes": [
+        "Gold Miners"
+      ]
+    },
+    "AERT": {
+      "name": "Aeries Technology, Inc",
+      "tv_sector": "Commercial services",
+      "industry": "Consulting Services",
+      "themes": [
+        "Drones"
+      ]
+    },
+    "AGI": {
+      "name": "Alamos Gold Inc.",
+      "tv_sector": "Non-energy minerals",
+      "industry": "Gold",
+      "themes": [
+        "Gold Miners"
+      ]
+    },
+    "AMG": {
+      "name": "Affiliated Managers Group, Inc.",
+      "tv_sector": "Finance",
+      "industry": "Asset Management",
+      "themes": [
+        "Asset Managers"
+      ]
+    },
+    "AN": {
+      "name": "AutoNation, Inc.",
+      "tv_sector": "Consumer durables",
+      "industry": "Auto & Truck Dealerships",
+      "themes": [
+        "Auto Dealers"
+      ]
+    },
+    "ARCB": {
+      "name": "ArcBest Corporation",
+      "tv_sector": "Transportation",
+      "industry": "Trucking",
+      "themes": [
+        "Trucking / LTL"
+      ]
+    },
+    "ARQQ": {
+      "name": "Arqit Quantum Inc.",
+      "tv_sector": "Technology services",
+      "industry": "Software - Infrastructure",
+      "themes": [
+        "Quantum"
+      ]
+    },
+    "ASML": {
+      "name": "ASML Holding N.V.",
+      "tv_sector": "Electronic technology",
+      "industry": "Semiconductor Equipment & Materials",
+      "themes": [
+        "Semi Equipment"
+      ]
+    },
+    "AZO": {
+      "name": "AutoZone, Inc.",
+      "tv_sector": "Producer manufacturing",
+      "industry": "Auto Parts",
+      "themes": [
+        "Auto Parts Retail"
+      ]
+    },
+    "BBD": {
+      "name": "Banco Bradesco S.A.",
+      "tv_sector": "Finance",
+      "industry": "Banks - Regional",
+      "themes": [
+        "LATAM"
+      ]
+    },
+    "BEKE": {
+      "name": "KE Holdings Inc.",
+      "tv_sector": "Finance",
+      "industry": "Real Estate Services",
+      "themes": [
+        "China ADRs"
+      ]
+    },
+    "BETZ": {
+      "name": "Roundhill Sports Betting & iGaming ETF",
+      "tv_sector": "Miscellaneous",
+      "industry": null,
+      "themes": [
+        "Online Gambling"
+      ]
+    },
+    "BHP": {
+      "name": "BHP Group Limited",
+      "tv_sector": "Non-energy minerals",
+      "industry": "Other Industrial Metals & Mining",
+      "themes": [
+        "Copper / Base Metal"
+      ]
+    },
+    "BIDU": {
+      "name": "Baidu, Inc.",
+      "tv_sector": "Technology services",
+      "industry": "Internet Content & Information",
+      "themes": [
+        "China ADRs"
+      ]
+    },
+    "BITF": {
+      "name": "Bitfarms Ltd",
+      "tv_sector": "Finance",
+      "industry": "Information Technology Services",
+      "themes": [
+        "Crypto / Miners"
+      ]
+    },
+    "BJRI": {
+      "name": "BJ's Restaurants, Inc.",
+      "tv_sector": "Consumer services",
+      "industry": "Restaurants",
+      "themes": [
+        "Restaurants - Casual"
+      ]
+    },
+    "BLNK": {
+      "name": "Blink Charging Co.",
+      "tv_sector": "Producer manufacturing",
+      "industry": "Engineering & Construction",
+      "themes": [
+        "EV Charging"
+      ]
+    },
+    "BTG": {
+      "name": "B2Gold Corp.",
+      "tv_sector": "Non-energy minerals",
+      "industry": "Gold",
+      "themes": [
+        "Gold Miners"
+      ]
+    },
+    "BTI": {
+      "name": "British American Tobacco p.l.c.",
+      "tv_sector": "Consumer non-durables",
+      "industry": "Tobacco",
+      "themes": [
+        "Tobacco"
+      ]
+    },
+    "BUD": {
+      "name": "Anheuser-Busch InBev SA/NV",
+      "tv_sector": "Consumer non-durables",
+      "industry": "Beverages - Brewers",
+      "themes": [
+        "Beverages"
+      ]
+    },
+    "CCJ": {
+      "name": "Cameco Corporation",
+      "tv_sector": "Energy minerals",
+      "industry": "Uranium",
+      "themes": [
+        "Nuclear & Uranium"
+      ]
+    },
+    "CCS": {
+      "name": "Century Communities, Inc.",
+      "tv_sector": "Finance",
+      "industry": "Real Estate - Development",
+      "themes": [
+        "Homebuilders"
+      ]
+    },
+    "CFLT": {
+      "name": "Confluent, Inc.",
+      "tv_sector": "Technology services",
+      "industry": "Software - Infrastructure",
+      "themes": [
+        "Data / DevOps"
+      ]
+    },
+    "CGC": {
+      "name": "Canopy Growth Corporation",
+      "tv_sector": "Health technology",
+      "industry": "Drug Manufacturers - Specialty & Generic",
+      "themes": [
+        "Cannabis"
+      ]
+    },
+    "CHPT": {
+      "name": "ChargePoint Holdings, Inc.",
+      "tv_sector": "Retail trade",
+      "industry": "Specialty Retail",
+      "themes": [
+        "EV Charging"
+      ]
+    },
+    "CMRE": {
+      "name": "Costamare Inc.",
+      "tv_sector": "Transportation",
+      "industry": "Marine Shipping",
+      "themes": [
+        "Marine Shipping"
+      ]
+    },
+    "CNI": {
+      "name": "Canadian National Railway Company",
+      "tv_sector": "Transportation",
+      "industry": "Railroads",
+      "themes": [
+        "Class I Rails"
+      ]
+    },
+    "CP": {
+      "name": "Canadian Pacific Kansas City Limited",
+      "tv_sector": "Transportation",
+      "industry": "Railroads",
+      "themes": [
+        "Class I Rails"
+      ]
+    },
+    "CRON": {
+      "name": "Cronos Group Inc.",
+      "tv_sector": "Health technology",
+      "industry": "Drug Manufacturers - Specialty & Generic",
+      "themes": [
+        "Cannabis"
+      ]
+    },
+    "CSL": {
+      "name": "Carlisle Companies Incorporated",
+      "tv_sector": "Producer manufacturing",
+      "industry": "Building Products & Equipment",
+      "themes": [
+        "Building Products"
+      ]
+    },
+    "CX": {
+      "name": "CEMEX, S.A.B. de C.V.",
+      "tv_sector": "Producer manufacturing",
+      "industry": "Building Materials",
+      "themes": [
+        "Cement & Aggregates"
+      ]
+    },
+    "DAC": {
+      "name": "Danaos Corporation",
+      "tv_sector": "Transportation",
+      "industry": "Marine Shipping",
+      "themes": [
+        "Marine Shipping"
+      ]
+    },
+    "DEO": {
+      "name": "Diageo plc",
+      "tv_sector": "Consumer non-durables",
+      "industry": "Beverages - Wineries & Distilleries",
+      "themes": [
+        "Beverages"
+      ]
+    },
+    "DNN": {
+      "name": "Denison Mines Corp.",
+      "tv_sector": "Energy minerals",
+      "industry": "Uranium",
+      "themes": [
+        "Nuclear & Uranium"
+      ]
+    },
+    "DORM": {
+      "name": "Dorman Products, Inc.",
+      "tv_sector": "Producer manufacturing",
+      "industry": "Auto Parts",
+      "themes": [
+        "Auto Suppliers"
+      ]
+    },
+    "DPRO": {
+      "name": "Draganfly Inc.",
+      "tv_sector": "Electronic technology",
+      "industry": "Computer Hardware",
+      "themes": [
+        "Drones"
+      ]
+    },
+    "EAF": {
+      "name": "GrafTech International Ltd.",
+      "tv_sector": "Producer manufacturing",
+      "industry": "Electrical Equipment & Parts",
+      "themes": [
+        "Cement & Aggregates"
+      ]
+    },
+    "EG": {
+      "name": "Everest Group, Ltd.",
+      "tv_sector": "Finance",
+      "industry": "Insurance - Reinsurance",
+      "themes": [
+        "Reinsurance"
+      ]
+    },
+    "EGO": {
+      "name": "Eldorado Gold Corporation",
+      "tv_sector": "Non-energy minerals",
+      "industry": "Gold",
+      "themes": [
+        "Gold Miners"
+      ]
+    },
+    "EGP": {
+      "name": "EastGroup Properties, Inc.",
+      "tv_sector": "Finance",
+      "industry": "REIT - Industrial",
+      "themes": [
+        "Industrial REITs"
+      ]
+    },
+    "EME": {
+      "name": "EMCOR Group, Inc.",
+      "tv_sector": "Producer manufacturing",
+      "industry": "Engineering & Construction",
+      "themes": [
+        "AI Infrastructure",
+        "AI Power"
+      ]
+    },
+    "ENB": {
+      "name": "Enbridge Inc.",
+      "tv_sector": "Energy minerals",
+      "industry": "Oil & Gas Midstream",
+      "themes": [
+        "Pipelines / Midstream"
+      ]
+    },
+    "ENVA": {
+      "name": "Enova International, Inc.",
+      "tv_sector": "Finance",
+      "industry": "Credit Services",
+      "themes": [
+        "BNPL / Consumer Lending"
+      ]
+    },
+    "EPD": {
+      "name": "Enterprise Products Partners L.P.",
+      "tv_sector": "Energy minerals",
+      "industry": "Oil & Gas Midstream",
+      "themes": [
+        "Pipelines / Midstream"
+      ]
+    },
+    "ERIE": {
+      "name": "Erie Indemnity Company",
+      "tv_sector": "Finance",
+      "industry": "Insurance Brokers",
+      "themes": [
+        "P&C Insurance"
+      ]
+    },
+    "ERO": {
+      "name": "Ero Copper Corp.",
+      "tv_sector": "Non-energy minerals",
+      "industry": "Copper",
+      "themes": [
+        "Copper / Base Metal"
+      ]
+    },
+    "ET": {
+      "name": "Energy Transfer LP",
+      "tv_sector": "Energy minerals",
+      "industry": "Oil & Gas Midstream",
+      "themes": [
+        "Pipelines / Midstream"
+      ]
+    },
+    "FARM": {
+      "name": "Farmer Bros. Co.",
+      "tv_sector": "Consumer non-durables",
+      "industry": "Packaged Foods",
+      "themes": [
+        "Coffee"
+      ]
+    },
+    "FIZZ": {
+      "name": "National Beverage Corp.",
+      "tv_sector": "Consumer non-durables",
+      "industry": "Beverages - Non-Alcoholic",
+      "themes": [
+        "Beverages"
+      ]
+    },
+    "FLL": {
+      "name": "Full House Resorts, Inc.",
+      "tv_sector": "Consumer durables",
+      "industry": "Resorts & Casinos",
+      "themes": [
+        "Casinos"
+      ]
+    },
+    "FNV": {
+      "name": "Franco-Nevada Corporation",
+      "tv_sector": "Non-energy minerals",
+      "industry": "Gold",
+      "themes": [
+        "Gold Miners"
+      ]
+    },
+    "FWRD": {
+      "name": "Forward Air Corporation",
+      "tv_sector": "Transportation",
+      "industry": "Integrated Freight & Logistics",
+      "themes": [
+        "Logistics & Parcels"
+      ]
+    },
+    "GDEN": {
+      "name": "Golden Entertainment, Inc.",
+      "tv_sector": "Consumer durables",
+      "industry": "Resorts & Casinos",
+      "themes": [
+        "Casinos"
+      ]
+    },
+    "GOOGL": {
+      "name": "Alphabet Inc.",
+      "tv_sector": "Technology services",
+      "industry": "Internet Content & Information",
+      "themes": [
+        "Big Tech",
+        "Top Recurring"
+      ]
+    },
+    "GPI": {
+      "name": "Group 1 Automotive, Inc.",
+      "tv_sector": "Consumer durables",
+      "industry": "Auto & Truck Dealerships",
+      "themes": [
+        "Auto Dealers"
+      ]
+    },
+    "GRBK": {
+      "name": "Green Brick Partners, Inc.",
+      "tv_sector": "Producer manufacturing",
+      "industry": "Residential Construction",
+      "themes": [
+        "Homebuilders"
+      ]
+    },
+    "GSL": {
+      "name": "Global Ship Lease, Inc.",
+      "tv_sector": "Transportation",
+      "industry": "Marine Shipping",
+      "themes": [
+        "Marine Shipping"
+      ]
+    },
+    "HBM": {
+      "name": "Hudbay Minerals Inc.",
+      "tv_sector": "Non-energy minerals",
+      "industry": "Copper",
+      "themes": [
+        "Copper / Base Metal"
+      ]
+    },
+    "HF": {
+      "name": "DGA Core Plus Absolute Return ETF",
+      "tv_sector": "Miscellaneous",
+      "industry": null,
+      "themes": [
+        "Refiners"
+      ]
+    },
+    "HII": {
+      "name": "Huntington Ingalls Industries, Inc.",
+      "tv_sector": "Electronic technology",
+      "industry": "Aerospace & Defense",
+      "themes": [
+        "Defense"
+      ]
+    },
+    "HMC": {
+      "name": "Honda Motor Co., Ltd.",
+      "tv_sector": "Consumer durables",
+      "industry": "Auto Manufacturers",
+      "themes": [
+        "Auto OEMs"
+      ]
+    },
+    "HTLD": {
+      "name": "Heartland Express, Inc.",
+      "tv_sector": "Transportation",
+      "industry": "Trucking",
+      "themes": [
+        "Trucking / LTL"
+      ]
+    },
+    "IHG": {
+      "name": "InterContinental Hotels Group PLC",
+      "tv_sector": "Consumer services",
+      "industry": "Lodging",
+      "themes": [
+        "Hotels & Lodging"
+      ]
+    },
+    "IPGP": {
+      "name": "IPG Photonics Corporation",
+      "tv_sector": "Electronic technology",
+      "industry": "Semiconductor Equipment & Materials",
+      "themes": [
+        "Photonics"
+      ]
+    },
+    "ITUB": {
+      "name": "Ita\u00fa Unibanco Holding S.A.",
+      "tv_sector": "Finance",
+      "industry": "Banks - Regional",
+      "themes": [
+        "LATAM"
+      ]
+    },
+    "KGC": {
+      "name": "Kinross Gold Corporation",
+      "tv_sector": "Non-energy minerals",
+      "industry": "Gold",
+      "themes": [
+        "Gold Miners"
+      ]
+    },
+    "LAC": {
+      "name": "Lithium Americas Corp.",
+      "tv_sector": "Non-energy minerals",
+      "industry": "Other Industrial Metals & Mining",
+      "themes": [
+        "Lithium"
+      ]
+    },
+    "LAD": {
+      "name": "Lithia Motors, Inc.",
+      "tv_sector": "Consumer durables",
+      "industry": "Auto & Truck Dealerships",
+      "themes": [
+        "Auto Dealers"
+      ]
+    },
+    "LANC": {
+      "name": "Lancaster Colony Corporation",
+      "tv_sector": "Miscellaneous",
+      "industry": "Packaged Foods",
+      "themes": [
+        "Packaged Food"
+      ]
+    },
+    "LI": {
+      "name": "Li Auto Inc.",
+      "tv_sector": "Consumer durables",
+      "industry": "Auto Manufacturers",
+      "themes": [
+        "China ADRs"
+      ]
+    },
+    "LSTR": {
+      "name": "Landstar System, Inc.",
+      "tv_sector": "Transportation",
+      "industry": "Integrated Freight & Logistics",
+      "themes": [
+        "Trucking / LTL"
+      ]
+    },
+    "MATX": {
+      "name": "Matson, Inc.",
+      "tv_sector": "Transportation",
+      "industry": "Marine Shipping",
+      "themes": [
+        "Marine Shipping"
+      ]
+    },
+    "MCRI": {
+      "name": "Monarch Casino & Resort, Inc.",
+      "tv_sector": "Consumer durables",
+      "industry": "Resorts & Casinos",
+      "themes": [
+        "Casinos"
+      ]
+    },
+    "MGA": {
+      "name": "Magna International Inc.",
+      "tv_sector": "Producer manufacturing",
+      "industry": "Auto Parts",
+      "themes": [
+        "Auto Suppliers"
+      ]
+    },
+    "MHO": {
+      "name": "M/I Homes, Inc.",
+      "tv_sector": "Producer manufacturing",
+      "industry": "Residential Construction",
+      "themes": [
+        "Homebuilders"
+      ]
+    },
+    "MKTX": {
+      "name": "MarketAxess Holdings Inc.",
+      "tv_sector": "Finance",
+      "industry": "Capital Markets",
+      "themes": [
+        "Exchanges"
+      ]
+    },
+    "MLM": {
+      "name": "Martin Marietta Materials, Inc.",
+      "tv_sector": "Producer manufacturing",
+      "industry": "Building Materials",
+      "themes": [
+        "Cement & Aggregates"
+      ]
+    },
+    "MPLX": {
+      "name": "MPLX LP",
+      "tv_sector": "Energy minerals",
+      "industry": "Oil & Gas Midstream",
+      "themes": [
+        "Pipelines / Midstream"
+      ]
+    },
+    "MT": {
+      "name": "ArcelorMittal S.A.",
+      "tv_sector": "Non-energy minerals",
+      "industry": "Steel",
+      "themes": [
+        "Steel"
+      ]
+    },
+    "NGD": {
+      "name": "New Gold Inc.",
+      "tv_sector": "Non-energy minerals",
+      "industry": "Gold",
+      "themes": [
+        "Gold Miners"
+      ]
+    },
+    "NTR": {
+      "name": "Nutrien Ltd.",
+      "tv_sector": "Process industries",
+      "industry": "Agricultural Inputs",
+      "themes": [
+        "Ag Inputs"
+      ]
+    },
+    "NVR": {
+      "name": "NVR, Inc.",
+      "tv_sector": "Producer manufacturing",
+      "industry": "Residential Construction",
+      "themes": [
+        "Homebuilders"
+      ]
+    },
+    "NXE": {
+      "name": "NexGen Energy Ltd.",
+      "tv_sector": "Energy minerals",
+      "industry": "Uranium",
+      "themes": [
+        "Nuclear & Uranium"
+      ]
+    },
+    "OGI": {
+      "name": "Organigram Global Inc.",
+      "tv_sector": "Health technology",
+      "industry": "Drug Manufacturers - Specialty & Generic",
+      "themes": [
+        "Cannabis"
+      ]
+    },
+    "OPRT": {
+      "name": "Oportun Financial Corporation",
+      "tv_sector": "Finance",
+      "industry": "Credit Services",
+      "themes": [
+        "BNPL / Consumer Lending"
+      ]
+    },
+    "PAAS": {
+      "name": "Pan American Silver Corp.",
+      "tv_sector": "Non-energy minerals",
+      "industry": "Gold",
+      "themes": [
+        "Gold Miners"
+      ]
+    },
+    "PAG": {
+      "name": "Penske Automotive Group, Inc.",
+      "tv_sector": "Consumer durables",
+      "industry": "Auto & Truck Dealerships",
+      "themes": [
+        "Auto Dealers"
+      ]
+    },
+    "PBR": {
+      "name": "Petr\u00f3leo Brasileiro S.A. - Petrobras",
+      "tv_sector": "Energy minerals",
+      "industry": "Oil & Gas Integrated",
+      "themes": [
+        "LATAM"
+      ]
+    },
+    "PHIN": {
+      "name": "PHINIA Inc.",
+      "tv_sector": "Producer manufacturing",
+      "industry": "Auto Parts",
+      "themes": [
+        "Auto Suppliers"
+      ]
+    },
+    "RGA": {
+      "name": "Reinsurance Group of America, Incorporated",
+      "tv_sector": "Finance",
+      "industry": "Insurance - Reinsurance",
+      "themes": [
+        "Reinsurance"
+      ]
+    },
+    "RIO": {
+      "name": "Rio Tinto Group",
+      "tv_sector": "Non-energy minerals",
+      "industry": "Other Industrial Metals & Mining",
+      "themes": [
+        "Copper / Base Metal"
+      ]
+    },
+    "RNR": {
+      "name": "RenaissanceRe Holdings Ltd.",
+      "tv_sector": "Finance",
+      "industry": "Insurance - Reinsurance",
+      "themes": [
+        "Reinsurance"
+      ]
+    },
+    "RS": {
+      "name": "Reliance, Inc.",
+      "tv_sector": "Non-energy minerals",
+      "industry": "Steel",
+      "themes": [
+        "Steel"
+      ]
+    },
+    "SAH": {
+      "name": "Sonic Automotive, Inc.",
+      "tv_sector": "Consumer durables",
+      "industry": "Auto & Truck Dealerships",
+      "themes": [
+        "Auto Dealers"
+      ]
+    },
+    "SAM": {
+      "name": "The Boston Beer Company, Inc.",
+      "tv_sector": "Consumer non-durables",
+      "industry": "Beverages - Brewers",
+      "themes": [
+        "Beverages"
+      ]
+    },
+    "SAP": {
+      "name": "SAP SE",
+      "tv_sector": "Technology services",
+      "industry": "Software - Application",
+      "themes": [
+        "Enterprise SaaS"
+      ]
+    },
+    "SBS": {
+      "name": "Companhia de Saneamento B\u00e1sico do Estado de S\u00e3o Paulo - SABESP",
+      "tv_sector": "Utilities",
+      "industry": "Utilities - Regulated Water",
+      "themes": [
+        "LATAM"
+      ]
+    },
+    "SEE": {
+      "name": "Sealed Air Corp",
+      "tv_sector": "Process industries",
+      "industry": "Packaging & Containers",
+      "themes": [
+        "Packaging"
+      ]
+    },
+    "SKYW": {
+      "name": "SkyWest, Inc.",
+      "tv_sector": "Transportation",
+      "industry": "Airlines",
+      "themes": [
+        "Airlines"
+      ]
+    },
+    "SPB": {
+      "name": "Spectrum Brands Holdings, Inc.",
+      "tv_sector": "Consumer non-durables",
+      "industry": "Household & Personal Products",
+      "themes": [
+        "Personal Care"
+      ]
+    },
+    "SQM": {
+      "name": "Sociedad Qu\u00edmica y Minera de Chile S.A.",
+      "tv_sector": "Process industries",
+      "industry": "Specialty Chemicals",
+      "themes": [
+        "Lithium"
+      ]
+    },
+    "STLA": {
+      "name": "Stellantis N.V.",
+      "tv_sector": "Consumer durables",
+      "industry": "Auto Manufacturers",
+      "themes": [
+        "Auto OEMs"
+      ]
+    },
+    "STRT": {
+      "name": "Strattec Security Corporation",
+      "tv_sector": "Producer manufacturing",
+      "industry": "Auto Parts",
+      "themes": [
+        "Auto Suppliers"
+      ]
+    },
+    "TCOM": {
+      "name": "Trip.com Group Limited",
+      "tv_sector": "Consumer services",
+      "industry": "Travel Services",
+      "themes": [
+        "China ADRs"
+      ]
+    },
+    "TDG": {
+      "name": "TransDigm Group Incorporated",
+      "tv_sector": "Electronic technology",
+      "industry": "Aerospace & Defense",
+      "themes": [
+        "Defense",
+        "Aerospace OEM"
+      ]
+    },
+    "TECK": {
+      "name": "Teck Resources Limited",
+      "tv_sector": "Non-energy minerals",
+      "industry": "Other Industrial Metals & Mining",
+      "themes": [
+        "Copper / Base Metal"
+      ]
+    },
+    "TM": {
+      "name": "Toyota Motor Corporation",
+      "tv_sector": "Consumer durables",
+      "industry": "Auto Manufacturers",
+      "themes": [
+        "Auto OEMs"
+      ]
+    },
+    "TME": {
+      "name": "Tencent Music Entertainment Group",
+      "tv_sector": "Technology services",
+      "industry": "Internet Content & Information",
+      "themes": [
+        "China ADRs"
+      ]
+    },
+    "TR": {
+      "name": "Tootsie Roll Industries, Inc.",
+      "tv_sector": "Consumer non-durables",
+      "industry": "Confectioners",
+      "themes": [
+        "Packaged Food"
+      ]
+    },
+    "TRVG": {
+      "name": "trivago N.V.",
+      "tv_sector": "Technology services",
+      "industry": "Internet Content & Information",
+      "themes": [
+        "Online Travel"
+      ]
+    },
+    "TS": {
+      "name": "Tenaris S.A.",
+      "tv_sector": "Energy minerals",
+      "industry": "Oil & Gas Equipment & Services",
+      "themes": [
+        "Oilfield Services"
+      ]
+    },
+    "TX": {
+      "name": "Ternium S.A.",
+      "tv_sector": "Non-energy minerals",
+      "industry": "Steel",
+      "themes": [
+        "Steel"
+      ]
+    },
+    "UAA": {
+      "name": "Under Armour, Inc.",
+      "tv_sector": "Consumer durables",
+      "industry": "Apparel Manufacturing",
+      "themes": [
+        "Athletic Apparel"
+      ]
+    },
+    "URG": {
+      "name": "Ur-Energy Inc.",
+      "tv_sector": "Energy minerals",
+      "industry": "Uranium",
+      "themes": [
+        "Nuclear & Uranium"
+      ]
+    },
+    "UUUU": {
+      "name": "Energy Fuels Inc.",
+      "tv_sector": "Energy minerals",
+      "industry": "Uranium",
+      "themes": [
+        "Nuclear & Uranium"
+      ]
+    },
+    "VALE": {
+      "name": "Vale S.A.",
+      "tv_sector": "Non-energy minerals",
+      "industry": "Other Industrial Metals & Mining",
+      "themes": [
+        "Copper / Base Metal",
+        "LATAM"
+      ]
+    },
+    "WB": {
+      "name": "Weibo Corporation",
+      "tv_sector": "Technology services",
+      "industry": "Internet Content & Information",
+      "themes": [
+        "China ADRs"
+      ]
+    },
+    "WBX": {
+      "name": "Wallbox N.V.",
+      "tv_sector": "Electronic technology",
+      "industry": "Electronic Components",
+      "themes": [
+        "EV Charging"
+      ]
+    },
+    "WES": {
+      "name": "Western Midstream Partners, LP",
+      "tv_sector": "Energy minerals",
+      "industry": "Oil & Gas Midstream",
+      "themes": [
+        "Pipelines / Midstream"
+      ]
+    },
+    "WOR": {
+      "name": "Worthington Enterprises, Inc.",
+      "tv_sector": "Non-energy minerals",
+      "industry": "Metal Fabrication",
+      "themes": [
+        "Steel"
+      ]
+    },
+    "WPM": {
+      "name": "Wheaton Precious Metals Corp.",
+      "tv_sector": "Non-energy minerals",
+      "industry": "Gold",
+      "themes": [
+        "Gold Miners"
+      ]
+    },
+    "WTS": {
+      "name": "Watts Water Technologies, Inc.",
+      "tv_sector": "Producer manufacturing",
+      "industry": "Specialty Industrial Machinery",
+      "themes": [
+        "Industrial Auto"
+      ]
+    },
+    "XPEV": {
+      "name": "XPeng Inc.",
+      "tv_sector": "Consumer durables",
+      "industry": "Auto Manufacturers",
+      "themes": [
+        "China ADRs"
+      ]
+    },
+    "ZIM": {
+      "name": "ZIM Integrated Shipping Services Ltd.",
+      "tv_sector": "Transportation",
+      "industry": "Marine Shipping",
+      "themes": [
+        "Marine Shipping"
+      ]
+    },
+    "ZTO": {
+      "name": "ZTO Express (Cayman) Inc.",
+      "tv_sector": "Transportation",
+      "industry": "Integrated Freight & Logistics",
+      "themes": [
+        "Logistics & Parcels",
+        "China ADRs"
+      ]
+    },
+    "ANSS": {
+      "name": "ANSYS",
+      "tv_sector": "Technology services",
+      "industry": "Software - Application",
+      "themes": [
+        "Enterprise SaaS"
+      ]
+    },
+    "AZEK": {
+      "name": "The AZEK Company",
+      "tv_sector": "Producer manufacturing",
+      "industry": "Building Products & Equipment",
+      "themes": [
+        "Building Products"
+      ]
+    },
+    "BERY": {
+      "name": "Berry Global Group",
+      "tv_sector": "Process industries",
+      "industry": "Packaging & Containers",
+      "themes": [
+        "Packaging"
+      ]
+    },
+    "BGFV": {
+      "name": "Big 5 Sporting Goods",
+      "tv_sector": "Retail trade",
+      "industry": "Specialty Retail",
+      "themes": [
+        "Sporting Goods"
+      ]
+    },
+    "CHX": {
+      "name": "ChampionX",
+      "tv_sector": "Energy minerals",
+      "industry": "Oil & Gas Equipment & Services",
+      "themes": [
+        "Oilfield Services"
+      ]
+    },
+    "CMA": {
+      "name": "Comerica",
+      "tv_sector": "Finance",
+      "industry": "Banks - Regional",
+      "themes": [
+        "Regional Banks"
+      ]
+    },
+    "CYBR": {
+      "name": "CyberArk Software",
+      "tv_sector": "Technology services",
+      "industry": "Software - Infrastructure",
+      "themes": [
+        "Cybersecurity"
+      ]
+    },
+    "DNB": {
+      "name": "Dun & Bradstreet Holdings",
+      "tv_sector": "Finance",
+      "industry": "Financial Data & Stock Exchanges",
+      "themes": [
+        "Cloud / CDN"
+      ]
+    },
+    "GAN": {
+      "name": "GAN plc",
+      "tv_sector": "Consumer services",
+      "industry": "Gambling",
+      "themes": [
+        "Online Gambling"
+      ]
+    },
+    "GES": {
+      "name": "Guess?",
+      "tv_sector": "Retail trade",
+      "industry": "Apparel Retail",
+      "themes": [
+        "Athletic Apparel"
+      ]
+    },
+    "HIBB": {
+      "name": "Hibbett",
+      "tv_sector": "Retail trade",
+      "industry": "Apparel Retail",
+      "themes": [
+        "Sporting Goods"
+      ]
+    },
+    "K": {
+      "name": "Kellanova",
+      "tv_sector": "Consumer non-durables",
+      "industry": "Packaged Foods",
+      "themes": [
+        "Packaged Food"
+      ]
+    },
+    "PARA": {
+      "name": "Paramount Global",
+      "tv_sector": "Consumer services",
+      "industry": "Entertainment",
+      "themes": [
+        "Streaming / Media"
+      ]
+    },
+    "PLL": {
+      "name": "Piedmont Lithium",
+      "tv_sector": "Non-energy minerals",
+      "industry": "Other Industrial Metals & Mining",
+      "themes": [
+        "Lithium"
+      ]
+    },
+    "PLYA": {
+      "name": "Playa Hotels & Resorts",
+      "tv_sector": "Miscellaneous",
+      "industry": "Resorts & Casinos",
+      "themes": [
+        "Hotels & Lodging"
+      ]
+    },
+    "SATX": {
+      "name": "Satixfy Communications",
+      "tv_sector": "Electronic technology",
+      "industry": "Communication Equipment",
+      "themes": [
+        "Space"
+      ]
+    },
+    "SIX": {
+      "name": "Six Flags Entertainment",
+      "tv_sector": "Consumer services",
+      "industry": "Leisure",
+      "themes": [
+        "Theme Parks"
+      ]
+    },
+    "SKX": {
+      "name": "Skechers U.S.A.",
+      "tv_sector": "Miscellaneous",
+      "industry": "Footwear & Accessories",
+      "themes": [
+        "Athletic Apparel"
+      ]
+    },
+    "SPR": {
+      "name": "Spirit AeroSystems Holdings",
+      "tv_sector": "Electronic technology",
+      "industry": "Aerospace & Defense",
+      "themes": [
+        "Aerospace OEM"
+      ]
+    },
+    "X": {
+      "name": "United States Steel",
+      "tv_sector": "Miscellaneous",
+      "industry": null,
+      "themes": [
+        "Steel"
+      ]
     }
   }
 }

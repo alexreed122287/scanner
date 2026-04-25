@@ -1,156 +1,30 @@
 Tickers referenced by curated themes in build_master_list.py but NOT
 present in alex_tickers.csv. They were filtered out of the INDUSTRY tab.
 Add to alex_tickers.csv if you want them scored.
-Generated: 2026-04-25T17:53:38+00:00
+Generated: 2026-04-25T18:21:51+00:00
 
-174 ticker-slot(s) across 72 theme(s):
-
-AI Infrastructure:
-  - EME
-
-AI Power:
-  - EME
-
-Aerospace OEM:
-  - TDG
-  - SPR
-
-Ag Inputs:
-  - NTR
+21 ticker-slot(s) across 17 theme(s):
 
 Airlines:
   - SAVE
   - HA
-  - SKYW
   - MESA
 
-Asset Managers:
-  - AMG
-
-Athletic Apparel:
-  - UAA
-  - SKX
-  - GES
-
-Auto Dealers:
-  - AN
-  - PAG
-  - GPI
-  - ABG
-  - LAD
-  - SAH
-
-Auto OEMs:
-  - STLA
-  - TM
-  - HMC
-
-Auto Parts Retail:
-  - AZO
-
-Auto Suppliers:
-  - MGA
-  - PHIN
-  - DORM
-  - STRT
-
-BNPL / Consumer Lending:
-  - OPRT
-  - ENVA
-
 Beverages:
-  - BUD
-  - DEO
-  - SAM
-  - FIZZ
   - PRMW
-
-Big Tech:
-  - GOOGL
-
-Building Products:
-  - CSL
-  - AZEK
 
 Cable:
   - ATUS
 
-Cannabis:
-  - CGC
-  - ACB
-  - OGI
-  - CRON
-
-Casinos:
-  - MCRI
-  - FLL
-  - GDEN
-
 Cement & Aggregates:
-  - MLM
   - USCR
   - SUM
-  - CX
-  - EAF
-
-China ADRs:
-  - BIDU
-  - TCOM
-  - TME
-  - ZTO
-  - WB
-  - BEKE
-  - LI
-  - XPEV
-
-Class I Rails:
-  - CNI
-  - CP
 
 Cloud / CDN:
-  - DNB
   - CLDR
 
-Coffee:
-  - FARM
-
 Copper / Base Metal:
-  - TECK
-  - BHP
-  - RIO
-  - VALE
-  - ERO
-  - HBM
   - TRQ
-
-Crypto / Miners:
-  - BITF
-
-Cybersecurity:
-  - CYBR
-
-Data / DevOps:
-  - CFLT
-
-Defense:
-  - HII
-  - TDG
-
-Drones:
-  - AERT
-  - DPRO
-
-EV Charging:
-  - CHPT
-  - BLNK
-  - WBX
-
-Enterprise SaaS:
-  - ANSS
-  - SAP
-
-Exchanges:
-  - MKTX
 
 Fiber Optics:
   - INFN
@@ -158,167 +32,30 @@ Fiber Optics:
 Fintech:
   - SQ
 
-Gold Miners:
-  - AEM
-  - KGC
-  - AGI
-  - PAAS
-  - WPM
-  - FNV
-  - EGO
-  - NGD
-  - BTG
-
-Homebuilders:
-  - NVR
-  - MHO
-  - GRBK
-  - CCS
-
-Hotels & Lodging:
-  - IHG
-  - PLYA
-
-Industrial Auto:
-  - WTS
-
-Industrial REITs:
-  - EGP
-
 Insurance Brokers:
   - MMC
 
-LATAM:
-  - BBD
-  - ITUB
-  - VALE
-  - PBR
-  - ABEV
-  - SBS
-
 Lithium:
-  - SQM
-  - LAC
   - LTHM
-  - PLL
-
-Logistics & Parcels:
-  - ZTO
-  - FWRD
 
 Marine Shipping:
-  - ZIM
-  - MATX
   - GOGL
-  - DAC
-  - GSL
-  - CMRE
 
 Mortgage REITs:
   - NYMT
-
-Nuclear & Uranium:
-  - UUUU
-  - CCJ
-  - DNN
-  - NXE
-  - URG
 
 Oil & Gas E&P:
   - PXD
   - MRO
 
-Oilfield Services:
-  - CHX
-  - TS
-
-Online Gambling:
-  - BETZ
-  - GAN
-
-Online Travel:
-  - TRVG
-
-P&C Insurance:
-  - ERIE
-
-Packaged Food:
-  - K
-  - TR
-  - LANC
-
 Packaging:
-  - SEE
-  - BERY
   - WRK
 
 Payments:
   - FI
 
-Personal Care:
-  - SPB
-
-Photonics:
-  - IPGP
-
 Pipelines / Midstream:
-  - ENB
-  - ET
-  - EPD
-  - MPLX
-  - WES
   - ENLC
-
-Quantum:
-  - ARQQ
-
-Refiners:
-  - HF
-
-Regional Banks:
-  - CMA
-
-Reinsurance:
-  - RNR
-  - EG
-  - RGA
-
-Restaurants - Casual:
-  - BJRI
-
-Semi Equipment:
-  - ASML
-
-Space:
-  - SATX
 
 Specialty Finance:
   - DFS
-
-Sporting Goods:
-  - HIBB
-  - BGFV
-
-Steel:
-  - X
-  - MT
-  - TX
-  - RS
-  - WOR
-
-Streaming / Media:
-  - PARA
-
-Theme Parks:
-  - SIX
-
-Tobacco:
-  - BTI
-
-Top Recurring:
-  - GOOGL
-
-Trucking / LTL:
-  - ARCB
-  - LSTR
-  - HTLD

@@ -381,6 +381,23 @@ def main(industry_scrape_limit: int | None = 0) -> None:
     tickers = load_universe()
     print(f"      {len(tickers)} tickers loaded")
 
+    # Preserve previously-fetched industry tags from the existing
+    # master_tickers.json so --enrich only hits stockanalysis.com for
+    # tickers that don't have a tag yet (e.g. ones newly added to the CSV).
+    if OUT_JSON.exists():
+        try:
+            prior = json.loads(OUT_JSON.read_text())
+            carried = 0
+            for sym, meta in (prior.get("tickers") or {}).items():
+                ind = meta.get("industry")
+                if ind and sym in tickers:
+                    tickers[sym]["industry"] = ind
+                    carried += 1
+            if carried:
+                print(f"      carried {carried} industry tag(s) from prior master_tickers.json")
+        except (json.JSONDecodeError, OSError):
+            pass
+
     print(f"[2/3] applying {len(CURATED_THEMES)} curated themes (strict to universe)...")
     themes, missing = apply_curated_themes(tickers)
     tagged = sum(1 for t in tickers.values() if t.get("themes"))
