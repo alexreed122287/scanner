@@ -76,9 +76,8 @@ CURATED_THEMES = {
                             "GSAT", "SATX"],
 
     # --- Energy / Power ---
-    "Uranium":             ["UUUU", "CCJ", "DNN", "UEC", "NXE", "URG", "LEU",
-                            "BWXT", "OKLO", "SMR"],
-    "Nuclear / SMR":       ["OKLO", "SMR", "BWXT", "LEU", "CEG", "VST"],
+    "Nuclear & Uranium":   ["UUUU", "CCJ", "DNN", "UEC", "NXE", "URG", "LEU",
+                            "BWXT", "OKLO", "SMR", "CEG", "VST"],
     "AI Power":            ["VRT", "ETN", "PWR", "GEV", "EME", "GNRC", "CEG",
                             "VST", "NRG", "BE", "PLUG"],
     "Solar":               ["FSLR", "ENPH", "SEDG", "RUN", "NXT", "ARRY", "SHLS"],
@@ -92,11 +91,6 @@ CURATED_THEMES = {
                             "BILL", "TOST", "MELI"],
     "Mega Banks":          ["JPM", "BAC", "WFC", "C", "GS", "MS", "USB"],
 
-    # --- Healthcare / Biotech ---
-    "GLP-1 / Obesity":     ["LLY", "NVO", "AMGN", "VKTX", "STRT", "ALT", "ZBH"],
-    "Biotech (large)":     ["LLY", "NVO", "AMGN", "GILD", "VRTX", "REGN", "BIIB",
-                            "MRNA", "BNTX"],
-
     # --- Other themes ---
     "Cybersecurity":       ["ZS", "CRWD", "PANW", "FTNT", "S", "CYBR", "NET",
                             "CHKP", "OKTA", "TENB"],
@@ -106,9 +100,7 @@ CURATED_THEMES = {
                             "UAL", "HLT", "EXPE"],
     "Retail / Consumer":   ["WMT", "COST", "TGT", "HD", "LOW", "DG", "DLTR"],
 
-    # --- Hogue 2026 draft (recurring picks) ---
-    "Hogue 2026":          ["AMZN", "PLTR", "MRVL", "MSFT", "TSLA", "GOOGL", "NVDA",
-                            "ZS"],
+    # --- Recurring high-conviction picks ---
     "Top Recurring":       ["NVDA", "PLTR", "AMZN", "MSFT", "GOOGL", "META", "TSLA",
                             "AMD", "MRVL", "ZS", "SMCI", "MU"],
 }
@@ -156,24 +148,57 @@ def load_universe() -> dict[str, dict]:
     return out
 
 
-def apply_curated_themes(tickers: dict[str, dict]) -> dict[str, list[str]]:
-    """Tag tickers with curated theme membership. Returns themes->[tickers]."""
+def apply_curated_themes(
+    tickers: dict[str, dict],
+) -> tuple[dict[str, list[str]], dict[str, list[str]]]:
+    """Tag tickers with curated theme membership. STRICT mode: only tickers
+    present in the universe (alex_tickers.csv) are kept in any theme.
+
+    Returns (themes_in_universe, missing_per_theme) where missing_per_theme
+    records the curated members that were dropped because they aren't in the
+    user's universe — written to missing_from_universe.txt for review.
+    """
     themes: dict[str, list[str]] = {}
+    missing: dict[str, list[str]] = {}
     for theme, members in CURATED_THEMES.items():
-        kept = []
+        kept, dropped = [], []
         for sym in members:
             if sym in tickers:
                 tickers[sym]["themes"].append(theme)
                 kept.append(sym)
             else:
-                # Theme member not in universe — keep anyway, but flag minimally
-                tickers.setdefault(sym, {
-                    "name": "", "tv_sector": "", "industry": None,
-                    "themes": [theme], "_off_universe": True,
-                })
-                kept.append(sym)
+                dropped.append(sym)
         themes[theme] = kept
-    return themes
+        if dropped:
+            missing[theme] = dropped
+    return themes, missing
+
+
+def write_missing_report(missing: dict[str, list[str]]) -> None:
+    """Write industry/missing_from_universe.txt — curated theme members that
+    were dropped because they aren't in alex_tickers.csv. Lets the user audit
+    and decide whether to add any of them to the universe."""
+    out_path = ROOT / "industry" / "missing_from_universe.txt"
+    lines = [
+        "Tickers referenced by curated themes in build_master_list.py but NOT",
+        "present in alex_tickers.csv. They were filtered out of the INDUSTRY tab.",
+        "Add to alex_tickers.csv if you want them scored.",
+        f"Generated: {datetime.now(timezone.utc).isoformat(timespec='seconds')}",
+        "",
+    ]
+    if not missing:
+        lines.append("(none — every curated member is in your universe)")
+    else:
+        total = sum(len(v) for v in missing.values())
+        lines.append(f"{total} ticker-slot(s) across {len(missing)} theme(s):")
+        lines.append("")
+        for theme in sorted(missing):
+            lines.append(f"{theme}:")
+            for sym in missing[theme]:
+                lines.append(f"  - {sym}")
+            lines.append("")
+    out_path.write_text("\n".join(lines))
+    print(f"      wrote {out_path.name}")
 
 
 def enrich_with_industry_tags(tickers: dict[str, dict], limit: int | None = None,
@@ -206,10 +231,13 @@ def main(industry_scrape_limit: int | None = 0) -> None:
     tickers = load_universe()
     print(f"      {len(tickers)} tickers loaded")
 
-    print(f"[2/3] applying {len(CURATED_THEMES)} curated themes...")
-    themes = apply_curated_themes(tickers)
+    print(f"[2/3] applying {len(CURATED_THEMES)} curated themes (strict to universe)...")
+    themes, missing = apply_curated_themes(tickers)
     tagged = sum(1 for t in tickers.values() if t.get("themes"))
+    dropped_total = sum(len(v) for v in missing.values())
     print(f"      {tagged} tickers tagged with at least one theme")
+    print(f"      {dropped_total} curated ticker-slot(s) dropped (not in alex_tickers.csv)")
+    write_missing_report(missing)
 
     if industry_scrape_limit != 0:
         print(f"[3/3] scraping stockanalysis.com industry tags "

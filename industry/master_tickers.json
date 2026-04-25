@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-04-25T15:46:44+00:00",
-  "universe_size": 2423,
-  "theme_count": 27,
+  "generated_at": "2026-04-25T17:14:37+00:00",
+  "universe_size": 2400,
+  "theme_count": 23,
   "themes": {
     "AI Infrastructure": [
       "NVDA",
@@ -15,7 +15,6 @@
       "ETN",
       "PWR",
       "GEV",
-      "EME",
       "GNRC",
       "CEG"
     ],
@@ -24,7 +23,6 @@
       "COHR",
       "AAOI",
       "GLW",
-      "IPGP",
       "LASR",
       "FN",
       "MTSI",
@@ -37,8 +35,7 @@
       "COHR",
       "AAOI",
       "GLW",
-      "CIEN",
-      "INFN"
+      "CIEN"
     ],
     "Memory & Storage": [
       "MU",
@@ -52,7 +49,6 @@
       "LRCX",
       "TER",
       "KLAC",
-      "ASML",
       "ENTG",
       "MKSI",
       "ACLS",
@@ -79,7 +75,6 @@
     "Big Tech": [
       "AAPL",
       "MSFT",
-      "GOOGL",
       "GOOG",
       "AMZN",
       "META",
@@ -90,14 +85,12 @@
       "KTOS",
       "AVAV",
       "PLTR",
-      "HII",
       "LHX",
       "HWM",
       "NOC",
       "RTX",
       "LMT",
       "GD",
-      "TDG",
       "BA"
     ],
     "Drones": [
@@ -107,8 +100,6 @@
       "RCAT",
       "AVAV",
       "KTOS",
-      "AERT",
-      "DPRO",
       "EH",
       "ACHR",
       "JOBY"
@@ -121,26 +112,14 @@
       "PL",
       "IRDM",
       "VSAT",
-      "GSAT",
-      "SATX"
+      "GSAT"
     ],
-    "Uranium": [
-      "UUUU",
-      "CCJ",
-      "DNN",
+    "Nuclear & Uranium": [
       "UEC",
-      "NXE",
-      "URG",
       "LEU",
       "BWXT",
-      "OKLO",
-      "SMR"
-    ],
-    "Nuclear / SMR": [
       "OKLO",
       "SMR",
-      "BWXT",
-      "LEU",
       "CEG",
       "VST"
     ],
@@ -149,7 +128,6 @@
       "ETN",
       "PWR",
       "GEV",
-      "EME",
       "GNRC",
       "CEG",
       "VST",
@@ -171,11 +149,9 @@
       "CVX",
       "COP",
       "EOG",
-      "PXD",
       "OXY",
       "FANG",
       "DVN",
-      "MRO",
       "PR"
     ],
     "Crypto / Miners": [
@@ -183,7 +159,6 @@
       "RIOT",
       "CLSK",
       "HUT",
-      "BITF",
       "CIFR",
       "WULF",
       "IREN",
@@ -192,7 +167,6 @@
       "GLXY"
     ],
     "Fintech": [
-      "SQ",
       "PYPL",
       "SOFI",
       "AFRM",
@@ -212,33 +186,12 @@
       "MS",
       "USB"
     ],
-    "GLP-1 / Obesity": [
-      "LLY",
-      "NVO",
-      "AMGN",
-      "VKTX",
-      "STRT",
-      "ALT",
-      "ZBH"
-    ],
-    "Biotech (large)": [
-      "LLY",
-      "NVO",
-      "AMGN",
-      "GILD",
-      "VRTX",
-      "REGN",
-      "BIIB",
-      "MRNA",
-      "BNTX"
-    ],
     "Cybersecurity": [
       "ZS",
       "CRWD",
       "PANW",
       "FTNT",
       "S",
-      "CYBR",
       "NET",
       "CHKP",
       "OKTA",
@@ -249,7 +202,6 @@
       "RGTI",
       "QBTS",
       "QUBT",
-      "ARQQ",
       "IBM"
     ],
     "Industrial / Picks": [
@@ -281,22 +233,11 @@
       "DG",
       "DLTR"
     ],
-    "Hogue 2026": [
-      "AMZN",
-      "PLTR",
-      "MRVL",
-      "MSFT",
-      "TSLA",
-      "GOOGL",
-      "NVDA",
-      "ZS"
-    ],
     "Top Recurring": [
       "NVDA",
       "PLTR",
       "AMZN",
       "MSFT",
-      "GOOGL",
       "META",
       "TSLA",
       "AMD",
@@ -315,7 +256,6 @@
         "AI Infrastructure",
         "Semiconductors",
         "Big Tech",
-        "Hogue 2026",
         "Top Recurring"
       ]
     },
@@ -341,7 +281,6 @@
       "industry": null,
       "themes": [
         "Big Tech",
-        "Hogue 2026",
         "Top Recurring"
       ]
     },
@@ -351,7 +290,6 @@
       "industry": null,
       "themes": [
         "Big Tech",
-        "Hogue 2026",
         "Top Recurring"
       ]
     },
@@ -379,7 +317,6 @@
       "industry": null,
       "themes": [
         "Big Tech",
-        "Hogue 2026",
         "Top Recurring"
       ]
     },
@@ -395,10 +332,7 @@
       "name": "Eli Lilly and Company",
       "tv_sector": "Health technology",
       "industry": null,
-      "themes": [
-        "GLP-1 / Obesity",
-        "Biotech (large)"
-      ]
+      "themes": []
     },
     "JPM": {
       "name": "JP Morgan Chase & Co.",
@@ -510,7 +444,6 @@
       "industry": null,
       "themes": [
         "Defense",
-        "Hogue 2026",
         "Top Recurring"
       ]
     },
@@ -728,10 +661,7 @@
       "name": "Amgen Inc.",
       "tv_sector": "Health technology",
       "industry": null,
-      "themes": [
-        "GLP-1 / Obesity",
-        "Biotech (large)"
-      ]
+      "themes": []
     },
     "DIS": {
       "name": "Walt Disney Company (The)",
@@ -781,9 +711,7 @@
       "name": "Gilead Sciences, Inc.",
       "tv_sector": "Health technology",
       "industry": null,
-      "themes": [
-        "Biotech (large)"
-      ]
+      "themes": []
     },
     "ARM": {
       "name": "Arm Holdings plc",
@@ -1047,7 +975,6 @@
       "themes": [
         "AI Infrastructure",
         "Semiconductors",
-        "Hogue 2026",
         "Top Recurring"
       ]
     },
@@ -1080,9 +1007,7 @@
       "name": "Vertex Pharmaceuticals Incorporated",
       "tv_sector": "Health technology",
       "industry": null,
-      "themes": [
-        "Biotech (large)"
-      ]
+      "themes": []
     },
     "SBUX": {
       "name": "Starbucks Corporation",
@@ -1132,7 +1057,7 @@
       "industry": null,
       "themes": [
         "AI Infrastructure",
-        "Nuclear / SMR",
+        "Nuclear & Uranium",
         "AI Power"
       ]
     },
@@ -1381,9 +1306,7 @@
       "name": "Regeneron Pharmaceuticals, Inc.",
       "tv_sector": "Health technology",
       "industry": null,
-      "themes": [
-        "Biotech (large)"
-      ]
+      "themes": []
     },
     "MMM": {
       "name": "3M Company",
@@ -1815,7 +1738,7 @@
       "tv_sector": "Utilities",
       "industry": null,
       "themes": [
-        "Nuclear / SMR",
+        "Nuclear & Uranium",
         "AI Power"
       ]
     },
@@ -2798,9 +2721,7 @@
       "name": "Biogen Inc.",
       "tv_sector": "Health technology",
       "industry": null,
-      "themes": [
-        "Biotech (large)"
-      ]
+      "themes": []
     },
     "SYF": {
       "name": "Synchrony Financial",
@@ -2890,9 +2811,7 @@
       "name": "BioNTech SE",
       "tv_sector": "Health technology",
       "industry": null,
-      "themes": [
-        "Biotech (large)"
-      ]
+      "themes": []
     },
     "XPO": {
       "name": "XPO, Inc.",
@@ -3137,8 +3056,7 @@
       "tv_sector": "Electronic technology",
       "industry": null,
       "themes": [
-        "Uranium",
-        "Nuclear / SMR"
+        "Nuclear & Uranium"
       ]
     },
     "STE": {
@@ -3169,9 +3087,7 @@
       "name": "Moderna, Inc.",
       "tv_sector": "Health technology",
       "industry": null,
-      "themes": [
-        "Biotech (large)"
-      ]
+      "themes": []
     },
     "ATI": {
       "name": "ATI Inc.",
@@ -3209,7 +3125,6 @@
       "industry": null,
       "themes": [
         "Cybersecurity",
-        "Hogue 2026",
         "Top Recurring"
       ]
     },
@@ -3475,9 +3390,7 @@
       "name": "Zimmer Biomet Holdings, Inc.",
       "tv_sector": "Health technology",
       "industry": null,
-      "themes": [
-        "GLP-1 / Obesity"
-      ]
+      "themes": []
     },
     "GIS": {
       "name": "General Mills, Inc.",
@@ -4528,8 +4441,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": null,
       "themes": [
-        "Uranium",
-        "Nuclear / SMR"
+        "Nuclear & Uranium"
       ]
     },
     "CR": {
@@ -5607,7 +5519,7 @@
       "tv_sector": "Non-energy minerals",
       "industry": null,
       "themes": [
-        "Uranium"
+        "Nuclear & Uranium"
       ]
     },
     "CE": {
@@ -7420,9 +7332,7 @@
       "name": "Viking Therapeutics, Inc.",
       "tv_sector": "Health technology",
       "industry": null,
-      "themes": [
-        "GLP-1 / Obesity"
-      ]
+      "themes": []
     },
     "OSCR": {
       "name": "Oscar Health, Inc.",
@@ -7567,8 +7477,7 @@
       "tv_sector": "Producer manufacturing",
       "industry": null,
       "themes": [
-        "Uranium",
-        "Nuclear / SMR"
+        "Nuclear & Uranium"
       ]
     },
     "HRB": {
@@ -7596,8 +7505,7 @@
       "tv_sector": "Non-energy minerals",
       "industry": null,
       "themes": [
-        "Uranium",
-        "Nuclear / SMR"
+        "Nuclear & Uranium"
       ]
     },
     "NTSK": {
@@ -12639,9 +12547,7 @@
       "name": "Altimmune, Inc.",
       "tv_sector": "Health technology",
       "industry": null,
-      "themes": [
-        "GLP-1 / Obesity"
-      ]
+      "themes": []
     },
     "SSP": {
       "name": "E.W. Scripps Company (The)",
@@ -15098,217 +15004,6 @@
       "tv_sector": "3X",
       "industry": null,
       "themes": []
-    },
-    "EME": {
-      "name": "",
-      "tv_sector": "",
-      "industry": null,
-      "themes": [
-        "AI Infrastructure",
-        "AI Power"
-      ],
-      "_off_universe": true
-    },
-    "IPGP": {
-      "name": "",
-      "tv_sector": "",
-      "industry": null,
-      "themes": [
-        "Photonics"
-      ],
-      "_off_universe": true
-    },
-    "INFN": {
-      "name": "",
-      "tv_sector": "",
-      "industry": null,
-      "themes": [
-        "Fiber Optics"
-      ],
-      "_off_universe": true
-    },
-    "ASML": {
-      "name": "",
-      "tv_sector": "",
-      "industry": null,
-      "themes": [
-        "Semi Equipment"
-      ],
-      "_off_universe": true
-    },
-    "GOOGL": {
-      "name": "",
-      "tv_sector": "",
-      "industry": null,
-      "themes": [
-        "Big Tech",
-        "Hogue 2026",
-        "Top Recurring"
-      ],
-      "_off_universe": true
-    },
-    "HII": {
-      "name": "",
-      "tv_sector": "",
-      "industry": null,
-      "themes": [
-        "Defense"
-      ],
-      "_off_universe": true
-    },
-    "TDG": {
-      "name": "",
-      "tv_sector": "",
-      "industry": null,
-      "themes": [
-        "Defense"
-      ],
-      "_off_universe": true
-    },
-    "AERT": {
-      "name": "",
-      "tv_sector": "",
-      "industry": null,
-      "themes": [
-        "Drones"
-      ],
-      "_off_universe": true
-    },
-    "DPRO": {
-      "name": "",
-      "tv_sector": "",
-      "industry": null,
-      "themes": [
-        "Drones"
-      ],
-      "_off_universe": true
-    },
-    "SATX": {
-      "name": "",
-      "tv_sector": "",
-      "industry": null,
-      "themes": [
-        "Space"
-      ],
-      "_off_universe": true
-    },
-    "UUUU": {
-      "name": "",
-      "tv_sector": "",
-      "industry": null,
-      "themes": [
-        "Uranium"
-      ],
-      "_off_universe": true
-    },
-    "CCJ": {
-      "name": "",
-      "tv_sector": "",
-      "industry": null,
-      "themes": [
-        "Uranium"
-      ],
-      "_off_universe": true
-    },
-    "DNN": {
-      "name": "",
-      "tv_sector": "",
-      "industry": null,
-      "themes": [
-        "Uranium"
-      ],
-      "_off_universe": true
-    },
-    "NXE": {
-      "name": "",
-      "tv_sector": "",
-      "industry": null,
-      "themes": [
-        "Uranium"
-      ],
-      "_off_universe": true
-    },
-    "URG": {
-      "name": "",
-      "tv_sector": "",
-      "industry": null,
-      "themes": [
-        "Uranium"
-      ],
-      "_off_universe": true
-    },
-    "PXD": {
-      "name": "",
-      "tv_sector": "",
-      "industry": null,
-      "themes": [
-        "Oil & Gas E&P"
-      ],
-      "_off_universe": true
-    },
-    "MRO": {
-      "name": "",
-      "tv_sector": "",
-      "industry": null,
-      "themes": [
-        "Oil & Gas E&P"
-      ],
-      "_off_universe": true
-    },
-    "BITF": {
-      "name": "",
-      "tv_sector": "",
-      "industry": null,
-      "themes": [
-        "Crypto / Miners"
-      ],
-      "_off_universe": true
-    },
-    "SQ": {
-      "name": "",
-      "tv_sector": "",
-      "industry": null,
-      "themes": [
-        "Fintech"
-      ],
-      "_off_universe": true
-    },
-    "NVO": {
-      "name": "",
-      "tv_sector": "",
-      "industry": null,
-      "themes": [
-        "GLP-1 / Obesity",
-        "Biotech (large)"
-      ],
-      "_off_universe": true
-    },
-    "STRT": {
-      "name": "",
-      "tv_sector": "",
-      "industry": null,
-      "themes": [
-        "GLP-1 / Obesity"
-      ],
-      "_off_universe": true
-    },
-    "CYBR": {
-      "name": "",
-      "tv_sector": "",
-      "industry": null,
-      "themes": [
-        "Cybersecurity"
-      ],
-      "_off_universe": true
-    },
-    "ARQQ": {
-      "name": "",
-      "tv_sector": "",
-      "industry": null,
-      "themes": [
-        "Quantum"
-      ],
-      "_off_universe": true
     }
   }
 }

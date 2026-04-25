@@ -275,6 +275,25 @@ def build_theme_universe(master: dict, tv_sample_size: int = 30) -> dict[str, li
     return themes
 
 
+def member_daily_perf(prices: pd.DataFrame, members: list[str]) -> dict[str, float]:
+    """Most-recent-day % change for each theme member, for sort-on-expand UI.
+    Returns {ticker: pct} where pct = 100 * (last_close / prev_close - 1).
+    NaN when not enough bars."""
+    out: dict[str, float] = {}
+    for m in members:
+        if m not in prices.columns:
+            continue
+        s = prices[m].dropna()
+        if len(s) < 2:
+            continue
+        prev = s.iloc[-2]
+        last = s.iloc[-1]
+        if prev <= 0:
+            continue
+        out[m] = round(float((last / prev - 1) * 100), 2)
+    return out
+
+
 def score_themes(prices: pd.DataFrame, themes: dict[str, list[str]],
                  spy_rets: pd.Series) -> dict[str, dict]:
     """Compute raw metrics for each theme."""
@@ -315,6 +334,7 @@ def score_themes(prices: pd.DataFrame, themes: dict[str, list[str]],
             "breadth_200": breadth(prices, valid, 200),
             "trend": trend,
             "composite_price": float(comp_price.iloc[-1]),
+            "member_perf": member_daily_perf(prices, valid),
         }
     return raw
 
@@ -349,6 +369,7 @@ def composite_scores(raw: dict[str, dict]) -> dict[str, dict]:
         out[theme] = {
             "members": r["members"],
             "member_count": r["member_count"],
+            "member_perf": r.get("member_perf", {}),
             "rs_excess_pct": {k: round(v, 2) if not np.isnan(v) else None
                               for k, v in r["rs_excess"].items()},
             "rs_rank": {

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-25T15:58:44+00:00",
+  "generated_at": "2026-04-25T17:16:54+00:00",
   "as_of": "2026-04-24",
   "benchmark": "SPY",
   "windows": {
@@ -22,30 +22,44 @@
         "ETN",
         "PWR",
         "GEV",
-        "EME",
         "GNRC",
         "CEG"
       ],
-      "member_count": 14,
+      "member_count": 13,
+      "member_perf": {
+        "NVDA": 4.32,
+        "AVGO": 0.67,
+        "AMD": 13.91,
+        "MRVL": -0.76,
+        "SMCI": 8.71,
+        "DELL": 1.86,
+        "ANET": 2.53,
+        "VRT": 0.53,
+        "ETN": -0.14,
+        "PWR": -1.36,
+        "GEV": -0.03,
+        "GNRC": 1.17,
+        "CEG": 7.09
+      },
       "rs_excess_pct": {
-        "1W": 4.69,
-        "1M": 6.97,
-        "3M": 26.05,
-        "6M": 42.58
+        "1W": 7.84,
+        "1M": 15.43,
+        "3M": 38.1,
+        "6M": 28.58
       },
       "rs_rank": {
-        "1W": 77.8,
-        "1M": 85.2,
-        "3M": 88.9,
-        "6M": 88.9
+        "1W": 95.5,
+        "1M": 86.4,
+        "3M": 90.9,
+        "6M": 75.0
       },
-      "breadth_50": 85.7,
-      "breadth_200": 100.0,
+      "breadth_50": 100.0,
+      "breadth_200": 84.6,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 83.0,
-        "weekly": 84.3,
-        "monthly": 90.0
+        "daily": 94.3,
+        "weekly": 90.9,
+        "monthly": 84.5
       }
     },
     "Photonics": {
@@ -54,7 +68,6 @@
         "COHR",
         "AAOI",
         "GLW",
-        "IPGP",
         "LASR",
         "FN",
         "MTSI",
@@ -62,26 +75,38 @@
         "ANET",
         "CIEN"
       ],
-      "member_count": 11,
+      "member_count": 10,
+      "member_perf": {
+        "LITE": 4.1,
+        "COHR": -0.47,
+        "AAOI": 17.74,
+        "GLW": 3.77,
+        "LASR": 2.14,
+        "FN": 4.46,
+        "MTSI": 1.14,
+        "POET": 28.84,
+        "ANET": 2.53,
+        "CIEN": 0.96
+      },
       "rs_excess_pct": {
-        "1W": 6.46,
-        "1M": 4.66,
-        "3M": 20.94,
-        "6M": 26.14
+        "1W": 11.43,
+        "1M": 23.38,
+        "3M": 104.64,
+        "6M": 179.0
       },
       "rs_rank": {
-        "1W": 100.0,
-        "1M": 59.3,
-        "3M": 74.1,
-        "6M": 66.7
+        "1W": 97.7,
+        "1M": 97.7,
+        "3M": 97.7,
+        "6M": 95.5
       },
-      "breadth_50": 72.7,
-      "breadth_200": 81.8,
+      "breadth_50": 100.0,
+      "breadth_200": 100.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 85.7,
-        "weekly": 71.6,
-        "monthly": 70.8
+        "daily": 98.3,
+        "weekly": 98.1,
+        "monthly": 97.4
       }
     },
     "Fiber Optics": {
@@ -90,29 +115,35 @@
         "COHR",
         "AAOI",
         "GLW",
-        "CIEN",
-        "INFN"
+        "CIEN"
       ],
-      "member_count": 6,
+      "member_count": 5,
+      "member_perf": {
+        "LITE": 4.1,
+        "COHR": -0.47,
+        "AAOI": 17.74,
+        "GLW": 3.77,
+        "CIEN": 0.96
+      },
       "rs_excess_pct": {
-        "1W": 3.98,
-        "1M": 2.52,
-        "3M": 7.14,
-        "6M": 10.0
+        "1W": 1.24,
+        "1M": 15.81,
+        "3M": 153.36,
+        "6M": 281.2
       },
       "rs_rank": {
-        "1W": 59.3,
-        "1M": 48.1,
-        "3M": 37.0,
-        "6M": 44.4
+        "1W": 65.9,
+        "1M": 88.6,
+        "3M": 100.0,
+        "6M": 100.0
       },
-      "breadth_50": 50.0,
-      "breadth_200": 83.3,
+      "breadth_50": 100.0,
+      "breadth_200": 100.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 59.2,
-        "weekly": 49.0,
-        "monthly": 47.9
+        "daily": 80.1,
+        "weekly": 87.5,
+        "monthly": 98.3
       }
     },
     "Memory & Storage": {
@@ -124,25 +155,32 @@
         "NTAP"
       ],
       "member_count": 5,
+      "member_perf": {
+        "MU": 3.11,
+        "WDC": 0.22,
+        "STX": -0.23,
+        "SNDK": 6.16,
+        "NTAP": 0.29
+      },
       "rs_excess_pct": {
-        "1W": 2.85,
-        "1M": -0.16,
-        "3M": 3.07,
-        "6M": 14.22
+        "1W": 6.85,
+        "1M": 22.98,
+        "3M": 53.6,
+        "6M": 179.45
       },
       "rs_rank": {
-        "1W": 37.0,
-        "1M": 25.9,
-        "3M": 18.5,
-        "6M": 51.9
+        "1W": 88.6,
+        "1M": 95.5,
+        "3M": 95.5,
+        "6M": 97.7
       },
-      "breadth_50": 60.0,
-      "breadth_200": 80.0,
+      "breadth_50": 100.0,
+      "breadth_200": 100.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 44.0,
-        "weekly": 32.1,
-        "monthly": 38.9
+        "daily": 93.2,
+        "weekly": 94.8,
+        "monthly": 96.8
       }
     },
     "Semi Equipment": {
@@ -151,7 +189,6 @@
         "LRCX",
         "TER",
         "KLAC",
-        "ASML",
         "ENTG",
         "MKSI",
         "ACLS",
@@ -159,26 +196,38 @@
         "FORM",
         "UCTT"
       ],
-      "member_count": 11,
+      "member_count": 10,
+      "member_perf": {
+        "AMAT": 3.25,
+        "LRCX": 3.57,
+        "TER": 4.26,
+        "KLAC": 6.59,
+        "ENTG": 4.45,
+        "MKSI": 0.15,
+        "ACLS": 2.34,
+        "ONTO": 5.32,
+        "FORM": 4.52,
+        "UCTT": 6.1
+      },
       "rs_excess_pct": {
-        "1W": 5.16,
-        "1M": -1.32,
-        "3M": 4.0,
-        "6M": 3.64
+        "1W": 6.88,
+        "1M": 18.86,
+        "3M": 49.35,
+        "6M": 124.82
       },
       "rs_rank": {
-        "1W": 85.2,
-        "1M": 7.4,
-        "3M": 25.9,
-        "6M": 22.2
+        "1W": 90.9,
+        "1M": 93.2,
+        "3M": 93.2,
+        "6M": 93.2
       },
-      "breadth_50": 54.5,
-      "breadth_200": 54.5,
+      "breadth_50": 100.0,
+      "breadth_200": 100.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 62.6,
-        "weekly": 32.8,
-        "monthly": 26.3
+        "daily": 93.8,
+        "weekly": 93.7,
+        "monthly": 94.2
       }
     },
     "Semiconductors": {
@@ -199,58 +248,82 @@
         "SMCI"
       ],
       "member_count": 14,
+      "member_perf": {
+        "NVDA": 4.32,
+        "AMD": 13.91,
+        "AVGO": 0.67,
+        "MRVL": -0.76,
+        "QCOM": 11.12,
+        "TXN": -1.8,
+        "INTC": 23.6,
+        "MU": 3.11,
+        "ON": 0.63,
+        "MCHP": -1.32,
+        "ADI": -1.07,
+        "NXPI": 1.19,
+        "MPWR": 2.51,
+        "SMCI": 8.71
+      },
       "rs_excess_pct": {
-        "1W": 1.89,
-        "1M": 2.63,
-        "3M": 13.92,
-        "6M": 17.27
+        "1W": 12.29,
+        "1M": 30.06,
+        "3M": 31.45,
+        "6M": 43.08
       },
       "rs_rank": {
-        "1W": 22.2,
-        "1M": 51.9,
-        "3M": 63.0,
-        "6M": 59.3
+        "1W": 100.0,
+        "1M": 100.0,
+        "3M": 86.4,
+        "6M": 84.1
       },
-      "breadth_50": 57.1,
-      "breadth_200": 71.4,
+      "breadth_50": 100.0,
+      "breadth_200": 85.7,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 42.6,
-        "weekly": 48.4,
-        "monthly": 61.5
+        "daily": 100.0,
+        "weekly": 98.0,
+        "monthly": 87.6
       }
     },
     "Big Tech": {
       "members": [
         "AAPL",
         "MSFT",
-        "GOOGL",
         "GOOG",
         "AMZN",
         "META",
         "NVDA",
         "TSLA"
       ],
-      "member_count": 8,
+      "member_count": 7,
+      "member_perf": {
+        "AAPL": -0.87,
+        "MSFT": 2.13,
+        "GOOG": 1.35,
+        "AMZN": 3.49,
+        "META": 2.41,
+        "NVDA": 4.32,
+        "TSLA": 0.69
+      },
       "rs_excess_pct": {
-        "1W": 4.46,
-        "1M": 6.21,
-        "3M": 12.55,
-        "6M": 15.21
+        "1W": -0.24,
+        "1M": 4.44,
+        "3M": -1.72,
+        "6M": -2.17
       },
       "rs_rank": {
-        "1W": 70.4,
-        "1M": 81.5,
-        "3M": 55.6,
-        "6M": 55.6
+        "1W": 56.8,
+        "1M": 68.2,
+        "3M": 45.5,
+        "6M": 40.9
       },
-      "breadth_50": 62.5,
-      "breadth_200": 62.5,
+      "breadth_50": 85.7,
+      "breadth_200": 57.1,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 74.9,
-        "weekly": 72.5,
-        "monthly": 60.5
+        "daily": 68.3,
+        "weekly": 65.1,
+        "monthly": 49.3
       }
     },
     "Defense": {
@@ -258,36 +331,46 @@
         "KTOS",
         "AVAV",
         "PLTR",
-        "HII",
         "LHX",
         "HWM",
         "NOC",
         "RTX",
         "LMT",
         "GD",
-        "TDG",
         "BA"
       ],
-      "member_count": 12,
+      "member_count": 10,
+      "member_perf": {
+        "KTOS": -6.5,
+        "AVAV": -2.79,
+        "PLTR": 1.07,
+        "LHX": -3.85,
+        "HWM": -1.51,
+        "NOC": -2.14,
+        "RTX": -2.81,
+        "LMT": -3.08,
+        "GD": -1.73,
+        "BA": -0.73
+      },
       "rs_excess_pct": {
-        "1W": 4.93,
-        "1M": 5.78,
-        "3M": 30.96,
-        "6M": 60.26
+        "1W": -7.47,
+        "1M": -16.92,
+        "3M": -18.93,
+        "6M": -11.62
       },
       "rs_rank": {
-        "1W": 81.5,
-        "1M": 77.8,
-        "3M": 96.3,
-        "6M": 100.0
+        "1W": 6.8,
+        "1M": 2.3,
+        "3M": 6.8,
+        "6M": 18.2
       },
-      "breadth_50": 66.7,
-      "breadth_200": 91.7,
-      "trend_above_50ema": true,
+      "breadth_50": 10.0,
+      "breadth_200": 30.0,
+      "trend_above_50ema": false,
       "scores": {
-        "daily": 80.2,
-        "weekly": 79.6,
-        "monthly": 93.9
+        "daily": 5.5,
+        "weekly": 5.0,
+        "monthly": 13.0
       }
     },
     "Drones": {
@@ -298,32 +381,41 @@
         "RCAT",
         "AVAV",
         "KTOS",
-        "AERT",
-        "DPRO",
         "EH",
         "ACHR",
         "JOBY"
       ],
-      "member_count": 11,
+      "member_count": 9,
+      "member_perf": {
+        "UMAC": -9.18,
+        "ONDS": 0.09,
+        "RDW": -3.59,
+        "RCAT": -5.9,
+        "AVAV": -2.79,
+        "KTOS": -6.5,
+        "EH": -1.54,
+        "ACHR": -1.21,
+        "JOBY": 0.12
+      },
       "rs_excess_pct": {
-        "1W": 4.0,
-        "1M": 7.05,
-        "3M": 21.87,
-        "6M": 40.63
+        "1W": -5.02,
+        "1M": -13.48,
+        "3M": -29.72,
+        "6M": -15.73
       },
       "rs_rank": {
-        "1W": 63.0,
-        "1M": 92.6,
-        "3M": 77.8,
-        "6M": 85.2
+        "1W": 13.6,
+        "1M": 9.1,
+        "3M": 2.3,
+        "6M": 15.9
       },
-      "breadth_50": 72.7,
-      "breadth_200": 90.9,
-      "trend_above_50ema": true,
+      "breadth_50": 22.2,
+      "breadth_200": 44.4,
+      "trend_above_50ema": false,
       "scores": {
-        "daily": 75.5,
-        "weekly": 81.5,
-        "monthly": 84.2
+        "daily": 12.4,
+        "weekly": 10.9,
+        "monthly": 13.7
       }
     },
     "Space": {
@@ -335,95 +427,79 @@
         "PL",
         "IRDM",
         "VSAT",
-        "GSAT",
-        "SATX"
+        "GSAT"
       ],
-      "member_count": 9,
+      "member_count": 8,
+      "member_perf": {
+        "RKLB": -5.82,
+        "ASTS": -2.98,
+        "RDW": -3.59,
+        "MNTS": 0.35,
+        "PL": -7.44,
+        "IRDM": -4.81,
+        "VSAT": -0.94,
+        "GSAT": 0.64
+      },
       "rs_excess_pct": {
-        "1W": 4.05,
-        "1M": -1.03,
-        "3M": 11.35,
-        "6M": 7.94
+        "1W": -7.96,
+        "1M": 6.61,
+        "3M": 7.81,
+        "6M": 48.96
       },
       "rs_rank": {
-        "1W": 66.7,
-        "1M": 14.8,
-        "3M": 51.9,
-        "6M": 29.6
+        "1W": 4.5,
+        "1M": 75.0,
+        "3M": 68.2,
+        "6M": 90.9
       },
-      "breadth_50": 77.8,
-      "breadth_200": 77.8,
+      "breadth_50": 87.5,
+      "breadth_200": 87.5,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 58.7,
-        "weekly": 40.2,
-        "monthly": 43.5
+        "daily": 44.1,
+        "weekly": 61.8,
+        "monthly": 78.9
       }
     },
-    "Uranium": {
+    "Nuclear & Uranium": {
       "members": [
-        "UUUU",
-        "CCJ",
-        "DNN",
         "UEC",
-        "NXE",
-        "URG",
         "LEU",
         "BWXT",
-        "OKLO",
-        "SMR"
-      ],
-      "member_count": 10,
-      "rs_excess_pct": {
-        "1W": 5.2,
-        "1M": 8.77,
-        "3M": 27.85,
-        "6M": 44.75
-      },
-      "rs_rank": {
-        "1W": 88.9,
-        "1M": 96.3,
-        "3M": 92.6,
-        "6M": 92.6
-      },
-      "breadth_50": 100.0,
-      "breadth_200": 100.0,
-      "trend_above_50ema": true,
-      "scores": {
-        "daily": 93.5,
-        "weekly": 94.8,
-        "monthly": 94.3
-      }
-    },
-    "Nuclear / SMR": {
-      "members": [
         "OKLO",
         "SMR",
-        "BWXT",
-        "LEU",
         "CEG",
         "VST"
       ],
-      "member_count": 6,
+      "member_count": 7,
+      "member_perf": {
+        "UEC": -6.02,
+        "LEU": -6.35,
+        "BWXT": -1.05,
+        "OKLO": -7.14,
+        "SMR": -5.97,
+        "CEG": 7.09,
+        "VST": 4.78
+      },
       "rs_excess_pct": {
-        "1W": 4.51,
-        "1M": 11.28,
-        "3M": 33.95,
-        "6M": 51.17
+        "1W": -0.7,
+        "1M": -0.04,
+        "3M": -16.7,
+        "6M": -28.38
       },
       "rs_rank": {
-        "1W": 74.1,
-        "1M": 100.0,
-        "3M": 100.0,
-        "6M": 96.3
+        "1W": 52.3,
+        "1M": 50.0,
+        "3M": 13.6,
+        "6M": 4.5
       },
-      "breadth_50": 100.0,
-      "breadth_200": 100.0,
+      "breadth_50": 85.7,
+      "breadth_200": 28.6,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 87.0,
-        "weekly": 94.8,
-        "monthly": 98.9
+        "daily": 61.5,
+        "weekly": 50.4,
+        "monthly": 18.6
       }
     },
     "AI Power": {
@@ -432,7 +508,6 @@
         "ETN",
         "PWR",
         "GEV",
-        "EME",
         "GNRC",
         "CEG",
         "VST",
@@ -440,26 +515,38 @@
         "BE",
         "PLUG"
       ],
-      "member_count": 11,
+      "member_count": 10,
+      "member_perf": {
+        "VRT": 0.53,
+        "ETN": -0.14,
+        "PWR": -1.36,
+        "GEV": -0.03,
+        "GNRC": 1.17,
+        "CEG": 7.09,
+        "VST": 4.78,
+        "NRG": 3.42,
+        "BE": -2.69,
+        "PLUG": -1.26
+      },
       "rs_excess_pct": {
-        "1W": 3.28,
-        "1M": 5.76,
-        "3M": 22.73,
-        "6M": 35.23
+        "1W": 5.44,
+        "1M": 9.64,
+        "3M": 32.32,
+        "6M": 33.16
       },
       "rs_rank": {
-        "1W": 51.9,
-        "1M": 74.1,
-        "3M": 81.5,
-        "6M": 77.8
+        "1W": 86.4,
+        "1M": 77.3,
+        "3M": 88.6,
+        "6M": 79.5
       },
-      "breadth_50": 72.7,
-      "breadth_200": 100.0,
+      "breadth_50": 90.0,
+      "breadth_200": 80.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 65.4,
-        "weekly": 70.5,
-        "monthly": 82.0
+        "daily": 86.0,
+        "weekly": 82.7,
+        "monthly": 82.9
       }
     },
     "Solar": {
@@ -473,25 +560,34 @@
         "SHLS"
       ],
       "member_count": 7,
+      "member_perf": {
+        "FSLR": -1.24,
+        "ENPH": -1.08,
+        "SEDG": -3.23,
+        "RUN": -1.7,
+        "NXT": -2.37,
+        "ARRY": 0.0,
+        "SHLS": 1.93
+      },
       "rs_excess_pct": {
-        "1W": -0.75,
-        "1M": 1.39,
-        "3M": 10.29,
-        "6M": 9.29
+        "1W": 7.71,
+        "1M": -10.78,
+        "3M": -8.42,
+        "6M": -4.72
       },
       "rs_rank": {
-        "1W": 3.7,
-        "1M": 37.0,
-        "3M": 48.1,
-        "6M": 40.7
+        "1W": 93.2,
+        "1M": 11.4,
+        "3M": 22.7,
+        "6M": 31.8
       },
-      "breadth_50": 42.9,
-      "breadth_200": 57.1,
+      "breadth_50": 57.1,
+      "breadth_200": 42.9,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 27.5,
-        "weekly": 32.9,
-        "monthly": 45.6
+        "daily": 68.0,
+        "weekly": 36.3,
+        "monthly": 26.8
       }
     },
     "Oil & Gas E&P": {
@@ -500,33 +596,41 @@
         "CVX",
         "COP",
         "EOG",
-        "PXD",
         "OXY",
         "FANG",
         "DVN",
-        "MRO",
         "PR"
       ],
-      "member_count": 10,
+      "member_count": 8,
+      "member_perf": {
+        "XOM": -1.08,
+        "CVX": -1.27,
+        "COP": -2.1,
+        "EOG": -0.55,
+        "OXY": -1.23,
+        "FANG": -0.41,
+        "DVN": -0.44,
+        "PR": -1.73
+      },
       "rs_excess_pct": {
-        "1W": 2.55,
-        "1M": 1.35,
-        "3M": -3.63,
-        "6M": -7.25
+        "1W": 4.34,
+        "1M": -14.37,
+        "3M": 20.4,
+        "6M": 32.19
       },
       "rs_rank": {
-        "1W": 29.6,
-        "1M": 33.3,
-        "3M": 11.1,
-        "6M": 11.1
+        "1W": 81.8,
+        "1M": 6.8,
+        "3M": 81.8,
+        "6M": 77.3
       },
-      "breadth_50": 70.0,
-      "breadth_200": 20.0,
-      "trend_above_50ema": false,
+      "breadth_50": 75.0,
+      "breadth_200": 100.0,
+      "trend_above_50ema": true,
       "scores": {
-        "daily": 33.6,
-        "weekly": 34.8,
-        "monthly": 15.8
+        "daily": 63.9,
+        "weekly": 43.3,
+        "monthly": 71.9
       }
     },
     "Crypto / Miners": {
@@ -535,7 +639,6 @@
         "RIOT",
         "CLSK",
         "HUT",
-        "BITF",
         "CIFR",
         "WULF",
         "IREN",
@@ -543,31 +646,42 @@
         "MSTR",
         "GLXY"
       ],
-      "member_count": 11,
+      "member_count": 10,
+      "member_perf": {
+        "MARA": -1.36,
+        "RIOT": 2.2,
+        "CLSK": 4.33,
+        "HUT": -2.41,
+        "CIFR": -2.62,
+        "WULF": -1.77,
+        "IREN": -2.65,
+        "COIN": 0.93,
+        "MSTR": -0.84,
+        "GLXY": -1.05
+      },
       "rs_excess_pct": {
-        "1W": 0.9,
-        "1M": 1.12,
-        "3M": 9.89,
-        "6M": 17.9
+        "1W": 0.38,
+        "1M": 16.09,
+        "3M": 3.66,
+        "6M": -9.69
       },
       "rs_rank": {
-        "1W": 7.4,
-        "1M": 29.6,
-        "3M": 44.4,
-        "6M": 63.0
+        "1W": 61.4,
+        "1M": 90.9,
+        "3M": 56.8,
+        "6M": 20.5
       },
-      "breadth_50": 45.5,
-      "breadth_200": 90.9,
+      "breadth_50": 100.0,
+      "breadth_200": 60.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 27.9,
-        "weekly": 29.8,
-        "monthly": 54.7
+        "daily": 78.4,
+        "weekly": 81.2,
+        "monthly": 51.5
       }
     },
     "Fintech": {
       "members": [
-        "SQ",
         "PYPL",
         "SOFI",
         "AFRM",
@@ -578,26 +692,37 @@
         "TOST",
         "MELI"
       ],
-      "member_count": 10,
+      "member_count": 9,
+      "member_perf": {
+        "PYPL": 1.47,
+        "SOFI": 0.66,
+        "AFRM": 1.17,
+        "HOOD": 1.4,
+        "COIN": 0.93,
+        "NU": 0.35,
+        "BILL": 1.45,
+        "TOST": 4.01,
+        "MELI": 1.44
+      },
       "rs_excess_pct": {
-        "1W": 3.95,
-        "1M": 4.98,
-        "3M": 15.69,
-        "6M": 8.39
+        "1W": -3.55,
+        "1M": 3.53,
+        "3M": -18.65,
+        "6M": -28.02
       },
       "rs_rank": {
-        "1W": 55.6,
-        "1M": 66.7,
-        "3M": 66.7,
-        "6M": 33.3
+        "1W": 22.7,
+        "1M": 61.4,
+        "3M": 9.1,
+        "6M": 6.8
       },
-      "breadth_50": 70.0,
-      "breadth_200": 80.0,
+      "breadth_50": 77.8,
+      "breadth_200": 0.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 64.9,
-        "weekly": 64.9,
-        "monthly": 58.7
+        "daily": 48.4,
+        "weekly": 48.3,
+        "monthly": 14.9
       }
     },
     "Mega Banks": {
@@ -611,91 +736,34 @@
         "USB"
       ],
       "member_count": 7,
+      "member_perf": {
+        "JPM": -1.09,
+        "BAC": -0.8,
+        "WFC": -1.35,
+        "C": -0.41,
+        "GS": -0.47,
+        "MS": -0.31,
+        "USB": -1.85
+      },
       "rs_excess_pct": {
-        "1W": 1.68,
-        "1M": -5.47,
-        "3M": -8.37,
-        "6M": -20.07
+        "1W": -2.3,
+        "1M": -0.93,
+        "3M": -1.12,
+        "6M": 7.26
       },
       "rs_rank": {
-        "1W": 14.8,
-        "1M": 3.7,
-        "3M": 3.7,
-        "6M": 3.7
+        "1W": 31.8,
+        "1M": 47.7,
+        "3M": 47.7,
+        "6M": 54.5
       },
-      "breadth_50": 28.6,
-      "breadth_200": 14.3,
-      "trend_above_50ema": false,
-      "scores": {
-        "daily": 12.6,
-        "weekly": 9.7,
-        "monthly": 5.3
-      }
-    },
-    "GLP-1 / Obesity": {
-      "members": [
-        "LLY",
-        "NVO",
-        "AMGN",
-        "VKTX",
-        "STRT",
-        "ALT",
-        "ZBH"
-      ],
-      "member_count": 7,
-      "rs_excess_pct": {
-        "1W": 3.06,
-        "1M": 4.01,
-        "3M": 4.47,
-        "6M": -5.45
-      },
-      "rs_rank": {
-        "1W": 44.4,
-        "1M": 55.6,
-        "3M": 29.6,
-        "6M": 14.8
-      },
-      "breadth_50": 57.1,
-      "breadth_200": 42.9,
+      "breadth_50": 85.7,
+      "breadth_200": 85.7,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 54.7,
-        "weekly": 49.7,
-        "monthly": 31.1
-      }
-    },
-    "Biotech (large)": {
-      "members": [
-        "LLY",
-        "NVO",
-        "AMGN",
-        "GILD",
-        "VRTX",
-        "REGN",
-        "BIIB",
-        "MRNA",
-        "BNTX"
-      ],
-      "member_count": 9,
-      "rs_excess_pct": {
-        "1W": 1.63,
-        "1M": 1.63,
-        "3M": 5.06,
-        "6M": 10.48
-      },
-      "rs_rank": {
-        "1W": 11.1,
-        "1M": 40.7,
-        "3M": 33.3,
-        "6M": 48.1
-      },
-      "breadth_50": 55.6,
-      "breadth_200": 55.6,
-      "trend_above_50ema": true,
-      "scores": {
-        "daily": 34.1,
-        "weekly": 35.9,
-        "monthly": 42.2
+        "daily": 50.7,
+        "weekly": 50.2,
+        "monthly": 55.5
       }
     },
     "Cybersecurity": {
@@ -705,32 +773,42 @@
         "PANW",
         "FTNT",
         "S",
-        "CYBR",
         "NET",
         "CHKP",
         "OKTA",
         "TENB"
       ],
-      "member_count": 10,
+      "member_count": 9,
+      "member_perf": {
+        "ZS": 1.9,
+        "CRWD": 0.62,
+        "PANW": 3.08,
+        "FTNT": 1.91,
+        "S": 2.3,
+        "NET": 1.01,
+        "CHKP": 0.64,
+        "OKTA": -0.08,
+        "TENB": 2.77
+      },
       "rs_excess_pct": {
-        "1W": 2.96,
-        "1M": 2.28,
-        "3M": 3.07,
-        "6M": 5.42
+        "1W": 2.55,
+        "1M": -4.09,
+        "3M": -11.56,
+        "6M": -27.84
       },
       "rs_rank": {
-        "1W": 40.7,
-        "1M": 44.4,
-        "3M": 22.2,
-        "6M": 25.9
+        "1W": 68.2,
+        "1M": 29.5,
+        "3M": 18.2,
+        "6M": 9.1
       },
-      "breadth_50": 40.0,
-      "breadth_200": 70.0,
+      "breadth_50": 66.7,
+      "breadth_200": 22.2,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 47.5,
-        "weekly": 39.7,
-        "monthly": 33.8
+        "daily": 61.5,
+        "weekly": 41.1,
+        "monthly": 17.8
       }
     },
     "Quantum": {
@@ -739,29 +817,35 @@
         "RGTI",
         "QBTS",
         "QUBT",
-        "ARQQ",
         "IBM"
       ],
-      "member_count": 6,
+      "member_count": 5,
+      "member_perf": {
+        "IONQ": -2.15,
+        "RGTI": -1.48,
+        "QBTS": -4.25,
+        "QUBT": -1.22,
+        "IBM": 0.39
+      },
       "rs_excess_pct": {
-        "1W": 2.09,
-        "1M": -1.17,
-        "3M": 8.66,
-        "6M": 8.85
+        "1W": -11.2,
+        "1M": 6.6,
+        "3M": -24.11,
+        "6M": -38.94
       },
       "rs_rank": {
-        "1W": 25.9,
-        "1M": 11.1,
-        "3M": 40.7,
-        "6M": 37.0
+        "1W": 2.3,
+        "1M": 72.7,
+        "3M": 4.5,
+        "6M": 2.3
       },
-      "breadth_50": 50.0,
-      "breadth_200": 50.0,
+      "breadth_50": 80.0,
+      "breadth_200": 0.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 33.2,
-        "weekly": 24.4,
-        "monthly": 36.6
+        "daily": 41.3,
+        "weekly": 49.5,
+        "monthly": 13.4
       }
     },
     "Industrial / Picks": {
@@ -774,25 +858,33 @@
         "ROK"
       ],
       "member_count": 6,
+      "member_perf": {
+        "CAT": -0.53,
+        "DE": -4.95,
+        "URI": -1.25,
+        "ETN": -0.14,
+        "EMR": -0.77,
+        "ROK": -1.89
+      },
       "rs_excess_pct": {
-        "1W": 1.7,
-        "1M": 5.54,
-        "3M": 25.82,
-        "6M": 39.02
+        "1W": 2.68,
+        "1M": 3.98,
+        "3M": 8.04,
+        "6M": 14.11
       },
       "rs_rank": {
-        "1W": 18.5,
-        "1M": 70.4,
-        "3M": 85.2,
-        "6M": 81.5
+        "1W": 70.5,
+        "1M": 65.9,
+        "3M": 70.5,
+        "6M": 63.6
       },
       "breadth_50": 83.3,
       "breadth_200": 100.0,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 49.4,
-        "weekly": 64.2,
-        "monthly": 84.1
+        "daily": 74.2,
+        "weekly": 70.1,
+        "monthly": 72.2
       }
     },
     "Travel & Leisure": {
@@ -809,25 +901,37 @@
         "EXPE"
       ],
       "member_count": 10,
+      "member_perf": {
+        "BKNG": 1.98,
+        "MAR": -0.3,
+        "ABNB": 0.67,
+        "RCL": 2.08,
+        "CCL": 1.95,
+        "NCLH": 0.49,
+        "DAL": 0.12,
+        "UAL": 1.92,
+        "HLT": 0.4,
+        "EXPE": 0.43
+      },
       "rs_excess_pct": {
-        "1W": 3.25,
-        "1M": -0.61,
-        "3M": -0.53,
-        "6M": 2.37
+        "1W": -5.93,
+        "1M": -4.86,
+        "3M": -4.71,
+        "6M": -3.33
       },
       "rs_rank": {
-        "1W": 48.1,
-        "1M": 22.2,
-        "3M": 14.8,
-        "6M": 18.5
+        "1W": 9.1,
+        "1M": 25.0,
+        "3M": 38.6,
+        "6M": 36.4
       },
-      "breadth_50": 40.0,
+      "breadth_50": 60.0,
       "breadth_200": 50.0,
-      "trend_above_50ema": false,
+      "trend_above_50ema": true,
       "scores": {
-        "daily": 35.6,
-        "weekly": 29.0,
-        "monthly": 22.3
+        "daily": 29.8,
+        "weekly": 29.1,
+        "monthly": 37.6
       }
     },
     "Retail / Consumer": {
@@ -841,58 +945,34 @@
         "DLTR"
       ],
       "member_count": 7,
+      "member_perf": {
+        "WMT": -1.6,
+        "COST": -0.32,
+        "TGT": -0.7,
+        "HD": -1.26,
+        "LOW": -0.85,
+        "DG": -1.11,
+        "DLTR": 1.47
+      },
       "rs_excess_pct": {
-        "1W": 2.55,
-        "1M": -1.01,
-        "3M": -3.81,
-        "6M": -12.82
+        "1W": -1.81,
+        "1M": -5.14,
+        "3M": -7.99,
+        "6M": 4.07
       },
       "rs_rank": {
-        "1W": 33.3,
-        "1M": 18.5,
-        "3M": 7.4,
-        "6M": 7.4
+        "1W": 36.4,
+        "1M": 22.7,
+        "3M": 25.0,
+        "6M": 52.3
       },
-      "breadth_50": 28.6,
-      "breadth_200": 28.6,
-      "trend_above_50ema": false,
-      "scores": {
-        "daily": 25.6,
-        "weekly": 21.3,
-        "monthly": 12.2
-      }
-    },
-    "Hogue 2026": {
-      "members": [
-        "AMZN",
-        "PLTR",
-        "MRVL",
-        "MSFT",
-        "TSLA",
-        "GOOGL",
-        "NVDA",
-        "ZS"
-      ],
-      "member_count": 8,
-      "rs_excess_pct": {
-        "1W": 5.71,
-        "1M": 7.0,
-        "3M": 18.79,
-        "6M": 32.51
-      },
-      "rs_rank": {
-        "1W": 92.6,
-        "1M": 88.9,
-        "3M": 70.4,
-        "6M": 74.1
-      },
-      "breadth_50": 87.5,
-      "breadth_200": 87.5,
+      "breadth_50": 42.9,
+      "breadth_200": 57.1,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 91.6,
-        "weekly": 86.6,
-        "monthly": 76.8
+        "daily": 40.3,
+        "weekly": 28.8,
+        "monthly": 37.7
       }
     },
     "Top Recurring": {
@@ -901,7 +981,6 @@
         "PLTR",
         "AMZN",
         "MSFT",
-        "GOOGL",
         "META",
         "TSLA",
         "AMD",
@@ -910,28 +989,1791 @@
         "SMCI",
         "MU"
       ],
-      "member_count": 12,
+      "member_count": 11,
+      "member_perf": {
+        "NVDA": 4.32,
+        "PLTR": 1.07,
+        "AMZN": 3.49,
+        "MSFT": 2.13,
+        "META": 2.41,
+        "TSLA": 0.69,
+        "AMD": 13.91,
+        "MRVL": -0.76,
+        "ZS": 1.9,
+        "SMCI": 8.71,
+        "MU": 3.11
+      },
       "rs_excess_pct": {
-        "1W": 6.19,
-        "1M": 4.95,
-        "3M": 13.28,
-        "6M": 30.85
+        "1W": 4.14,
+        "1M": 11.44,
+        "3M": 4.13,
+        "6M": 0.67
       },
       "rs_rank": {
-        "1W": 96.3,
-        "1M": 63.0,
-        "3M": 59.3,
-        "6M": 70.4
+        "1W": 79.5,
+        "1M": 81.8,
+        "3M": 59.1,
+        "6M": 45.5
       },
-      "breadth_50": 75.0,
-      "breadth_200": 83.3,
+      "breadth_50": 72.7,
+      "breadth_200": 45.5,
       "trend_above_50ema": true,
       "scores": {
-        "daily": 85.1,
-        "weekly": 70.9,
-        "monthly": 66.8
+        "daily": 81.1,
+        "weekly": 76.6,
+        "monthly": 56.4
+      }
+    },
+    "[TV] Electronic technology": {
+      "members": [
+        "NVDA",
+        "AAPL",
+        "AVGO",
+        "MU",
+        "AMD",
+        "GE",
+        "INTC",
+        "CSCO",
+        "RTX",
+        "KLAC",
+        "TXN",
+        "ANET",
+        "APH",
+        "BA",
+        "ARM",
+        "ADI",
+        "HON",
+        "GLW",
+        "QCOM",
+        "LMT",
+        "SNDK",
+        "WDC",
+        "MRVL",
+        "VRT",
+        "DELL",
+        "STX",
+        "HWM",
+        "NOC",
+        "GD",
+        "EMR"
+      ],
+      "member_count": 30,
+      "member_perf": {
+        "NVDA": 4.32,
+        "AAPL": -0.87,
+        "AVGO": 0.67,
+        "MU": 3.11,
+        "AMD": 13.91,
+        "GE": 0.8,
+        "INTC": 23.6,
+        "CSCO": 0.47,
+        "RTX": -2.81,
+        "KLAC": 6.59,
+        "TXN": -1.8,
+        "ANET": 2.53,
+        "APH": -0.31,
+        "BA": -0.73,
+        "ARM": 14.76,
+        "ADI": -1.07,
+        "HON": -0.55,
+        "GLW": 3.77,
+        "QCOM": 11.12,
+        "LMT": -3.08,
+        "SNDK": 6.16,
+        "WDC": 0.22,
+        "MRVL": -0.76,
+        "VRT": 0.53,
+        "DELL": 1.86,
+        "STX": -0.23,
+        "HWM": -1.51,
+        "NOC": -2.14,
+        "GD": -1.73,
+        "EMR": -0.77
+      },
+      "rs_excess_pct": {
+        "1W": 4.46,
+        "1M": 11.23,
+        "3M": 27.24,
+        "6M": 48.48
+      },
+      "rs_rank": {
+        "1W": 84.1,
+        "1M": 79.5,
+        "3M": 84.1,
+        "6M": 88.6
+      },
+      "breadth_50": 76.7,
+      "breadth_200": 80.0,
+      "trend_above_50ema": true,
+      "scores": {
+        "daily": 83.4,
+        "weekly": 80.7,
+        "monthly": 84.2
+      }
+    },
+    "[TV] Technology services": {
+      "members": [
+        "GOOG",
+        "MSFT",
+        "META",
+        "ORCL",
+        "NFLX",
+        "PLTR",
+        "IBM",
+        "CRM",
+        "APP",
+        "PANW",
+        "ACN",
+        "SPOT",
+        "INTU",
+        "CRWD",
+        "ADBE",
+        "NOW",
+        "SNPS",
+        "CDNS",
+        "ADP",
+        "NTES",
+        "NET",
+        "CRWV",
+        "FTNT",
+        "EA",
+        "ADSK",
+        "SNOW",
+        "MSTR",
+        "DDOG",
+        "RBLX",
+        "NBIS"
+      ],
+      "member_count": 30,
+      "member_perf": {
+        "GOOG": 1.35,
+        "MSFT": 2.13,
+        "META": 2.41,
+        "ORCL": -1.7,
+        "NFLX": -0.41,
+        "PLTR": 1.07,
+        "IBM": 0.39,
+        "CRM": 2.8,
+        "APP": -1.29,
+        "PANW": 3.08,
+        "ACN": 0.04,
+        "SPOT": 0.4,
+        "INTU": 3.3,
+        "CRWD": 0.62,
+        "ADBE": 2.7,
+        "NOW": 6.36,
+        "SNPS": 9.62,
+        "CDNS": 5.9,
+        "ADP": -1.01,
+        "NTES": 0.95,
+        "NET": 1.01,
+        "CRWV": -6.2,
+        "FTNT": 1.91,
+        "EA": 0.08,
+        "ADSK": 2.35,
+        "SNOW": -4.15,
+        "MSTR": -0.84,
+        "DDOG": 1.27,
+        "RBLX": 1.15,
+        "NBIS": -6.32
+      },
+      "rs_excess_pct": {
+        "1W": -1.66,
+        "1M": -2.42,
+        "3M": -9.19,
+        "6M": -23.41
+      },
+      "rs_rank": {
+        "1W": 38.6,
+        "1M": 45.5,
+        "3M": 20.5,
+        "6M": 11.4
+      },
+      "breadth_50": 56.7,
+      "breadth_200": 26.7,
+      "trend_above_50ema": true,
+      "scores": {
+        "daily": 49.2,
+        "weekly": 42.0,
+        "monthly": 22.4
+      }
+    },
+    "[TV] Retail trade": {
+      "members": [
+        "AMZN",
+        "WMT",
+        "COST",
+        "HD",
+        "BABA",
+        "TJX",
+        "PDD",
+        "LOW",
+        "CVS",
+        "MELI",
+        "CVNA",
+        "ORLY",
+        "ROST",
+        "TGT",
+        "SE",
+        "EBAY",
+        "KR",
+        "CPNG",
+        "JD",
+        "CPRT",
+        "TPR",
+        "CASY",
+        "DG",
+        "ULTA",
+        "TSCO",
+        "WSM",
+        "BURL",
+        "DLTR",
+        "DKS",
+        "BBY"
+      ],
+      "member_count": 30,
+      "member_perf": {
+        "AMZN": 3.49,
+        "WMT": -1.6,
+        "COST": -0.32,
+        "HD": -1.26,
+        "BABA": 3.13,
+        "TJX": -0.83,
+        "PDD": 0.27,
+        "LOW": -0.85,
+        "CVS": -1.17,
+        "MELI": 1.44,
+        "CVNA": 1.5,
+        "ORLY": -0.12,
+        "ROST": -0.24,
+        "TGT": -0.7,
+        "SE": 2.51,
+        "EBAY": -5.28,
+        "KR": -2.71,
+        "CPNG": -0.34,
+        "JD": 0.97,
+        "CPRT": -2.39,
+        "TPR": -0.38,
+        "CASY": 1.23,
+        "DG": -1.11,
+        "ULTA": -1.04,
+        "TSCO": -3.75,
+        "WSM": -0.96,
+        "BURL": 0.65,
+        "DLTR": 1.47,
+        "DKS": 0.65,
+        "BBY": -1.71
+      },
+      "rs_excess_pct": {
+        "1W": -2.87,
+        "1M": -3.71,
+        "3M": -7.09,
+        "6M": -5.72
+      },
+      "rs_rank": {
+        "1W": 27.3,
+        "1M": 34.1,
+        "3M": 29.5,
+        "6M": 27.3
+      },
+      "breadth_50": 53.3,
+      "breadth_200": 53.3,
+      "trend_above_50ema": true,
+      "scores": {
+        "daily": 40.2,
+        "weekly": 34.9,
+        "monthly": 33.1
+      }
+    },
+    "[TV] Consumer durables": {
+      "members": [
+        "TSLA",
+        "GM",
+        "F",
+        "DHI",
+        "PHM",
+        "LEN",
+        "AS",
+        "RIVN",
+        "SGI",
+        "SN",
+        "NIO",
+        "TOL",
+        "HAS",
+        "ALLE",
+        "SWK",
+        "VFS",
+        "OSK",
+        "LKQ",
+        "FSS",
+        "TMHC",
+        "MAT",
+        "FTDR",
+        "SKY",
+        "THO",
+        "TPH",
+        "WHR",
+        "PATK",
+        "KBH",
+        "HAYW",
+        "PII"
+      ],
+      "member_count": 30,
+      "member_perf": {
+        "TSLA": 0.69,
+        "GM": -0.6,
+        "F": -0.8,
+        "DHI": -2.63,
+        "PHM": -2.36,
+        "LEN": -0.14,
+        "AS": -0.08,
+        "RIVN": -2.54,
+        "SGI": -0.48,
+        "SN": 0.92,
+        "NIO": -1.11,
+        "TOL": -1.75,
+        "HAS": -1.55,
+        "ALLE": -0.9,
+        "SWK": 0.83,
+        "VFS": -1.13,
+        "OSK": -1.8,
+        "LKQ": 0.73,
+        "FSS": -0.68,
+        "TMHC": -1.69,
+        "MAT": -1.49,
+        "FTDR": 0.94,
+        "SKY": 0.92,
+        "THO": 0.24,
+        "TPH": 0.02,
+        "WHR": -0.74,
+        "PATK": -3.03,
+        "KBH": -1.55,
+        "HAYW": 0.2,
+        "PII": 1.06
+      },
+      "rs_excess_pct": {
+        "1W": -1.42,
+        "1M": -3.2,
+        "3M": -7.51,
+        "6M": -3.19
+      },
+      "rs_rank": {
+        "1W": 43.2,
+        "1M": 40.9,
+        "3M": 27.3,
+        "6M": 38.6
+      },
+      "breadth_50": 60.0,
+      "breadth_200": 63.3,
+      "trend_above_50ema": true,
+      "scores": {
+        "daily": 50.8,
+        "weekly": 42.2,
+        "monthly": 38.1
+      }
+    },
+    "[TV] Health technology": {
+      "members": [
+        "LLY",
+        "JNJ",
+        "ABBV",
+        "MRK",
+        "TMO",
+        "AMGN",
+        "ABT",
+        "GILD",
+        "ISRG",
+        "PFE",
+        "DHR",
+        "SYK",
+        "BMY",
+        "VRTX",
+        "MDT",
+        "BSX",
+        "REGN",
+        "MDLN",
+        "ZTS",
+        "IDXX",
+        "EW",
+        "BDX",
+        "ALNY",
+        "A",
+        "GEHC",
+        "RMD",
+        "WAT",
+        "INSM",
+        "RVMD",
+        "IQV"
+      ],
+      "member_count": 30,
+      "member_perf": {
+        "LLY": -3.67,
+        "JNJ": -1.37,
+        "ABBV": -1.11,
+        "MRK": -2.37,
+        "TMO": 0.64,
+        "AMGN": -1.17,
+        "ABT": -1.46,
+        "GILD": -2.42,
+        "ISRG": 0.71,
+        "PFE": 1.24,
+        "DHR": -0.74,
+        "SYK": -0.65,
+        "BMY": -0.53,
+        "VRTX": -1.11,
+        "MDT": -0.56,
+        "BSX": -5.51,
+        "REGN": -1.89,
+        "MDLN": -3.18,
+        "ZTS": 0.7,
+        "IDXX": 0.89,
+        "EW": 5.56,
+        "BDX": -1.75,
+        "ALNY": -2.63,
+        "A": 0.99,
+        "GEHC": -1.52,
+        "RMD": 0.15,
+        "WAT": -0.43,
+        "INSM": -6.02,
+        "RVMD": 0.61,
+        "IQV": 1.0
+      },
+      "rs_excess_pct": {
+        "1W": -4.75,
+        "1M": -9.98,
+        "3M": -12.79,
+        "6M": -8.44
+      },
+      "rs_rank": {
+        "1W": 15.9,
+        "1M": 13.6,
+        "3M": 15.9,
+        "6M": 22.7
+      },
+      "breadth_50": 10.0,
+      "breadth_200": 31.0,
+      "trend_above_50ema": false,
+      "scores": {
+        "daily": 12.9,
+        "weekly": 13.9,
+        "monthly": 19.9
+      }
+    },
+    "[TV] Finance": {
+      "members": [
+        "JPM",
+        "V",
+        "MA",
+        "BAC",
+        "MS",
+        "GS",
+        "WFC",
+        "C",
+        "AXP",
+        "SCHW",
+        "BLK",
+        "BX",
+        "WELL",
+        "IBKR",
+        "PLD",
+        "CB",
+        "COF",
+        "PGR",
+        "CME",
+        "EQIX",
+        "ICE",
+        "KKR",
+        "BK",
+        "PNC",
+        "USB",
+        "MRSH",
+        "AMT",
+        "BAM",
+        "HOOD",
+        "NU"
+      ],
+      "member_count": 30,
+      "member_perf": {
+        "JPM": -1.09,
+        "V": 0.17,
+        "MA": 0.36,
+        "BAC": -0.8,
+        "MS": -0.31,
+        "GS": -0.47,
+        "WFC": -1.35,
+        "C": -0.41,
+        "AXP": -1.4,
+        "SCHW": -0.47,
+        "BLK": -0.81,
+        "BX": -0.56,
+        "WELL": 0.24,
+        "IBKR": 0.95,
+        "PLD": -0.17,
+        "CB": -2.03,
+        "COF": -2.66,
+        "PGR": -2.16,
+        "CME": -0.14,
+        "EQIX": -0.59,
+        "ICE": 0.62,
+        "KKR": 0.19,
+        "BK": -1.01,
+        "PNC": -2.32,
+        "USB": -1.85,
+        "MRSH": -2.25,
+        "AMT": -0.45,
+        "BAM": -0.48,
+        "HOOD": 1.4,
+        "NU": 0.35
+      },
+      "rs_excess_pct": {
+        "1W": -3.15,
+        "1M": -2.46,
+        "3M": -4.91,
+        "6M": -3.71
+      },
+      "rs_rank": {
+        "1W": 25.0,
+        "1M": 43.2,
+        "3M": 36.4,
+        "6M": 34.1
+      },
+      "breadth_50": 60.0,
+      "breadth_200": 46.7,
+      "trend_above_50ema": true,
+      "scores": {
+        "daily": 42.3,
+        "weekly": 41.0,
+        "monthly": 38.2
+      }
+    },
+    "[TV] Energy minerals": {
+      "members": [
+        "XOM",
+        "CVX",
+        "COP",
+        "EOG",
+        "VLO",
+        "MPC",
+        "PSX",
+        "OXY",
+        "FANG",
+        "EQT",
+        "DVN",
+        "CTRA",
+        "EXE",
+        "PR",
+        "OVV",
+        "APA",
+        "AR",
+        "DINO",
+        "RRC",
+        "NFG",
+        "HESM",
+        "CHRD",
+        "MTDR",
+        "SM",
+        "CRC",
+        "CNX",
+        "MUR",
+        "MGY",
+        "IEP",
+        "CRK"
+      ],
+      "member_count": 30,
+      "member_perf": {
+        "XOM": -1.08,
+        "CVX": -1.27,
+        "COP": -2.1,
+        "EOG": -0.55,
+        "VLO": 0.86,
+        "MPC": 1.37,
+        "PSX": 2.08,
+        "OXY": -1.23,
+        "FANG": -0.41,
+        "EQT": -0.03,
+        "DVN": -0.44,
+        "CTRA": -0.36,
+        "EXE": 0.15,
+        "PR": -1.73,
+        "OVV": -1.5,
+        "APA": -2.41,
+        "AR": -0.94,
+        "DINO": 1.21,
+        "RRC": -0.66,
+        "NFG": -1.09,
+        "HESM": -1.37,
+        "CHRD": -1.35,
+        "MTDR": -1.0,
+        "SM": -1.74,
+        "CRC": -0.8,
+        "CNX": -0.18,
+        "MUR": -1.42,
+        "MGY": -1.28,
+        "IEP": 0.99,
+        "CRK": -1.51
+      },
+      "rs_excess_pct": {
+        "1W": 3.93,
+        "1M": -15.16,
+        "3M": 16.97,
+        "6M": 24.98
+      },
+      "rs_rank": {
+        "1W": 77.3,
+        "1M": 4.5,
+        "3M": 79.5,
+        "6M": 68.2
+      },
+      "breadth_50": 66.7,
+      "breadth_200": 93.3,
+      "trend_above_50ema": true,
+      "scores": {
+        "daily": 59.8,
+        "weekly": 39.7,
+        "monthly": 67.0
+      }
+    },
+    "[TV] Producer manufacturing": {
+      "members": [
+        "CAT",
+        "LRCX",
+        "AMAT",
+        "GEV",
+        "DE",
+        "ETN",
+        "PH",
+        "TT",
+        "JCI",
+        "CMI",
+        "MMM",
+        "ITW",
+        "PCAR",
+        "LITE",
+        "AME",
+        "CARR",
+        "ROK",
+        "WAB",
+        "SYM",
+        "IR",
+        "JBL",
+        "XYL",
+        "DOV",
+        "HUBB",
+        "WWD",
+        "VLTO",
+        "ENTG",
+        "ITT",
+        "MKSI",
+        "WSO"
+      ],
+      "member_count": 30,
+      "member_perf": {
+        "CAT": -0.53,
+        "LRCX": 3.57,
+        "AMAT": 3.25,
+        "GEV": -0.03,
+        "DE": -4.95,
+        "ETN": -0.14,
+        "PH": 0.06,
+        "TT": 0.18,
+        "JCI": 0.13,
+        "CMI": 0.58,
+        "MMM": 0.79,
+        "ITW": -1.41,
+        "PCAR": 0.02,
+        "LITE": 4.1,
+        "AME": -0.87,
+        "CARR": -0.93,
+        "ROK": -1.89,
+        "WAB": -0.89,
+        "SYM": -4.99,
+        "IR": -1.34,
+        "JBL": 0.92,
+        "XYL": -0.19,
+        "DOV": -1.48,
+        "HUBB": -0.86,
+        "WWD": -0.7,
+        "VLTO": -0.19,
+        "ENTG": 4.45,
+        "ITT": -0.22,
+        "MKSI": 0.15,
+        "WSO": 0.72
+      },
+      "rs_excess_pct": {
+        "1W": 0.24,
+        "1M": 1.2,
+        "3M": 14.52,
+        "6M": 34.86
+      },
+      "rs_rank": {
+        "1W": 59.1,
+        "1M": 59.1,
+        "3M": 77.3,
+        "6M": 81.8
+      },
+      "breadth_50": 76.7,
+      "breadth_200": 90.0,
+      "trend_above_50ema": true,
+      "scores": {
+        "daily": 65.8,
+        "weekly": 64.5,
+        "monthly": 77.8
+      }
+    },
+    "[TV] Consumer non-durables": {
+      "members": [
+        "PG",
+        "KO",
+        "PM",
+        "PEP",
+        "MO",
+        "MNST",
+        "MDLZ",
+        "NKE",
+        "CL",
+        "CCEP",
+        "HSY",
+        "KDP",
+        "KVUE",
+        "KMB",
+        "STZ",
+        "EL",
+        "KHC",
+        "CHD",
+        "RL",
+        "TSN",
+        "LULU",
+        "JBS",
+        "GIS",
+        "IFF",
+        "DECK",
+        "MKC",
+        "COKE",
+        "CLX",
+        "ONON",
+        "HRL"
+      ],
+      "member_count": 30,
+      "member_perf": {
+        "PG": 2.46,
+        "KO": 0.46,
+        "PM": -2.95,
+        "PEP": -0.17,
+        "MO": -0.4,
+        "MNST": 0.86,
+        "MDLZ": -0.17,
+        "NKE": -0.2,
+        "CL": 1.11,
+        "CCEP": 0.75,
+        "HSY": -0.32,
+        "KDP": 2.42,
+        "KVUE": 0.0,
+        "KMB": -0.08,
+        "STZ": -2.08,
+        "EL": 1.86,
+        "KHC": -0.14,
+        "CHD": 0.47,
+        "RL": 0.03,
+        "TSN": -1.84,
+        "LULU": 1.51,
+        "JBS": -1.42,
+        "GIS": -1.41,
+        "IFF": 0.28,
+        "DECK": 0.76,
+        "MKC": -0.69,
+        "COKE": 1.65,
+        "CLX": 1.04,
+        "ONON": 0.08,
+        "HRL": -0.97
+      },
+      "rs_excess_pct": {
+        "1W": -1.64,
+        "1M": -7.47,
+        "3M": -6.98,
+        "6M": -5.75
+      },
+      "rs_rank": {
+        "1W": 40.9,
+        "1M": 18.2,
+        "3M": 31.8,
+        "6M": 25.0
+      },
+      "breadth_50": 30.0,
+      "breadth_200": 56.7,
+      "trend_above_50ema": false,
+      "scores": {
+        "daily": 29.5,
+        "weekly": 26.5,
+        "monthly": 31.5
+      }
+    },
+    "[TV] Health services": {
+      "members": [
+        "UNH",
+        "HCA",
+        "CI",
+        "ELV",
+        "HUM",
+        "LH",
+        "DGX",
+        "CNC",
+        "THC",
+        "SOLV",
+        "GH",
+        "UHS",
+        "EHC",
+        "DVA",
+        "BTSG",
+        "MOH",
+        "HIMS",
+        "PACS",
+        "RDNT",
+        "OPCH",
+        "ALHC",
+        "OSCR",
+        "BLLN",
+        "BKD",
+        "CON",
+        "LFST",
+        "ACHC",
+        "SEM",
+        "WGS",
+        "MD"
+      ],
+      "member_count": 30,
+      "member_perf": {
+        "UNH": 0.1,
+        "HCA": -8.77,
+        "CI": -1.46,
+        "ELV": -0.44,
+        "HUM": 0.13,
+        "LH": -0.42,
+        "DGX": -1.63,
+        "CNC": 1.78,
+        "THC": -3.99,
+        "SOLV": -0.64,
+        "GH": 1.18,
+        "UHS": -3.77,
+        "EHC": 0.12,
+        "DVA": -2.05,
+        "BTSG": 2.03,
+        "MOH": 0.71,
+        "HIMS": 8.56,
+        "PACS": 1.08,
+        "RDNT": 2.11,
+        "OPCH": -0.49,
+        "ALHC": 1.44,
+        "OSCR": 2.31,
+        "BLLN": 0.97,
+        "BKD": 1.76,
+        "CON": -0.78,
+        "LFST": 0.86,
+        "ACHC": 0.15,
+        "SEM": 0.12,
+        "WGS": 3.46,
+        "MD": 1.23
+      },
+      "rs_excess_pct": {
+        "1W": 0.82,
+        "1M": 0.23,
+        "3M": -3.03,
+        "6M": 1.44
+      },
+      "rs_rank": {
+        "1W": 63.6,
+        "1M": 52.3,
+        "3M": 43.2,
+        "6M": 47.7
+      },
+      "breadth_50": 60.0,
+      "breadth_200": 58.6,
+      "trend_above_50ema": true,
+      "scores": {
+        "daily": 63.9,
+        "weekly": 54.3,
+        "monthly": 48.2
+      }
+    },
+    "[TV] Process industries": {
+      "members": [
+        "LIN",
+        "SHW",
+        "ECL",
+        "APD",
+        "CTVA",
+        "ADM",
+        "DOW",
+        "PPG",
+        "LYB",
+        "BG",
+        "ALB",
+        "SW",
+        "IP",
+        "DD",
+        "AMCR",
+        "CF",
+        "PKG",
+        "BALL",
+        "WLK",
+        "RPM",
+        "AVY",
+        "SOLS",
+        "CCK",
+        "OC",
+        "ESI",
+        "EMN",
+        "ATR",
+        "PPC",
+        "MOS",
+        "CE"
+      ],
+      "member_count": 30,
+      "member_perf": {
+        "LIN": 0.44,
+        "SHW": 0.01,
+        "ECL": -0.72,
+        "APD": -0.62,
+        "CTVA": 0.21,
+        "ADM": -1.14,
+        "DOW": 0.34,
+        "PPG": -0.44,
+        "LYB": -1.2,
+        "BG": -1.2,
+        "ALB": -2.49,
+        "SW": -1.38,
+        "IP": -2.65,
+        "DD": -0.09,
+        "AMCR": -1.74,
+        "CF": -3.71,
+        "PKG": -1.0,
+        "BALL": -2.85,
+        "WLK": -1.43,
+        "RPM": -0.68,
+        "AVY": -1.15,
+        "SOLS": 0.31,
+        "CCK": -1.7,
+        "OC": -0.04,
+        "ESI": 6.21,
+        "EMN": 0.11,
+        "ATR": -0.69,
+        "PPC": -0.24,
+        "MOS": -1.15,
+        "CE": -0.35
+      },
+      "rs_excess_pct": {
+        "1W": -1.41,
+        "1M": -8.12,
+        "3M": 3.37,
+        "6M": 13.55
+      },
+      "rs_rank": {
+        "1W": 45.5,
+        "1M": 15.9,
+        "3M": 54.5,
+        "6M": 61.4
+      },
+      "breadth_50": 43.3,
+      "breadth_200": 65.5,
+      "trend_above_50ema": true,
+      "scores": {
+        "daily": 43.2,
+        "weekly": 31.7,
+        "monthly": 52.4
+      }
+    },
+    "[TV] Consumer services": {
+      "members": [
+        "MCD",
+        "DIS",
+        "BKNG",
+        "SBUX",
+        "CMCSA",
+        "MAR",
+        "ABNB",
+        "RCL",
+        "HLT",
+        "WBD",
+        "CMG",
+        "YUM",
+        "CCL",
+        "LVS",
+        "TKO",
+        "LYV",
+        "VIK",
+        "QSR",
+        "EXPE",
+        "CHTR",
+        "FOX",
+        "DRI",
+        "FLUT",
+        "YUMC",
+        "H",
+        "NWS",
+        "NYT",
+        "PSKY",
+        "DPZ",
+        "DKNG"
+      ],
+      "member_count": 30,
+      "member_perf": {
+        "MCD": -1.05,
+        "DIS": -1.01,
+        "BKNG": 1.98,
+        "SBUX": -0.87,
+        "CMCSA": -12.9,
+        "MAR": -0.3,
+        "ABNB": 0.67,
+        "RCL": 2.08,
+        "HLT": 0.4,
+        "WBD": 0.63,
+        "CMG": 0.91,
+        "YUM": -0.28,
+        "CCL": 1.95,
+        "LVS": 1.66,
+        "TKO": 0.13,
+        "LYV": 2.24,
+        "VIK": 1.04,
+        "QSR": -0.41,
+        "EXPE": 0.43,
+        "CHTR": -25.5,
+        "FOX": -2.72,
+        "DRI": -0.63,
+        "FLUT": 5.21,
+        "YUMC": 1.6,
+        "H": -0.12,
+        "NWS": -0.53,
+        "NYT": 0.57,
+        "PSKY": -2.66,
+        "DPZ": -1.22,
+        "DKNG": 4.56
+      },
+      "rs_excess_pct": {
+        "1W": -3.63,
+        "1M": -4.73,
+        "3M": -5.78,
+        "6M": -5.62
+      },
+      "rs_rank": {
+        "1W": 20.5,
+        "1M": 27.3,
+        "3M": 34.1,
+        "6M": 29.5
+      },
+      "breadth_50": 53.3,
+      "breadth_200": 50.0,
+      "trend_above_50ema": true,
+      "scores": {
+        "daily": 35.0,
+        "weekly": 30.8,
+        "monthly": 34.1
+      }
+    },
+    "[TV] Communications": {
+      "members": [
+        "TMUS",
+        "VZ",
+        "T",
+        "SATS",
+        "ASTS",
+        "TIGO",
+        "GSAT",
+        "LUMN",
+        "TDS",
+        "LBTYA",
+        "IRDM",
+        "CCOI",
+        "OPTU",
+        "GOGO",
+        "IQST"
+      ],
+      "member_count": 15,
+      "member_perf": {
+        "TMUS": -2.2,
+        "VZ": -1.78,
+        "T": -1.54,
+        "SATS": -3.31,
+        "ASTS": -2.98,
+        "TIGO": -0.2,
+        "GSAT": 0.64,
+        "LUMN": -1.89,
+        "TDS": -0.33,
+        "LBTYA": -1.73,
+        "IRDM": -4.81,
+        "CCOI": 2.09,
+        "OPTU": -9.58,
+        "GOGO": -6.91,
+        "IQST": -14.36
+      },
+      "rs_excess_pct": {
+        "1W": -4.25,
+        "1M": -3.4,
+        "3M": 2.3,
+        "6M": 1.72
+      },
+      "rs_rank": {
+        "1W": 18.2,
+        "1M": 38.6,
+        "3M": 52.3,
+        "6M": 50.0
+      },
+      "breadth_50": 53.3,
+      "breadth_200": 60.0,
+      "trend_above_50ema": true,
+      "scores": {
+        "daily": 36.8,
+        "weekly": 38.8,
+        "monthly": 50.7
+      }
+    },
+    "[TV] Utilities": {
+      "members": [
+        "NEE",
+        "CEG",
+        "SO",
+        "DUK",
+        "AEP",
+        "SRE",
+        "VST",
+        "D",
+        "ETR",
+        "TRGP",
+        "XEL",
+        "EXC",
+        "PEG",
+        "ED",
+        "PCG",
+        "WEC",
+        "NRG",
+        "ATO",
+        "AEE",
+        "DTE",
+        "PPL",
+        "FE",
+        "CNP",
+        "EIX",
+        "ES",
+        "AWK",
+        "CMS",
+        "NI",
+        "EVRG",
+        "LNT"
+      ],
+      "member_count": 30,
+      "member_perf": {
+        "NEE": -1.01,
+        "CEG": 7.09,
+        "SO": -0.45,
+        "DUK": -0.6,
+        "AEP": -0.26,
+        "SRE": -0.76,
+        "VST": 4.78,
+        "D": 0.1,
+        "ETR": -0.25,
+        "TRGP": 0.33,
+        "XEL": -0.42,
+        "EXC": 0.36,
+        "PEG": 0.72,
+        "ED": -1.08,
+        "PCG": -1.31,
+        "WEC": -0.84,
+        "NRG": 3.42,
+        "ATO": -1.26,
+        "AEE": -0.83,
+        "DTE": -0.35,
+        "PPL": 0.54,
+        "FE": -0.42,
+        "CNP": -1.64,
+        "EIX": -2.1,
+        "ES": -0.19,
+        "AWK": -1.89,
+        "CMS": -0.46,
+        "NI": -0.62,
+        "EVRG": -0.81,
+        "LNT": -0.44
+      },
+      "rs_excess_pct": {
+        "1W": -1.12,
+        "1M": -6.82,
+        "3M": 5.88,
+        "6M": -1.42
+      },
+      "rs_rank": {
+        "1W": 47.7,
+        "1M": 20.5,
+        "3M": 65.9,
+        "6M": 43.2
+      },
+      "breadth_50": 40.0,
+      "breadth_200": 86.7,
+      "trend_above_50ema": true,
+      "scores": {
+        "daily": 45.0,
+        "weekly": 35.7,
+        "monthly": 55.4
+      }
+    },
+    "[TV] Commercial services": {
+      "members": [
+        "SHOP",
+        "SPGI",
+        "MCO",
+        "CTAS",
+        "PYPL",
+        "MSCI",
+        "XYZ",
+        "FISV",
+        "ROL",
+        "EFX",
+        "OMC",
+        "CPAY",
+        "GPN",
+        "ULS",
+        "WMG",
+        "TRU",
+        "BAH",
+        "ICLR",
+        "CRL",
+        "FDS",
+        "MORN",
+        "TAL",
+        "BZ",
+        "G",
+        "WEX",
+        "KLAR",
+        "ADT",
+        "FOUR",
+        "GPGI"
+      ],
+      "member_count": 29,
+      "member_perf": {
+        "SHOP": 1.29,
+        "SPGI": -0.51,
+        "MCO": 0.82,
+        "CTAS": -0.97,
+        "PYPL": 1.47,
+        "MSCI": -0.89,
+        "XYZ": 2.43,
+        "FISV": -1.15,
+        "ROL": -0.68,
+        "EFX": -1.41,
+        "OMC": -1.41,
+        "CPAY": -0.18,
+        "GPN": -0.15,
+        "ULS": 0.78,
+        "WMG": -0.17,
+        "TRU": -0.64,
+        "BAH": -0.34,
+        "ICLR": -3.92,
+        "CRL": 1.23,
+        "FDS": -1.74,
+        "MORN": -0.77,
+        "TAL": 3.02,
+        "BZ": 2.18,
+        "G": -0.52,
+        "WEX": -2.78,
+        "KLAR": 2.7,
+        "ADT": 0.28,
+        "FOUR": -2.08,
+        "GPGI": -1.83
+      },
+      "rs_excess_pct": {
+        "1W": -5.25,
+        "1M": -4.06,
+        "3M": -17.13,
+        "6M": -22.61
+      },
+      "rs_rank": {
+        "1W": 11.4,
+        "1M": 31.8,
+        "3M": 11.4,
+        "6M": 13.6
+      },
+      "breadth_50": 51.7,
+      "breadth_200": 21.4,
+      "trend_above_50ema": false,
+      "scores": {
+        "daily": 21.4,
+        "weekly": 27.6,
+        "monthly": 16.6
+      }
+    },
+    "[TV] Transportation": {
+      "members": [
+        "UBER",
+        "UNP",
+        "UPS",
+        "FDX",
+        "CSX",
+        "DASH",
+        "NSC",
+        "DAL",
+        "ODFL",
+        "UAL",
+        "XPO",
+        "JBHT",
+        "LUV",
+        "CHRW",
+        "EXPD",
+        "GRAB",
+        "PFGC",
+        "SAIA",
+        "KNX",
+        "CART",
+        "SARO",
+        "AAL",
+        "KEX",
+        "GXO",
+        "LYFT",
+        "VNT",
+        "CPA",
+        "ALK",
+        "SNDR",
+        "TDW"
+      ],
+      "member_count": 30,
+      "member_perf": {
+        "UBER": -0.08,
+        "UNP": -0.94,
+        "UPS": -0.65,
+        "FDX": -1.2,
+        "CSX": -1.67,
+        "DASH": -0.12,
+        "NSC": -0.54,
+        "DAL": 0.12,
+        "ODFL": -1.26,
+        "UAL": 1.92,
+        "XPO": -0.48,
+        "JBHT": -2.02,
+        "LUV": 4.5,
+        "CHRW": -0.39,
+        "EXPD": -1.46,
+        "GRAB": -1.52,
+        "PFGC": 0.07,
+        "SAIA": 0.33,
+        "KNX": -0.87,
+        "CART": -1.17,
+        "SARO": 0.82,
+        "AAL": 2.72,
+        "KEX": -0.17,
+        "GXO": -0.69,
+        "LYFT": 1.5,
+        "VNT": -1.82,
+        "CPA": 1.6,
+        "ALK": 1.04,
+        "SNDR": 0.5,
+        "TDW": 3.39
+      },
+      "rs_excess_pct": {
+        "1W": -1.92,
+        "1M": 0.61,
+        "3M": 0.42,
+        "6M": 9.49
+      },
+      "rs_rank": {
+        "1W": 34.1,
+        "1M": 54.5,
+        "3M": 50.0,
+        "6M": 56.8
+      },
+      "breadth_50": 73.3,
+      "breadth_200": 63.3,
+      "trend_above_50ema": true,
+      "scores": {
+        "daily": 51.7,
+        "weekly": 52.6,
+        "monthly": 54.7
+      }
+    },
+    "[TV] Non-energy minerals": {
+      "members": [
+        "SCCO",
+        "NEM",
+        "FCX",
+        "CRH",
+        "AU",
+        "NUE",
+        "VMC",
+        "AMRZ",
+        "STLD",
+        "RGLD",
+        "ATI",
+        "CRS",
+        "CDE",
+        "AA",
+        "HL",
+        "JHX",
+        "MP",
+        "AUGO",
+        "UEC",
+        "CMC",
+        "SSRM",
+        "CENX",
+        "EXP",
+        "CLF",
+        "LPX",
+        "KNF",
+        "NG",
+        "TREX",
+        "CSTM",
+        "LEU"
+      ],
+      "member_count": 30,
+      "member_perf": {
+        "SCCO": -1.0,
+        "NEM": 8.68,
+        "FCX": -0.7,
+        "CRH": 0.72,
+        "AU": 2.63,
+        "NUE": 0.63,
+        "VMC": -0.22,
+        "AMRZ": 1.98,
+        "STLD": 0.77,
+        "RGLD": 0.44,
+        "ATI": 0.14,
+        "CRS": 0.19,
+        "CDE": 2.39,
+        "AA": 0.98,
+        "HL": 2.01,
+        "JHX": 0.32,
+        "MP": -4.09,
+        "AUGO": 2.05,
+        "UEC": -6.02,
+        "CMC": 1.69,
+        "SSRM": 2.35,
+        "CENX": 1.45,
+        "EXP": 0.17,
+        "CLF": 7.37,
+        "LPX": 0.82,
+        "KNF": 0.91,
+        "NG": -2.04,
+        "TREX": -1.11,
+        "CSTM": 3.63,
+        "LEU": -6.35
+      },
+      "rs_excess_pct": {
+        "1W": -2.78,
+        "1M": 3.64,
+        "3M": -3.74,
+        "6M": 26.02
+      },
+      "rs_rank": {
+        "1W": 29.5,
+        "1M": 63.6,
+        "3M": 40.9,
+        "6M": 70.5
+      },
+      "breadth_50": 66.7,
+      "breadth_200": 75.9,
+      "trend_above_50ema": true,
+      "scores": {
+        "daily": 50.7,
+        "weekly": 53.9,
+        "monthly": 58.4
+      }
+    },
+    "[TV] Distribution services": {
+      "members": [
+        "MCK",
+        "COR",
+        "FAST",
+        "FERG",
+        "CAH",
+        "SYY",
+        "USFD",
+        "SNX",
+        "QXO",
+        "GPC",
+        "WCC",
+        "CNM",
+        "HSIC",
+        "ARW",
+        "POOL",
+        "UGI",
+        "SITE",
+        "REZI",
+        "AVT",
+        "MSM",
+        "UNFI",
+        "CHEF",
+        "DNOW",
+        "GCT",
+        "HLMN",
+        "DOLE",
+        "OLPX",
+        "WKC",
+        "CRCT",
+        "DNUT"
+      ],
+      "member_count": 30,
+      "member_perf": {
+        "MCK": -0.96,
+        "COR": -1.03,
+        "FAST": -1.67,
+        "FERG": 0.08,
+        "CAH": -2.38,
+        "SYY": 0.99,
+        "USFD": 0.4,
+        "SNX": 2.19,
+        "QXO": -5.11,
+        "GPC": -0.96,
+        "WCC": -0.47,
+        "CNM": 1.12,
+        "HSIC": -0.87,
+        "ARW": -0.26,
+        "POOL": 1.69,
+        "UGI": -0.75,
+        "SITE": 0.48,
+        "REZI": 1.01,
+        "AVT": 0.69,
+        "MSM": -0.23,
+        "UNFI": 1.13,
+        "CHEF": 0.8,
+        "DNOW": 2.17,
+        "GCT": -1.6,
+        "HLMN": -1.34,
+        "DOLE": -0.13,
+        "OLPX": 0.49,
+        "WKC": 10.92,
+        "CRCT": -2.63,
+        "DNUT": 2.88
+      },
+      "rs_excess_pct": {
+        "1W": -0.76,
+        "1M": 0.94,
+        "3M": 4.3,
+        "6M": 10.24
+      },
+      "rs_rank": {
+        "1W": 50.0,
+        "1M": 56.8,
+        "3M": 61.4,
+        "6M": 59.1
+      },
+      "breadth_50": 73.3,
+      "breadth_200": 73.3,
+      "trend_above_50ema": true,
+      "scores": {
+        "daily": 60.2,
+        "weekly": 58.6,
+        "monthly": 61.8
+      }
+    },
+    "[TV] Industrial services": {
+      "members": [
+        "WM",
+        "PWR",
+        "WMB",
+        "SLB",
+        "KMI",
+        "RSG",
+        "BKR",
+        "LNG",
+        "OKE",
+        "OTIS",
+        "HAL",
+        "FTI",
+        "MTZ",
+        "APG",
+        "CLH",
+        "PAA",
+        "STRL",
+        "DTM",
+        "DY",
+        "ACM",
+        "BLD",
+        "AM",
+        "PRIM",
+        "TTEK",
+        "KNTK",
+        "NE",
+        "LGN",
+        "WFRD",
+        "FLR",
+        "NOV"
+      ],
+      "member_count": 30,
+      "member_perf": {
+        "WM": -1.4,
+        "PWR": -1.36,
+        "WMB": 0.74,
+        "SLB": 2.58,
+        "KMI": 0.03,
+        "RSG": -1.99,
+        "BKR": 6.9,
+        "LNG": -0.04,
+        "OKE": 0.33,
+        "OTIS": -1.94,
+        "HAL": 1.79,
+        "FTI": 3.2,
+        "MTZ": -1.77,
+        "APG": -0.69,
+        "CLH": -0.43,
+        "PAA": 0.19,
+        "STRL": 0.3,
+        "DTM": 0.76,
+        "DY": -0.88,
+        "ACM": -0.11,
+        "BLD": -2.48,
+        "AM": -0.05,
+        "PRIM": -0.54,
+        "TTEK": -0.29,
+        "KNTK": 0.34,
+        "NE": 1.23,
+        "LGN": -0.89,
+        "WFRD": 5.45,
+        "FLR": 1.28,
+        "NOV": 1.38
+      },
+      "rs_excess_pct": {
+        "1W": 3.03,
+        "1M": -3.49,
+        "3M": 13.18,
+        "6M": 27.71
+      },
+      "rs_rank": {
+        "1W": 72.7,
+        "1M": 36.4,
+        "3M": 75.0,
+        "6M": 72.7
+      },
+      "breadth_50": 70.0,
+      "breadth_200": 86.2,
+      "trend_above_50ema": true,
+      "scores": {
+        "daily": 66.0,
+        "weekly": 54.5,
+        "monthly": 70.2
+      }
+    },
+    "[TV] Miscellaneous": {
+      "members": [
+        "TPL",
+        "VNOM",
+        "WT",
+        "CSWC",
+        "TRIN",
+        "ASST",
+        "PANL",
+        "INV"
+      ],
+      "member_count": 8,
+      "member_perf": {
+        "TPL": -0.05,
+        "VNOM": -0.38,
+        "WT": -3.19,
+        "CSWC": 0.21,
+        "TRIN": 1.54,
+        "ASST": -2.47,
+        "PANL": -1.1,
+        "INV": -5.22
+      },
+      "rs_excess_pct": {
+        "1W": 3.22,
+        "1M": 4.83,
+        "3M": 12.56,
+        "6M": 44.59
+      },
+      "rs_rank": {
+        "1W": 75.0,
+        "1M": 70.5,
+        "3M": 72.7,
+        "6M": 86.4
+      },
+      "breadth_50": 75.0,
+      "breadth_200": 87.5,
+      "trend_above_50ema": true,
+      "scores": {
+        "daily": 76.4,
+        "weekly": 72.4,
+        "monthly": 78.7
+      }
+    },
+    "[TV] 3X": {
+      "members": [
+        "UMDD",
+        "WEBL",
+        "FAS",
+        "TPOR",
+        "YSPY",
+        "HIBL",
+        "UDOW",
+        "SPXL",
+        "UPRO",
+        "DPST",
+        "TQQQ",
+        "TECL",
+        "SEMY",
+        "URTY",
+        "DUSL",
+        "TNA",
+        "MEXX",
+        "RETL",
+        "DFEN",
+        "NAIL",
+        "TMF",
+        "SOXL",
+        "DRN",
+        "EDC",
+        "YINN",
+        "KORU",
+        "WANT",
+        "EURL",
+        "TQQY",
+        "UTSL"
+      ],
+      "member_count": 30,
+      "member_perf": {
+        "UMDD": 0.71,
+        "WEBL": 3.56,
+        "FAS": -2.05,
+        "TPOR": -1.25,
+        "YSPY": 1.27,
+        "HIBL": 4.52,
+        "UDOW": -0.5,
+        "SPXL": 2.33,
+        "UPRO": 2.28,
+        "DPST": -4.73,
+        "TQQQ": 5.64,
+        "TECL": 8.45,
+        "SEMY": 0.49,
+        "URTY": 1.15,
+        "DUSL": -3.25,
+        "TNA": 1.14,
+        "MEXX": 3.05,
+        "RETL": -0.67,
+        "DFEN": -4.64,
+        "NAIL": -4.08,
+        "TMF": 0.3,
+        "SOXL": 13.79,
+        "DRN": -1.13,
+        "EDC": 6.66,
+        "YINN": 2.96,
+        "KORU": 7.34,
+        "WANT": 1.88,
+        "EURL": 2.29,
+        "TQQY": 1.16,
+        "UTSL": 0.45
+      },
+      "rs_excess_pct": {
+        "1W": -0.37,
+        "1M": 14.9,
+        "3M": 4.91,
+        "6M": 17.96
+      },
+      "rs_rank": {
+        "1W": 54.5,
+        "1M": 84.1,
+        "3M": 63.6,
+        "6M": 65.9
+      },
+      "breadth_50": 83.3,
+      "breadth_200": 69.0,
+      "trend_above_50ema": true,
+      "scores": {
+        "daily": 70.8,
+        "weekly": 75.0,
+        "monthly": 68.2
       }
     }
-  },
-  "_demo_data": true
+  }
 }
