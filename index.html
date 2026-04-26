@@ -979,6 +979,7 @@ tr.sel-row td{background:var(--blu3);}
     <label class="ind-filter-lbl"><input type="checkbox" class="ind-filter" id="filt-tf" onchange="applyFilters()"> <span>TF Aligned 2/3</span></label>
     <label class="ind-filter-lbl"><input type="checkbox" class="ind-filter" id="filt-ema200" onchange="applyFilters()"> <span>Above EMA200</span></label>
     <label class="ind-filter-lbl"><input type="checkbox" class="ind-filter" id="filt-vol" onchange="applyFilters()"> <span>Vol &gt; Avg</span></label>
+    <label class="ind-filter-lbl" title="Hide tickers with earnings within N days. Earnings = binary event; even good signals turn into 50/50 coin flips."><input type="checkbox" class="ind-filter" id="filt-no-earn" onchange="applyFilters()"> <span>No Earnings &lt;<input type="number" id="filt-earn-days" value="7" min="1" max="30" style="width:32px;font-size:10px;padding:1px 3px;background:var(--bg2);border:1px solid var(--bg3);color:var(--amb);" onchange="applyFilters()" onclick="event.stopPropagation()">d</span></label>
     <input type="text" id="sc-search" placeholder="Search ticker..." oninput="onScSearch()" style="margin-left:auto;font-family:var(--ff-mono);font-size:11px;padding:3px 8px;background:var(--bg1);border:1px solid var(--bg3);border-radius:3px;color:var(--amb);width:160px;">
     <span id="sc-filter-count" style="font-family:var(--ff-mono);font-size:10px;color:var(--gry);"></span>
   </div>
@@ -6728,6 +6729,94 @@ async function fetchFmpData(ticker){
   }
 }
 
+// ===========================================================================
+//  EARNINGS CALENDAR — FMP bulk fetch, per-ticker lookup
+// ===========================================================================
+// Skip option entries within N days of earnings: earnings is binary, even
+// strong technical signals become coin flips when IV crush + gap risk dominate.
+// One bulk fetch per scan (FMP earning_calendar?from=X&to=Y returns ALL tickers
+// with earnings in the window). 12hr localStorage TTL — earnings dates rarely
+// change intra-day. Per-ticker lookup is sync after the bulk hydrate.
+
+var G_EARNINGS_CACHE = {};            // ticker -> next earnings YYYY-MM-DD (or '' if none in window)
+var G_EARNINGS_FETCHED_AT = 0;        // ms timestamp of last successful bulk fetch
+var EARNINGS_CACHE_KEY = 'rrjcar_earnings_v1';
+var EARNINGS_CACHE_TTL_MS = 12 * 60 * 60 * 1000;   // 12 hours
+var EARNINGS_LOOKAHEAD_DAYS = 30;     // pull a wide window so user can dial filter to 30d if desired
+
+function loadEarningsCacheFromStorage(){
+  try {
+    var raw = localStorage.getItem(EARNINGS_CACHE_KEY);
+    if (!raw) return false;
+    var obj = JSON.parse(raw);
+    if (!obj || !obj.ts || (Date.now() - obj.ts) > EARNINGS_CACHE_TTL_MS) return false;
+    G_EARNINGS_CACHE = obj.data || {};
+    G_EARNINGS_FETCHED_AT = obj.ts;
+    return true;
+  } catch(e){ return false; }
+}
+
+function saveEarningsCacheToStorage(){
+  try {
+    localStorage.setItem(EARNINGS_CACHE_KEY, JSON.stringify({
+      ts: G_EARNINGS_FETCHED_AT,
+      data: G_EARNINGS_CACHE
+    }));
+  } catch(e){ /* quota — fine, in-memory cache survives the session */ }
+}
+
+async function fetchEarningsCalendarBulk(){
+  // Hydrate from localStorage if fresh
+  if (loadEarningsCacheFromStorage()) return G_EARNINGS_CACHE;
+  if (Object.keys(G_EARNINGS_CACHE).length > 0
+      && (Date.now() - G_EARNINGS_FETCHED_AT) < EARNINGS_CACHE_TTL_MS) {
+    return G_EARNINGS_CACHE;
+  }
+  var fmpKey = '';
+  try { fmpKey = localStorage.getItem('rrjcar_fmp') || ''; } catch(e){}
+  if (!fmpKey && typeof FMP_KEY_DEFAULT !== 'undefined') fmpKey = FMP_KEY_DEFAULT;
+  if (!fmpKey) return G_EARNINGS_CACHE;        // empty cache; rule will pass-by-default
+
+  var today = new Date();
+  var from = today.toISOString().split('T')[0];
+  var to   = new Date(today.getTime() + EARNINGS_LOOKAHEAD_DAYS * 86400000).toISOString().split('T')[0];
+  var url  = 'https://financialmodelingprep.com/stable/earning-calendar?from=' + from + '&to=' + to + '&apikey=' + fmpKey;
+
+  try {
+    var r = await window.fmpFetch(url);
+    var data = await r.json();
+    if (!Array.isArray(data)) return G_EARNINGS_CACHE;
+    var fresh = {};
+    data.forEach(function(row){
+      if (!row || !row.symbol || !row.date) return;
+      // Keep the SOONEST upcoming date per ticker (data may include multiple if FMP duplicates)
+      var existing = fresh[row.symbol];
+      if (!existing || row.date < existing) fresh[row.symbol] = row.date;
+    });
+    G_EARNINGS_CACHE = fresh;
+    G_EARNINGS_FETCHED_AT = Date.now();
+    saveEarningsCacheToStorage();
+    console.log('[earnings] hydrated ' + Object.keys(fresh).length + ' tickers with upcoming earnings');
+    return G_EARNINGS_CACHE;
+  } catch(e) {
+    console.warn('[earnings] fetch failed:', e.message);
+    return G_EARNINGS_CACHE;
+  }
+}
+
+// Days from today to next earnings, or null if unknown / none in lookahead window.
+// "null" means "no signal" — should NOT be treated as "within threshold" (default-allow).
+function getDaysToEarnings(ticker){
+  var d = G_EARNINGS_CACHE[ticker];
+  if (!d) return null;
+  // Parse as UTC midnight to avoid timezone drift
+  var earningsTs = Date.parse(d + 'T00:00:00Z');
+  if (!isFinite(earningsTs)) return null;
+  var nowTs = Date.now();
+  var days = Math.ceil((earningsTs - nowTs) / 86400000);
+  return days >= 0 ? days : null;       // past dates filtered (FMP sometimes stale)
+}
+
 function scoreIt(ticker, ind, opt){
   // \u2500\u2500 Look up cached FMP data (sync \u2014 fetched async during scan) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
   var fmp = G_FMP_CACHE[ticker] || loadFmpCache(ticker);
@@ -6930,7 +7019,14 @@ function buildDetail(r,detId,emptyId){
     '<div class="det-hdr"><span class="det-tk">'+r.ticker+'</span>'
     +'<span class="det-pr">$'+fmt2(r.price)+'</span>'
     +'<span class="det-sig '+sigCls+'">'+sigLbl+'</span>'
-    +'<span class="det-meta">'+r.sector+' | Score: <b>'+Math.round(r.score)+'</b>/150 | Tech: '+techScore+' Fund: '+fundScore+' | Passes: '+r.passes+'/14</span>'
+    +'<span class="det-meta">'+r.sector+' | Score: <b>'+Math.round(r.score)+'</b>/150 | Tech: '+techScore+' Fund: '+fundScore+' | Passes: '+r.passes+'/14'
+      + (function(){
+          var dte = (typeof getDaysToEarnings === 'function') ? getDaysToEarnings(r.ticker) : null;
+          if (dte === null) return '';
+          var color = dte < 7 ? 'var(--ngo)' : dte < 14 ? 'var(--wrn)' : 'var(--grn)';
+          return ' | <span style="color:'+color+';font-weight:700;" title="Next earnings in '+dte+' day(s) — binary event risk">EARN '+dte+'d</span>';
+        })()
+      +'</span>'
     +'<button onclick="closeDetailPane(\''+detId+'\',\''+emptyId+'\')" title="Close detail panel" style="margin-left:auto;background:transparent;border:1px solid var(--gry2);color:var(--wrn);border-radius:3px;padding:2px 9px;font-size:13px;font-weight:700;cursor:pointer;line-height:1;">\u2715</button>'
     +'</div>'
     +'<div class="chain-tabs">'
@@ -7941,6 +8037,13 @@ async function runScan(){
   if(wrap) wrap.style.display = 'block';
   setScanProgress(0, 'Starting scan...');
 
+  // Hydrate earnings calendar in background — non-blocking. Bulk fetch is
+  // cached for 12h so subsequent scans within the day are free. If FMP fails,
+  // G_EARNINGS_CACHE stays empty and the filter pass-by-defaults (null = no signal).
+  fetchEarningsCalendarBulk().catch(function(e){
+    console.warn('[scan] earnings hydrate failed:', e && e.message);
+  });
+
   // NOTE: Sector selections are preserved across scans — the multi-select
   // checkbox dropdown is rebuilt from UNIVERSE_FULL + new results in finishScan().
 
@@ -8336,6 +8439,9 @@ function applyFilters(){
   var needTF      = getIndFilter('filt-tf');
   var needEma200  = getIndFilter('filt-ema200');
   var needVol     = getIndFilter('filt-vol');
+  // Earnings exclusion: hide tickers within N days of upcoming earnings
+  var needNoEarn  = getIndFilter('filt-no-earn');
+  var earnDays    = parseInt((eid('filt-earn-days') && eid('filt-earn-days').value) || '7') || 7;
   // OB filter checkboxes were removed from the UI; underlying detection JS
   // and cache stay defined so the feature can be reactivated. Hardcoded false
   // here (was 4 per-cycle DOM lookups that always returned false).
@@ -8405,6 +8511,14 @@ function applyFilters(){
       if(needTF      && !passed['TF Aligned 2/3'])          return false;
       if(needEma200  && !passed['Price > EMA200'])          return false;
       if(needVol     && !passed['Vol > Avg'])               return false;
+    }
+
+    // Earnings exclusion — hard filter, not a rule. Pass-by-default if
+    // ticker has no entry in G_EARNINGS_CACHE (FMP coverage gap; we don't
+    // exclude on missing data — would be too aggressive).
+    if (needNoEarn) {
+      var dte = getDaysToEarnings(r.ticker);
+      if (dte !== null && dte < earnDays) return false;
     }
 
     return true;
