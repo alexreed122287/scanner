@@ -1995,6 +1995,8 @@ tr.sel-row td{background:var(--blu3);}
   <div class="flt-bar" style="justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
     <span style="font-family:var(--ff-brand);font-size:12px;color:var(--amb);letter-spacing:2px;">PORTFOLIO BUILDER</span>
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <span style="color:var(--gry);font-size:10px;" title="The Tradier account ID being pulled. Set via /v1/user/profile auto-discovery on first PULL TRADIER. Click ⚙ API tab to verify.">Tradier acct: <b id="pf-acct-display" style="color:var(--ambb);font-family:var(--ff-mono);">--</b></span>
+      <span style="color:var(--gry);font-size:10px;" title="Cash + cash-equivalents from Tradier balances endpoint. Pulled together with positions when you click PULL TRADIER.">Cash: <b id="pf-cash-display" style="color:var(--grn);font-family:var(--ff-mono);">$--</b></span>
       <span style="color:var(--gry);font-size:10px;" id="pf-last-update">Not loaded</span>
       <button class="btn blu" style="font-size:10px;padding:3px 10px;" onclick="pfRefreshAll()">&#8635; REFRESH ALL</button>
       <button class="btn" style="font-size:10px;padding:3px 10px;border-color:var(--amb);color:var(--amb);" onclick="pfCopyAllTickers()" title="Copy comma-separated unique tickers from all columns">COPY ALL TICKERS</button>
@@ -16122,6 +16124,29 @@ function renderPortfolio(){
   var wrap = eid('pf-cols-wrap');
   if(!wrap) return;
 
+  // Surface cached account ID + cash on tab open (so user sees them even
+  // before clicking PULL TRADIER). Empty if nothing cached yet.
+  try {
+    var cachedAcct = G.acctId || localStorage.getItem('rrjcar_acct') || '';
+    var acctEl = eid('pf-acct-display');
+    if (acctEl) acctEl.textContent = cachedAcct || '—';
+    var cashEl = eid('pf-cash-display');
+    if (cashEl && G.pfTradierCash != null) {
+      cashEl.textContent = '$' + G.pfTradierCash.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    } else if (cashEl && G.lastBalances) {
+      // Reuse fetchBalances' cached balances object if available
+      var b = G.lastBalances;
+      var cv = (b.margin && b.margin.cash_available)
+            || (b.pdt && b.pdt.cash_available)
+            || (b.cash && b.cash.cash_available)
+            || b.total_cash || null;
+      if (cv != null) {
+        G.pfTradierCash = cv;
+        cashEl.textContent = '$' + cv.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      }
+    }
+  } catch(_){}
+
   var html = '';
   for(var i=0;i<data.columns.length;i++){
     html += pfRenderColumn(data.columns[i]);
@@ -16804,13 +16829,44 @@ function pfAutoPullTradier(){
     return;
   }
 
+  // Surface which account we're pulling from so the user can verify
+  if (eid('pf-acct-display')) eid('pf-acct-display').textContent = acct;
   eid('pf-last-update').textContent = 'Pulling Tradier positions for ' + acct + '...';
-  fetch(creds.host+'/v1/accounts/'+acct+'/positions',
-    {headers:{Authorization:'Bearer '+creds.key, Accept:'application/json'}})
-    .then(function(r){
-      if(!r.ok) throw new Error('positions HTTP '+r.status);
-      return r.json();
-    })
+
+  // Fetch positions + balances in parallel — both /v1/accounts/<acct>/* paths
+  // are read-only (X-Live-Token gated, no X-Trade-Token needed). Balances
+  // gives us cash for the portfolio's cash-balance display.
+  Promise.all([
+    fetch(creds.host+'/v1/accounts/'+acct+'/positions',
+      {headers:{Authorization:'Bearer '+creds.key, Accept:'application/json'}})
+      .then(function(r){ if(!r.ok) throw new Error('positions HTTP '+r.status); return r.json(); }),
+    fetch(creds.host+'/v1/accounts/'+acct+'/balances',
+      {headers:{Authorization:'Bearer '+creds.key, Accept:'application/json'}})
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .catch(function(){ return null; })   // balances is best-effort; positions is the primary
+  ]).then(function(arr){
+    var pd = arr[0];
+    var bd = arr[1];
+
+    // Extract cash from balances. Tradier exposes different fields per account
+    // type: margin → margin.cash_available, cash → cash.cash_available, pdt →
+    // pdt.cash_available. Fall back to total_cash which exists across types.
+    var cashVal = null;
+    if (bd && bd.balances) {
+      var b = bd.balances;
+      if (b.margin && typeof b.margin.cash_available === 'number')      cashVal = b.margin.cash_available;
+      else if (b.pdt && typeof b.pdt.cash_available === 'number')       cashVal = b.pdt.cash_available;
+      else if (b.cash && typeof b.cash.cash_available === 'number')     cashVal = b.cash.cash_available;
+      else if (typeof b.total_cash === 'number')                         cashVal = b.total_cash;
+    }
+    if (cashVal != null && eid('pf-cash-display')) {
+      eid('pf-cash-display').textContent = '$' + cashVal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    }
+    // Stash on G so pfRecomputeStats can roll cash into total
+    G.pfTradierCash = cashVal;
+
+    return pd;
+  })
     .then(function(pd){
       var positions = [];
       try {
@@ -16921,6 +16977,13 @@ function pfRecomputeStats(data){
       }
     });
   });
+  // Include Tradier cash balance in TOTAL VALUE so portfolio reflects full
+  // account equity, not just positions market value. Cash is also treated
+  // as its own "Cash" pseudo-sector for the top-sector calc — large cash
+  // balances would otherwise distort which sector dominates if ignored.
+  var cashAdd = (typeof G.pfTradierCash === 'number' && isFinite(G.pfTradierCash)) ? G.pfTradierCash : 0;
+  total += cashAdd;
+  if (cashAdd > 0) sectorTotals['Cash'] = (sectorTotals['Cash'] || 0) + cashAdd;
   eid('pf-total-val').textContent = '$'+fmt2(total);
   eid('pf-pos-count').textContent = count;
   eid('pf-col-count').textContent = data.columns.length;
