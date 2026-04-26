@@ -5912,6 +5912,41 @@ function computeATR(days, period){
   return atr;
 }
 
+// Annualized historical volatility (HV) from daily closes \u2014 log-returns,
+// stddev x sqrt(252). Matches Tradier's smv_vol convention (annualized
+// decimal \u2014 0.32 = 32%). Returns null if insufficient data.
+//
+// Used to compute IV/HV ratio for the option premium-expensiveness check.
+// Premium that's >50% above realized vol = mean-reversion risk that bites
+// even on directionally-correct trades. Standard rule of thumb:
+//   IV/HV < 1.0  : underpriced (rare)
+//   IV/HV 1.0-1.2: fair
+//   IV/HV 1.2-1.5: slightly rich
+//   IV/HV > 1.5  : expensive \u2014 long premium becomes a fight against mean
+//                  reversion, even on a winning directional thesis.
+function computeHV(days, period){
+  if (!Array.isArray(days) || days.length < period + 1) return null;
+  var rets = [];
+  for (var i = 1; i < days.length; i++) {
+    var c0 = +days[i-1].close, c1 = +days[i].close;
+    if (!isFinite(c0) || !isFinite(c1) || c0 <= 0 || c1 <= 0) continue;
+    rets.push(Math.log(c1 / c0));
+  }
+  if (rets.length < period) return null;
+  // Use the LAST `period` returns
+  var sliced = rets.slice(-period);
+  var mean = 0;
+  for (var j = 0; j < sliced.length; j++) mean += sliced[j];
+  mean /= sliced.length;
+  var variance = 0;
+  for (var k = 0; k < sliced.length; k++) {
+    var d = sliced[k] - mean;
+    variance += d * d;
+  }
+  variance /= (sliced.length - 1);     // sample stddev (N-1 in denominator)
+  return Math.sqrt(variance) * Math.sqrt(252);
+}
+
 // EMA(period) \u2014 returns latest value of the EMA series
 function computeEMA(days, period){
   if (!Array.isArray(days) || days.length < period) return null;
@@ -7025,6 +7060,26 @@ function buildDetail(r,detId,emptyId){
           if (dte === null) return '';
           var color = dte < 7 ? 'var(--ngo)' : dte < 14 ? 'var(--wrn)' : 'var(--grn)';
           return ' | <span style="color:'+color+';font-weight:700;" title="Next earnings in '+dte+' day(s) — binary event risk">EARN '+dte+'d</span>';
+        })()
+      // IV/HV ratio — shows whether the option premium is expensive vs the
+      // underlying's realized volatility. Computed lazily from cached daily bars
+      // (G_HIST_CACHE) + Tradier smv_vol on the chosen contract. Color: green
+      // < 1.2 (fair), amber 1.2-1.5 (rich), red > 1.5 (expensive — long premium
+      // fights mean reversion even on a winning directional thesis).
+      + (function(){
+          try {
+            if (!r.opt || !(r.opt.iv > 0)) return '';
+            var days = (typeof G_HIST_CACHE !== 'undefined') ? G_HIST_CACHE[r.ticker] : null;
+            if (!days || days.length < 21) return '';
+            var hv20 = computeHV(days, 20);
+            if (!hv20 || hv20 <= 0) return '';
+            var ivPct = (r.opt.iv * 100).toFixed(0);
+            var hvPct = (hv20 * 100).toFixed(0);
+            var ratio = r.opt.iv / hv20;
+            var col = ratio > 1.5 ? 'var(--ngo)' : ratio > 1.2 ? 'var(--wrn)' : 'var(--grn)';
+            var label = ratio > 1.5 ? 'EXPENSIVE' : ratio > 1.2 ? 'rich' : 'fair';
+            return ' | <span style="color:'+col+';font-weight:700;" title="Option IV ('+ivPct+'%) vs underlying HV20 ('+hvPct+'%). Ratio > 1.5 = premium too rich; long-premium trades fight mean reversion even on a winning directional thesis.">IV/HV '+ratio.toFixed(2)+'x ('+label+')</span>';
+          } catch(e){ return ''; }
         })()
       +'</span>'
     +'<button onclick="closeDetailPane(\''+detId+'\',\''+emptyId+'\')" title="Close detail panel" style="margin-left:auto;background:transparent;border:1px solid var(--gry2);color:var(--wrn);border-radius:3px;padding:2px 9px;font-size:13px;font-weight:700;cursor:pointer;line-height:1;">\u2715</button>'
