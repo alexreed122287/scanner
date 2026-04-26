@@ -3860,6 +3860,17 @@ function saveEquityTrail(){
 }
 
 function eid(id){return document.getElementById(id);}
+// HTML-escape helper for safely interpolating dynamic strings into innerHTML.
+// Use this for any value that could come from an external source — Tradier/FMP
+// API responses, user-typed input, ticker symbols loaded from imports — before
+// embedding it inside an innerHTML template. Numbers and trusted hardcoded
+// strings don't need escaping.
+function _esc(s){
+  if(s==null) return '';
+  return String(s).replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
 function fmt2(n){return isNaN(n)?'--':(+n).toFixed(2);}
 function fmtP(n){return isNaN(n)?'--':(+n).toFixed(2)+'%';}
 function fmtD(n){if(isNaN(n))return'--';var v=+n;return(v<0?'-$':'$')+Math.abs(v).toFixed(2);}
@@ -5362,18 +5373,21 @@ function submitOrder(){
             setTimeout(function(){ if(G.acctId) fetchPositions(); }, 3000);
           } else if(data.errors){
             var errs=data.errors.error;if(!Array.isArray(errs))errs=[errs];
-            res.innerHTML='<span style="color:var(--wrn)">Error: '+errs.join(' | ')+'</span>';
+            // S-1: escape Tradier API error strings — they're untrusted input
+            // that flows into innerHTML and could carry script tags if the
+            // proxy is compromised or a MITM occurs.
+            res.innerHTML='<span style="color:var(--wrn)">Error: '+_esc(errs.join(' | '))+'</span>';
             res.style.borderColor='var(--wrn)';
           } else {
-            res.innerHTML='<span style="color:var(--wrn)">Response: '+JSON.stringify(data).slice(0,240)+'</span>';
+            res.innerHTML='<span style="color:var(--wrn)">Response: '+_esc(JSON.stringify(data).slice(0,240))+'</span>';
             res.style.borderColor='var(--wrn)';
           }
         }catch(e){
-          res.innerHTML='<span style="color:var(--wrn)">Error (HTTP '+resp.s+'): '+resp.t.slice(0,240)+'</span>';
+          res.innerHTML='<span style="color:var(--wrn)">Error (HTTP '+_esc(resp.s)+'): '+_esc((resp.t||'').slice(0,240))+'</span>';
           res.style.borderColor='var(--wrn)';
         }
       }).catch(function(e){
-        res.innerHTML='<span style="color:var(--wrn)">Error: '+e.message+'</span>';
+        res.innerHTML='<span style="color:var(--wrn)">Error: '+_esc(e.message)+'</span>';
         res.style.borderColor='var(--wrn)';
       });
       return;
@@ -5426,20 +5440,21 @@ function submitOrder(){
         setTimeout(function(){ try{ resetOrderForm({keepResult:true}); }catch(e){} }, 3500);
       } else if(data.errors){
         var errs=data.errors.error;if(!Array.isArray(errs))errs=[errs];
-        res.innerHTML='<span style="color:var(--wrn)">Error: '+errs.join(' | ')+
+        // S-1: escape Tradier API error strings + occSym before innerHTML
+        res.innerHTML='<span style="color:var(--wrn)">Error: '+_esc(errs.join(' | '))+
           (errs.join('').toLowerCase().includes('undefined symbol') && type!=='STOCK' ?
-            '<br><small>Tip: The option '+occSym+' may not exist. Check the expiry date matches a standard Friday expiration.</small>':'')+'</span>';
+            '<br><small>Tip: The option '+_esc(occSym)+' may not exist. Check the expiry date matches a standard Friday expiration.</small>':'')+'</span>';
         res.style.borderColor='var(--wrn)';
       } else {
-        res.innerHTML='<span style="color:var(--wrn)">Response: '+JSON.stringify(data).slice(0,200)+'</span>';
+        res.innerHTML='<span style="color:var(--wrn)">Response: '+_esc(JSON.stringify(data).slice(0,200))+'</span>';
         res.style.borderColor='var(--wrn)';
       }
     }catch(e){
-      res.innerHTML='<span style="color:var(--wrn)">Error (HTTP '+resp.s+'): '+resp.t.slice(0,200)+'</span>';
+      res.innerHTML='<span style="color:var(--wrn)">Error (HTTP '+_esc(resp.s)+'): '+_esc((resp.t||'').slice(0,200))+'</span>';
       res.style.borderColor='var(--wrn)';
     }
   }).catch(function(e){
-    res.innerHTML='<span style="color:var(--wrn)">Error: '+e.message+'</span>';
+    res.innerHTML='<span style="color:var(--wrn)">Error: '+_esc(e.message)+'</span>';
     res.style.borderColor='var(--wrn)';
   });
 }
@@ -7444,9 +7459,16 @@ function _ensureIntradayThemeRS(){
   if (G_INTRADAY_THEME_RS && G_INTRADAY_THEME_GEN === (G._scanGen || 0)) {
     return G_INTRADAY_THEME_RS;
   }
-  G_INTRADAY_THEME_RS = {};
-  G_INTRADAY_THEME_GEN = G._scanGen || 0;
-  if (!G.results || !G.results.length) return G_INTRADAY_THEME_RS;
+  // F-8: don't poison the cache. Previously this function set
+  // G_INTRADAY_THEME_GEN to the current scan-generation BEFORE the early-bail
+  // checks (empty results, missing SPY). If called before enrichment had
+  // populated G.results, an empty {} got cached for the whole scan-gen and
+  // every subsequent caller during the same scan saw an empty map, so the
+  // Strong Sector intraday signal silently vanished for that scan. Now we
+  // only commit the cache+gen once we've actually computed a non-empty map.
+  if (!G.results || !G.results.length) {
+    return {};   // transient — do NOT cache or bump gen counter
+  }
 
   // Find SPY's intraday change. SPY is always added to the universe at
   // fetchDynamicUniverse line 8528, so it should exist in G.results after
@@ -7456,7 +7478,9 @@ function _ensureIntradayThemeRS(){
   for (var i = 0; i < G.results.length; i++) {
     if (G.results[i].ticker === 'SPY') { spyR = G.results[i]; break; }
   }
-  if (!spyR || typeof spyR.changePct !== 'number') return G_INTRADAY_THEME_RS;
+  if (!spyR || typeof spyR.changePct !== 'number') {
+    return {};   // SPY not yet enriched — also transient, don't cache
+  }
   var spyChg = spyR.changePct;
 
   // Group all results by their assigned theme, accumulate sum + count
@@ -7474,10 +7498,14 @@ function _ensureIntradayThemeRS(){
 
   // intraday_RS_pct = avg theme member move - SPY move
   // Positive = theme outperforming SPY today (bullish rotation INTO this sector)
+  var out = {};
   Object.keys(byTheme).forEach(function(t){
     var b = byTheme[t];
-    G_INTRADAY_THEME_RS[t] = +(b.sum / b.count - spyChg).toFixed(2);
+    out[t] = +(b.sum / b.count - spyChg).toFixed(2);
   });
+  // Commit the cache only now that we have a real, non-empty computation.
+  G_INTRADAY_THEME_RS = out;
+  G_INTRADAY_THEME_GEN = G._scanGen || 0;
   return G_INTRADAY_THEME_RS;
 }
 
@@ -8172,7 +8200,7 @@ async function loadOptionChain(ticker){
     expRes = await tradierFetch(creds.host+'/v1/markets/options/expirations?symbol='+encodeURIComponent(ticker)+'&includeAllRoots=true',{
       headers:{Authorization:'Bearer '+creds.key,Accept:'application/json'}
     }, 6*60*60*1000).then(function(r){return r.json();});
-  }catch(e){ chainDiv.innerHTML = '<div class="chain-loading" style="color:var(--red);">Error: '+e.message+'</div>'; return; }
+  }catch(e){ chainDiv.innerHTML = '<div class="chain-loading" style="color:var(--red);">Error: '+_esc(e.message)+'</div>'; return; }
 
   var dates = [];
   try{ dates = expRes.expirations.date; if(!Array.isArray(dates)) dates=[dates]; }catch(e){}
@@ -8238,7 +8266,7 @@ async function renderChainForExp(ticker, expDate, underlyingPrice){
       creds.host+'/v1/markets/options/chains?symbol='+encodeURIComponent(ticker)+'&expiration='+expDate+'&greeks=true',
       {headers:{Authorization:'Bearer '+creds.key,Accept:'application/json'}}
     ).then(function(r){return r.json();});
-  }catch(e){ wrap.innerHTML='<div class="chain-loading" style="color:var(--red);">Error: '+e.message+'</div>'; return; }
+  }catch(e){ wrap.innerHTML='<div class="chain-loading" style="color:var(--red);">Error: '+_esc(e.message)+'</div>'; return; }
 
   var options = [];
   try{ options = chainData.options.option; if(!Array.isArray(options)) options=[options]; }catch(e){}
@@ -9823,7 +9851,14 @@ function applyFilters(){
 // max-opt-price). Restored on page load via loadScanSettings() hooked into
 // init(). RESET DEFAULTS button reverts to the factory values defined in HTML.
 
-var SCAN_SETTINGS_KEY = 'rrjcar_scan_settings_v1';
+// F-6: bumped from _v1 to _v2 when OB checkboxes + sector multi-select were
+// added to the persisted snapshot. Old _v1 snapshots are ignored on load so
+// users with stale saves get fresh HTML defaults instead of a snapshot that's
+// silently missing the new fields. SCAN_SETTINGS_VERSION is also written into
+// each snapshot so future migrations can detect / upgrade old saves rather
+// than discarding them.
+var SCAN_SETTINGS_KEY = 'rrjcar_scan_settings_v2';
+var SCAN_SETTINGS_VERSION = 2;
 
 // Field-id → factory default (for Reset). Inputs map to their HTML defaults;
 // checkboxes default to false unless noted.
@@ -9837,14 +9872,18 @@ var SCAN_SETTING_DEFAULTS = {
   'sc-sig':          'GO',
   'filt-earn-days':  '1'
 };
+// F-5: include OB / instrument-OB checkboxes so resetScanSettings actually
+// clears them (previously they were missing from this list and resetScanSettings
+// left them in whatever state the user had checked).
 var SCAN_FILTER_CHECKBOXES = [
   'filt-analyst','filt-gex','filt-proven','filt-52hi','filt-rs',
-  'filt-macd','filt-tf','filt-ema200','filt-vol','filt-no-earn','filt-strong-sector'
+  'filt-macd','filt-tf','filt-ema200','filt-vol','filt-no-earn','filt-strong-sector',
+  'filt-obclear','filt-obsupport','filt-inst-obclear','filt-inst-obsupport'
 ];
 
 function saveScanSettings(){
   try {
-    var snap = { ts: Date.now(), inputs: {}, checkboxes: {} };
+    var snap = { v: SCAN_SETTINGS_VERSION, ts: Date.now(), inputs: {}, checkboxes: {}, sectors: [] };
     Object.keys(SCAN_SETTING_DEFAULTS).forEach(function(id){
       var el = eid(id);
       if (el) snap.inputs[id] = el.value;
@@ -9853,6 +9892,9 @@ function saveScanSettings(){
       var el = eid(id);
       if (el) snap.checkboxes[id] = !!el.checked;
     });
+    // F-5: persist sector multi-select alongside the rest of the settings so
+    // it gets saved/loaded/reset as a single coherent unit.
+    if (G.selectedSectors instanceof Set) snap.sectors = Array.from(G.selectedSectors);
     localStorage.setItem(SCAN_SETTINGS_KEY, JSON.stringify(snap));
     if (typeof toast === 'function') toast('Scan settings saved');
   } catch(e) { if (typeof toast === 'function') toast('Save failed: '+e.message); }
@@ -9869,6 +9911,11 @@ function loadScanSettings(){
     if (snap.checkboxes) SCAN_FILTER_CHECKBOXES.forEach(function(id){
       var el = eid(id); if (el && id in snap.checkboxes) el.checked = !!snap.checkboxes[id];
     });
+    if (Array.isArray(snap.sectors)) {
+      G.selectedSectors = new Set(snap.sectors);
+      if (typeof populateSectorCheckboxes === 'function') populateSectorCheckboxes();
+      if (typeof updateSectorLabel === 'function') updateSectorLabel();
+    }
   } catch(e){ /* corrupt — ignore, leave HTML defaults */ }
 }
 
@@ -9880,6 +9927,12 @@ function resetScanSettings(){
   SCAN_FILTER_CHECKBOXES.forEach(function(id){
     var el = eid(id); if (el) el.checked = false;
   });
+  // F-5: clear sector multi-select (empty Set = "all sectors") and refresh the
+  // dropdown UI so the user actually sees the reset reflected.
+  G.selectedSectors = new Set();
+  try { saveSelectedSectors(); } catch(e){}
+  if (typeof populateSectorCheckboxes === 'function') populateSectorCheckboxes();
+  if (typeof updateSectorLabel === 'function') updateSectorLabel();
   try { localStorage.removeItem(SCAN_SETTINGS_KEY); } catch(e){}
   if (typeof applyFilters === 'function') applyFilters();
   if (typeof reclassifyGoThreshold === 'function') reclassifyGoThreshold();
@@ -12400,7 +12453,7 @@ function buyOrder(ticker,type,strike,exp){
     eid('ord-strike').value=strike;eid('ord-exp').value=exp||'';
     eid('ord-action').value='BUY_TO_OPEN';eid('ord-qty').value=1;eid('ord-otype').value='limit';
     var res=eid('ord-result');
-    res.innerHTML='Order pre-filled: '+ticker+' '+type+' strike:'+strike+' exp:'+exp;
+    res.innerHTML='Order pre-filled: '+_esc(ticker)+' '+_esc(type)+' strike:'+_esc(strike)+' exp:'+_esc(exp);
     res.className='ord-result show';res.style.borderColor='var(--blu)';
     toast('Buy pre-filled: '+ticker+' '+type);
     // Auto-fetch quote after pre-fill
@@ -12829,7 +12882,7 @@ function rollLoadChain(){
       if(localBest) rollSelectContract(localBest.symbol);
     }
   }).catch(function(e){
-    eid('roll-chain-body').innerHTML='<tr><td colspan="7" style="padding:8px;color:var(--ngo);text-align:center;">Error: '+e.message+'</td></tr>';
+    eid('roll-chain-body').innerHTML='<tr><td colspan="7" style="padding:8px;color:var(--ngo);text-align:center;">Error: '+_esc(e.message)+'</td></tr>';
   });
 }
 
