@@ -2717,6 +2717,13 @@ function promptTradeToken(){
     setTimeout(function(){ if (input) input.focus(); }, 50);
     function cleanup(){
       modal.style.display = 'none';
+      // S-3: clear the input value on close so the entered trade token does
+      // not linger in the DOM between sessions. Otherwise a screenshot,
+      // devtools dump, error reporter, or any other DOM serialization that
+      // happens after the modal is dismissed would still see it. value is
+      // re-cleared on next open at line ~2715, but that doesn't help in the
+      // window in between.
+      if (input) input.value = '';
       okBtn.onclick = null;
       cancelBtn.onclick = null;
       if (input) input.onkeydown = null;
