@@ -460,16 +460,59 @@ def append_history(theme_scores: dict[str, dict], asof: str) -> None:
     # theme_scores gets dropped. Without this, every theme rename or removal
     # leaves a stale series trailing forever (one None per day) that the
     # frontend either renders flat or lookup-errors on.
+    #
+    # CRITICAL: themes can be absent from one run for benign reasons —
+    # yfinance dropping prices for all constituent tickers, master_tickers
+    # not yet rebuilt, theme too small (<3 priced members threshold). The
+    # original implementation deleted on a single-run absence, so a flaky
+    # yfinance day permanently nuked legitimate themes from history. Now we
+    # track consecutive absences in history["_absences"] and only prune
+    # after PRUNE_THRESHOLD runs in a row — 7 runs ≈ 1 week of cron at
+    # weekday + weekend cadence, enough to distinguish "deleted/renamed"
+    # from "transient data hiccup".
+    PRUNE_THRESHOLD = 7
+    history.setdefault("_absences", {})
     current = set(theme_scores.keys())
-    pruned: list[str] = []
+    # Themes that exist anywhere in history (across all timeframes)
+    all_history_themes: set[str] = set()
     for tf in ("daily", "weekly", "monthly"):
-        for theme in list(history[tf].keys()):
-            if theme not in current:
-                del history[tf][theme]
-                if theme not in pruned:
-                    pruned.append(theme)
+        all_history_themes.update(history[tf].keys())
+
+    # Update absence counters
+    for theme in all_history_themes:
+        if theme in current:
+            history["_absences"].pop(theme, None)
+        else:
+            history["_absences"][theme] = history["_absences"].get(theme, 0) + 1
+
+    # Drop counters for themes that no longer exist in history at all
+    # (already pruned previously)
+    for theme in list(history["_absences"].keys()):
+        if theme not in all_history_themes:
+            del history["_absences"][theme]
+
+    # Only prune themes that have been absent for >= PRUNE_THRESHOLD runs
+    pruned: list[str] = []
+    deferred: list[tuple[str, int]] = []
+    for theme in list(all_history_themes):
+        if theme in current:
+            continue
+        absences = history["_absences"].get(theme, 0)
+        if absences >= PRUNE_THRESHOLD:
+            for tf in ("daily", "weekly", "monthly"):
+                history[tf].pop(theme, None)
+            history["_absences"].pop(theme, None)
+            if theme not in pruned:
+                pruned.append(theme)
+        else:
+            deferred.append((theme, absences))
+
     if pruned:
-        print(f"      pruned {len(pruned)} zombie theme(s) from history: {sorted(pruned)}")
+        print(f"      pruned {len(pruned)} zombie theme(s) (absent >={PRUNE_THRESHOLD} runs): {sorted(pruned)}")
+    if deferred:
+        # Surface deferrals so a real-but-slow rename is visible in cron logs
+        print(f"      {len(deferred)} theme(s) absent this run but kept (need {PRUNE_THRESHOLD} consecutive): "
+              f"{sorted([f'{t}({n})' for t, n in deferred])[:10]}{'...' if len(deferred) > 10 else ''}")
 
     HISTORY_JSON.write_text(json.dumps(history))
 
