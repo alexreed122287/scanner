@@ -28,12 +28,20 @@ jobs:
         # yfinance has had ≥4 major schema changes in 18 months — an unpinned
         # install ships with whatever the latest is and can quietly produce
         # all-NaN scores that get committed without anyone noticing.
-        run: pip install 'yfinance==0.2.55' 'pandas>=2.2,<3' 'numpy>=2,<3' 'requests>=2.32,<3'
+        # pytest is added for the post-scoring smoke test (test_theme_scores.py).
+        run: pip install 'yfinance==0.2.55' 'pandas>=2.2,<3' 'numpy>=2,<3' 'requests>=2.32,<3' 'pytest>=8'
 
       - name: Run scoring engine
         env:
           TRADIER_TOKEN: ${{ secrets.TRADIER_TOKEN }}
         run: python industry/score_themes.py
+
+      - name: Smoke-test fresh theme_scores.json
+        # Hard gate between scoring and commit. If the new snapshot is
+        # malformed / degenerate / stale, abort the run so the previous
+        # (good) snapshot stays in place. F-3's failure-notification step
+        # will then open a GitHub issue.
+        run: pytest industry/test_theme_scores.py -v
 
       - name: Commit refreshed scores
         run: |
