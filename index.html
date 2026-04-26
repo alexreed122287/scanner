@@ -7433,6 +7433,46 @@ function getDaysToEarnings(ticker){
   return days >= 0 ? days : null;       // past dates filtered (FMP sometimes stale)
 }
 
+// ===========================================================================
+//  RESULT-RANK COMPARATOR — multi-key tiebreaker for sorting G.results
+// ===========================================================================
+// Single-key sort by score leaves tied tickers in arbitrary alphabetical-ish
+// order (whatever Tradier returned in the bulk-quote batch). For tied scores,
+// rank by the next strongest signal so the actually-better trade surfaces
+// first instead of just the alphabetically-earlier ticker.
+//
+// Tiebreaker hierarchy (each only evaluates if the prior was 0):
+//   1. score        — primary
+//   2. techScore    — stronger technical setup wins
+//   3. relStr5d     — stronger 5-day relative momentum vs SPY
+//   4. theme score  — stronger sector context (uses theme overlay)
+//   5. volume       — final liquidity floor
+//
+// Used by every G.results / G.filtered sort so ranking is consistent across
+// re-renders. Manual column sorts (sortTable) keep their own comparator.
+function _resultRankCompare(a, b){
+  // 1. score (primary, descending)
+  var d = (b.score || 0) - (a.score || 0);
+  if (d !== 0) return d;
+  // 2. techScore — stronger technical setup
+  d = (b.techScore || 0) - (a.techScore || 0);
+  if (d !== 0) return d;
+  // 3. relStr5d — stronger 5-day relative momentum
+  var aRs = (a.ind && typeof a.ind.relStr5d === 'number') ? a.ind.relStr5d : 0;
+  var bRs = (b.ind && typeof b.ind.relStr5d === 'number') ? b.ind.relStr5d : 0;
+  d = bRs - aRs;
+  if (d !== 0) return d;
+  // 4. theme dailyScore — stronger sector context
+  if (typeof getThemeStrength === 'function') {
+    var aTh = getThemeStrength(a.ticker);
+    var bTh = getThemeStrength(b.ticker);
+    d = ((bTh && bTh.dailyScore) || 0) - ((aTh && aTh.dailyScore) || 0);
+    if (d !== 0) return d;
+  }
+  // 5. volume — liquidity floor
+  return (b.volume || 0) - (a.volume || 0);
+}
+
 function scoreIt(ticker, ind, opt){
   // \u2500\u2500 Look up cached FMP data (sync \u2014 fetched async during scan) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
   var fmp = G_FMP_CACHE[ticker] || loadFmpCache(ticker);
@@ -8843,7 +8883,7 @@ function finishScan(){
   populateSectorCheckboxes();
   updateSectorLabel();
 
-  G.results.sort(function(a,b){ return b.score - a.score; });
+  G.results.sort(_resultRankCompare);
   G.filtered = excludedFilteredResults();
 
   // Bulk pass done \u2014 preliminary scores are populated for ALL ~750 passed
@@ -8904,7 +8944,7 @@ function finishScan(){
     G.scanRunning = false;     // gate cleared HERE, not after the bulk pass
     clearTimeout(_watchdogId);
     // Final render so the last batch under the throttle threshold lands
-    G.results.sort(function(a,b){ return b.score-a.score; });
+    G.results.sort(_resultRankCompare);
     G.filtered = excludedFilteredResults();
     renderBuySig(); renderScan();
     // Cache FULLY-ENRICHED results. Persists what renderBuySig + buildDetail
@@ -8959,7 +8999,7 @@ function finishScan(){
         if (sIdx >= stragglers.length) {
           console.log('[scan] cleanup pass complete');
           // Final re-render so the cleanup-enriched tickers' updated scores show
-          G.results.sort(function(a,b){ return b.score-a.score; });
+          G.results.sort(_resultRankCompare);
           G.filtered = excludedFilteredResults();
           renderBuySig(); renderScan();
           return;
@@ -9038,7 +9078,7 @@ function finishScan(){
             if(typeof window._rescoredCount==='undefined') window._rescoredCount=0;
             window._rescoredCount++;
             if(window._rescoredCount % 25 === 0){
-              G.results.sort(function(a,b){ return b.score-a.score; });
+              G.results.sort(_resultRankCompare);
               G.filtered = excludedFilteredResults();
               renderBuySig(); renderScan();
             }
@@ -9118,7 +9158,7 @@ function finishScan(){
         // table rebuilds per scan (visible jank, scroll position resets, lost
         // hover tooltips). Final guaranteed render fires from _maybeFinishScan.
         if(indDone % 25 === 0){
-          G.results.sort(function(a,b){ return b.score-a.score; });
+          G.results.sort(_resultRankCompare);
           G.filtered = G.results.slice();
           renderBuySig(); renderScan();
         }
@@ -9969,7 +10009,7 @@ function runGex(){
         r.score = updated.score; r.techScore = updated.techScore;
         r.isGo = updated.isGo; r.rules = updated.rules; r.passes = updated.passes;
       });
-      G.results.sort(function(a,b){ return b.score - a.score; });
+      G.results.sort(_resultRankCompare);
       G.filtered = excludedFilteredResults();
       renderBuySig(); renderScan();
       toast('GEX loaded \u2014 scores updated');
