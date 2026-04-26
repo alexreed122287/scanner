@@ -980,6 +980,7 @@ tr.sel-row td{background:var(--blu3);}
     <label class="ind-filter-lbl"><input type="checkbox" class="ind-filter" id="filt-ema200" onchange="applyFilters()"> <span>Above EMA200</span></label>
     <label class="ind-filter-lbl"><input type="checkbox" class="ind-filter" id="filt-vol" onchange="applyFilters()"> <span>Vol &gt; Avg</span></label>
     <label class="ind-filter-lbl" title="Hide tickers with earnings within N days. Earnings = binary event; even good signals turn into 50/50 coin flips."><input type="checkbox" class="ind-filter" id="filt-no-earn" onchange="applyFilters()"> <span>No Earnings &lt;<input type="number" id="filt-earn-days" value="7" min="1" max="30" style="width:32px;font-size:10px;padding:1px 3px;background:var(--bg2);border:1px solid var(--bg3);color:var(--amb);" onchange="applyFilters()" onclick="event.stopPropagation()">d</span></label>
+    <label class="ind-filter-lbl" title="Sector rotation overlay — only show tickers in themes with daily composite score >= 75 (top quartile, prevailing institutional flow)"><input type="checkbox" class="ind-filter" id="filt-strong-sector" onchange="applyFilters()"> <span>Strong Sector</span></label>
     <input type="text" id="sc-search" placeholder="Search ticker..." oninput="onScSearch()" style="margin-left:auto;font-family:var(--ff-mono);font-size:11px;padding:3px 8px;background:var(--bg1);border:1px solid var(--bg3);border-radius:3px;color:var(--amb);width:160px;">
     <span id="sc-filter-count" style="font-family:var(--ff-mono);font-size:10px;color:var(--gry);"></span>
   </div>
@@ -6765,6 +6766,122 @@ async function fetchFmpData(ticker){
 }
 
 // ===========================================================================
+//  SECTOR / THEME OVERLAY — uses industry pipeline output (theme_scores.json)
+// ===========================================================================
+// Consumes the nightly score_themes.py output to apply a sector-rotation
+// overlay on top of the per-ticker technicals. Theory: even a great setup
+// in a weak sector underperforms because money is rotating elsewhere. By
+// boosting top-quartile theme tickers and demoting bottom-quartile theme
+// tickers, the scanner naturally aligns with prevailing institutional flow.
+//
+// Data sources:
+//   - industry/theme_scores.json   — daily/weekly/monthly composite scores
+//                                    + RS rank vs SPY (rs_rank.daily) per theme
+//   - industry/master_tickers.json — themes->[member tickers] reverse map
+//
+// Both are fetched relative to the scanner ('./industry/...') so they auto-
+// align to whatever build is deployed. 6hr localStorage TTL because the cron
+// rebuilds them once daily — refetching every page load wastes bandwidth.
+//
+// Score impact (in scoreIt):
+//   Theme RS rank > 75 (top quartile)  → +5 score, +5 fundScore
+//   Theme RS rank < 25 (bottom quartile) → -5 score, -5 fundScore
+//   Pass-through on missing data (no theme assignment, fetch failed, etc.)
+//
+// New rule "STRONG SECTOR" added to the rule scorecard so the overlay is
+// transparent in the detail panel.
+
+var G_THEME_OVERLAY = {
+  loaded: false,
+  fetchedAt: 0,
+  ticker2theme: {},      // ticker -> { theme, dailyRank, dailyScore, weeklyScore }
+};
+var THEME_OVERLAY_KEY = 'rrjcar_theme_overlay_v1';
+var THEME_OVERLAY_TTL_MS = 6 * 60 * 60 * 1000;       // 6 hours
+
+function _loadThemeOverlayFromStorage(){
+  try {
+    var raw = localStorage.getItem(THEME_OVERLAY_KEY);
+    if (!raw) return false;
+    var obj = JSON.parse(raw);
+    if (!obj || !obj.ts || (Date.now() - obj.ts) > THEME_OVERLAY_TTL_MS) return false;
+    G_THEME_OVERLAY.ticker2theme = obj.ticker2theme || {};
+    G_THEME_OVERLAY.fetchedAt = obj.ts;
+    G_THEME_OVERLAY.loaded = true;
+    return true;
+  } catch(e){ return false; }
+}
+
+function _saveThemeOverlayToStorage(){
+  try {
+    localStorage.setItem(THEME_OVERLAY_KEY, JSON.stringify({
+      ts: G_THEME_OVERLAY.fetchedAt,
+      ticker2theme: G_THEME_OVERLAY.ticker2theme,
+    }));
+  } catch(e){ /* quota — fine, in-memory cache survives session */ }
+}
+
+async function loadThemeOverlay(force){
+  if (!force && _loadThemeOverlayFromStorage()) {
+    console.log('[theme-overlay] hydrated from cache: ' +
+                Object.keys(G_THEME_OVERLAY.ticker2theme).length + ' tickers mapped');
+    return G_THEME_OVERLAY;
+  }
+  try {
+    var cb = '?cb=' + Math.floor(Date.now() / (THEME_OVERLAY_TTL_MS));   // 6hr cachebuster
+    var results = await Promise.all([
+      fetch('./industry/theme_scores.json' + cb).then(function(r){ if(!r.ok) throw new Error('scores '+r.status); return r.json(); }),
+      fetch('./industry/master_tickers.json' + cb).then(function(r){ if(!r.ok) throw new Error('master '+r.status); return r.json(); }),
+    ]);
+    var scoresData = results[0], masterData = results[1];
+    if (!scoresData || !scoresData.themes || !masterData || !masterData.themes) {
+      console.warn('[theme-overlay] malformed data — skipping');
+      return G_THEME_OVERLAY;
+    }
+
+    // Build reverse map: ticker -> [strongest theme it belongs to]
+    // A ticker can be in multiple themes (e.g. NVDA is in 'AI Infrastructure' AND
+    // 'Semiconductors'). Use the theme with the HIGHEST daily score so the overlay
+    // gives the ticker its best shot — bullish bias since we're long-side anyway.
+    var ticker2theme = {};
+    Object.keys(masterData.themes).forEach(function(themeName){
+      var members = masterData.themes[themeName] || [];
+      var themeScores = scoresData.themes[themeName];
+      if (!themeScores || !themeScores.scores) return;
+      var dailyScore  = themeScores.scores.daily  || 0;
+      var weeklyScore = themeScores.scores.weekly || 0;
+      var dailyRank   = (themeScores.rs_rank && themeScores.rs_rank['1M']) || 50;   // 1M RS rank as default
+      members.forEach(function(t){
+        var existing = ticker2theme[t];
+        if (!existing || dailyScore > existing.dailyScore) {
+          ticker2theme[t] = {
+            theme: themeName,
+            dailyScore: dailyScore,
+            weeklyScore: weeklyScore,
+            dailyRank: dailyRank,
+          };
+        }
+      });
+    });
+
+    G_THEME_OVERLAY.ticker2theme = ticker2theme;
+    G_THEME_OVERLAY.fetchedAt = Date.now();
+    G_THEME_OVERLAY.loaded = true;
+    _saveThemeOverlayToStorage();
+    console.log('[theme-overlay] loaded ' + Object.keys(ticker2theme).length + ' ticker→theme mappings (as_of ' + (scoresData.as_of || '?') + ')');
+    return G_THEME_OVERLAY;
+  } catch(e) {
+    console.warn('[theme-overlay] fetch failed:', e && e.message);
+    return G_THEME_OVERLAY;
+  }
+}
+
+// Returns { theme, dailyScore, dailyRank } or null
+function getThemeStrength(ticker){
+  return G_THEME_OVERLAY.ticker2theme[ticker] || null;
+}
+
+// ===========================================================================
 //  EARNINGS CALENDAR — FMP bulk fetch, per-ticker lookup
 // ===========================================================================
 // Skip option entries within N days of earnings: earnings is binary, even
@@ -6972,8 +7089,27 @@ function scoreIt(ticker, ind, opt){
   if(gexCallHeavy){ score += 6; techScore += 6; }
   res.push({n:'GEX Call Heavy', pass:gexCallHeavy, val:gexVal, filter:false, pts:6, isGex:true});
 
+  // Rule: Strong Sector (+5 / -5) — sector-rotation overlay from industry pipeline.
+  // Pass if ticker's strongest theme has dailyScore >= 75 (top quartile-ish).
+  // Penalty -5 if dailyScore <= 25 (bottom quartile). Pass-through if no mapping.
+  var themeInfo = (typeof getThemeStrength === 'function') ? getThemeStrength(ticker) : null;
+  var sectorOk = false, sectorVal = 'No theme data';
+  if (themeInfo) {
+    var ds = themeInfo.dailyScore || 0;
+    sectorVal = themeInfo.theme + ' (daily ' + ds.toFixed(1) + ')';
+    if (ds >= 75) {
+      score += 5; fundScore += 5;
+      sectorOk = true;
+      sectorVal += ' ↑';
+    } else if (ds <= 25) {
+      score -= 5; fundScore -= 5;
+      sectorVal += ' ↓ (weak sector — demoted)';
+    }
+  }
+  res.push({n:'Strong Sector', pass:sectorOk, val:sectorVal, filter:false, pts:5, isTheme:true});
+
   // \u2500\u2500 GO DECISION \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-  var total = clamp(score, 0, 150); // 144 base + 6 GEX bonus
+  var total = clamp(score, 0, 155); // 144 base + 6 GEX bonus + 5 sector overlay
   // GO threshold reads from the Min Score input in the scanner tab so the
   // user can tune what counts as a "GO". Falls back to 110 if input missing.
   var goThreshold = 110;
@@ -7060,6 +7196,17 @@ function buildDetail(r,detId,emptyId){
           if (dte === null) return '';
           var color = dte < 7 ? 'var(--ngo)' : dte < 14 ? 'var(--wrn)' : 'var(--grn)';
           return ' | <span style="color:'+color+';font-weight:700;" title="Next earnings in '+dte+' day(s) — binary event risk">EARN '+dte+'d</span>';
+        })()
+      // Sector overlay — show theme name + daily score badge
+      + (function(){
+          try {
+            var ti = (typeof getThemeStrength === 'function') ? getThemeStrength(r.ticker) : null;
+            if (!ti) return '';
+            var ds = ti.dailyScore || 0;
+            var col = ds >= 75 ? 'var(--grn)' : ds >= 50 ? 'var(--amb)' : ds >= 25 ? 'var(--gry)' : 'var(--ngo)';
+            var arrow = ds >= 75 ? '↑↑' : ds >= 50 ? '↑' : ds >= 25 ? '·' : '↓';
+            return ' | <span style="color:'+col+';font-weight:700;" title="Sector rotation overlay — daily composite score (0-100, percentile-ranked vs all themes). >=75 top quartile (institutional flow); <=25 bottom quartile.">' + ti.theme + ' ' + ds.toFixed(0) + ' ' + arrow + '</span>';
+          } catch(e){ return ''; }
         })()
       // IV/HV ratio — shows whether the option premium is expensive vs the
       // underlying's realized volatility. Computed lazily from cached daily bars
@@ -8497,6 +8644,8 @@ function applyFilters(){
   // Earnings exclusion: hide tickers within N days of upcoming earnings
   var needNoEarn  = getIndFilter('filt-no-earn');
   var earnDays    = parseInt((eid('filt-earn-days') && eid('filt-earn-days').value) || '7') || 7;
+  // Sector rotation: only top-quartile-theme tickers
+  var needStrongSector = getIndFilter('filt-strong-sector');
   // OB filter checkboxes were removed from the UI; underlying detection JS
   // and cache stay defined so the feature can be reactivated. Hardcoded false
   // here (was 4 per-cycle DOM lookups that always returned false).
@@ -8576,6 +8725,12 @@ function applyFilters(){
       if (dte !== null && dte < earnDays) return false;
     }
 
+    // Strong-sector filter — pass-through on missing theme overlay data
+    if (needStrongSector) {
+      var ti = (typeof getThemeStrength === 'function') ? getThemeStrength(r.ticker) : null;
+      if (!ti || (ti.dailyScore || 0) < 75) return false;
+    }
+
     return true;
   });
 
@@ -8584,7 +8739,8 @@ function applyFilters(){
   var shown = G.filtered.length;
   var activeFilters = [needAnalyst,needGex,needProven,
     need52hi,needRS,needMacd,needTF,needEma200,needVol,
-    needOBClear,needOBSup,needInstOBClear,needInstOBSup].filter(Boolean).length;
+    needOBClear,needOBSup,needInstOBClear,needInstOBSup,
+    needNoEarn,needStrongSector].filter(Boolean).length;
   var countEl = eid('sc-filter-count');
   if(countEl){
     countEl.textContent = shown + ' / ' + total + (activeFilters > 0 ? ' (' + activeFilters + ' filter' + (activeFilters>1?'s':'')+' active)' : '');
@@ -15978,6 +16134,8 @@ function init(){
   loadAutoTraderState();
   loadSmartExitsConfig();    // hydrate G.smartExits from localStorage
   applySmartExitsToUi();     // reflect into checkboxes + start poller if enabled
+  // Theme overlay — non-blocking. If fetch fails, scoreIt pass-throughs.
+  loadThemeOverlay().catch(function(e){ console.warn('[init] theme overlay failed:', e && e.message); });
   loadPortfolio();
   // Populate sector checkboxes from the embedded universe
   // (CSV loader removed — embedded UNIVERSE_FULL is the single source of truth)
