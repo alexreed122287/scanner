@@ -12118,16 +12118,24 @@ function _apiTestReset(){
 async function testTradierApi(){
   _apiTestReset();
   var key = '';
-  try{ key = localStorage.getItem('rrjcar_tradier') || ''; }catch(e){}
-  if(!key){
-    _apiTestAppend('✗ TRADIER: no key saved. Enter key above and click SAVE KEYS first.', false);
+  var proxy = '';
+  try{ key   = localStorage.getItem('rrjcar_tradier')         || ''; }catch(e){}
+  try{ proxy = localStorage.getItem('rrjcar_tradier_proxy')   || ''; }catch(e){}
+  // Proxy mode is valid even without a local key — the worker injects its own.
+  // Direct mode requires a key.
+  if(!key && !proxy){
+    _apiTestAppend('✗ TRADIER: no key OR proxy URL saved. Enter a key + SAVE KEYS, OR paste a worker URL into TRADIER PROXY URL.', false);
     return false;
   }
   var mode = 'sandbox';
   try{ mode = localStorage.getItem('rrjcar_mode') || 'sandbox'; }catch(e){}
   var host = mode === 'live' ? 'https://api.tradier.com' : 'https://sandbox.tradier.com';
   _apiTestAppend('→ TRADIER: mode='+mode.toUpperCase()+' host='+host, null);
-  _apiTestAppend('→ TRADIER: key length='+key.length+' (hidden)', null);
+  if(proxy){
+    _apiTestAppend('→ TRADIER: proxy='+proxy+' (key injected server-side)', null);
+  } else {
+    _apiTestAppend('→ TRADIER: key length='+key.length+' (hidden)', null);
+  }
 
   // Test 1 — user profile (verifies auth)
   try{
