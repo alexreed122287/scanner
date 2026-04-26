@@ -529,7 +529,20 @@ def append_history(theme_scores: dict[str, dict], asof: str) -> None:
     # PRUNE_THRESHOLD is env-configurable so you can dial it during incidents
     # (yfinance outage, mass theme rename) without a code change + redeploy.
     # Default 7 ≈ 1.5 calendar weeks at weekday-only cron.
-    PRUNE_THRESHOLD = int(os.environ.get("PRUNE_THRESHOLD", "7"))
+    #
+    # HC-J: validate. PRUNE_THRESHOLD="0" deletes any absent theme on first
+    # miss (regression to original bug). "-1" makes the >= check always
+    # true → wipes every non-current theme from history immediately. "abc"
+    # would raise ValueError mid-run AFTER scoring + OUT_JSON write but
+    # BEFORE history append. Clamp to >=1 with a warn log on any of these.
+    _raw_thresh = os.environ.get("PRUNE_THRESHOLD", "7")
+    try:
+        PRUNE_THRESHOLD = max(1, int(_raw_thresh))
+        if PRUNE_THRESHOLD != int(_raw_thresh):
+            print(f"      ⚠ PRUNE_THRESHOLD env value {_raw_thresh!r} clamped to {PRUNE_THRESHOLD} (must be >= 1)")
+    except (ValueError, TypeError):
+        PRUNE_THRESHOLD = 7
+        print(f"      ⚠ PRUNE_THRESHOLD env value {_raw_thresh!r} is not a valid integer — defaulting to 7")
     history.setdefault("_absences", {})
     current = set(theme_scores.keys())
     # Themes that exist anywhere in history (across all timeframes)
@@ -634,7 +647,15 @@ def main():
 
     print(f"[4/4] appending to history...")
     append_history(scored, asof)
-    print(f"      history now has {len(json.loads(HISTORY_JSON.read_text())['dates'])} days")
+    # HC-K: read-back is best-effort — if a permission glitch / cross-cron
+    # race made the freshly-written file unreadable, we don't want a successful
+    # run to exit non-zero (which would mask success in CI logs and could
+    # trigger downstream "no commit" / failure paths).
+    try:
+        days_in_hist = len(json.loads(HISTORY_JSON.read_text()).get('dates', []))
+        print(f"      history now has {days_in_hist} days")
+    except Exception as e:
+        print(f"      ⚠ history written but couldn't re-read for length report: {e}")
 
     # Print top 10 by each timeframe to console for sanity check
     print("\n=== TOP 10 by DAILY score ===")

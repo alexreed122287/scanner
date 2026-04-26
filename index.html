@@ -7339,9 +7339,12 @@ function getThemeStrength(ticker){
 
 var G_EARNINGS_CACHE = {};            // ticker -> next earnings YYYY-MM-DD (or '' if none in window)
 var G_EARNINGS_FETCHED_AT = 0;        // ms timestamp of last successful bulk fetch
+var G_EARNINGS_FETCHED_DATE = '';     // YYYY-MM-DD UTC at fetch time (HC-G cross-day buster)
 var EARNINGS_CACHE_KEY = 'rrjcar_earnings_v1';
 var EARNINGS_CACHE_TTL_MS = 12 * 60 * 60 * 1000;   // 12 hours
 var EARNINGS_LOOKAHEAD_DAYS = 30;     // pull a wide window so user can dial filter to 30d if desired
+
+function _todayUtc(){ return new Date().toISOString().slice(0, 10); }
 
 function loadEarningsCacheFromStorage(){
   try {
@@ -7349,8 +7352,18 @@ function loadEarningsCacheFromStorage(){
     if (!raw) return false;
     var obj = JSON.parse(raw);
     if (!obj || !obj.ts || (Date.now() - obj.ts) > EARNINGS_CACHE_TTL_MS) return false;
+    // HC-G: cross-day staleness. The cache stores `from = today` baked in
+    // at fetch time. If user opens scanner Monday 8 AM and hits Tuesday at
+    // 6 AM (10h later, still within TTL), the `from` value in the cached
+    // payload is yesterday — getDaysToEarnings would return inflated counts
+    // off the old "today". Bust the cache when calendar day changes.
+    if (obj.fetchDate && obj.fetchDate !== _todayUtc()) {
+      console.log('[earnings] cache spans calendar boundary (' + obj.fetchDate + ' → ' + _todayUtc() + ') — invalidating');
+      return false;
+    }
     G_EARNINGS_CACHE = obj.data || {};
     G_EARNINGS_FETCHED_AT = obj.ts;
+    G_EARNINGS_FETCHED_DATE = obj.fetchDate || _todayUtc();
     return true;
   } catch(e){ return false; }
 }
@@ -7359,16 +7372,19 @@ function saveEarningsCacheToStorage(){
   try {
     localStorage.setItem(EARNINGS_CACHE_KEY, JSON.stringify({
       ts: G_EARNINGS_FETCHED_AT,
+      fetchDate: G_EARNINGS_FETCHED_DATE,
       data: G_EARNINGS_CACHE
     }));
   } catch(e){ /* quota — fine, in-memory cache survives the session */ }
 }
 
 async function fetchEarningsCalendarBulk(){
-  // Hydrate from localStorage if fresh
+  // Hydrate from localStorage if fresh (handles cross-day bust internally)
   if (loadEarningsCacheFromStorage()) return G_EARNINGS_CACHE;
+  // In-memory check also gates on calendar day to match the storage path
   if (Object.keys(G_EARNINGS_CACHE).length > 0
-      && (Date.now() - G_EARNINGS_FETCHED_AT) < EARNINGS_CACHE_TTL_MS) {
+      && (Date.now() - G_EARNINGS_FETCHED_AT) < EARNINGS_CACHE_TTL_MS
+      && G_EARNINGS_FETCHED_DATE === _todayUtc()) {
     return G_EARNINGS_CACHE;
   }
   var fmpKey = '';
@@ -7394,6 +7410,7 @@ async function fetchEarningsCalendarBulk(){
     });
     G_EARNINGS_CACHE = fresh;
     G_EARNINGS_FETCHED_AT = Date.now();
+    G_EARNINGS_FETCHED_DATE = from;     // baked-in `from` matches today's UTC date
     saveEarningsCacheToStorage();
     console.log('[earnings] hydrated ' + Object.keys(fresh).length + ' tickers with upcoming earnings');
     return G_EARNINGS_CACHE;
@@ -12583,10 +12600,34 @@ function fetchClosedPositions(){
     // This survives Tradier sandbox resets which truncate order history
     var savedTrades = [];
     try{ savedTrades = JSON.parse(localStorage.getItem('rrjcar_closed_trades')||'[]'); }catch(e){}
-    // Build a map of closeOrderId -> trade for deduplication (fresh API data wins)
+    // HC-H: dedup MERGES saved + fresh — fresh API data wins on overlap, but
+    // saved entry-snapshot fields (entryRules, entryIv, entryHv20, entryThemeName,
+    // entryThemeScore, entryScore, entryWasGo, underlyingAtOpen) are preserved
+    // even if the fresh `matched` trade lacks them. Without this merge, a
+    // re-fetch after the position's posOpenData was pruned would OVERWRITE
+    // the previously enriched trade record with one missing all entry data,
+    // wiping the analytics signal for that trade permanently.
     var tradeMap = {};
     savedTrades.forEach(function(t){ if(t.closeOrderId) tradeMap[t.closeOrderId] = t; });
-    matched.forEach(function(t){ if(t.closeOrderId) tradeMap[t.closeOrderId] = t; });
+    matched.forEach(function(t){
+      if(!t.closeOrderId) return;
+      var prior = tradeMap[t.closeOrderId];
+      if (prior) {
+        // Merge: start with prior, overlay fresh — fresh wins on every field
+        // EXCEPT entry-snapshot fields, which are write-once-keep-forever.
+        var merged = Object.assign({}, prior, t);
+        // Preserve prior entry fields when fresh lacks them
+        ['entryRules','entryScore','entryWasGo','entryIv','entryHv20',
+         'entryThemeName','entryThemeScore','underlyingAtOpen'].forEach(function(k){
+          if (typeof t[k] === 'undefined' && typeof prior[k] !== 'undefined') {
+            merged[k] = prior[k];
+          }
+        });
+        tradeMap[t.closeOrderId] = merged;
+      } else {
+        tradeMap[t.closeOrderId] = t;
+      }
+    });
     var allTrades = Object.values(tradeMap).sort(function(a,b){ return new Date(b.closeDate)-new Date(a.closeDate); });
     try{ localStorage.setItem('rrjcar_closed_trades', JSON.stringify(allTrades)); }catch(e){}
 
