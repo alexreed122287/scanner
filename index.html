@@ -7474,6 +7474,38 @@ function _resultRankCompare(a, b){
   return (b.volume || 0) - (a.volume || 0);
 }
 
+// Returns a short label explaining WHY a row is ranked below the row above
+// it — finds the FIRST tiebreaker level (in the same priority order as
+// _resultRankCompare) where this row scored lower. Surfaces the actual
+// deciding factor so the user can see at a glance "this is below the prev
+// row because of RS, not because of tech."
+//
+// Possible returns:
+//   ''            — top of list (no row above)
+//   '↓ score'     — fell short on the primary score
+//   '↓ tech'      — score tied; lower techScore
+//   '↓ RS 5D'     — score+tech tied; lower 5-day RS
+//   '↓ theme'     — score+tech+RS tied; lower theme dailyScore
+//   '↓ volume'    — score+tech+RS+theme tied; lower volume
+//   '= tied'      — every tiebreaker was equal (rare but possible)
+function _whyRankedBelow(r, prev){
+  if (!r || !prev) return '';
+  if ((r.score||0) < (prev.score||0)) return '↓ score';
+  if ((r.techScore||0) < (prev.techScore||0)) return '↓ tech';
+  var aRs = (r.ind && typeof r.ind.relStr5d === 'number') ? r.ind.relStr5d : 0;
+  var bRs = (prev.ind && typeof prev.ind.relStr5d === 'number') ? prev.ind.relStr5d : 0;
+  if (aRs < bRs) return '↓ RS 5D';
+  if (typeof getThemeStrength === 'function') {
+    var aTh = getThemeStrength(r.ticker);
+    var bTh = getThemeStrength(prev.ticker);
+    var aThS = (aTh && aTh.dailyScore) || 0;
+    var bThS = (bTh && bTh.dailyScore) || 0;
+    if (aThS < bThS) return '↓ theme';
+  }
+  if ((r.volume||0) < (prev.volume||0)) return '↓ volume';
+  return '= tied';
+}
+
 function scoreIt(ticker, ind, opt){
   // \u2500\u2500 Look up cached FMP data (sync \u2014 fetched async during scan) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
   var fmp = G_FMP_CACHE[ticker] || loadFmpCache(ticker);
@@ -8240,6 +8272,10 @@ function renderBuySig(){
 
   // Derive top sector from actual GO signals \u2014 matches Market Breadth
   var sectorGoCounts={}, sectorAllCounts={};
+  // Track previous-rendered card per list (GO vs NO-GO) for the why-ranked
+  // indicator. We compare each row to the prior one in the SAME list.
+  var prevGo = null, prevNoGo = null;
+  var rankGo = 0, rankNoGo = 0;
   G.results.forEach(function(r){
     // Hard sector exclusion (e.g. no health sectors except allowlist)
     if(!tickerPassesSectorExclusion(r.ticker, r.sector)) return;
@@ -8252,6 +8288,15 @@ function renderBuySig(){
     var card=document.createElement('div');
     card.className='sig-card'+(r.isGo?'':' nogo-card');card.dataset.ticker=r.ticker;
     var tk=r.ticker;
+    // Why-ranked indicator: compute against the previous card in the SAME list
+    // (GO vs NO-GO are split, so each list ranks independently within itself)
+    var _prev = r.isGo ? prevGo : prevNoGo;
+    var _rank = r.isGo ? (++rankGo) : (++rankNoGo);
+    var _why = _whyRankedBelow(r, _prev);
+    var _whyCol = _why === '' ? 'var(--grn)'
+               : _why === '\u2193 score' ? 'var(--gry)'
+               : _why === '= tied' ? 'var(--gry)'
+               :                     'var(--ambb)';
     // Tiebreaker subtitle — exposes the values that decide rank when scores tie.
     // Order matches _resultRankCompare: techScore → relStr5d → theme → volume.
     // Wrapped in a tooltip explaining the ranking hierarchy so the user can
@@ -8279,7 +8324,11 @@ function renderBuySig(){
       '5. Volume: ' + fmtK(_vol)
     ];
     var _tip = _tipParts.join('\n');
-    card.innerHTML='<div class="sc-l"><div class="tk">'+starHTML(tk,14)+tk
+    // Rank prefix: "#3 ↓ tech" makes the deciding tiebreaker explicit.
+    var _rankPrefix = '<span style="color:var(--gry2);font-size:9px;font-family:var(--ff-mono);margin-right:4px;" title="Rank within '+(r.isGo?'GO':'NO-GO')+' list. '+(_why?'Beat by previous row on '+_why.replace(/^[↓=]\s*/,''):'Top of list')+'">#'+_rank
+      +(_why ? ' <span style="color:'+_whyCol+';">'+_why+'</span>' : '')
+      +'</span>';
+    card.innerHTML='<div class="sc-l"><div class="tk">'+_rankPrefix+starHTML(tk,14)+tk
       +'<button class="bs-buy-btn" data-ticker="'+tk+'" title="View all call contracts" style="font-size:9px;padding:2px 7px;margin-left:8px;border:1px solid var(--amb);color:var(--amb);background:var(--amb3);border-radius:3px;cursor:pointer;vertical-align:middle;font-family:var(--ff);">▲ BUY</button>'
       +'<button class="bs-sh-btn" data-ticker="'+tk+'" title="Quick market BUY for shares (Tradier)" style="font-size:9px;padding:2px 7px;margin-left:4px;border:1px solid var(--grn);color:var(--grn);background:var(--grn3);border-radius:3px;cursor:pointer;vertical-align:middle;font-family:var(--ff);">▲ SHARES</button>'
       +'</div>'
@@ -8293,6 +8342,8 @@ function renderBuySig(){
       +  ' <span style="color:'+_rsCol+';">'+_rsTxt+'</span>'
       +  ' <span style="color:'+_thCol+';">θ'+_thTxt+'</span>'
       +'</div></div>';
+    // Update the prev-tracker for the NEXT row's _whyRankedBelow comparison
+    if (r.isGo) prevGo = r; else prevNoGo = r;
     card.onclick=function(e){
       if(e.target && e.target.classList && e.target.classList.contains('bs-buy-btn')){
         e.stopPropagation();
@@ -9914,9 +9965,22 @@ function renderScan(){
       themeCell = '<td style="font-size:11px;color:var(--gry2);">—</td>';
     }
 
+    // Why-ranked indicator: shows the deciding tiebreaker vs the row above.
+    // E.g. "2  ↓ RS 5D" means this row tied with row 1 on score+tech+fund
+    // but was beaten on RS 5D. Top row shows just the rank with no arrow.
+    var _why = _whyRankedBelow(r, idx > 0 ? rowSrc[idx-1] : null);
+    var _whyTitle = _why ? 'Ranked #'+(idx+1)+' — beat by row #'+idx+' on '+_why.replace(/^[↓=]\s*/,'')
+                         : 'Top of ranked list';
+    var _whyCol = _why === '' ? 'var(--grn)'
+               : _why === '↓ score' ? 'var(--gry)'
+               : _why === '= tied' ? 'var(--gry)'
+               :                     'var(--ambb)';   // tiebreaker beats stand out
     rows+='<tr data-ticker="'+tk+'" onclick="viewDetail(this.dataset.ticker,\'sc-detail\',\'sc-det-empty\')">'
       +'<td style="text-align:center;padding:0;">'+starHTML(tk,14)+'</td>'
-      +'<td style="text-align:center;font-size:10px;color:var(--gry2);font-family:var(--ff-mono);">'+(idx+1)+'</td>'
+      +'<td style="text-align:center;font-size:10px;color:var(--gry2);font-family:var(--ff-mono);" title="'+_whyTitle.replace(/"/g,'&quot;')+'">'
+      +  '<div style="line-height:1.1;">'+(idx+1)+'</div>'
+      +  (_why ? '<div style="font-size:8px;color:'+_whyCol+';margin-top:1px;white-space:nowrap;">'+_why+'</div>' : '')
+      +'</td>'
       +'<td><b>'+tk+'</b></td>'
       +'<td>'+scoreBar+'</td>'
       +'<td>'+sigBadge+'</td>'
