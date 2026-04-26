@@ -9013,7 +9013,18 @@ function finishScan(){
     if(enrichIdx >= enrichQueue.length) return;
     var t = enrichQueue[enrichIdx++];
     var r = G.results.filter(function(x){ return x.ticker===t; })[0];
-    if(!r){ enrichNext(); return; }
+    if(!r){
+      // CRITICAL: ticker was in enrichQueue at dispatch time but no longer
+      // in G.results (race with re-render, slim-cache restore on tab switch,
+      // any mutation). Without ticking indDone, _maybeFinishScan stays short
+      // forever and the scan stalls at "199/200" until the 6-min watchdog
+      // kicks in. This was the same family as the FMP cache-skip bug fixed
+      // in 53b1c16, but on the indicator queue side. The dropped ticker
+      // still counts toward enrichTotal — it was never going to enrich.
+      indDone++; _maybeFinishScan();
+      enrichNext();
+      return;
+    }
     var tradierKey=_getTradierKey();
     var fmpKey='';try{fmpKey=localStorage.getItem('rrjcar_fmp')||'';}catch(e){}
     setScanProgress(62 + Math.round((enrichIdx/enrichQueue.length)*35), 'Enriching '+enrichIdx+'/'+enrichQueue.length+': '+t+'...');
