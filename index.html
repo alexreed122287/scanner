@@ -10554,7 +10554,11 @@ function _gexScheduleTick(){
   var times = GEX_SCHED_TIMES[G.gexAutoSchedule] || [];
   var nowMin = _etMinuteOfDay();
   if (nowMin < 0) return;                                     // weekend
-  if (nowMin === G._gexLastFireMin) return;                   // same minute, debounce
+  // F-1: range debounce. The ±1 match window means times {9:35} matches at 9:34, 9:35, 9:36.
+  // An exact-equality debounce (=== lastFire) would still let the function double-fire across
+  // adjacent ticks (e.g. fire at 9:34, then again at 9:35). Suppress any fire whose minute is
+  // within 2 minutes of the previous fire — covers the full match window plus a 1-minute jitter.
+  if (G._gexLastFireMin >= 0 && nowMin >= G._gexLastFireMin && (nowMin - G._gexLastFireMin) <= 2) return;
   // Match within a 1-minute window so a tick that lands at 9:36 catches the 9:35 schedule
   for (var i = 0; i < times.length; i++) {
     if (Math.abs(nowMin - times[i]) <= 1) {
@@ -13746,7 +13750,30 @@ function makeMeter(label, value, max, colorClass, subtitle){
 //  NOTIFICATION ENGINE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var G_NOTIF_COOLDOWNS = {}; // ticker -> timestamp of last alert
+// F-2: persist cooldowns across page reloads so we don't re-alert every previously-alerted
+// ticker on first scan after refresh. TTL = 24h (max useful cooldown window); stale entries
+// are pruned on load. The user's configured cooldown (settings.cooldown, in minutes) still
+// governs whether a given entry counts as live — this layer only stops the post-reload spam.
+var G_NOTIF_COOLDOWN_KEY = 'rrjcar_notif_cooldowns_v1';
+var G_NOTIF_COOLDOWN_TTL_MS = 24 * 60 * 60 * 1000;
+function _loadNotifCooldowns(){
+  try {
+    var raw = localStorage.getItem(G_NOTIF_COOLDOWN_KEY);
+    if(!raw) return {};
+    var obj = JSON.parse(raw) || {};
+    var now = Date.now(), out = {};
+    for(var k in obj){
+      if(obj.hasOwnProperty(k) && typeof obj[k] === 'number' && (now - obj[k]) < G_NOTIF_COOLDOWN_TTL_MS){
+        out[k] = obj[k];
+      }
+    }
+    return out;
+  } catch(e){ return {}; }
+}
+function _saveNotifCooldowns(){
+  try { localStorage.setItem(G_NOTIF_COOLDOWN_KEY, JSON.stringify(G_NOTIF_COOLDOWNS)); } catch(e){}
+}
+var G_NOTIF_COOLDOWNS = _loadNotifCooldowns(); // ticker -> timestamp of last alert (persisted)
 
 function saveAlertSettingsBtn(btn){
   saveNotifSettings();
@@ -14029,7 +14056,7 @@ function hcModalSkip(){
   if(G_HC_MODAL_TIMER){ clearInterval(G_HC_MODAL_TIMER); G_HC_MODAL_TIMER = null; }
   var modal = eid('hc-modal');
   if(modal) modal.style.display = 'none';
-  if(G_HC_CURRENT){ G_NOTIF_COOLDOWNS[G_HC_CURRENT.r.ticker] = Date.now(); addAlert(G_HC_CURRENT.r.ticker, 'Skipped \u2014 suppressed for cooldown period', 'warn'); }
+  if(G_HC_CURRENT){ G_NOTIF_COOLDOWNS[G_HC_CURRENT.r.ticker] = Date.now(); _saveNotifCooldowns(); addAlert(G_HC_CURRENT.r.ticker, 'Skipped \u2014 suppressed for cooldown period', 'warn'); }
   G_HC_CURRENT = null;
   if(G_HC_MODAL_QUEUE.length > 0){ var next = G_HC_MODAL_QUEUE.shift(); setTimeout(function(){ showAutoSubmitModal(next.r, next.optData); }, 500); }
 }
@@ -14052,6 +14079,7 @@ function checkHighConvictionSignals(results){
     if(!isProven || !hasAnalyst || !hasGex) return;
     if(G_NOTIF_COOLDOWNS[r.ticker] && (now - G_NOTIF_COOLDOWNS[r.ticker]) < cooldownMs) return;
     G_NOTIF_COOLDOWNS[r.ticker] = now;
+    _saveNotifCooldowns();
     var rulesSummary = 'PROVEN \u2713  Analyst Rev \u2191 \u2713  GEX Call Heavy \u2713  Score ' + r.score;
     var price = r.price || 0;
     addAlert(r.ticker, '\u2605 HIGH CONVICTION \u2014 Score ' + r.score + '/150 | ' + r.sector + ' | $' + price.toFixed(2), 'go');
@@ -16839,7 +16867,12 @@ function pfAutoPullTradier(){
   Promise.all([
     fetch(creds.host+'/v1/accounts/'+acct+'/positions',
       {headers:{Authorization:'Bearer '+creds.key, Accept:'application/json'}})
-      .then(function(r){ if(!r.ok) throw new Error('positions HTTP '+r.status); return r.json(); }),
+      .then(function(r){ if(!r.ok) throw new Error('positions HTTP '+r.status); return r.json(); })
+      // F-7: wrap positions in a sentinel-returning catch so a positions failure does not
+      // reject the whole chain — we still want balances/cash to render even if positions
+      // 500s. The sentinel is detected inside the .then below and short-circuits position
+      // parsing while preserving the cash-render path.
+      .catch(function(e){ return { __err: e }; }),
     fetch(creds.host+'/v1/accounts/'+acct+'/balances',
       {headers:{Authorization:'Bearer '+creds.key, Accept:'application/json'}})
       .then(function(r){ return r.ok ? r.json() : null; })
@@ -16847,6 +16880,7 @@ function pfAutoPullTradier(){
   ]).then(function(arr){
     var pd = arr[0];
     var bd = arr[1];
+    var positionsErr = (pd && pd.__err) ? pd.__err : null;
 
     // Extract cash from balances. Tradier exposes different fields per account
     // type: margin → margin.cash_available, cash → cash.cash_available, pdt →
@@ -16865,6 +16899,9 @@ function pfAutoPullTradier(){
     // Stash on G so pfRecomputeStats can roll cash into total
     G.pfTradierCash = cashVal;
 
+    // F-7: now that cash has rendered, surface the positions error (if any) so the
+    // existing .catch below can update the status line + toast the user.
+    if (positionsErr) throw positionsErr;
     return pd;
   })
     .then(function(pd){
