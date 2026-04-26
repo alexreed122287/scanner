@@ -9598,7 +9598,11 @@ function finishScan(){
   function enrichNext(){
     if(enrichIdx >= enrichQueue.length) return;
     var t = enrichQueue[enrichIdx++];
-    var r = G.results.filter(function(x){ return x.ticker===t; })[0];
+    // P-1: was `G.results.filter(...)[0]` — O(N) per call, with N≈1620 and
+    // 200 calls per scan that's ~324K comparisons. The same lookup map
+    // built at line 9389 is already used in the FMP queue at line 9568;
+    // the indicator queue had been missed. Identical O(1) replacement.
+    var r = G.resultsByTicker[t];
     if(!r){
       // CRITICAL: ticker was in enrichQueue at dispatch time but no longer
       // in G.results (race with re-render, slim-cache restore on tab switch,
