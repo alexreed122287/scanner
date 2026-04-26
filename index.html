@@ -11492,10 +11492,22 @@ function renderPositionsTable(pos,srcLabel){
     var cfgEnabled   = cfg.enabled   || false;
 
 
-    // DIT \u2014 days since position was opened (date_acquired from Tradier)
+    // A-1 + A-2: consolidated DIT/DTE block. Previously this was duplicated as
+    // two near-identical sub-blocks that redeclared the same `var` names \u2014 the
+    // second block silently overwrote the first (dead code) but used different
+    // time math (T16:00:00 local vs T21:00:00Z UTC; setHours vs Date.now()),
+    // so any future fix had to be remembered twice. Both copies also had a
+    // regex bug: `(d{2})` was a literal `d` instead of `\d`, so the OCC-symbol
+    // fallback never matched (Tradier positions without a `p.exp` field
+    // displayed DTE as '--'). Fixed in one place; rounding to whole days
+    // makes the exact intraday hour irrelevant, so we parse the date as
+    // local midnight to avoid DST/UTC drift.
+
+    // DIT \u2014 days since position was opened (1 = opened today)
     var ditDays = '--';
-    if(p.dateAcquired){
-      var entryMid = new Date(p.dateAcquired); entryMid.setHours(0,0,0,0);
+    var ditSrc = p.openTs || p.dateAcquired || '';
+    if(ditSrc){
+      var entryMid = new Date(ditSrc); entryMid.setHours(0,0,0,0);
       var todayMid = new Date(); todayMid.setHours(0,0,0,0);
       ditDays = Math.floor((todayMid - entryMid) / 86400000) + 1;
     }
@@ -11505,37 +11517,18 @@ function renderPositionsTable(pos,srcLabel){
     var expStr = p.exp || '';
     if(!expStr && sym){
       // Parse from OCC symbol: e.g. NVDA260501C00175000 \u2192 2026-05-01
-      var occMatch = sym.match(/[A-Z]+(d{2})(d{2})(d{2})[CP]/);
+      var occMatch = sym.match(/[A-Z]+(\d{2})(\d{2})(\d{2})[CP]/);
       if(occMatch) expStr = '20'+occMatch[1]+'-'+occMatch[2]+'-'+occMatch[3];
     }
     if(expStr){
-      var expDate = new Date(expStr + 'T16:00:00'); // options expire at 4pm ET
-      var todayMs = new Date().setHours(0,0,0,0);
-      dteDays = Math.max(0, Math.round((expDate - todayMs) / 86400000));
+      var ep = expStr.split('-');
+      var expMid = new Date(+ep[0], +ep[1]-1, +ep[2]); // local midnight on expiry day
+      var dteTodayMid = new Date(); dteTodayMid.setHours(0,0,0,0);
+      dteDays = Math.max(0, Math.round((expMid - dteTodayMid) / 86400000));
     }
-    var dteCls = dteDays !== '--' && dteDays <= 7 ? 'color:var(--red)' : dteDays !== '--' && dteDays <= 14 ? 'color:var(--ambb)' : 'color:var(--gry3)';
-    var ditCls = 'color:var(--gry3)';
-
-    // DIT \u2014 days since position was opened (1 = opened today)
-    var ditDays = '--';
-    var _ditSrc = p.openTs || (p.dateAcquired ? new Date(p.dateAcquired).toISOString() : null);
-    if(_ditSrc){
-      var _entryMid = new Date(_ditSrc); _entryMid.setHours(0,0,0,0);
-      var _todayMid = new Date(); _todayMid.setHours(0,0,0,0);
-      ditDays = Math.floor((_todayMid - _entryMid) / 86400000) + 1;
-    }
-    // DTE \u2014 calendar days to expiry, parsed from p.exp or OCC symbol
-    var dteDays = '--';
-    var expStr = p.exp||'';
-    if(!expStr && sym){
-      var occMatch = sym.match(/[A-Z]+(d{2})(d{2})(d{2})[CP]/);
-      if(occMatch) expStr = '20'+occMatch[1]+'-'+occMatch[2]+'-'+occMatch[3];
-    }
-    if(expStr){
-      var expDate = new Date(expStr+'T21:00:00Z');
-      dteDays = Math.max(0, Math.round((expDate - Date.now()) / 86400000));
-    }
-    var dteCls = dteDays!=='--'&&dteDays<=7?'color:var(--red)':dteDays!=='--'&&dteDays<=14?'color:var(--ambb)':'color:var(--gry3)';
+    var dteCls = (dteDays !== '--' && dteDays <= 7) ? 'color:var(--red)'
+               : (dteDays !== '--' && dteDays <= 14) ? 'color:var(--ambb)'
+               : 'color:var(--gry3)';
     var ditCls = 'color:var(--gry3)';
     // Strike cell with C/P suffix + ITM/OTM badge (folded TYPE column into STRIKE)
     var isStock = p.type === 'STOCK';
