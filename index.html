@@ -8119,7 +8119,13 @@ function renderSentimentTab(){
   // panel doesn't fetch until the user opens this tab. Subsequent tab switches
   // are no-ops (the panel keeps its own state inside the iframe).
   if(iframe.src && iframe.src.indexOf('alexreed122287.github.io') >= 0) return;
-  iframe.src = SENT_PANEL_URL;
+  // Daily cachebuster on iframe src so browser doesn't serve stale iframe HTML
+  // referencing an old bundle hash after a sentiment-panel redeploy. Bumps once
+  // per UTC day — long enough to keep the GH Pages CDN warm, short enough that
+  // a deploy is visible same-day. (Was: bare URL, which made the browser keep
+  // serving old HTML for hours/days even though the new dist was already live.)
+  var dayBuster = new Date().toISOString().slice(0,10).replace(/-/g,'');
+  iframe.src = SENT_PANEL_URL + '?v=' + dayBuster;
 }
 
 // Helper: called from SENT tab row clicks — drops ticker into the scanner's
