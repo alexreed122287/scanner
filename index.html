@@ -8370,6 +8370,20 @@ function applyTheme(isLight){
   document.body.classList.toggle('light-mode', !!isLight);
   var btn = eid('theme-toggle');
   if(btn) btn.innerHTML = isLight ? '&#9790; DARK' : '&#9788; LIGHT';
+  // Notify the sandboxed sentiment-panel iframe — it can't observe our
+  // localStorage 'storage' event because the sandbox gives it a null origin.
+  // postMessage is the only cross-context channel that works through the
+  // sandbox boundary.
+  try {
+    var iframe = document.getElementById('sent-iframe');
+    if (iframe && iframe.contentWindow) {
+      iframe.contentWindow.postMessage({
+        source: 'option-panda',
+        type: 'theme',
+        theme: isLight ? 'light' : 'dark'
+      }, '*');
+    }
+  } catch(e){ /* iframe not yet loaded — initial theme is sent on iframe load */ }
 }
 function toggleLightMode(){
   var isLight = !document.body.classList.contains('light-mode');
@@ -9954,6 +9968,19 @@ function renderSentimentTab(){
   // a deploy is visible same-day. (Was: bare URL, which made the browser keep
   // serving old HTML for hours/days even though the new dist was already live.)
   var dayBuster = new Date().toISOString().slice(0,10).replace(/-/g,'');
+  // Send the current theme to the iframe as soon as it loads so it doesn't
+  // start in dark mode and flicker. Also re-send on every load (which catches
+  // hard refresh, navigation, etc).
+  iframe.addEventListener('load', function(){
+    try {
+      var isLight = document.body.classList.contains('light-mode');
+      iframe.contentWindow && iframe.contentWindow.postMessage({
+        source: 'option-panda',
+        type: 'theme',
+        theme: isLight ? 'light' : 'dark'
+      }, '*');
+    } catch(e){}
+  });
   iframe.src = SENT_PANEL_URL + '?v=' + dayBuster;
 }
 
