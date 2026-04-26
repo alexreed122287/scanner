@@ -7492,11 +7492,21 @@ function finishScan(){
         setTimeout(_fmpNext, 5000);
         return;
       }
-      if(window._fmpDead) return; // circuit breaker open \u2014 give up
+      if(window._fmpDead) {
+        // Circuit breaker open \u2014 credit ALL remaining slots so _maybeFinishScan
+        // can finalize. Was bailing without ever ticking fmpDone, leaving the
+        // scan stuck at "Enriching N/N" forever (caller relied on watchdog).
+        var remaining = goTickers.length - _fmpIdx;
+        if(remaining > 0){ fmpDone += remaining; _fmpIdx = goTickers.length; _maybeFinishScan(); }
+        return;
+      }
       var t = goTickers[_fmpIdx++];
       // Skip tickers that already have fresh cache
       var cached = G_FMP_CACHE[t] || loadFmpCache(t);
       if(cached && cached.numAnalysts > 0){
+        // CRITICAL: cache-skip must still tick fmpDone, else scans where most
+        // tickers have warm FMP cache (every re-scan within ~1h) hang at 97%.
+        fmpDone++; _maybeFinishScan();
         setTimeout(_fmpNext, 0);
         return;
       }
