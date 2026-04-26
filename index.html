@@ -8352,7 +8352,7 @@ function searchCustomTicker(){
   // Make sure we're on the scanner tab so the user sees results
   try{ switchTab('sc'); }catch(e){}
   // Defer the scan one tick so the tab switch animation doesn't drop the toast
-  setTimeout(function(){ try{ runScan(); }catch(e){ toast('Scan error: '+e.message); } }, 100);
+  setTimeout(function(){ try{ runScan({force:true}); }catch(e){ toast('Scan error: '+e.message); } }, 100);
 }
 
 function setScanProgress(pct, label){
@@ -8444,7 +8444,7 @@ function autoScanTick(){
   }
   if(G.scanRunning) return;                      // don't stack
   AUTO_SCAN.lastFire = Date.now();
-  try { runScan(); } catch(e) { console.warn('autoScanTick: ', e); }
+  try { runScan({force:true}); } catch(e) { console.warn('autoScanTick: ', e); }
 }
 function toggleAutoScanPanel(){
   var p = eid('autoscan-panel');
@@ -8731,8 +8731,36 @@ async function fetchDynamicUniverse(key, mode){
   }
   return passed;
 }
-async function runScan(){
+async function runScan(opts){
+  opts = opts || {};
   if(G.scanRunning) return;
+
+  // FRESHNESS CHECK — when SCAN is clicked while a recent scan exists, prompt
+  // before re-running. Cached results are still loaded in memory + visible
+  // in the table, so canceling means "keep what I have." Forced callers
+  // (auto-scan timer, auto-trader cycle, stale-banner refresh button) pass
+  // {force:true} to skip this prompt.
+  if (!opts.force) {
+    try {
+      var lastTs = cacheGet(CACHE_KEYS.scanTs);
+      if (lastTs) {
+        var ageMin = Math.floor((Date.now() - lastTs) / 60000);
+        // Threshold: <30 min = "fresh" (intraday swing setups don't shift
+        // meaningfully on minute-scale; less than this is wasted API budget)
+        if (ageMin < 30) {
+          var ageStr = ageMin === 0 ? 'less than 1 min' : ageMin + ' min';
+          var msg = 'Last scan was ' + ageStr + ' ago.\n\n' +
+                    'Re-scanning now will spend ~600 Tradier calls (~5 min) for likely identical data.\n\n' +
+                    'OK = re-scan anyway\nCancel = keep cached results';
+          if (!confirm(msg)) {
+            try { toast('Using cached scan from ' + ageStr + ' ago'); } catch(_){}
+            return;
+          }
+        }
+      }
+    } catch(_) {}
+  }
+
   G.scanRunning = true;
 
   var key = _getTradierKey();
@@ -9922,9 +9950,15 @@ function runGex(){
   // Call OI vs Put OI at 30DTE expiry = real flow proxy.
   // No further slicing — sourceTickers already capped to GEX_TICKER_LIMIT (200) above.
   var gexTickers = sourceTickers;
-  var estMinutes = Math.ceil(gexTickers.length * 2 / 100);   // 2 fetches/ticker, 100/min cap
+  // GEX dispatch: 600ms internal pacing \u00d7 2 fetches/ticker = 1.2s/ticker.
+  // 200 tickers = ~4min. Without this pacing the 200 expirations all hit
+  // the tradierFetch queue at once, swamping it; the queue still rate-limits
+  // but creates burst pressure that triggers cascading 429s. 600ms internal
+  // gap distributes evenly under the new 110/min wrapper cap.
+  var GEX_DISPATCH_MS = 600;
+  var estMinutes = Math.ceil(gexTickers.length * 2 * GEX_DISPATCH_MS / 60000);
   var _gt2=eid('gex-ts');
-  if(_gt2) _gt2.textContent = 'Fetching 30DTE options flow for ' + gexTickers.length + ' tickers (~' + estMinutes + 'min, paced by rate limit)...';
+  if(_gt2) _gt2.textContent = 'Fetching 30DTE options flow for ' + gexTickers.length + ' tickers (~' + estMinutes + 'min, paced)...';
 
   // Step 1: get expirations for all tickers, find nearest 25-50 calendar day expiry each
   var today = new Date();
@@ -9932,7 +9966,29 @@ function runGex(){
     return Math.round((d2 - d1) / 864e5); // same as fetchOptionContract \u2014 calendar days
   }
 
-  var expPromises = gexTickers.map(function(t){
+  // Sequential dispatcher with N-millisecond spacing between dispatches.
+  // Returns Promise<Array<resolvedValue>> in input order.
+  function _gexPaced(items, delayMs, doFn){
+    return new Promise(function(resolve){
+      if (items.length === 0) return resolve([]);
+      var results = new Array(items.length);
+      var done = 0, idx = 0;
+      function next(){
+        if (idx >= items.length) return;
+        var i = idx++;
+        var p;
+        try { p = doFn(items[i]); } catch(e) { p = Promise.reject(e); }
+        Promise.resolve(p).then(function(r){ results[i] = r; }).catch(function(){ results[i] = null; }).then(function(){
+          done++;
+          if (done === items.length) resolve(results);
+        });
+        setTimeout(next, delayMs);
+      }
+      next();
+    });
+  }
+
+  function _fetchOneExpiry(t){
     return tradierFetch(host+'/v1/markets/options/expirations?symbol='+t+'&includeAllRoots=true', {
       headers:{Authorization:'Bearer '+key, Accept:'application/json'}
     }, 6*60*60*1000)
@@ -9951,12 +10007,12 @@ function runGex(){
       return {ticker:t, expiry:best};
     })
     .catch(function(){ return {ticker:t, expiry:null}; });
-  });
+  }
 
-  Promise.all(expPromises).then(function(expiries){
-    // Step 2: fetch options chains for tickers that have a valid expiry
-    var chainPromises = expiries.map(function(e){
-      if(!e.expiry) return Promise.resolve({ticker:e.ticker, chain:[], expiry:null});
+  _gexPaced(gexTickers, GEX_DISPATCH_MS, _fetchOneExpiry).then(function(expiries){
+    // Step 2: fetch options chains for tickers that have a valid expiry \u2014 also paced
+    function _fetchOneChain(e){
+      if(!e || !e.expiry) return Promise.resolve({ticker:(e&&e.ticker)||'', chain:[], expiry:null});
       return tradierFetch(host+'/v1/markets/options/chains?symbol='+e.ticker+'&expiration='+e.expiry.date+'&greeks=false', {
         headers:{Authorization:'Bearer '+key, Accept:'application/json'}
       }, 5*60*1000)
@@ -9967,9 +10023,9 @@ function runGex(){
         return {ticker:e.ticker, chain:opts, expiry:e.expiry, dte:e.expiry.dte};
       })
       .catch(function(){ return {ticker:e.ticker, chain:[], expiry:e.expiry}; });
-    });
+    }
 
-    Promise.all(chainPromises).then(function(chains){
+    _gexPaced(expiries, GEX_DISPATCH_MS, _fetchOneChain).then(function(chains){
       // Step 3: compute net flow from call OI vs put OI
       G.gexData = chains.map(function(c){
         var result = G.results.filter(function(r){ return r.t===c.ticker||r.ticker===c.ticker; })[0];
@@ -13549,7 +13605,7 @@ async function runAutoScanCycle(){
   G_AT.scanCount++;
   atLog('Scanning... (cycle #'+G_AT.scanCount+')','');
   atUpdateStats();
-  runScan();
+  runScan({force:true});   // auto-trader needs fresh data each cycle, never prompt
   // CRITICAL: Wait for scan to FULLY finalize before reading G.results.
   //
   // Was a fixed 12s sleep ("scan ~5s + GEX 2s + buffer"). That timing held on
@@ -15002,7 +15058,8 @@ function cacheGet(key){
 var T_CACHE = {};                     // url → {data, ts}
 var T_CACHE_MAX_ENTRIES = 500;        // hard ceiling — evict oldest when exceeded
 var T_RATE = { recent: [], pending: [], drainScheduled: false, throttledUntil: 0 };
-var T_RATE_CAP_PER_MIN = 100;         // stay safely under Tradier's 120/min ceiling
+var T_RATE_CAP_PER_MIN = 110;         // 10% closer to Tradier's 120/min ceiling for faster enrichment;
+                                       // still leaves headroom for the proxy's own rate-limit overhead
 var T_CACHE_GC_LAST = 0;
 
 function _tradierGcCache(){
@@ -15175,7 +15232,7 @@ function cacheAge(tsKey){
 // Whitelist of refresh function names callable via showStaleBanner — prevents
 // arbitrary-JS injection if refreshFn is ever sourced from untrusted input.
 var STALE_REFRESH_FNS = {
-  runScan:           function(){ if(typeof runScan          === 'function') runScan(); },
+  runScan:           function(){ if(typeof runScan          === 'function') runScan({force:true}); },
   fetchPositions:    function(){ if(typeof fetchPositions   === 'function') fetchPositions(); },
   fetchClosedPositions: function(){ if(typeof fetchClosedPositions === 'function') fetchClosedPositions(); }
 };
