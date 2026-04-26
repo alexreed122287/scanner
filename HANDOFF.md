@@ -10,7 +10,7 @@ Personal trading scanner ("Option Panda") for long-calls-only swing trading. Sin
 - Python pipeline (`industry/score_themes.py`) for nightly sector RS scoring via GH Actions cron
 - React sentiment panel (separate repo, embedded as sandboxed iframe)
 
-User: solo developer/trader. Live Tradier account `6YB55403`. Mode: live. Strategy: long calls only, ~25–50 DTE, ~0.70 delta, swing horizon (days to weeks).
+User: solo developer/trader. Live Tradier account `6YB72268`. Mode: live. Strategy: long calls only, ~25–50 DTE, ~0.70 delta, swing horizon (days to weeks).
 
 ## Architecture quick map
 
@@ -51,7 +51,7 @@ Cloudflare Worker secrets configured (DO NOT echo values, just know they exist):
 
 - `rrjcar_tradier_proxy` — workers.dev URL
 - `rrjcar_tradier_proxy_live_token` — matches `LIVE_MODE_TOKEN` secret
-- `rrjcar_acct` / `rrjcar_acct_live` — `6YB55403`
+- `rrjcar_acct` / `rrjcar_acct_live` — `6YB72268`
 - `rrjcar_mode` — `live`
 - `rrjcar_theme` — `light` or `dark`
 - `rrjcar_smart_exits_v1`, `rrjcar_gex_schedule_v1`, `rrjcar_scan_settings_v1`, `rrjcar_notif_cooldowns_v1`, etc.
@@ -123,7 +123,7 @@ console.log({
 });
 ```
 
-Should show: `mode: live`, `proxyUrl` set, `hasLiveToken: true`, `acct: 6YB55403`, themes mapped (~2000+), GEX schedule preference.
+Should show: `mode: live`, `proxyUrl` set, `hasLiveToken: true`, `acct: 6YB72268`, themes mapped (~2000+), GEX schedule preference.
 
 ## Quick commands
 
