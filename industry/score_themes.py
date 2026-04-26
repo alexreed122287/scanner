@@ -157,21 +157,26 @@ def fetch_prices_tradier(tickers: list[str], days: int) -> pd.DataFrame:
 
 
 def fetch_prices_yfinance(tickers: list[str], days: int = LOOKBACK_DAYS,
-                          chunk_size: int = 100) -> pd.DataFrame:
-    """Fallback: yfinance in chunks. Works fine from GitHub Actions runners
-    but may rate-limit elsewhere."""
+                          chunk_size: int = 50) -> pd.DataFrame:
+    """Fallback: yfinance in chunks. GitHub Actions runners share IP space
+    that yfinance heavily rate-limits — use small chunks (50) + 3s pacing
+    + per-chunk retry on rate-limit failure. Was 100/chunk + 1s pacing
+    which got hammered: typical run dropped 685/2109 tickers including SPY,
+    causing the FATAL abort downstream."""
     end = datetime.now(timezone.utc).replace(tzinfo=None)
     start = end - timedelta(days=int(days * 1.5))
     start_s = start.strftime("%Y-%m-%d")
     end_s = end.strftime("%Y-%m-%d")
-    print(f"  YFINANCE fetch: {len(tickers)} tickers in chunks of {chunk_size}...",
-          flush=True)
+    print(f"  YFINANCE fetch: {len(tickers)} tickers in chunks of {chunk_size} "
+          f"(3s pacing + 1 retry on rate-limit)...", flush=True)
 
     closes: dict[str, pd.Series] = {}
     chunks = [tickers[i:i + chunk_size]
               for i in range(0, len(tickers), chunk_size)]
 
-    for i, chunk in enumerate(chunks, 1):
+    def _do_chunk(chunk):
+        """Returns dict[ticker -> close Series] for what we successfully got."""
+        got = {}
         try:
             df = yf.download(
                 tickers=chunk, start=start_s, end=end_s,
@@ -179,29 +184,53 @@ def fetch_prices_yfinance(tickers: list[str], days: int = LOOKBACK_DAYS,
                 group_by="ticker",
             )
         except Exception as e:
-            print(f"    chunk {i}/{len(chunks)} FAILED: {e}", flush=True)
-            continue
-
+            print(f"      yf.download threw: {e}", flush=True)
+            return got
         if isinstance(df.columns, pd.MultiIndex):
             for tkr in chunk:
                 try:
                     s = df[tkr]["Close"].dropna()
                     if len(s) > 50:
-                        closes[tkr] = s
+                        got[tkr] = s
                 except (KeyError, AttributeError):
                     continue
         else:
             try:
                 s = df["Close"].dropna()
                 if len(s) > 50:
-                    closes[chunk[0]] = s
+                    got[chunk[0]] = s
             except (KeyError, AttributeError):
                 pass
+        return got
+
+    for i, chunk in enumerate(chunks, 1):
+        got = _do_chunk(chunk)
+        # Retry rate-limited tickers once after a 30s cooldown — typical
+        # rate-limit windows are ~60s but yfinance's per-IP backoff is shorter.
+        missing = [t for t in chunk if t not in got]
+        if missing and len(missing) > len(chunk) * 0.3:
+            # >30% chunk failure suggests rate-limiting, not delistings
+            print(f"    chunk {i}/{len(chunks)}: {len(missing)}/{len(chunk)} missing — "
+                  f"30s cooldown + retry...", flush=True)
+            time.sleep(30)
+            retry_got = _do_chunk(missing)
+            got.update(retry_got)
+        closes.update(got)
 
         if i % 5 == 0 or i == len(chunks):
             print(f"    chunk {i}/{len(chunks)}  cumulative={len(closes)}",
                   flush=True)
-        time.sleep(1)  # gentle pacing
+        time.sleep(3)  # gentle pacing — was 1s, doubled to reduce burst pressure
+
+    # SPY special-case: it's the benchmark; FATAL if missing. Try alone with
+    # a longer cooldown if the bulk fetches missed it.
+    if "SPY" in tickers and "SPY" not in closes:
+        print("  SPY missed in bulk fetch — solo retry after 60s cooldown...", flush=True)
+        time.sleep(60)
+        spy_got = _do_chunk(["SPY"])
+        closes.update(spy_got)
+        if "SPY" not in closes:
+            print("  SPY still missing after retry — script will abort downstream.", flush=True)
 
     out = pd.DataFrame(closes)
     print(f"  yfinance got {out.shape[1]}/{len(tickers)} tickers, "
