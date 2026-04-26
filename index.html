@@ -8939,6 +8939,56 @@ function finishScan(){
       go:      goCountFinal,
       nogo:    G.results.length - goCountFinal
     });
+    // STRAGGLERS CLEANUP PASS — re-enrich any top-200 ticker that finished
+    // the scan with indEnriched=false. Common causes:
+    //   - Tradier 429 dropped that ticker's history fetch (resolves with null)
+    //   - Race with auto-trader's next scan bumped G._scanGen mid-fetch
+    //   - Network blip / fetch abort
+    // Bounded to top-200 (same enrichTotal cap), runs ONCE per scan, sequential
+    // 700ms spacing so we don't re-trip rate limits. The capturedGen guard
+    // prevents this cleanup from running if a NEW scan started — that scan's
+    // own enrichment will handle these tickers fresh.
+    var capturedGen = G._scanGen;
+    setTimeout(function(){
+      if (capturedGen !== G._scanGen) return;     // new scan superseded us
+      var stragglers = G.results.slice(0, enrichTotal).filter(function(r){ return !r.indEnriched; });
+      if (stragglers.length === 0) return;
+      console.log('[scan] cleanup pass: re-enriching ' + stragglers.length + ' stragglers');
+      var sIdx = 0;
+      function _retryNext(){
+        if (sIdx >= stragglers.length) {
+          console.log('[scan] cleanup pass complete');
+          // Final re-render so the cleanup-enriched tickers' updated scores show
+          G.results.sort(function(a,b){ return b.score-a.score; });
+          G.filtered = excludedFilteredResults();
+          renderBuySig(); renderScan();
+          return;
+        }
+        if (capturedGen !== G._scanGen) return;
+        var r = stragglers[sIdx++];
+        if (!r) { setTimeout(_retryNext, 100); return; }
+        fetchIndicatorHistory(r.ticker).then(function(days){
+          if (capturedGen !== G._scanGen) return;
+          if (days) G_HIST_CACHE[r.ticker] = days;
+          r.indEnriched = true;
+          try {
+            var u = scoreIt(r.ticker, r.ind, r.opt);
+            r.score = u.score; r.techScore = u.techScore; r.fundScore = u.fundScore;
+            r.isGo = u.isGo; r.rules = u.rules; r.passes = u.passes;
+          } catch (e) {
+            console.warn('[scan] cleanup scoreIt threw for '+r.ticker+': '+e.message);
+          }
+          setTimeout(_retryNext, 700);     // slow pace — we're in cleanup, not racing
+        }).catch(function(err){
+          if (capturedGen !== G._scanGen) return;
+          console.warn('[scan] cleanup fetch failed for '+r.ticker+(err && err.message ? ': '+err.message : ''));
+          // Still mark enriched so the next scan's cleanup doesn't keep retrying same ticker
+          r.indEnriched = true;
+          setTimeout(_retryNext, 700);
+        });
+      }
+      _retryNext();
+    }, 3000);   // 3s delay so any in-flight enrichment from the main pass settles
   }
   var fmpKey='';try{fmpKey=localStorage.getItem('rrjcar_fmp')||'';}catch(e){}
   if(!fmpKey && typeof FMP_KEY_DEFAULT !== 'undefined') fmpKey = FMP_KEY_DEFAULT;
