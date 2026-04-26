@@ -9043,14 +9043,27 @@ function finishScan(){
       // Generation check \u2014 bail if scan was superseded
       if(myGen !== G._scanGen) return;
       if(days) G_HIST_CACHE[t]=days;
+      // Mark indEnriched=true HERE (before scoring) \u2014 the indicator-history
+      // fetch is done at this point regardless of whether scoreIt succeeds
+      // below. Was previously set INSIDE the inner .then after scoreIt; if
+      // scoreIt throws (e.g. for SPY/QQQ where simulated ind/opt may be
+      // malformed for index ETFs), the .then aborts, .catch fires, and
+      // indEnriched stays false even though enrichment actually completed.
+      r.indEnriched = true;
       var fmpActive = fmpKey && !window._isFmpCircuitOpen() && !(window._fmpRateLimited > 0 && (Date.now()-window._fmpRateLimited) < (window._FMP_COOLDOWN_MS||60000));
       var p = fmpActive ? fetchFmpData(t) : Promise.resolve(null);
       p.then(function(){
         if(myGen !== G._scanGen) return;
-        var u=scoreIt(t,r.ind,r.opt);
-        r.score=u.score; r.techScore=u.techScore; r.fundScore=u.fundScore;
-        r.isGo=u.isGo; r.rules=u.rules; r.passes=u.passes;
-        r.indEnriched = true;
+        // Wrap scoreIt in try/catch \u2014 a single ticker's bad data shouldn't
+        // poison the whole .then chain. If it throws, we log + continue with
+        // the existing pre-enrichment score from the bulk pass.
+        try {
+          var u=scoreIt(t,r.ind,r.opt);
+          r.score=u.score; r.techScore=u.techScore; r.fundScore=u.fundScore;
+          r.isGo=u.isGo; r.rules=u.rules; r.passes=u.passes;
+        } catch (scoreErr) {
+          console.warn('[scan] scoreIt threw for '+t+': '+scoreErr.message+' \u2014 keeping bulk-pass score');
+        }
         // Re-render every 25 ticks instead of every 1 \u2014 was causing 200 full
         // table rebuilds per scan (visible jank, scroll position resets, lost
         // hover tooltips). Final guaranteed render fires from _maybeFinishScan.
@@ -9061,16 +9074,19 @@ function finishScan(){
         }
         indDone++; _maybeFinishScan();
         setTimeout(enrichNext, 100);
-      }).catch(function(){
+      }).catch(function(err){
         if(myGen !== G._scanGen) return;
+        // Surface which ticker hit the inner catch \u2014 helps diagnose the next stall
+        console.warn('[scan] inner enrich catch for '+t+(err && err.message ? ': '+err.message : ''));
         indDone++; _maybeFinishScan();
         setTimeout(enrichNext, 100);
       });
-    }).catch(function(){
+    }).catch(function(err){
       // Outer catch was missing \u2014 a fetchIndicatorHistory rejection (network
       // blip, JSON parse error) used to stall the entire enrichment queue
       // forever. Now we tick the counter and continue.
       if(myGen !== G._scanGen) return;
+      console.warn('[scan] outer enrich catch for '+t+(err && err.message ? ': '+err.message : ''));
       indDone++; _maybeFinishScan();
       setTimeout(enrichNext, 100);
     });
