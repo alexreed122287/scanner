@@ -9195,14 +9195,26 @@ function finishScan(){
   // Check for high-conviction signals after scan
   checkHighConvictionSignals(G.results);
 
-  // Auto-refresh GEX after scan so GEX bonus scores are applied
-  // Run in background \u2014 doesn't block UI
+  // Auto-refresh GEX after scan so GEX bonus scores are applied for the rule
+  // scorecard. Now covers all top-200 enriched tickers (was top 35) \u2014 meaning
+  // ~400 Tradier calls paced by the 100/min wrapper. Delayed to 20s instead of
+  // 2s so the main indicator-history enrichment + cleanup pass have already
+  // drained their request budget; otherwise GEX competes for the rate-limit
+  // window and triggers cascading 429s.
   var tradierKey = _getTradierKey();
   if(tradierKey){
     setTimeout(function(){
-      addAlert('GEX', 'Auto-refreshing GEX after scan...', 'warn');
-      runGex();
-    }, 2000);
+      // Skip if a newer scan started \u2014 its own auto-trigger will fire instead
+      var startGen = G._scanGen;
+      setTimeout(function(){
+        if (startGen !== G._scanGen) {
+          console.log('[scan] GEX auto-trigger skipped \u2014 newer scan in progress');
+          return;
+        }
+        addAlert('GEX', 'Auto-refreshing GEX (top 200 tickers, ~4min) after scan...', 'warn');
+        runGex();
+      }, 0);
+    }, 20000);
   }
 }
 
@@ -9863,13 +9875,21 @@ function runGex(){
   if(!wrap) return;
   var tsEl=eid('gex-ts'); if(tsEl) tsEl.textContent='Updated: '+new Date().toLocaleTimeString();
 
-  // Use GO results from scan if available, otherwise fall back to static UNIVERSE
+  // GEX coverage cap. Was 35 (top 35 GO + top 15 NOGO, then sliced) \u2014 meaning
+  // anything outside the top 35 by score had no GEX data and the rule scorecard
+  // showed "Run GEX/Flow tab first" for 165 of the top 200 enriched tickers.
+  // Raised to 200 to cover every ticker the indicator-history enrichment touched.
+  // Cost: 200 expirations + 200 chains = 400 Tradier calls per refresh, paced
+  // by tradierFetch's 100/min wrapper rate limit (worst case ~4min total).
+  // Tradeoff acknowledged by user \u2014 they explicitly chose option 3.
+  var GEX_TICKER_LIMIT = 200;
+
+  // Use top-N results by rank (multi-key tiebreaker already applied to G.results
+  // ordering at scan finalize). No longer biased toward GO vs NO-GO \u2014 every
+  // top-N ticker gets GEX coverage so its scorecard is complete.
   var sourceTickers;
   if(G.results && G.results.length > 0){
-    // Use top GO signals first, then top NO-GO by score \u2014 max 50
-    var goTickers = G.results.filter(function(r){ return r.isGo; }).slice(0,35);
-    var nogoTickers = G.results.filter(function(r){ return !r.isGo; }).slice(0,15);
-    sourceTickers = goTickers.concat(nogoTickers).map(function(r){ return r.ticker; });
+    sourceTickers = G.results.slice(0, GEX_TICKER_LIMIT).map(function(r){ return r.ticker; });
   } else {
     sourceTickers = UNIVERSE.slice(0,30).map(function(u){ return u.t; });
   }
@@ -9898,10 +9918,13 @@ function runGex(){
     return;
   }
 
-  // Live path: fetch real 30DTE options chain for each ticker to compute net GEX flow
-  // Call OI vs Put OI at 30DTE expiry = real flow proxy
-  var gexTickers = sourceTickers.slice(0, 35); // expanded for full GO coverage
-  var _gt2=eid('gex-ts'); if(_gt2) _gt2.textContent = 'Fetching 30DTE options flow for ' + gexTickers.length + ' tickers...';
+  // Live path: fetch real 30DTE options chain for each ticker to compute net GEX flow.
+  // Call OI vs Put OI at 30DTE expiry = real flow proxy.
+  // No further slicing — sourceTickers already capped to GEX_TICKER_LIMIT (200) above.
+  var gexTickers = sourceTickers;
+  var estMinutes = Math.ceil(gexTickers.length * 2 / 100);   // 2 fetches/ticker, 100/min cap
+  var _gt2=eid('gex-ts');
+  if(_gt2) _gt2.textContent = 'Fetching 30DTE options flow for ' + gexTickers.length + ' tickers (~' + estMinutes + 'min, paced by rate limit)...';
 
   // Step 1: get expirations for all tickers, find nearest 25-50 calendar day expiry each
   var today = new Date();
