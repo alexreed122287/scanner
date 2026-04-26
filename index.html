@@ -10210,7 +10210,16 @@ function runGex(){
       G.results.sort(_resultRankCompare);
       G.filtered = excludedFilteredResults();
       renderBuySig(); renderScan();
-      toast('GEX loaded \u2014 scores updated');
+      // Refresh any open detail panel so its rule scorecard reflects the new
+      // GEX data \u2014 was rendering stale "Run GEX/Flow tab first" even after
+      // GEX completed because buildDetail had captured rules at click time.
+      if (G.selTicker) {
+        try {
+          if (document.getElementById('bs-detail')) viewDetail(G.selTicker, 'bs-detail', 'bs-empty');
+          if (document.getElementById('sc-detail')) viewDetail(G.selTicker, 'sc-detail', 'sc-det-empty');
+        } catch(e) { console.warn('[gex] detail-panel refresh failed:', e.message); }
+      }
+      toast('GEX loaded \u2014 scores + scorecards updated');
       // Re-check high-conviction signals now that GEX bonus is applied
       checkHighConvictionSignals(G.results);
     });
