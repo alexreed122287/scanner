@@ -18,7 +18,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          cache: 'pip'
+          # No pip cache — repo has no requirements.txt / pyproject.toml so
+          # cache: 'pip' fails with "No file matched". Deps are inlined below
+          # and the install is fast enough (~15s) that caching saves nothing.
 
       - name: Install deps
         # Pinned to prevent silent breakage from upstream regressions.
