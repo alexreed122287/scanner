@@ -9383,6 +9383,15 @@ function finishScan(){
           console.log('[scan] GEX auto-trigger skipped \u2014 newer scan in progress');
           return;
         }
+        // Skip if GEX was just refreshed (e.g. by the scheduled fire). Two
+        // simultaneous GEX runs (post-scan + scheduled) would double the
+        // 400-call API load and trigger the cascading 429s the user just hit.
+        // 30 min window matches the freshness threshold used elsewhere.
+        if (typeof _gexFreshWithin === 'function' && _gexFreshWithin(30)) {
+          console.log('[scan] GEX auto-trigger skipped \u2014 GEX data is <30min old');
+          try { addAlert('GEX', 'Auto-trigger skipped \u2014 GEX data is fresh (<30min)', 'warn'); } catch(e){}
+          return;
+        }
         addAlert('GEX', 'Auto-refreshing GEX (top 200 tickers, ~4min) after scan...', 'warn');
         runGex();
       }, 0);
@@ -10094,6 +10103,24 @@ function saveGexCache(){
       data: G.gexData
     }));
   } catch(e) { /* quota — fine, in-memory survives session */ }
+  // Track last-fetch ts in memory so post-scan auto-trigger can skip if recent
+  G._gexLastFetchTs = Date.now();
+}
+
+// Returns true if GEX data was refreshed within the last `windowMin` minutes.
+// Used to skip the post-scan auto-trigger when GEX was just refreshed via the
+// scheduled fire — prevents double-fire that doubles API pressure during scan.
+function _gexFreshWithin(windowMin){
+  var lastTs = G._gexLastFetchTs || 0;
+  if (!lastTs) {
+    // Fall back to localStorage cache timestamp
+    try {
+      var raw = localStorage.getItem(GEX_CACHE_KEY);
+      if (raw) { var obj = JSON.parse(raw); if (obj && obj.ts) lastTs = obj.ts; }
+    } catch(_){}
+  }
+  if (!lastTs) return false;
+  return (Date.now() - lastTs) < (windowMin * 60000);
 }
 function loadGexCache(){
   try {
