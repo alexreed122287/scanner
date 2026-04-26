@@ -13293,8 +13293,16 @@ async function startAutoTrader(){
   // HC-F: race guard \u2014 set _starting to true so a concurrent stopAutoTrader
   // doesn't see G_AT.timer=null and miss the cleanup. Cleared at the end
   // (success path) or on the abort below.
+  //
+  // RC-2: also reset disabledMidStart at the top of EVERY genuine start
+  // attempt. Without this reset, a prior cycle that aborted (user clicked
+  // DISABLE during the trade-token modal) leaves disabledMidStart=true
+  // on G_AT, and the NEXT genuine startAutoTrader call would see it set
+  // and bail immediately \u2014 locking the user out of re-enabling until a
+  // page reload clears the global object.
   if (G_AT._starting) return;        // double-click protection
   G_AT._starting = true;
+  G_AT.disabledMidStart = false;
   // Trade-token gate: when proxy is set + worker has WRITE_AUTH_TOKEN secret,
   // order placement requires the in-memory token. Prompt now so the user gets
   // one upfront modal instead of every order POST silently 403'ing later.

@@ -187,18 +187,24 @@ export default {
       return jsonError(500, "Worker misconfigured: LIVE_MODE_TOKEN is set but WRITE_AUTH_TOKEN is not. Either set both (recommended) or unset both. See worker README.", corsOrigin);
     }
 
-    // HC-C — stream-based body-size cap. The previous parseInt(content-length)
+    // HC-C / RC-1 — stream-based body-size cap. The previous parseInt(content-length)
     // check trusted an attacker-controlled header: a POST with
     // "Content-Length: 100" and a 100MB body would sail through, then
     // request.text() would buffer the full 100MB. Cloudflare normalizes
     // most cases but doesn't contractually guarantee. Stream + count instead.
-    if (request.method === "POST" || request.method === "PUT") {
+    //
+    // RC-1: include DELETE. Tradier order-cancels are body-less in practice,
+    // but the cap was advertised as universal and a malicious DELETE with a
+    // bogus body would buffer somewhere. Cheap to gate uniformly.
+    //
+    // RC-5: __bodyTextForUpstream declared with `let` outside the if so its
+    // function-scope hoisting (was `var`) is replaced with explicit block-scope.
+    let __bodyTextForUpstream = "";
+    if (request.method === "POST" || request.method === "PUT" || request.method === "DELETE") {
       const MAX_BODY_BYTES = 8192;
-      const contentType = request.headers.get("Content-Type") || "application/x-www-form-urlencoded";
-      let bodyText;
       try {
         if (!request.body) {
-          bodyText = "";
+          __bodyTextForUpstream = "";
         } else {
           const reader = request.body.getReader();
           const chunks = [];
@@ -217,13 +223,11 @@ export default {
           const merged = new Uint8Array(received);
           let offset = 0;
           for (const c of chunks) { merged.set(c, offset); offset += c.byteLength; }
-          bodyText = new TextDecoder().decode(merged);
+          __bodyTextForUpstream = new TextDecoder().decode(merged);
         }
       } catch (err) {
         return jsonError(400, `Could not read request body: ${err.message}`, corsOrigin);
       }
-      // Stash for the forward step below
-      var __bodyTextForUpstream = bodyText;
     }
 
     // Strip ?mode= before forwarding so we don't pollute Tradier's params
