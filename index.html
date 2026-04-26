@@ -7402,6 +7402,35 @@ async function runScan(){
     });
 
     finishScan();
+  }).catch(function(err){
+    // CRITICAL: Without this catch, a rejection from fetchDynamicUniverse
+    // (network error, malformed Tradier response, JSON parse failure) leaves
+    // G.scanRunning=true forever. Subsequent runScan() calls early-return,
+    // the SCAN button stays disabled, the auto-trader's _scanFinished poll
+    // hangs until its 7min cap, and the user sees a permanently-stuck UI
+    // with no error feedback. Now we surface it, fall back to static, and
+    // clear the gate so the next scan can run.
+    console.error('[scan] fetchDynamicUniverse threw:', err);
+    addAlert('SYS', 'Universe fetch failed: ' + (err && err.message || err) + ' — using static fallback', 'nogo');
+    toast('⚠ Universe fetch failed — using static universe (' + UNIVERSE.length + ' tickers)');
+    eid('sc-universe-label').textContent = 'STATIC FALLBACK (' + UNIVERSE.length + ' tickers)';
+    G.results = [];
+    UNIVERSE.forEach(function(u){
+      var q = simQuote(u.t), ind = simInd(u.t, q.price), opt = simOpt(q.price), sc2 = scoreIt(u.t, ind, opt);
+      G.results.push({ticker:u.t, sector:u.s, price:q.price, change:q.change, changePct:q.changePct,
+        volume:q.volume, ind:ind, opt:opt, score:sc2.score, isGo:sc2.isGo,
+        filtersPass:sc2.filtersPass, rules:sc2.rules, passes:sc2.passes});
+    });
+    try { finishScan(); }
+    catch(e2){
+      // Defense in depth — if even finishScan throws (extremely unlikely),
+      // at least clear the gate so the user can retry.
+      console.error('[scan] finishScan threw after universe-fetch fallback:', e2);
+      G.scanRunning = false;
+      G._scanFinished = true;   // unblock auto-trader's poll
+      var btn = eid('sc-run-btn');
+      if(btn){ btn.disabled = false; btn.textContent = '↻ SCAN'; }
+    }
   });
 }
 
@@ -11864,8 +11893,45 @@ async function runAutoScanCycle(){
   atLog('Scanning... (cycle #'+G_AT.scanCount+')','');
   atUpdateStats();
   runScan();
-  // Wait for scan (~5s) + GEX auto-load (2s) + buffer = 12s
-  await new Promise(function(r){ setTimeout(r,12000); });
+  // CRITICAL: Wait for scan to FULLY finalize before reading G.results.
+  //
+  // Was a fixed 12s sleep ("scan ~5s + GEX 2s + buffer"). That timing held on
+  // a fast network with a small universe, but enrichment routinely takes
+  // 30-90s once 200 tickers go through FMP analyst-grade + Tradier indicator-
+  // history passes. Result: auto-trader scored half-enriched results and
+  // could enter on signals that the FMP analyst-revisions rule would have
+  // blocked (or skip true GO signals because FMP hadn't bumped their score yet).
+  //
+  // Now poll the _scanFinished latch (set by _maybeFinishScan once BOTH the
+  // FMP queue and the indicator-history queue drain). 7min cap is just above
+  // the 6min scan watchdog, so we always proceed eventually — even if every
+  // upstream went silent.
+  await new Promise(function(resolve){
+    var startTs = Date.now();
+    var MAX_WAIT_MS = 7 * 60 * 1000;
+    var POLL_MS = 1000;
+    var loggedProgress = false;
+    function poll(){
+      if (!G_AT.enabled) return resolve();           // user disarmed mid-wait
+      if (G._scanFinished === true) {
+        var waitedSec = Math.round((Date.now()-startTs)/1000);
+        if (loggedProgress) atLog('Scan finalized after '+waitedSec+'s — evaluating signals','');
+        return resolve();
+      }
+      var waitedSec = Math.round((Date.now()-startTs)/1000);
+      // After 30s, start logging progress so user sees the wait isn't a hang
+      if (waitedSec > 0 && waitedSec % 30 === 0 && waitedSec >= 30) {
+        loggedProgress = true;
+        atLog('Waiting for scan to finalize... ('+waitedSec+'s elapsed, results not yet enriched)','');
+      }
+      if (Date.now() - startTs > MAX_WAIT_MS) {
+        atLog('Scan finalization timeout ('+Math.round(MAX_WAIT_MS/60000)+'min) — proceeding with current results','warn');
+        return resolve();
+      }
+      setTimeout(poll, POLL_MS);
+    }
+    poll();
+  });
   if(!G_AT.enabled) return;
   var results = G.results||[];
   if(!results.length){ atLog('Scan returned no results','warn'); return; }
