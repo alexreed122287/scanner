@@ -16764,23 +16764,82 @@ function pfAutoPullTradier(){
   var creds = getTradierCreds();
   if(!creds){ toast('Set Tradier API key in ⚙ API tab first'); return; }
   var acct = G.acctId || ''; try { if(!acct) acct = localStorage.getItem('rrjcar_acct') || ''; } catch(e){}
-  if(!acct){ toast('No Tradier account number set — go to ⚙ API tab'); return; }
 
-  eid('pf-last-update').textContent = 'Pulling Tradier positions...';
+  // Auto-discover account ID via /user/profile if not cached. Mirrors
+  // fetchPositions' fallback so the user doesn't need to open the Positions
+  // tab first to populate G.acctId. Common case: user opens Portfolio tab
+  // on a fresh session before Positions has been loaded.
+  if (!acct) {
+    eid('pf-last-update').textContent = 'Discovering account number via /user/profile...';
+    fetch(creds.host+'/v1/user/profile',
+      {headers:{Authorization:'Bearer '+creds.key, Accept:'application/json'}})
+      .then(function(r){ if(!r.ok) throw new Error('profile HTTP '+r.status); return r.json(); })
+      .then(function(d){
+        var found = '';
+        try {
+          var prof = d && d.profile;
+          if (prof && prof.account) {
+            found = Array.isArray(prof.account) ? prof.account[0].account_number : prof.account.account_number;
+          }
+        } catch(_){}
+        if (!found) {
+          eid('pf-last-update').textContent = '';
+          toast('Could not discover account number from Tradier — check ⚙ API tab');
+          return;
+        }
+        // Persist for next reload + recurse
+        G.acctId = found;
+        try {
+          localStorage.setItem('rrjcar_acct', found);
+          var mode = localStorage.getItem('rrjcar_mode') || 'sandbox';
+          localStorage.setItem(mode==='live' ? 'rrjcar_acct_live' : 'rrjcar_acct_sandbox', found);
+        } catch(_){}
+        toast('Discovered Tradier account ' + found + ' — pulling positions...');
+        pfAutoPullTradier();    // re-enter with the now-set acct
+      })
+      .catch(function(e){
+        eid('pf-last-update').textContent = '';
+        toast('Account discovery failed: ' + e.message);
+      });
+    return;
+  }
+
+  eid('pf-last-update').textContent = 'Pulling Tradier positions for ' + acct + '...';
   fetch(creds.host+'/v1/accounts/'+acct+'/positions',
     {headers:{Authorization:'Bearer '+creds.key, Accept:'application/json'}})
-    .then(function(r){ return r.ok?r.json():null; })
+    .then(function(r){
+      if(!r.ok) throw new Error('positions HTTP '+r.status);
+      return r.json();
+    })
     .then(function(pd){
       var positions = [];
       try {
-        var raw = pd && pd.positions && pd.positions.position;
-        if(Array.isArray(raw)) positions = raw;
-        else if(raw) positions = [raw];
+        // Tradier returns {"positions":"null"} (string!) when account has zero
+        // open positions. Handle that vs an actual empty/missing field.
+        if (pd && pd.positions && pd.positions !== 'null' && typeof pd.positions === 'object') {
+          var raw = pd.positions.position;
+          if(Array.isArray(raw)) positions = raw;
+          else if(raw) positions = [raw];
+        }
       } catch(e){}
 
       var data = pfLoad();
       var col = pfGetCol(data, 'tradier');
       if(!col){ toast('No Tradier column found'); return; }
+
+      // Diagnostic: if API returned but zero positions parsed, log raw shape so
+      // user can see what Tradier actually sent (sandbox mode returns "null"
+      // string for zero positions; live with no positions same).
+      if (positions.length === 0) {
+        console.warn('[portfolio] Tradier returned zero positions for account ' + acct
+                     + ' — raw shape:', JSON.stringify(pd).slice(0, 200));
+        eid('pf-last-update').textContent = 'Tradier returned zero positions for ' + acct + ' (' + new Date().toLocaleTimeString() + ')';
+        col.rows = [];
+        pfSave(data);
+        renderPortfolio();
+        toast('No positions in Tradier account ' + acct);
+        return;
+      }
 
       var newRows = [];
       var optCount = 0, shrCount = 0;
@@ -16838,7 +16897,11 @@ function pfAutoPullTradier(){
       toast('Pulled '+(parts.length ? parts.join(' + ') : '0 positions')+' from Tradier');
       // Now price them
       pfRefreshAll();
-    }).catch(function(e){ toast('Tradier positions fetch failed: '+e.message); });
+    }).catch(function(e){
+      console.error('[portfolio] Tradier fetch error:', e);
+      eid('pf-last-update').textContent = '⚠ Fetch failed: ' + e.message;
+      toast('Tradier positions fetch failed: '+e.message+' — see console');
+    });
 }
 
 // ── Stats recompute ─────────────────────────────────────────────────────────
