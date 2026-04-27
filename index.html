@@ -279,9 +279,22 @@ tr.sel-row td{background:var(--blu3);}
 .badge.go{background:rgba(0,212,255,.12);color:var(--amb);box-shadow:0 0 10px rgba(0,212,255,.2);}
 .badge.nogo{background:rgba(255,0,230,.12);color:var(--ngo);box-shadow:0 0 10px rgba(255,0,230,.15);}
 .badge.warn{background:var(--amb3);color:var(--ambb);}
-.flt-bar{background:var(--bg1);border-bottom:var(--bdr);display:flex;flex-wrap:wrap;gap:6px;padding:6px 10px;flex-shrink:0;align-items:center;}
-.flt-bar label{color:var(--gry);font-size:10px;}
-.flt-bar select,.flt-bar input{background:var(--bg2);border:var(--bdr);color:var(--wht);font-family:var(--ff);font-size:11px;padding:3px 6px;border-radius:3px;}
+/* ── Spacing scale (informal) ──
+   Use these everywhere in filter/control bars so the layout reads as one
+   deliberate system instead of N independent inline-style decisions:
+     gap-tight: 6px  (siblings within one logical group: label+input)
+     gap-base:  10px (siblings between logical groups: dropdown + dropdown)
+     gap-loose: 16px (separator between major groups: filter set + button set)
+   row-pad:   10px 14px  (vertical / horizontal padding of every flt-bar)
+   ctrl-h:    30px (height of every button / input / select inside flt-bar)
+*/
+.flt-bar{background:var(--bg1);border-bottom:var(--bdr);display:flex;flex-wrap:wrap;gap:10px;padding:10px 14px;flex-shrink:0;align-items:center;}
+.flt-bar label{color:var(--gry);font-size:10px;display:inline-flex;align-items:center;gap:6px;letter-spacing:.5px;}
+.flt-bar select,.flt-bar input{background:var(--bg2);border:var(--bdr);color:var(--wht);font-family:var(--ff);font-size:11px;padding:6px 8px;border-radius:3px;height:30px;box-sizing:border-box;}
+/* Buttons inside filter bars: lock height to match inputs/selects so the row
+   has a single visual baseline. Inline padding/font-size on individual buttons
+   is preserved (some need tighter) but the height + display always wins. */
+.flt-bar .btn,.flt-bar button.btn{height:30px;display:inline-flex;align-items:center;padding:0 12px;}
 .ind-filter-lbl{display:flex;align-items:center;gap:4px;cursor:pointer;padding:3px 8px;border:1px solid var(--bg3);border-radius:3px;font-family:var(--ff-mono);font-size:10px;color:var(--gry);transition:border-color 0.15s,color 0.15s;white-space:nowrap;flex-shrink:0;}
 .ind-filter-lbl:hover{border-color:var(--gry);color:var(--wht);}
 .ind-filter-lbl input[type=checkbox]{width:auto;margin:0;accent-color:var(--amb);}
@@ -1121,17 +1134,19 @@ tr.sel-row td{background:var(--blu3);}
     <span id="sc-mobile-filter-count" style="margin-left:auto;color:var(--gry);font-size:10px;"></span>
   </button>
   <div id="sc-filter-bars">
-  <!-- Strategy mode quick filters -->
-  <div class="flt-bar" style="flex-wrap:wrap;gap:6px;border-bottom:1px solid var(--bg3);">
-    <span style="font-family:var(--ff-mono);font-size:10px;color:var(--amb);letter-spacing:.5px;margin-right:2px;">STRATEGY:</span>
-    <button class="btn blu" style="font-size:11px;" onclick="applyStrategyMode('highConviction')">&#9733; HIGH CONVICTION</button>
-    <button class="btn" style="font-size:11px;" onclick="applyStrategyMode('breakout')">&#9650; BREAKOUT</button>
-    <button class="btn" style="font-size:11px;" onclick="applyStrategyMode('momentum')">&#9654; MOMENTUM</button>
-    <button class="btn" style="font-size:11px;border-color:var(--grn);color:var(--grn);" onclick="applyStrategyMode('bestItmCalls')">&#9670; BEST ITM CALLS</button>
-    <button class="btn" style="font-size:11px;border-color:var(--gry2);color:var(--gry);" onclick="applyStrategyMode('clear')">&#10005; CLEAR</button>
-    <span id="strategy-desc-sc" style="font-family:var(--ff-mono);font-size:10px;color:var(--gry);margin-left:4px;font-style:italic;"></span>
+  <!-- Strategy mode quick filters — inline gap/font overrides removed; the
+       base .flt-bar / .flt-bar .btn rules now drive sizing for consistency
+       with every other filter row in the app. -->
+  <div class="flt-bar" style="border-bottom:1px solid var(--bg3);">
+    <span style="font-family:var(--ff-mono);font-size:10px;color:var(--amb);letter-spacing:.5px;">STRATEGY</span>
+    <button class="btn blu" onclick="applyStrategyMode('highConviction')">&#9733; HIGH CONVICTION</button>
+    <button class="btn" onclick="applyStrategyMode('breakout')">&#9650; BREAKOUT</button>
+    <button class="btn" onclick="applyStrategyMode('momentum')">&#9654; MOMENTUM</button>
+    <button class="btn" style="border-color:var(--grn);color:var(--grn);" onclick="applyStrategyMode('bestItmCalls')">&#9670; BEST ITM CALLS</button>
+    <button class="btn" style="border-color:var(--gry2);color:var(--gry);" onclick="applyStrategyMode('clear')">&#10005; CLEAR</button>
+    <span id="strategy-desc-sc" style="font-family:var(--ff-mono);font-size:10px;color:var(--gry);font-style:italic;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;"></span>
   </div>
-  <div class="flt-bar" style="flex-wrap:wrap;gap:8px;">
+  <div class="flt-bar">
     <label>Sectors
       <span class="sect-wrap">
         <button type="button" id="sc-sect-btn" class="sect-btn" onclick="toggleSectorDropdown(event)">
@@ -1161,10 +1176,10 @@ tr.sel-row td{background:var(--blu3);}
     <button class="btn" onclick="applyFilters()">FILTER</button>
     <button class="btn" onclick="clearFilters()" style="border-color:var(--gry2);color:var(--gry);">CLEAR</button>
   </div>
-  <!-- ── INDICATOR FILTERS ── single row, natural chip widths preserved.
-       Container scrolls horizontally if chips collectively exceed viewport
-       width so labels stay readable instead of collapsing. -->
-  <div class="flt-bar must-pass-row" style="flex-wrap:nowrap;gap:6px;border-top:1px solid var(--bg3);padding:6px 10px;overflow-x:auto;width:100%;">
+  <!-- ── INDICATOR FILTERS ── inherits .flt-bar padding/gap; flex-wrap:nowrap
+       only override is to keep all chips on one row. Container scrolls
+       horizontally if chips exceed viewport width. -->
+  <div class="flt-bar must-pass-row" style="flex-wrap:nowrap;border-top:1px solid var(--bg3);overflow-x:auto;width:100%;">
     <span style="font-family:var(--ff-mono);font-size:10px;color:var(--amb);letter-spacing:.5px;margin-right:4px;">MUST PASS:</span>
     <label class="ind-filter-lbl"><input type="checkbox" class="ind-filter" id="filt-analyst" onchange="applyFilters()"> <span>Analyst Revisions &#8593;</span></label>
     <label class="ind-filter-lbl"><input type="checkbox" class="ind-filter" id="filt-gex" onchange="applyFilters()"> <span>GEX Call Heavy</span></label>
@@ -1182,24 +1197,19 @@ tr.sel-row td{background:var(--blu3);}
   </div>
   <div class="flt-bar" style="flex-wrap:wrap;gap:6px;">
     <button class="btn blu" id="sc-run-btn" onclick="runScan()">↻ SCAN</button>
-    <div style="display:flex;align-items:center;gap:6px;margin-left:8px;border-left:1px solid var(--gry2);padding-left:10px;">
-      <span style="color:var(--gry);font-size:10px;letter-spacing:.5px;">SCREENER</span>
-      <label style="font-size:11px;color:var(--gry);">Min Price $<input type="number" id="sc-minprice" value="1" min="1" style="width:70px;font-size:11px;" title="Only include stocks above this price"></label>
-      <label style="font-size:11px;color:var(--gry);">Max Price $<input type="number" id="sc-maxprice" placeholder="any" min="1" style="width:80px;font-size:11px;" title="Only include stocks below this price — leave blank for no limit"></label>
-      <label style="font-size:11px;color:var(--gry);">Min AvgVol <input type="number" id="sc-minavgvol" value="500000" min="100000" step="100000" style="width:110px;font-size:11px;" title="Min average daily volume"></label>
-      <label style="font-size:11px;color:var(--gry);">Today Vol % <input type="number" id="sc-volratio" placeholder="any" min="0" max="200" style="width:64px;font-size:11px;" title="Today volume must be at least X% of avg volume. Leave blank to skip this filter.">%</label>
-      <label style="font-size:11px;color:var(--gry);" title="Filter OUT tickers where the option contract costs more than this amount. Uses last scanned option price.">Max Opt $ <input type="number" id="sc-maxoptprice" placeholder="any" min="0" step="0.50" style="width:80px;font-size:11px;"></label>
-      <button class="btn" style="font-size:10px;padding:3px 8px;border-color:var(--grn);color:var(--grn);" onclick="saveScanSettings()" title="Save current screener + filter settings to localStorage. Restored on every page load.">SAVE SETTINGS</button>
-      <button class="btn" style="font-size:10px;padding:3px 8px;border-color:var(--gry2);color:var(--gry);" onclick="resetScanSettings()" title="Reset screener + filters to factory defaults. Does NOT clear saved API keys or tokens.">&#8634; RESET DEFAULTS</button>
-    </div>
+    <span style="color:var(--gry);font-size:10px;letter-spacing:.5px;border-left:1px solid var(--gry2);padding-left:14px;margin-left:4px;">SCREENER</span>
+    <label>Min Price $<input type="number" id="sc-minprice" value="1" min="1" style="width:70px;" title="Only include stocks above this price"></label>
+    <label>Max Price $<input type="number" id="sc-maxprice" placeholder="any" min="1" style="width:80px;" title="Only include stocks below this price — leave blank for no limit"></label>
+    <label>Min AvgVol <input type="number" id="sc-minavgvol" value="500000" min="100000" step="100000" style="width:110px;" title="Min average daily volume"></label>
+    <label>Today Vol % <input type="number" id="sc-volratio" placeholder="any" min="0" max="200" style="width:64px;" title="Today volume must be at least X% of avg volume. Leave blank to skip this filter.">%</label>
+    <label title="Filter OUT tickers where the option contract costs more than this amount. Uses last scanned option price.">Max Opt $ <input type="number" id="sc-maxoptprice" placeholder="any" min="0" step="0.50" style="width:80px;"></label>
+    <button class="btn" style="border-color:var(--grn);color:var(--grn);" onclick="saveScanSettings()" title="Save current screener + filter settings to localStorage. Restored on every page load.">SAVE</button>
+    <button class="btn" style="border-color:var(--gry2);color:var(--gry);" onclick="resetScanSettings()" title="Reset screener + filters to factory defaults. Does NOT clear saved API keys or tokens.">&#8634; RESET</button>
+    <button class="btn grn" style="margin-left:auto;" onclick="exportGoTickers('sc')" title="Copy a comma-separated list of all GO-signal tickers from current filtered results">▲ EXPORT GOs</button>
+    <span id="sc-export-hint" style="color:var(--gry);font-size:10px;font-family:var(--ff-mono);"></span>
     <span id="sc-universe-label" style="display:none;"></span>
   </div>
   </div><!-- /#sc-filter-bars -->
-  <!-- Export row (always visible, not part of collapsible filters) -->
-  <div class="flt-bar" style="gap:8px;border-top:1px solid var(--bg3);">
-    <button class="btn grn" style="font-size:11px;" onclick="exportGoTickers('sc')" title="Copy a comma-separated list of all GO-signal tickers from current filtered results">▲ EXPORT GOs</button>
-    <span id="sc-export-hint" style="color:var(--gry);font-size:10px;font-family:var(--ff-mono);align-self:center;"></span>
-  </div>
   <!-- Live theme leaderboard (same render as BUY SIGNALS — both .top-themes-strip
        elements get updated by renderTopThemesStrip via querySelectorAll). -->
   <div class="top-themes-strip" style="background:var(--bg1);border-bottom:var(--bdr);padding:5px 10px;font-family:var(--ff-mono);font-size:11px;white-space:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;letter-spacing:.3px;"></div>
