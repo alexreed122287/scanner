@@ -742,7 +742,31 @@ tr.sel-row td{background:var(--blu3);}
 
 /* INDUSTRY tab */
 #tab-ind{padding:0;}
-#tab-ind .ind-scroll{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:10px;}
+#tab-ind .ind-scroll{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:10px;
+  /* B-5: force always-visible scrollbar so the user can find unassigned
+     tickers + diagnostics sections at the bottom of a long industry list.
+     macOS hides scrollbars by default unless actively scrolling, which made
+     it unclear there was more content below. */
+  scrollbar-width: thin;
+  scrollbar-color: var(--amb) var(--bg2);
+}
+#tab-ind .ind-scroll::-webkit-scrollbar{
+  width: 12px;
+  display: block;
+  -webkit-appearance: none;
+}
+#tab-ind .ind-scroll::-webkit-scrollbar-track{
+  background: var(--bg2);
+  border-left: 1px solid var(--bg3);
+}
+#tab-ind .ind-scroll::-webkit-scrollbar-thumb{
+  background: var(--amb);
+  border-radius: 4px;
+  border: 2px solid var(--bg2);
+}
+#tab-ind .ind-scroll::-webkit-scrollbar-thumb:hover{
+  background: var(--ambb);
+}
 #tab-ind .ind-desc{color:var(--gry);font-size:11px;font-family:var(--ff-mono);padding:6px 10px;background:var(--amb3);border-left:2px solid var(--amb);line-height:1.5;}
 #tab-ind .ind-layout{display:grid;grid-template-columns:1fr 360px;gap:12px;}
 @media (max-width:1100px){#tab-ind .ind-layout{grid-template-columns:1fr;}}
@@ -1036,7 +1060,11 @@ tr.sel-row td{background:var(--blu3);}
       <select id="sc-sect" style="display:none;"><option value="">All</option></select>
     </label>
     <label>Signal <select id="sc-sig"><option value="">All</option><option value="GO" selected>GO</option><option value="NO-GO">NO-GO</option></select></label>
-    <label>Min Score <input type="number" id="sc-minscore" value="89" style="width:60px;" onchange="reclassifyGoThreshold()"></label>
+    <label title="Filter scan results to tickers in the chosen theme. Populated from theme_scores.json — see INDUSTRY tab for the full theme list and current ranks.">Theme <select id="sc-theme" onchange="applyFilters()" style="min-width:120px;"><option value="">All themes</option></select></label>
+    <!-- B-2 default Min Score bumped 89 -> 100. With theme overlay (added 2026-04)
+         scores trend ~10 pts higher, so the historical "GO rate" at 89 became
+         too permissive. 100 preserves the prior selectivity. Adjust to taste. -->
+    <label>Min Score <input type="number" id="sc-minscore" value="100" style="width:60px;" onchange="reclassifyGoThreshold()"></label>
     <button class="btn" onclick="applyFilters()">FILTER</button>
     <button class="btn" onclick="clearFilters()" style="border-color:var(--gry2);color:var(--gry);">CLEAR</button>
   </div>
@@ -1286,7 +1314,7 @@ tr.sel-row td{background:var(--blu3);}
        DAY P&L  = today's account-equity change tracked via localStorage history.
        CASH     = b.total_cash from Tradier balances (purchasing power slice). -->
   <div class="stats-bar" id="pos-stats" style="border-bottom:var(--bdr);border-top:none;">
-    <div class="stat-box"><div class="stat-label">TOTAL P&amp;L</div><div class="stat-val" id="pos-pnl" title="Lifetime: realized (closed trades) + unrealized (open positions)">$0.00</div></div>
+    <div class="stat-box"><div class="stat-label">TOTAL P&amp;L <span onclick="resetTotalPnl()" title="Reset Total P&amp;L counter to $0. Clears the local closed-trades history and snapshots the current broker realized P&amp;L as the new baseline. Open-position unrealized P&amp;L is not affected." style="cursor:pointer;font-size:9px;color:var(--gry);margin-left:6px;text-decoration:underline;letter-spacing:.5px;">RESET</span></div><div class="stat-val" id="pos-pnl" title="Lifetime: realized (closed trades) + unrealized (open positions)">$0.00</div></div>
     <div class="stat-box"><div class="stat-label">DAY P&amp;L</div><div class="stat-val" id="pos-daypnl" title="Today's change in total account equity">$0.00</div></div>
     <div class="stat-box"><div class="stat-label">OPEN POSITIONS</div><div class="stat-val amb" id="pos-count">0</div></div>
     <div class="stat-box"><div class="stat-label">CASH</div><div class="stat-val amb" id="pos-cash" title="Total cash available (from Tradier balances)">--</div></div>
@@ -9829,9 +9857,41 @@ function finishScan(){
 
 function getIndFilter(id){ var el=eid(id); return el?el.checked:false; }
 
+// B-3: populate the theme filter dropdown. Iterate G_THEME_OVERLAY.ticker2theme
+// to build a unique set of {theme, dailyScore} pairs, then sort by score
+// descending so strongest sectors are at the top — matches the user's mental
+// model of "where is rotation today?". Called from init() (after theme overlay
+// hydrates) and any time theme data refreshes.
+function populateThemeDropdown(){
+  var sel = document.getElementById('sc-theme');
+  if (!sel) return;
+  var prev = sel.value;
+  var byName = {};
+  try {
+    var t2t = (G_THEME_OVERLAY && G_THEME_OVERLAY.ticker2theme) || {};
+    Object.keys(t2t).forEach(function(tk){
+      var ti = t2t[tk];
+      if (!ti || !ti.theme) return;
+      if (!(ti.theme in byName) || (ti.dailyScore || 0) > byName[ti.theme]) {
+        byName[ti.theme] = ti.dailyScore || 0;
+      }
+    });
+  } catch(e){}
+  var themes = Object.keys(byName).map(function(n){ return {name: n, score: byName[n]}; });
+  themes.sort(function(a,b){ return b.score - a.score; });
+  var html = '<option value="">All themes</option>';
+  themes.forEach(function(t){
+    var label = t.name + (t.score ? ' ('+Math.round(t.score)+')' : '');
+    html += '<option value="'+_esc(t.name)+'">'+_esc(label)+'</option>';
+  });
+  sel.innerHTML = html;
+  if (prev) sel.value = prev;   // preserve user selection across re-populate
+}
+
 function applyFilters(){
   var sig     = eid('sc-sig').value;
   var minsc   = +eid('sc-minscore').value||0;
+  var theme   = (eid('sc-theme') && eid('sc-theme').value) || '';
   var maxOptPr= parseFloat(eid('sc-maxoptprice') ? eid('sc-maxoptprice').value : 0) || 0;
 
   // Indicator filter checkboxes
@@ -9868,6 +9928,13 @@ function applyFilters(){
     if(sig === 'GO' && !r.isGo) return false;
     if(sig === 'NO-GO' && r.isGo) return false;
     if(r.score < minsc) return false;
+    // B-3: theme filter. Look up the ticker's theme via the overlay map.
+    // Empty string = "All themes" (no filter).
+    if(theme){
+      var ti2 = (G_THEME_OVERLAY && G_THEME_OVERLAY.ticker2theme && G_THEME_OVERLAY.ticker2theme[r.ticker]) || null;
+      var rTheme = (ti2 && ti2.theme) || '';
+      if(rTheme !== theme) return false;
+    }
     // Max option price filter \u2014 uses last known option price from scan or detail fetch
     if(maxOptPr > 0 && r.opt && r.opt.optPr > 0 && r.opt.optPr > maxOptPr) return false;
 
@@ -9978,8 +10045,9 @@ var SCAN_SETTING_DEFAULTS = {
   'sc-minavgvol':    '500000',
   'sc-volratio':     '',
   'sc-maxoptprice':  '',
-  'sc-minscore':     '89',
+  'sc-minscore':     '100',
   'sc-sig':          'GO',
+  'sc-theme':        '',
   'filt-earn-days':  '1'
 };
 // F-5: include OB / instrument-OB checkboxes so resetScanSettings actually
@@ -10463,7 +10531,17 @@ function addToScanner(tk){
 
 function renderScan(){
   var wrap=eid('sc-tbl-wrap');
-  if(!G.filtered.length){wrap.innerHTML='<div class="empty-det" style="min-height:400px;"><img src="assets/panda-transparent.png?v=3" alt="" class="empty-det-panda"><p>No results \u2014 run a scan first</p></div>';return;}
+  if(!G.filtered.length){
+    // If we have scan results but filters reduced to zero, message the user
+    // about that explicitly so they don't think the scan failed. If we genuinely
+    // have no scan results, show the run-a-scan prompt instead.
+    var hasResults = G.results && G.results.length > 0;
+    var msg = hasResults
+      ? 'No tickers match the active filters \u2014 '+G.results.length+' scanned, 0 visible. <br><span style="font-size:11px;color:var(--gry2);">Uncheck a filter checkbox or lower Min Score to see matches.</span>'
+      : 'No results \u2014 run a scan first';
+    wrap.innerHTML='<div class="empty-det" style="min-height:400px;"><img src="assets/panda-transparent.png?v=3" alt="" class="empty-det-panda"><p>'+msg+'</p></div>';
+    return;
+  }
 
   // Apply text search (post-filter layer so it composes with all filters)
   var q = (G.scQuery||'');
@@ -11863,6 +11941,26 @@ function renderPositionsTable(pos,srcLabel){
 // history) + Tradier's reported close_pl. Tracks day-over-day equity in
 // localStorage so DAY P&L reflects today's actual change instead of the
 // 30%-of-totalPnl placeholder it was before.
+// B-4: reset Total P&L to $0. Clears the local closed-trades history that the
+// performance analytics + Total P&L sums consume, AND snapshots the current
+// broker realized P&L (close_pl) as a baseline so the calculation below
+// subtracts it out, displaying $0 from this point forward. Open-position
+// unrealized P&L is intentionally NOT affected — those reflect live positions.
+function resetTotalPnl(){
+  if (!confirm('Reset Total P&L counter to $0?\n\nThis clears the local closed-trades history (used for the Performance tab) and snapshots the current broker realized P&L as the new baseline. Open-position unrealized P&L is not affected.')) return;
+  try { localStorage.removeItem('rrjcar_closed_trades'); } catch(_) {}
+  try {
+    if (typeof G_closed !== 'undefined' && G_closed.trades) G_closed.trades = [];
+  } catch(_){}
+  // Snapshot current broker close_pl as the baseline. updatePosStats subtracts it.
+  var brokerNow = (G.lastBalances && typeof G.lastBalances.close_pl === 'number')
+                ? G.lastBalances.close_pl : 0;
+  try { localStorage.setItem('rrjcar_pnl_baseline', String(brokerNow)); } catch(_){}
+  if (typeof updatePosStats === 'function') updatePosStats();
+  if (typeof renderClosedTable === 'function') renderClosedTable();
+  if (typeof toast === 'function') toast('Total P&L reset to $0 (baseline saved)');
+}
+
 function updatePosStats(){
   // ── TOTAL P&L (cumulative) ─────────────────────────────────────────────
   var openPnl = (typeof G.openUnrealizedPnl === 'number') ? G.openUnrealizedPnl : 0;
@@ -11882,7 +11980,11 @@ function updatePosStats(){
   // because the user hasn't loaded it yet this session).
   var brokerClose = (G.lastBalances && typeof G.lastBalances.close_pl === 'number')
                   ? G.lastBalances.close_pl : 0;
+  // B-4: subtract the user's reset baseline if they've reset Total P&L.
+  var pnlBaseline = 0;
+  try { pnlBaseline = parseFloat(localStorage.getItem('rrjcar_pnl_baseline') || '0') || 0; } catch(_){}
   var realizedTotal = Math.abs(brokerClose) > Math.abs(realized) ? brokerClose : realized;
+  realizedTotal -= pnlBaseline;
   var totalPnl = openPnl + realizedTotal;
   var pnlEl = eid('pos-pnl');
   if(pnlEl){
@@ -17922,7 +18024,9 @@ function init(){
     if (G.gexAutoSchedule !== 'off') startGexAutoSchedule();
   }
   // Theme overlay — non-blocking. If fetch fails, scoreIt pass-throughs.
-  loadThemeOverlay().catch(function(e){ console.warn('[init] theme overlay failed:', e && e.message); });
+  loadThemeOverlay()
+    .then(function(){ try { populateThemeDropdown(); } catch(e){} })
+    .catch(function(e){ console.warn('[init] theme overlay failed:', e && e.message); });
   loadPortfolio();
   // Populate sector checkboxes from the embedded universe
   // (CSV loader removed — embedded UNIVERSE_FULL is the single source of truth)
