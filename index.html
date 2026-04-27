@@ -2570,10 +2570,24 @@ tr.sel-row td{background:var(--blu3);}
     <div style="font-size:16px;font-weight:600;color:var(--wht);margin-bottom:6px;">Enter session trade token</div>
     <div style="font-family:var(--ff-mono);font-size:11px;color:var(--gry);margin-bottom:16px;line-height:1.6;">
       Required to place or cancel orders this session.<br>
-      Held in memory only — re-prompted next session.<br>
+      Default: held in memory only — re-prompted next session.<br>
       Must match the worker's <code style="color:var(--amb);">WRITE_AUTH_TOKEN</code> secret.
     </div>
-    <input id="trade-token-input" type="password" placeholder="paste token..." autocomplete="off" spellcheck="false" style="width:100%;background:var(--bg2);border:1px solid var(--bg3);border-radius:3px;padding:8px 10px;color:var(--wht);font-family:var(--ff-mono);font-size:13px;letter-spacing:.5px;margin-bottom:14px;box-sizing:border-box;">
+    <input id="trade-token-input" type="password" placeholder="paste token..." autocomplete="off" spellcheck="false" style="width:100%;background:var(--bg2);border:1px solid var(--bg3);border-radius:3px;padding:8px 10px;color:var(--wht);font-family:var(--ff-mono);font-size:13px;letter-spacing:.5px;margin-bottom:12px;box-sizing:border-box;">
+    <!-- Opt-in persistence. Default unchecked = memory-only (existing
+         behavior). When checked, token is saved to localStorage under
+         rrjcar_trade_token_persisted with a 14-day expiry. Restored on
+         every page load until expiry or until user clicks the badge to
+         clear (which wipes both memory + localStorage). -->
+    <label style="display:flex;align-items:center;gap:8px;font-family:var(--ff-mono);font-size:11px;color:var(--gry);margin-bottom:6px;cursor:pointer;line-height:1.4;">
+      <input type="checkbox" id="trade-token-persist" style="width:16px;height:16px;flex-shrink:0;accent-color:var(--ngo);">
+      <span><b style="color:var(--wrn);">Remember on this device</b> <span style="color:var(--gry2);">(less secure)</span></span>
+    </label>
+    <div style="font-family:var(--ff-mono);font-size:9px;color:var(--gry2);margin-bottom:14px;line-height:1.5;padding-left:24px;">
+      Stores in this device's browser storage, restores across reloads + sleeps + reboots.
+      Auto-expires after 14 days of inactivity. Anyone with access to this device + browser can place orders.
+      Only check on a personal device with a passcode.
+    </div>
     <div style="display:flex;gap:8px;">
       <button id="trade-token-ok" class="btn grn" style="flex:1;font-size:12px;padding:8px;">&#10003; ARM TRADING</button>
       <button id="trade-token-cancel" class="btn wrn" style="flex:1;font-size:12px;padding:8px;">CANCEL</button>
@@ -2847,30 +2861,83 @@ function _getTradierKey(){
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  TRADE-TOKEN HELPER — session-only, never persisted
+//  TRADE-TOKEN HELPER — session-only by default, opt-in persistence
 // ═══════════════════════════════════════════════════════════════════════════
 // The trade token is the SECOND-tier auth required to place / cancel orders.
 // Unlike X-Live-Token (which lives in localStorage so the auto-trader can
-// scan unattended), this lives ONLY in memory — closed tab = gone, page
+// scan unattended), this defaults to MEMORY ONLY — closed tab = gone, page
 // refresh = re-prompted. That way an exfiltrated localStorage (browser
 // extension, stolen device, forensic recovery) can read your account but
 // can't place trades.
+//
+// OPT-IN PERSISTENCE: the user can check "Remember on this device" in the
+// arm modal to persist the token to localStorage with a 14-day TTL. Only
+// applies to that single device's localStorage; auto-clears after the TTL
+// expires or when the user clicks the badge to lock. Tradeoff: anyone with
+// access to the device + browser session can place orders. Intended for
+// personal devices with a passcode (e.g., user's iPad) where the iPadOS
+// memory reclamation makes the strict memory-only mode painful.
+//
+// localStorage keys:
+//   rrjcar_trade_token_persisted        — the token value (if opted in)
+//   rrjcar_trade_token_persisted_until  — timestamp ms; tokens past this
+//                                          are auto-purged on load
 //
 // The fetch monkey-patch injects window._tradeToken as X-Trade-Token on
 // any POST/PUT/DELETE to /v1/accounts/*/orders* in proxy + live mode.
 // If unset, those requests get 403 from the worker (when WRITE_AUTH_TOKEN
 // secret is set; otherwise the gate is bypassed for backward compat).
+
+var TRADE_TOKEN_PERSIST_KEY      = 'rrjcar_trade_token_persisted';
+var TRADE_TOKEN_PERSIST_TTL_KEY  = 'rrjcar_trade_token_persisted_until';
+var TRADE_TOKEN_PERSIST_TTL_MS   = 14 * 24 * 60 * 60 * 1000;   // 14 days
+
 window._tradeToken = null;
+window._tradeTokenPersisted = false;   // tracks whether current value is from persisted storage
+
+// Restore persisted token if opt-in flag is set + not expired. Wiped if
+// expired so the user gets re-prompted instead of carrying a stale value.
+(function _restorePersistedTradeToken(){
+  try {
+    var until = parseInt(localStorage.getItem(TRADE_TOKEN_PERSIST_TTL_KEY) || '0', 10) || 0;
+    if (!until || Date.now() > until) {
+      // expired (or never set) — clear both so we don't accumulate stale
+      localStorage.removeItem(TRADE_TOKEN_PERSIST_KEY);
+      localStorage.removeItem(TRADE_TOKEN_PERSIST_TTL_KEY);
+      return;
+    }
+    var v = localStorage.getItem(TRADE_TOKEN_PERSIST_KEY) || '';
+    if (v) {
+      window._tradeToken = v;
+      window._tradeTokenPersisted = true;
+      // Sliding TTL: each successful load extends expiry by another 14 days
+      // so an actively-used iPad doesn't expire mid-week. A truly idle
+      // device hits the expiry cliff and clears.
+      try { localStorage.setItem(TRADE_TOKEN_PERSIST_TTL_KEY, String(Date.now() + TRADE_TOKEN_PERSIST_TTL_MS)); } catch(_){}
+    }
+  } catch(e){ /* localStorage unavailable — fail closed, memory-only */ }
+})();
 
 function _updateTradeTokenBadge(){
   var el = document.getElementById('hdr-trade-token');
   if (!el) return;
   if (window._tradeToken) {
-    el.textContent = 'TRADE: armed';
-    el.style.color = 'var(--grn)';
-    el.style.background = 'rgba(0,230,118,0.10)';
-    el.style.borderColor = 'rgba(0,230,118,0.4)';
-    el.title = 'Trade authorization armed for this session (memory only — re-prompted next session). Click to clear.';
+    if (window._tradeTokenPersisted) {
+      // Persisted on this device — different visual so the user knows
+      // they're in the lower-security mode. Solid amber instead of green
+      // signals "armed AND remembered". Tooltip explains.
+      el.textContent = 'TRADE: armed ★';
+      el.style.color = 'var(--wrn)';
+      el.style.background = 'rgba(255,215,64,0.10)';
+      el.style.borderColor = 'rgba(255,215,64,0.5)';
+      el.title = 'Trade authorization armed AND persisted on this device (auto-expires in 14d of inactivity). Anyone with access to this device can place orders. Click to clear.';
+    } else {
+      el.textContent = 'TRADE: armed';
+      el.style.color = 'var(--grn)';
+      el.style.background = 'rgba(0,230,118,0.10)';
+      el.style.borderColor = 'rgba(0,230,118,0.4)';
+      el.title = 'Trade authorization armed for this session (memory only — re-prompted next session). Click to clear.';
+    }
   } else {
     el.textContent = 'TRADE: locked';
     el.style.color = 'var(--ngo)';
@@ -2885,13 +2952,29 @@ function _updateTradeTokenBadge(){
   }
 }
 
+// Helper to wipe BOTH the in-memory token AND any persisted copy. Used by
+// the badge-click clear path and any future revoke/lockout flow.
+function _clearTradeToken(){
+  window._tradeToken = null;
+  window._tradeTokenPersisted = false;
+  try {
+    localStorage.removeItem(TRADE_TOKEN_PERSIST_KEY);
+    localStorage.removeItem(TRADE_TOKEN_PERSIST_TTL_KEY);
+  } catch(_){}
+  _updateTradeTokenBadge();
+}
+
 function promptTradeToken(){
-  // If already armed, clicking the badge clears it (single-click "lock")
+  // If already armed, clicking the badge clears it (single-click "lock").
+  // Wipes BOTH memory AND persisted localStorage so the next session starts
+  // clean regardless of opt-in state when armed.
   if (window._tradeToken) {
-    var confirmClear = confirm('Clear trade token? Order placement will require re-entry.');
+    var msg = window._tradeTokenPersisted
+      ? 'Clear trade token? Will remove the persisted copy from this device — next session will require re-entry.'
+      : 'Clear trade token? Order placement will require re-entry.';
+    var confirmClear = confirm(msg);
     if (confirmClear) {
-      window._tradeToken = null;
-      _updateTradeTokenBadge();
+      _clearTradeToken();
       try { toast('Trade token cleared'); } catch(_){}
     }
     return Promise.resolve(window._tradeToken);
@@ -2900,7 +2983,9 @@ function promptTradeToken(){
   return new Promise(function(resolve){
     var modal = document.getElementById('trade-token-modal');
     if (!modal) {
-      // Fallback: synchronous prompt if modal HTML missing for some reason
+      // Fallback: synchronous prompt if modal HTML missing for some reason.
+      // Note: this path can't offer the "remember" checkbox; it stays
+      // memory-only by default to match the safer behavior.
       var v = window.prompt('Trade token (memory only, re-prompted next session):');
       if (v) {
         window._tradeToken = v.trim();
@@ -2908,10 +2993,12 @@ function promptTradeToken(){
       }
       return resolve(window._tradeToken);
     }
-    var input = document.getElementById('trade-token-input');
-    var okBtn = document.getElementById('trade-token-ok');
+    var input     = document.getElementById('trade-token-input');
+    var persistCb = document.getElementById('trade-token-persist');
+    var okBtn     = document.getElementById('trade-token-ok');
     var cancelBtn = document.getElementById('trade-token-cancel');
     if (input) input.value = '';
+    if (persistCb) persistCb.checked = false;   // default to memory-only on every open
     modal.style.display = 'flex';
     setTimeout(function(){ if (input) input.focus(); }, 50);
     function cleanup(){
@@ -2919,10 +3006,9 @@ function promptTradeToken(){
       // S-3: clear the input value on close so the entered trade token does
       // not linger in the DOM between sessions. Otherwise a screenshot,
       // devtools dump, error reporter, or any other DOM serialization that
-      // happens after the modal is dismissed would still see it. value is
-      // re-cleared on next open at line ~2715, but that doesn't help in the
-      // window in between.
+      // happens after the modal is dismissed would still see it.
       if (input) input.value = '';
+      if (persistCb) persistCb.checked = false;
       okBtn.onclick = null;
       cancelBtn.onclick = null;
       if (input) input.onkeydown = null;
@@ -2931,8 +3017,32 @@ function promptTradeToken(){
       var val = (input && input.value || '').trim();
       if (val) {
         window._tradeToken = val;
+        var wantPersist = !!(persistCb && persistCb.checked);
+        if (wantPersist) {
+          // Opt-in persistence: write token + 14d expiry to localStorage.
+          // Failure is non-fatal (storage may be quota-blocked); the token
+          // still works for the current session, just won't survive reload.
+          try {
+            localStorage.setItem(TRADE_TOKEN_PERSIST_KEY, val);
+            localStorage.setItem(TRADE_TOKEN_PERSIST_TTL_KEY, String(Date.now() + TRADE_TOKEN_PERSIST_TTL_MS));
+            window._tradeTokenPersisted = true;
+            try { toast('Trade token armed + remembered (14d on this device)'); } catch(_){}
+          } catch(e){
+            window._tradeTokenPersisted = false;
+            try { toast('Armed (but could not persist: ' + (e && e.message || 'storage error') + ')'); } catch(_){}
+          }
+        } else {
+          // Memory-only: nuke any prior persisted value so an old
+          // "remembered" token doesn't survive a session where the user
+          // explicitly chose memory-only this time.
+          try {
+            localStorage.removeItem(TRADE_TOKEN_PERSIST_KEY);
+            localStorage.removeItem(TRADE_TOKEN_PERSIST_TTL_KEY);
+          } catch(_){}
+          window._tradeTokenPersisted = false;
+          try { toast('Trade token armed for this session'); } catch(_){}
+        }
         _updateTradeTokenBadge();
-        try { toast('Trade token armed for this session'); } catch(_){}
       }
       cleanup();
       resolve(window._tradeToken);
