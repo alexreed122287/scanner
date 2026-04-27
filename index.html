@@ -2207,9 +2207,9 @@ tr.sel-row td{background:var(--blu3);}
   <div class="stats-bar">
     <div class="stat-box"><div class="stat-label">AS OF</div><div class="stat-val amb" id="ind-asof">--</div></div>
     <div class="stat-box"><div class="stat-label">THEMES</div><div class="stat-val amb" id="ind-count">--</div></div>
-    <div class="stat-box"><div class="stat-label">TOP-DECILE</div><div class="stat-val amb" id="ind-topdec">--</div></div>
-    <div class="stat-box"><div class="stat-label">ABOVE 50EMA</div><div class="stat-val amb" id="ind-trend">--</div></div>
-    <div class="stat-box"><div class="stat-label">AVG B50</div><div class="stat-val amb" id="ind-b50">--</div></div>
+    <div class="stat-box" title="Number of themes scoring in the top 10% of the leaderboard. These are the strongest sectors right now and the rotation candidates with the most institutional flow."><div class="stat-label">TOP 10%</div><div class="stat-val amb" id="ind-topdec">--</div></div>
+    <div class="stat-box" title="Percentage of themes whose composite price is currently above its 50-day exponential moving average — broad-tape trend indicator. >70% = uptrend, <30% = downtrend."><div class="stat-label">ABOVE 50EMA</div><div class="stat-val amb" id="ind-trend">--</div></div>
+    <div class="stat-box" title="Average breadth across all themes — what percent of theme MEMBERS are trading above their 50-day moving average. >60% = market is broadly participating in the move, <40% = narrow leadership."><div class="stat-label">AVG % &gt;50DMA</div><div class="stat-val amb" id="ind-b50">--</div></div>
     <div class="stat-box" style="flex:0 0 auto;display:flex;align-items:center;padding:6px 10px;border-left:1px solid var(--bg3);">
       <button class="btn blu" style="font-size:11px;padding:6px 10px;white-space:nowrap;" onclick="renderIndustryTab(true)" title="Reload theme_scores.json from disk">&#8635; REFRESH</button>
     </div>
@@ -11011,6 +11011,7 @@ function runGex(){
           callOI: callOI,
           putOI: putOI,
           dte: c.dte || 30,
+          exp: (c.expiry && c.expiry.date) || '',   // C-1: expose expiration for the renderer
           price: price,
           flow: callPct >= 50 ? 'CALL HEAVY' : 'PUT HEAVY',
           flowCls: callPct >= 50 ? 'go' : 'nogo',
@@ -11061,18 +11062,43 @@ function runGex(){
 function renderGex(){
   var wrap=eid('gx-tbl-wrap');
   if(!wrap) return;
-  var html='<table><thead><tr><th>SYMBOL</th><th>NET GEX</th><th>GAMMA FLIP</th><th>CALL OI%</th><th>PUT OI%</th><th>DTE</th><th>FLOW</th></tr></thead><tbody>';
+  // C-1: definitions on every column header (title attr -> hover tooltip).
+  // C-2: split callOI/putOI into their own columns to the right of NET GEX.
+  // C-3: add EXP / FLIP STRIKE column between DTE and FLOW so the user can
+  //      see which contract the GEX/flip values are referring to.
+  var defs = {
+    'NET GEX': 'Net dealer gamma exposure (call OI \u2212 put OI), normalized by price and expressed in millions. POSITIVE = dealers net long gamma \u2192 they sell into rallies and buy dips \u2192 suppresses volatility. NEGATIVE = dealers net short gamma \u2192 they buy strength and sell weakness \u2192 amplifies moves. Above the gamma flip strike, dealers are long; below, short.',
+    'CALL OI': 'Total open interest across CALL options at the chosen expiration. Higher = more positioning on the upside.',
+    'PUT OI': 'Total open interest across PUT options at the chosen expiration. Higher = more downside positioning / hedging.',
+    'GAMMA FLIP': 'The strike price (near-the-money, within \u00b110% of spot) with the highest combined open interest. This is roughly where dealer gamma exposure flips from long to short. Price moves THROUGH this strike often trigger acceleration as dealer hedging reverses direction.',
+    'CALL OI %': 'Call OI as a percentage of total OI (calls + puts), blended 60% by OI and 40% by today\u2019s volume. >50% = call-heavy / bullish positioning. <50% = put-heavy / bearish.',
+    'PUT OI %': 'Put OI percentage (100 \u2212 Call OI %). High values indicate hedging or bearish positioning.',
+    'DTE': 'Calendar days to expiration of the referenced options chain. The scanner picks the chain closest to 35 DTE within the 20-70 day window.',
+    'EXP / STRIKE': 'Expiration date of the chain GEX was computed against, and the gamma-flip strike. These are the contract specs the rest of this row\u2019s metrics reference.',
+    'FLOW': 'Aggregate directional bias from call/put OI. CALL HEAVY = bullish setup. PUT HEAVY = bearish setup.'
+  };
+  function th(label){ return '<th title="'+_esc(defs[label]||'')+'" style="cursor:help;">'+label+'</th>'; }
+  var html='<table><thead><tr>'
+    + '<th>SYMBOL</th>'
+    + th('NET GEX') + th('CALL OI') + th('PUT OI') + th('GAMMA FLIP')
+    + th('CALL OI %') + th('PUT OI %') + th('DTE') + th('EXP / STRIKE') + th('FLOW')
+    + '</tr></thead><tbody>';
   G.gexData.forEach(function(r){
     var gexCls=r.gex>0?'pnl-pos':'pnl-neg';
     var simBadge=r.sim?'<span style="font-size:9px;color:var(--gry);margin-left:4px;">[SIM]</span>':'';
-    var oiDetail = (!r.sim && r.callOI) ? '<br><span style="font-size:9px;color:var(--gry);">'+fmtK(r.callOI)+'c/'+fmtK(r.putOI)+'p OI</span>' : '';
-    html+='<tr data-ticker="'+r.t+'" onclick="viewDetail(this.dataset.ticker,\'gx-detail\',\'gx-det-empty\')">'
-      +'<td><b>'+r.t+'</b>'+simBadge+'</td>'
-      +'<td class="'+gexCls+'">'+(r.gex>0?'+':'')+r.gex+'M'+oiDetail+'</td>'
+    var expDisplay = r.exp
+      ? (r.exp.split('-').slice(1).join('/') + ' / $' + fmt2(r.flip))
+      : (r.flip ? '$'+fmt2(r.flip) : '--');
+    html+='<tr data-ticker="'+_esc(r.t)+'" onclick="viewDetail(this.dataset.ticker,\'gx-detail\',\'gx-det-empty\')">'
+      +'<td><b>'+_esc(r.t)+'</b>'+simBadge+'</td>'
+      +'<td class="'+gexCls+'">'+(r.gex>0?'+':'')+r.gex+'M</td>'
+      +'<td style="font-family:var(--ff-mono);font-size:11px;color:var(--grn);">'+(r.callOI ? fmtK(r.callOI) : '--')+'</td>'
+      +'<td style="font-family:var(--ff-mono);font-size:11px;color:var(--ngo);">'+(r.putOI ? fmtK(r.putOI) : '--')+'</td>'
       +'<td>$'+fmt2(r.flip)+'</td>'
       +'<td class="pnl-pos">'+r.call+'%</td>'
       +'<td class="pnl-neg">'+r.put+'%</td>'
       +'<td style="color:var(--gry);font-size:11px;">'+(r.dte||'--')+'d</td>'
+      +'<td style="font-family:var(--ff-mono);font-size:11px;color:var(--gry);">'+expDisplay+'</td>'
       +'<td><span class="badge '+r.flowCls+'">'+r.flow+'</span></td>'
       +'</tr>';
   });
