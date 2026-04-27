@@ -11718,19 +11718,57 @@ function renderPositionsTable(pos,srcLabel){
     startTsPoller();
     tsLog('Trail stop auto-armed for ' + pos.length + ' position(s)', 'info');
   }
+  // D-1 through D-12: positions table redesign per user spec.
+  //   - sort by DTE ascending (soonest first); STOCK rows pinned to bottom
+  //   - new column order; OPENED between TICKER and TRAIL; TRAIL before CLOSE;
+  //     EQUITY between ROLL and P/L $; STOCK PRICE before ENTRY PRICE;
+  //     ATR exit columns (1/2, 1, EMERGENCY) after ENTRY PRICE
+  //   - removed: MARK, ENTRY (cost basis $), the P&L button + chart row
+  //   - renamed: UL@ENTRY -> ENTRY PRICE, UL -> STOCK PRICE
+  //   - EXP date format -> MM/DD/YY
+  //   - TRAIL badge + TRAIL button consolidated into one cell, single row
+  pos = pos.slice().sort(function(a, b){
+    var aIsStock = (a.type === 'STOCK');
+    var bIsStock = (b.type === 'STOCK');
+    if (aIsStock && !bIsStock) return  1;       // shares to the bottom
+    if (!aIsStock && bIsStock) return -1;
+    function _dte(p){
+      if (p.type === 'STOCK') return Number.MAX_SAFE_INTEGER;
+      var es = p.exp || '';
+      if (!es && p.symbol) {
+        var m = p.symbol.match(/[A-Z]+(\d{2})(\d{2})(\d{2})[CP]/);
+        if (m) es = '20'+m[1]+'-'+m[2]+'-'+m[3];
+      }
+      if (!es) return Number.MAX_SAFE_INTEGER;
+      var ep = es.split('-');
+      var em = new Date(+ep[0], +ep[1]-1, +ep[2]);
+      var tm = new Date(); tm.setHours(0,0,0,0);
+      return Math.max(0, Math.round((em - tm) / 86400000));
+    }
+    return _dte(a) - _dte(b);
+  });
+
   var html='<table><thead><tr>'
-    +'<th>TICKER</th><th>CLOSE</th><th>ROLL</th>'
-    +'<th>P/L $</th><th>P/L %</th>'
-    +'<th>STRIKE</th><th>EXP</th><th>DTE</th>'
-    +'<th>QTY</th><th>ENTRY</th><th class="col-opened">OPENED</th>'
-    +'<th title="Underlying stock price at the time you bought this position">UL@ENTRY</th>'
-    +'<th>MARK</th>'
-    +'<th title="Underlying price needed for the contract to break even at expiration">B/E</th>'
-    +'<th>UL</th>'
+    +'<th>TICKER</th>'
+    +'<th class="col-opened">OPENED</th>'
+    +'<th title="Trailing-stop status + per-position config. Click to expand.">TRAIL</th>'
+    +'<th>CLOSE</th>'
+    +'<th>ROLL</th>'
     +'<th title="Current value of your position (mark x qty x multiplier)">EQUITY</th>'
-    +'<th>TRAIL</th><th></th><th></th>'
+    +'<th>P/L $</th>'
+    +'<th>P/L %</th>'
+    +'<th>STRIKE</th>'
+    +'<th>EXP</th>'
+    +'<th>DTE</th>'
+    +'<th>QTY</th>'
+    +'<th title="Current underlying stock price">STOCK PRICE</th>'
+    +'<th title="Underlying stock price at the time you bought this position">ENTRY PRICE</th>'
+    +'<th title="Underlying price needed for the contract to break even at expiration">B/E</th>'
+    +'<th title="Stock price after a 0.5 × ATR(14) drop from current — soft exit signal">1/2 ATR</th>'
+    +'<th title="Stock price after a 1 × ATR(14) drop from current — typical stop">1 ATR</th>'
+    +'<th title="Stock price after a 2 × ATR(14) drop from current — emergency exit. If price reaches this, close immediately regardless of P&L.">EMERGENCY EXIT</th>'
     +'</tr></thead><tbody>';
-  colCount = 19; // total columns (used by inline config/chart rows)
+  colCount = 18; // total columns (used by inline config row)
 
   pos.forEach(function(p){
     var pnlCls  = p.pnl>=0?'pnl-pos':'pnl-neg';
@@ -11819,7 +11857,13 @@ function renderPositionsTable(pos,srcLabel){
     })();
     var ulCell = p.underlyingNow ? '$'+fmt2(p.underlyingNow) : '--';
     // Stock rows don't have expiry, DTE, or rollover — render dashes
-    var expCell = isStock ? '<td style="color:var(--gry2);">\u2014</td>' : '<td>'+(p.exp||'--')+'</td>';
+    // D-8: EXP formatted as MM/DD/YY (was YYYY-MM-DD).
+    var expFmt = '--';
+    if (p.exp && /^\d{4}-\d{2}-\d{2}$/.test(p.exp)){
+      var ep2 = p.exp.split('-');
+      expFmt = ep2[1]+'/'+ep2[2]+'/'+ep2[0].slice(2);
+    } else if (p.exp){ expFmt = p.exp; }
+    var expCell = isStock ? '<td style="color:var(--gry2);">\u2014</td>' : '<td>'+expFmt+'</td>';
     var dteCell = isStock ? '<td style="color:var(--gry2);">\u2014</td>' : '<td style="'+dteCls+';">'+(dteDays!=='--'?dteDays+'d':'--')+'</td>';
     // Roll button: hide for stocks (no contract to roll)
     var rollCell = isStock
@@ -11863,26 +11907,52 @@ function renderPositionsTable(pos,srcLabel){
       return '<td class="'+equityCls+'" style="white-space:nowrap;">'+fmtD(equity)+'</td>';
     })();
 
+    // D-9, D-10, D-11: ATR-based exit prices on the underlying.
+    var atrCells = (function(){
+      var ulN = p.underlyingNow || 0;
+      var atr = 0;
+      try {
+        var hist = (typeof loadHistCache === 'function') ? loadHistCache(p.underlying) : null;
+        if (hist && hist.length >= 15 && typeof computeATR === 'function'){
+          atr = computeATR(hist, 14) || 0;
+        }
+      } catch(_){}
+      function fp(v){ return v > 0 ? '$'+fmt2(v) : '<span style="color:var(--gry2);">--</span>'; }
+      if (!ulN || !atr){
+        return '<td style="color:var(--gry2);">--</td><td style="color:var(--gry2);">--</td><td style="color:var(--gry2);">--</td>';
+      }
+      var p05 = ulN - 0.5 * atr;
+      var p10 = ulN - 1.0 * atr;
+      var p20 = ulN - 2.0 * atr;
+      return '<td style="color:var(--ambb);font-family:var(--ff-mono);" title="0.5 × ATR(14) drop. ATR=$'+fmt2(atr)+'">'+fp(p05)+'</td>'
+           + '<td style="color:var(--wrn);font-family:var(--ff-mono);" title="1 × ATR(14) drop. ATR=$'+fmt2(atr)+'">'+fp(p10)+'</td>'
+           + '<td style="color:var(--ngo);font-weight:700;font-family:var(--ff-mono);" title="EMERGENCY — 2 × ATR(14) drop. Close immediately. ATR=$'+fmt2(atr)+'">'+fp(p20)+'</td>';
+    })();
+
+    // D-6: TRAIL cell consolidated into one cell, single horizontal row
+    var trailCell = '<td style="white-space:nowrap;">'
+      + '<div style="display:inline-flex;align-items:center;gap:6px;">'
+      +   trailBadge
+      +   '<button class="btn ts-enable-btn" style="font-size:10px;padding:3px 8px;'+(cfgEnabled?'border-color:var(--grn);color:var(--grn);':'')+'" onclick="toggleTsRow(\''+sym+'\')">CFG</button>'
+      + '</div></td>';
+
     html += '<tr data-tk="'+tk+'" data-tp="'+tp+'" data-st="'+st+'" data-ex="'+ex+'" data-qty="'+qty+'" data-sym="'+sym+'">'
-      +'<td><b>'+tk+'</b>'+(isStock?' <span style="color:var(--gry);font-size:10px;">EQ</span>':'')+'</td>'  // TICKER (with EQ marker for stocks)
-      +'<td style="white-space:nowrap;"><button class="cbtn" onclick="doClose(this)">CLOSE</button></td>'
-      +rollCell
-      +'<td class="'+pnlCls+'">'+(p.pnl>=0?'+':'')+fmtD(p.pnl)+'</td>'               // P/L $
-      +'<td class="'+pnlCls+'">'+(p.pnlPct>=0?'+':'')+fmtP(p.pnlPct)+'</td>'         // P/L %
-      +strikeCell                                                                     // STRIKE ($NNN C/P + ITM/OTM) or SHARES
-      +expCell                                                                        // EXP (— for stocks)
-      +dteCell                                                                        // DTE (— for stocks)
-      +'<td>'+qty+(isStock?' <span style="color:var(--gry2);font-size:9px;">sh</span>':'')+'</td>'  // QTY (with sh suffix for stocks)
-      +'<td>$'+fmt2(p.cost)+'</td>'                                                  // ENTRY (total cost basis)
-      +formatOpenedDateTime(p)                                                        // OPENED (date/time bought)
-      +ulEntryCell                                                                    // UL@ENTRY (underlying price when bought)
-      +'<td>$'+fmt2(p.last)+'</td>'                                                  // MARK
-      +beCell                                                                         // B/E (breakeven)
-      +'<td style="color:var(--gry3)">'+(isStock?'\u2014':ulCell)+'</td>'            // UL
-      +equityCell                                                                     // EQUITY (current value)
-      +'<td>'+trailBadge+'</td>'                                                      // TRAIL badge
-      +'<td><button class="btn ts-enable-btn" style="'+(cfgEnabled?'border-color:var(--grn);color:var(--grn);':'')+'" onclick="toggleTsRow(\''+sym+'\')">\u25b4 TRAIL</button></td>'
-      +'<td><button class="btn" style="font-size:10px;padding:3px 8px;border-color:var(--blu3);color:var(--blub);" onclick="togglePosChart(\''+sym+'\')">\u25b2 P&L</button></td>'
+      +'<td><b>'+tk+'</b>'+(isStock?' <span style="color:var(--gry);font-size:10px;">EQ</span>':'')+'</td>'  // TICKER
+      +formatOpenedDateTime(p)                                                                                // OPENED
+      +trailCell                                                                                              // TRAIL (badge + CFG button)
+      +'<td style="white-space:nowrap;"><button class="cbtn" onclick="doClose(this)">CLOSE</button></td>'    // CLOSE
+      +rollCell                                                                                               // ROLL
+      +equityCell                                                                                             // EQUITY (current value)
+      +'<td class="'+pnlCls+'">'+(p.pnl>=0?'+':'')+fmtD(p.pnl)+'</td>'                                       // P/L $
+      +'<td class="'+pnlCls+'">'+(p.pnlPct>=0?'+':'')+fmtP(p.pnlPct)+'</td>'                                 // P/L %
+      +strikeCell                                                                                             // STRIKE
+      +expCell                                                                                                // EXP (MM/DD/YY)
+      +dteCell                                                                                                // DTE
+      +'<td>'+qty+(isStock?' <span style="color:var(--gry2);font-size:9px;">sh</span>':'')+'</td>'           // QTY
+      +'<td style="color:var(--gry3)">'+(isStock?'—':ulCell)+'</td>'                                    // STOCK PRICE (current UL)
+      +ulEntryCell                                                                                            // ENTRY PRICE (UL when opened)
+      +beCell                                                                                                 // B/E
+      +atrCells                                                                                               // 1/2 ATR | 1 ATR | EMERGENCY EXIT
       +'</tr>';
 
     // Inline trailing stop config row
@@ -11931,25 +12001,9 @@ function renderPositionsTable(pos,srcLabel){
       +'</div></div>'
       +'</div></td></tr>';
 
-    // P&L chart expansion row
-    html += '<tr id="poschart-'+sym+'" class="pos-chart-row">'
-      +'<td colspan="'+colCount+'">'
-      +'<div class="pos-chart-inner">'
-      +'<div class="pnl-chart-hdr">'
-      +'<span class="pnl-chart-title" id="pchart-title-'+sym+'">P&L PAYOFF \u2014 '+sym+'</span>'
-      +'<div class="pnl-chart-stats">'
-      +'<div class="pnl-stat"><div class="pnl-stat-lbl">Breakeven</div><div class="pnl-stat-val neu" id="pbe-'+sym+'">--</div></div>'
-      +'<div class="pnl-stat"><div class="pnl-stat-lbl">Max Loss</div><div class="pnl-stat-val neg" id="pml-'+sym+'">--</div></div>'
-      +'<div class="pnl-stat"><div class="pnl-stat-lbl">+10% Target</div><div class="pnl-stat-val pos" id="pt10-'+sym+'">--</div></div>'
-      +'<div class="pnl-stat"><div class="pnl-stat-lbl">+20% Target</div><div class="pnl-stat-val pos" id="pt20-'+sym+'">--</div></div>'
-      +'<div class="pnl-stat"><div class="pnl-stat-lbl">Current P&L</div><div class="pnl-stat-val" id="pcur-'+sym+'">--</div></div>'
-      +'</div></div>'
-      +'<div class="pnl-canvas-wrap">'
-      +'<canvas id="pcanvas-'+sym+'" height="160"></canvas>'
-      +'<div class="pnl-tooltip" id="ptooltip-'+sym+'"></div>'
-      +'</div>'
-      +'</div>'
-      +'</td></tr>';
+    // D-7: P&L chart expansion row removed per user spec \u2014 the toggle button
+    // and the chart pane are no longer rendered. drawPnlChart / togglePosChart
+    // remain defined elsewhere but are no longer reachable from the UI.
   });
 
   html += '</tbody></table>';
