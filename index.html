@@ -1079,7 +1079,6 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
        rendering keep working. -->
   <button class="ntab" style="display:none;" onclick="switchTab('bs')">BUY SIGNALS</button>
   <button class="ntab active" onclick="switchTab('sc')">FULL SCANNER</button>
-  <button class="ntab" onclick="switchTab('wl')">WATCHLIST</button>
   <button class="ntab" onclick="switchTab('pos')">POSITIONS</button>
   <button class="ntab" onclick="switchTab('order')">ORDER TICKET</button>
   <button class="ntab" onclick="switchTab('al')">ALERTS</button>
@@ -1088,6 +1087,7 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
   <button class="ntab" onclick="switchTab('pf')">PORTFOLIO</button>
   <button class="ntab" onclick="switchTab('ind')">INDUSTRY</button>
   <button class="ntab" onclick="switchTab('gex')" title="Gamma exposure / 30DTE options-flow (call vs put OI) for the top 200 enriched tickers. Drives the GEX Call Heavy rule.">GEX / FLOW</button>
+  <button class="ntab" onclick="switchTab('wl')">WATCHLIST</button>
   <!-- OPTIONS WATCHLIST button hidden per user request — underlying tab pane
        (id="tab-cw") + cwRenderTable code path retained in case of re-enable. -->
   <button class="ntab" style="display:none;" onclick="switchTab('cw')">&#9734; OPTIONS WATCHLIST</button>
@@ -5384,9 +5384,19 @@ function setLimitToAsk(){
 //  STEP FILL ENGINE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-function isCloseAction(action){
-  return action==='BUY_TO_CLOSE'||action==='SELL_TO_CLOSE'||action==='SELL';
+// Step-fill walking direction is determined by side direction (buy vs sell),
+// NOT by open vs close. A SELL_TO_OPEN should walk ASK→BID just like a
+// SELL_TO_CLOSE; a BUY_TO_CLOSE should walk BID→ASK just like a
+// BUY_TO_OPEN. The earlier isCloseAction helper conflated the two and
+// caused SELL_TO_OPEN to walk in the wrong direction (starting at bid,
+// stepping toward ask — giving up the spread instead of capturing it).
+function isSellAction(action){
+  return action === 'SELL_TO_OPEN' || action === 'SELL_TO_CLOSE' || action === 'SELL';
 }
+// Backward-compat alias — preserved so any external snippet / unmoved
+// call site referencing the old name still works. Internally everything
+// should use isSellAction.
+function isCloseAction(action){ return isSellAction(action); }
 
 // Updates the step fill label and default start-from based on open vs close.
 // Also re-anchors the LIMIT PRICE field so flipping ACTION between buy/sell
@@ -5396,17 +5406,18 @@ function isCloseAction(action){
 // user manually clicked SET BID / SET ASK).
 function updateStepFillMode(){
   var action=eid('ord-action').value;
-  var closing=isCloseAction(action);
+  var selling=isSellAction(action);
   var lbl=eid('sf-mode-label');
   var sfStart=eid('sf-start');
-  if(closing){
-    lbl.innerHTML='\u25bc STEP FILL MODE \u2014 start at ASK, step DOWN toward bid (best close price)';
+  if(selling){
+    lbl.innerHTML='\u25bc STEP FILL MODE \u2014 start at ASK, step DOWN toward bid (best sell price)';
     lbl.style.color='var(--wrn)';
-    // Force to 'ask' for close orders regardless of prior value. Submit logic
-    // also force-overrides, but keeping the UI honest prevents confusion.
+    // Any sell action (open or close) should start at ASK and walk down so
+    // we capture the spread instead of giving it up. Submit logic also
+    // force-overrides; keeping the UI honest prevents confusion.
     if(sfStart && sfStart.value !== 'ask') sfStart.value='ask';
   } else {
-    lbl.innerHTML='\u25b2 STEP FILL MODE \u2014 start at bid, step UP toward ask until filled';
+    lbl.innerHTML='\u25b2 STEP FILL MODE \u2014 start at BID, step UP toward ask (best buy price)';
     lbl.style.color='var(--grn)';
     if(sfStart && sfStart.value==='ask') sfStart.value='bid'; // auto-flip default
   }
@@ -12336,6 +12347,7 @@ function renderPositionsTable(pos,srcLabel){
     +'<th>EXP</th>'
     +'<th>DTE</th>'
     +'<th>QTY</th>'
+    +'<th title="Current contract mid price (bid+ask)/2 — what one contract is worth right now">MID</th>'
     +'<th title="Current underlying stock price">STOCK PRICE</th>'
     +'<th title="Underlying stock price at the time you bought this position">ENTRY PRICE</th>'
     +'<th title="Underlying price needed for the contract to break even at expiration">B/E</th>'
@@ -12343,7 +12355,7 @@ function renderPositionsTable(pos,srcLabel){
     +'<th title="Stock price after a 1 × ATR(14) drop from current — typical stop">1 ATR</th>'
     +'<th title="Stock price after a 2 × ATR(14) drop from current — emergency exit. If price reaches this, close immediately regardless of P&L.">EMERGENCY EXIT</th>'
     +'</tr></thead><tbody>';
-  colCount = 18; // total columns (used by inline config row)
+  colCount = 19; // total columns (used by inline config row)
 
   var todayCount = 0;
   pos.forEach(function(p){
@@ -12550,6 +12562,16 @@ function renderPositionsTable(pos,srcLabel){
       +expCell                                                                                                // EXP (MM/DD/YY)
       +dteCell                                                                                                // DTE
       +'<td>'+qty+(isStock?' <span style="color:var(--gry2);font-size:9px;">sh</span>':'')+'</td>'           // QTY
+      +(function(){
+         // MID: contract mark price (bid+ask)/2 → what one contract is worth
+         // right now. Falls back to last when bid/ask aren't both populated
+         // (after-hours / illiquid). Stocks show the current price directly.
+         var bb = +p.bid || 0, aa = +p.ask || 0, ll = +p.last || 0;
+         var mid = (bb > 0 && aa > 0) ? (bb + aa) / 2 : ll;
+         if(!(mid > 0)) return '<td style="color:var(--gry2);">—</td>';
+         var label = isStock ? '$'+fmt2(mid) : '$'+fmt2(mid);
+         return '<td title="bid '+fmt2(bb)+' / ask '+fmt2(aa)+'" style="color:var(--ambb);font-weight:600;">'+label+'</td>';
+       })()                                                                                                  // MID
       +'<td style="color:var(--gry3)">'+(isStock?'—':ulCell)+'</td>'                                    // STOCK PRICE (current UL)
       +ulEntryCell                                                                                            // ENTRY PRICE (UL when opened)
       +beCell                                                                                                 // B/E
@@ -14056,6 +14078,37 @@ async function submitRoll(){
   var delay=+eid('roll-sf-delay').value||3;
   var coverage=+eid('roll-sf-coverage').value||100;
   var fallback=eid('roll-sf-fallback').value;
+
+  // Refresh BOTH legs' bid/ask just before submitting. The quotes captured
+  // at FIND BEST / REFRESH QUOTE click time can be 30s-5min stale by the
+  // time the user reviews and hits EXECUTE. A fresh fetch ensures LEG 1
+  // starts at the *current* ask (best sell price) and LEG 2 starts at the
+  // *current* bid (best buy price) instead of walking from a stale anchor.
+  try {
+    var refreshSyms = G_roll.occSym + ',' + (G_roll.leg2 && G_roll.leg2.occSym ? G_roll.leg2.occSym : '');
+    var refreshUrl = c.host + '/v1/markets/quotes?symbols=' + encodeURIComponent(refreshSyms) + '&greeks=true';
+    var rresp = await fetch(refreshUrl, { headers:{Authorization:'Bearer '+c.key, Accept:'application/json'} });
+    var rdata = await rresp.json();
+    var rq = (rdata && rdata.quotes && rdata.quotes.quote) ? rdata.quotes.quote : null;
+    if(rq){
+      var rArr = Array.isArray(rq) ? rq : [rq];
+      rArr.forEach(function(qr){
+        if(qr.symbol === G_roll.occSym && G_roll.leg1Quote){
+          G_roll.leg1Quote.bid = +qr.bid; G_roll.leg1Quote.ask = +qr.ask;
+          if(eid('roll-leg1-bid')) eid('roll-leg1-bid').textContent='$'+fmt2(+qr.bid);
+          if(eid('roll-leg1-ask')) eid('roll-leg1-ask').textContent='$'+fmt2(+qr.ask);
+        }
+        if(G_roll.leg2 && qr.symbol === G_roll.leg2.occSym){
+          G_roll.leg2.bid = +qr.bid; G_roll.leg2.ask = +qr.ask;
+          if(eid('roll-leg2-bid')) eid('roll-leg2-bid').textContent='$'+fmt2(+qr.bid);
+          if(eid('roll-leg2-ask')) eid('roll-leg2-ask').textContent='$'+fmt2(+qr.ask);
+        }
+      });
+      rollLog('✓ Quotes refreshed at submit — leg1 ask=$'+fmt2(G_roll.leg1Quote.ask)+' leg2 bid=$'+fmt2(G_roll.leg2.bid),'');
+    }
+  } catch(e){
+    rollLog('⚠ Pre-submit quote refresh failed ('+(e&&e.message||e)+') — using cached quotes','err');
+  }
 
   var l1q=G_roll.leg1Quote;
   var l2=G_roll.leg2;
