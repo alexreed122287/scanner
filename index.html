@@ -1149,7 +1149,9 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
     <button class="btn" onclick="applyStrategyMode('breakout')">&#9650; BREAKOUT</button>
     <button class="btn" onclick="applyStrategyMode('momentum')">&#9654; MOMENTUM</button>
     <button class="btn" style="border-color:var(--grn);color:var(--grn);" onclick="applyStrategyMode('bestItmCalls')">&#9670; BEST ITM CALLS</button>
+    <button class="btn" style="border-color:var(--ambb);color:var(--ambb);" onclick="applyStrategyMode('preMarket')" title="Surface pre-market gappers — biggest absolute %change vs prior close. Most useful between 4:00am and 9:30am ET when Tradier's `last` field reflects pre-market quotes.">&#9650; PRE-MARKET</button>
     <button class="btn" style="border-color:var(--gry2);color:var(--gry);" onclick="applyStrategyMode('clear')">&#10005; CLEAR</button>
+    <span id="pre-market-pill" style="display:none;font-family:var(--ff-mono);font-size:9px;font-weight:800;letter-spacing:1.5px;background:var(--ambb);color:var(--bg0);padding:2px 8px;border-radius:2px;animation:today-pulse 2.4s ease-in-out infinite;" title="Pre-market session is active — Tradier `last` reflects extended-hours quotes. Use the PRE-MARKET preset to sort by gap %.">PRE-MARKET LIVE</span>
     <span id="strategy-desc-sc" style="font-family:var(--ff-mono);font-size:10px;color:var(--gry);font-style:italic;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;"></span>
   </div>
   <div class="flt-bar">
@@ -9331,11 +9333,24 @@ async function fetchDynamicUniverse(key, mode){
   var minAvgVol  = parseFloat(eid('sc-minavgvol')  ? eid('sc-minavgvol').value  : 50000) || 50000;
   var volRatioPct= parseFloat(eid('sc-volratio')   ? eid('sc-volratio').value   : 0)  || 0;
   var seen = {};
-  // Theme is intentionally NOT a pre-scan filter — restricting the universe
-  // to a theme's ~20 curated members would shrink the enrichment pool below
-  // SC_ENRICH_LIMIT (200) and starve the post-scan view of breadth. Theme
-  // narrowing happens later in applyFilters() against the fully scored
-  // results, so the full 200-ticker enrichment still runs every scan.
+  // Pre-scan theme filter: when a theme is selected in the SCAN toolbar,
+  // restrict the universe to that theme's curated members. The scan still
+  // enriches every passing ticker (Math.min(SC_ENRICH_LIMIT, results) covers
+  // small themes naturally — a 20-member theme enriches all 20). Falls
+  // through to "no theme filter" when the overlay isn't loaded yet.
+  var preTheme = (eid('sc-theme') && eid('sc-theme').value) || '';
+  var themeMembers = null;
+  if(preTheme){
+    try {
+      var t2t = (G_THEME_OVERLAY && G_THEME_OVERLAY.ticker2theme) || {};
+      var members = {};
+      Object.keys(t2t).forEach(function(tk){
+        var ti = t2t[tk];
+        if(ti && ti.theme === preTheme) members[tk] = true;
+      });
+      if(Object.keys(members).length > 0) themeMembers = members;
+    } catch(e){}
+  }
   var allTickers = UNIVERSE_FULL.filter(function(u){
     if(seen[u.t]) return false;
     seen[u.t] = true;
@@ -9344,12 +9359,14 @@ async function fetchDynamicUniverse(key, mode){
     if(!sectorAllowed(u.s)) return false;
     // Apply hard sector exclusion (e.g. health sectors except allowlist)
     if(!tickerPassesSectorExclusion(u.t, u.s)) return false;
+    // Theme pre-filter: if the user picked a theme, only scan its members
+    if(themeMembers && !themeMembers[u.t]) return false;
     return true;
   });
-  // Always include SPY as a market reference, regardless of sector filter
+  // Always include SPY as a market reference, regardless of sector/theme filter
   if(!seen['SPY']) allTickers.push({t:'SPY', s:'ETF'});
   if(allTickers.length === 0){
-    console.warn('[scan] No tickers match current sector selection');
+    console.warn('[scan] No tickers match current sector/theme selection');
     return [];
   }
   var BATCH_SIZE = 400;
@@ -15305,8 +15322,42 @@ var STRATEGY_MODES = {
     desc: 'Score \u2265110 + liquid ($5+, 1M+ avg vol) + in-play today (vol \u2265 avg) + contract \u2264$8 \u2014 deep-ITM (\u03b4 0.70\u20130.90) calls on bullish momentum names. Click SCAN to run.',
     filters: {sig:'GO', minScore:110, macd:true, ema200:true, vol:true, rs:true,
               minPrice:5, minAvgVol:1000000, volRatio:100, maxOptPrice:8}
+  },
+  preMarket: {
+    label: '\u25b2 PRE-MARKET',
+    desc: 'Pre-market gappers \u2014 Tradier `last` during 4:00\u20139:30am ET reflects pre-market quotes. Permissive thresholds (intraday indicators are unreliable before the open) and results sorted by absolute gap %.',
+    // Loose criteria: technical indicators are noisy before the cash open.
+    // Liquidity gate kept (1M avg vol) so the gappers are tradeable. Sort by
+    // |changePct| handled in applyStrategyMode (post-filter).
+    filters: {sig:'', minScore:0, minPrice:3, minAvgVol:1000000, volRatio:0,
+              _sortByGap:true}
   }
 };
+
+// Pre-market session detector: 4:00am \u2014 9:30am ET on US weekdays. Doesn't
+// account for half-day holidays (Thanksgiving Friday, Christmas Eve) \u2014
+// good enough for a session pill, the user can ignore it on those days.
+function isPreMarketET(){
+  try {
+    var s = new Date().toLocaleString('en-US', {timeZone:'America/New_York', hour12:false,
+      weekday:'short', hour:'2-digit', minute:'2-digit'});
+    // s e.g. "Mon, 04:23"
+    var m = s.match(/^(\w{3}),?\s+(\d{1,2}):(\d{2})/);
+    if(!m) return false;
+    var dow = m[1];
+    if(dow === 'Sat' || dow === 'Sun') return false;
+    var minutes = parseInt(m[2],10) * 60 + parseInt(m[3],10);
+    return minutes >= 240 && minutes < 570; // 4:00 inclusive, 9:30 exclusive
+  } catch(_) { return false; }
+}
+
+// Toggle the PRE-MARKET LIVE pill based on current ET time. Called on init
+// and on a 1-minute interval so the pill appears/disappears at the boundaries.
+function _updatePreMarketPill(){
+  var pill = document.getElementById('pre-market-pill');
+  if(!pill) return;
+  pill.style.display = isPreMarketET() ? '' : 'none';
+}
 
 function applyStrategyMode(mode, silent){
   if(mode === 'clear'){
@@ -15320,9 +15371,10 @@ function applyStrategyMode(mode, silent){
   var sm = STRATEGY_MODES[mode];
   if(!sm) return;
 
-  // Apply signal and score filters
-  if(eid('sc-sig'))      eid('sc-sig').value = sm.filters.sig || 'GO';
-  if(eid('sc-minscore')) eid('sc-minscore').value = sm.filters.minScore || 72;
+  // Apply signal and score filters. `||` was clobbering legitimate empty/zero
+  // values from the preset (e.g. preMarket sets sig:'' and minScore:0).
+  if(eid('sc-sig'))      eid('sc-sig').value      = (sm.filters.sig      !== undefined) ? sm.filters.sig      : 'GO';
+  if(eid('sc-minscore')) eid('sc-minscore').value = (sm.filters.minScore !== undefined) ? sm.filters.minScore : 72;
 
   // Clear all indicator checkboxes first
   ['filt-analyst','filt-gex','filt-proven',
@@ -15356,11 +15408,22 @@ function applyStrategyMode(mode, silent){
   // Reclassify GO/NO-GO with the strategy's threshold BEFORE applying filters
   // so the table reflects the new signal status.
   if(typeof reclassifyGoThreshold === 'function') reclassifyGoThreshold();
+  // Pre-market preset: re-sort the filtered set by absolute gap % so the
+  // biggest movers are at the top. Done before applyFilters so renderScan
+  // sees the new order.
+  if(f._sortByGap && Array.isArray(G.results) && G.results.length){
+    G.results.sort(function(a,b){
+      return Math.abs(b.changePct||0) - Math.abs(a.changePct||0);
+    });
+  }
   // Apply filters. Only switch tabs / toast when user-initiated (not silent init).
   applyFilters();
   if(!silent){
     switchTab('sc');
-    toast(sm.label + ' mode applied');
+    var note = (mode === 'preMarket' && !isPreMarketET())
+      ? ' — heads up, it is outside 4:00–9:30am ET so `last` reflects regular-hours data'
+      : '';
+    toast(sm.label + ' mode applied' + note);
   }
 }
 
@@ -18635,6 +18698,9 @@ function init(){
     .catch(function(e){ console.warn('[init] theme overlay failed:', e && e.message); });
   // Adanos miniature chips in the header — start the 5-min refresh loop.
   try { _startAdanosChips(); } catch(e){ console.warn('[init] adanos chips failed:', e && e.message); }
+  // Pre-market session pill — show 4:00–9:30am ET, hide otherwise. Re-checked
+  // every minute so the boundary transitions self-correct.
+  try { _updatePreMarketPill(); setInterval(_updatePreMarketPill, 60 * 1000); } catch(_){}
   loadPortfolio();
   // Populate sector checkboxes from the embedded universe
   // (CSV loader removed — embedded UNIVERSE_FULL is the single source of truth)
