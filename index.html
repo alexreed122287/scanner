@@ -5498,9 +5498,28 @@ function submitLimitAtPrice(creds,acct,occSym,sym,side,qty,otype,price){
   // worker can't loop us forever. Single retry is enough — if it 403s again
   // after the user supplied a fresh token, the token itself is wrong.
   var _retried = false;
-  function _placeOrder(){ return fetch(creds.host+'/v1/accounts/'+acct+'/orders',{
+  function _placeOrder(){
+    // Belt-and-suspenders: attach X-Trade-Token at the call site too, in
+    // addition to whatever the fetch monkey-patch tries to do. Cheaper than
+    // depending on the patch firing correctly across cache lifetimes (a
+    // stale isOrderWrite gate from an older cached JS bundle was sending
+    // sandbox-mode order POSTs without the header for weeks before this
+    // direct attach landed). The patch's Object.assign + same-value set
+    // is idempotent, so no conflict when the patch is current.
+    var orderHeaders = {
+      Authorization: 'Bearer ' + creds.key,
+      Accept: 'application/json',
+      'Content-Type': 'application/x-www-form-urlencoded'
+    };
+    try {
+      var proxyForHdr = localStorage.getItem('rrjcar_tradier_proxy') || '';
+      if (proxyForHdr && window._tradeToken) {
+        orderHeaders['X-Trade-Token'] = window._tradeToken;
+      }
+    } catch(_) {}
+    return fetch(creds.host+'/v1/accounts/'+acct+'/orders',{
     method:'POST',
-    headers:{Authorization:'Bearer '+creds.key,Accept:'application/json','Content-Type':'application/x-www-form-urlencoded'},
+    headers: orderHeaders,
     body:body
   }).then(function(r){
     // Capture status + raw text BEFORE JSON parsing so non-JSON or
