@@ -2163,7 +2163,8 @@ tr.sel-row td{background:var(--blu3);}
       <button class="btn blu" style="font-size:10px;padding:3px 10px;" onclick="pfRefreshAll()">&#8635; REFRESH ALL</button>
       <button class="btn" style="font-size:10px;padding:3px 10px;border-color:var(--amb);color:var(--amb);" onclick="pfCopyAllTickers()" title="Copy comma-separated unique tickers from all columns">COPY ALL TICKERS</button>
       <button class="btn" style="font-size:10px;padding:3px 10px;border-color:var(--grn);color:var(--grn);" onclick="pfAddColumn()">+ ADD COLUMN</button>
-      <button class="btn" style="font-size:10px;padding:3px 10px;border-color:var(--wrn);color:var(--wrn);" onclick="pfExportCSV()">&#10515; EXPORT CSV</button>
+      <button class="btn" style="font-size:10px;padding:3px 10px;border-color:var(--wrn);color:var(--wrn);" onclick="pfExportCSV()" title="Long-form CSV — one row per position">&#10515; EXPORT CSV</button>
+      <button class="btn" style="font-size:10px;padding:3px 10px;border-color:var(--ambb);color:var(--ambb);" onclick="pfExportMatrix()" title="Wide-form matrix — accounts as columns, positions with the same ticker/strike/expiry on one row. Copies markdown to clipboard + downloads .md.">&#10515; EXPORT MATRIX</button>
       <button class="btn" style="font-size:10px;padding:3px 10px;border-color:var(--ngo);color:var(--ngo);" onclick="pfResetAll()">RESET</button>
     </div>
   </div>
@@ -18471,6 +18472,91 @@ function pfExportCSV(){
   a.download = 'portfolio_'+new Date().toISOString().slice(0,10)+'.csv';
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   toast('CSV exported');
+}
+
+// Wide-form matrix export: accounts as columns, positions with the same
+// ticker/strike/expiry collapse onto one row. Quantities for the same
+// (account × position) are summed (handles duplicate manual rows).
+function pfExportMatrix(){
+  var data = pfLoad();
+  var cols = data.columns;
+  var keyMap = {};
+  cols.forEach(function(col){
+    col.rows.forEach(function(r){
+      if(!r.ticker) return;
+      var ticker = r.ticker.toUpperCase();
+      var kind = r.kind || 'option';
+      var key, strike, exp, type;
+      if(kind === 'shares'){
+        key = ticker + '|shares';
+        strike = null; exp = null; type = null;
+      } else {
+        if(!r.strike || !r.exp) return; // skip half-filled option rows
+        type = (r.type === 'PUT') ? 'PUT' : 'CALL';
+        key = ticker + '|' + r.strike + '|' + r.exp + '|' + type;
+        strike = r.strike; exp = r.exp;
+      }
+      if(!keyMap[key]){
+        keyMap[key] = { ticker:ticker, kind:kind, strike:strike, exp:exp, type:type, cells:{} };
+      }
+      keyMap[key].cells[col.id] = (keyMap[key].cells[col.id] || 0) + (parseInt(r.qty)||0);
+    });
+  });
+  var rows = Object.keys(keyMap).map(function(k){ return keyMap[k]; });
+  if(!rows.length){ toast('Nothing to export — portfolio is empty'); return; }
+  rows.sort(function(a,b){
+    if(a.ticker !== b.ticker) return a.ticker < b.ticker ? -1 : 1;
+    if(a.kind !== b.kind) return a.kind === 'shares' ? 1 : -1; // options before shares
+    if(a.kind === 'option'){
+      if(a.exp !== b.exp) return a.exp < b.exp ? -1 : 1;
+      if((a.strike||0) !== (b.strike||0)) return (a.strike||0) - (b.strike||0);
+      return (a.type||'').localeCompare(b.type||'');
+    }
+    return 0;
+  });
+  function fmtExp(exp){
+    if(!exp) return '—';
+    var p = exp.split('-'); // YYYY-MM-DD
+    if(p.length !== 3) return exp;
+    return parseInt(p[1],10) + '/' + parseInt(p[2],10);
+  }
+  function fmtStrike(s){
+    if(s == null) return '—';
+    var n = parseFloat(s);
+    return '$' + (n % 1 === 0 ? n.toFixed(0) : String(n));
+  }
+  var hdr = ['Ticker','Strike','Expiry'].concat(cols.map(function(c){ return c.name; }));
+  var lines = [
+    '| ' + hdr.join(' | ') + ' |',
+    '|' + hdr.map(function(){ return '---'; }).join('|') + '|'
+  ];
+  rows.forEach(function(r){
+    var strikeCell = r.kind === 'shares'
+      ? 'shares'
+      : fmtStrike(r.strike) + (r.type === 'PUT' ? 'P' : '');
+    var line = [r.ticker, strikeCell, r.kind === 'shares' ? '—' : fmtExp(r.exp)];
+    cols.forEach(function(c){
+      var qty = r.cells[c.id];
+      if(!qty) line.push('—');
+      else if(r.kind === 'shares') line.push(String(qty));
+      else line.push('x'+qty);
+    });
+    lines.push('| ' + line.join(' | ') + ' |');
+  });
+  var md = lines.join('\n');
+  var copied = false;
+  try {
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(md);
+      copied = true;
+    }
+  } catch(e){}
+  var blob = new Blob([md], {type:'text/markdown'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'portfolio_matrix_'+new Date().toISOString().slice(0,10)+'.md';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  toast(rows.length + ' rows exported' + (copied ? ' — markdown copied to clipboard' : ''));
 }
 
 function loadPortfolio(){ /* no-op loader — data loaded on demand in renderPortfolio */ }
