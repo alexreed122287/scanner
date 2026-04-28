@@ -2130,6 +2130,14 @@ tr.sel-row td{background:var(--blu3);}
           <input id="sync-master-secret" type="password" placeholder="20+ chars; same on every device" autocomplete="off" spellcheck="false" style="flex:1;min-width:240px;background:var(--bg2);border:var(--bdr);border-radius:3px;color:var(--wht);font-family:var(--ff-mono);font-size:12px;padding:8px 10px;">
           <button class="btn" onclick="document.getElementById('sync-master-secret').type=document.getElementById('sync-master-secret').type==='password'?'text':'password'" title="Show / hide" style="font-size:10px;">SHOW</button>
         </div>
+        <!-- Trade-token-in-sync opt-in. Default OFF (matches the original
+             security design where each device arms separately). When ON, the
+             persisted trade token gets included in PUSH and auto-armed on PULL.
+             State persists in localStorage under rrjcar_sync_include_trade. -->
+        <label style="display:flex;align-items:center;gap:8px;font-family:var(--ff-mono);font-size:10px;color:var(--gry);margin-bottom:10px;cursor:pointer;line-height:1.4;">
+          <input type="checkbox" id="sync-include-trade" onchange="try{localStorage.setItem('rrjcar_sync_include_trade', this.checked?'1':'0');}catch(_){}" style="width:14px;height:14px;flex-shrink:0;accent-color:var(--ngo);">
+          <span><b style="color:var(--wrn);">Include trade token in sync</b> <span style="color:var(--gry2);">(less secure — anyone with master secret + any synced device can place orders)</span></span>
+        </label>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
           <button class="btn grn" onclick="syncPushConfig()" title="Encrypt current settings + upload to Cloudflare KV">▲ PUSH TO CLOUD</button>
           <button class="btn blu" onclick="syncPullConfig()" title="Download from Cloudflare KV + decrypt + restore (page reloads)">▼ PULL FROM CLOUD</button>
@@ -3492,14 +3500,38 @@ function _b64decode(str){
   return bytes;
 }
 
+// Trade-token keys — included in sync ONLY when user opts in via the
+// "Include trade token in sync" checkbox in the SYNC card. Stored
+// separately from SYNC_KEYS so the default sync surface stays free of
+// trade-auth material and existing pushes that didn't opt-in stay clean.
+var SYNC_TRADE_KEYS = [
+  'rrjcar_trade_token_persisted',
+  'rrjcar_trade_token_persisted_until'
+];
+
+// Read whether the user has opted into trade-token sync. Persisted under
+// rrjcar_sync_include_trade ("1" / "0") so the checkbox state survives
+// reloads. Default false (matches the safer original design).
+function _syncIncludesTradeToken(){
+  try { return localStorage.getItem('rrjcar_sync_include_trade') === '1'; }
+  catch(_) { return false; }
+}
+
 // Snapshot the syncable subset of localStorage into a plain object.
 function _syncSnapshot(){
   var snap = {};
   SYNC_KEYS.forEach(function(k){
     try { var v = localStorage.getItem(k); if (v != null) snap[k] = v; } catch(_) {}
   });
+  // Include trade-token keys only when the user has explicitly opted in.
+  if (_syncIncludesTradeToken()){
+    SYNC_TRADE_KEYS.forEach(function(k){
+      try { var v = localStorage.getItem(k); if (v != null) snap[k] = v; } catch(_) {}
+    });
+  }
   snap.__pushed_at = Date.now();
   snap.__device = (navigator.userAgent.match(/(iPad|iPhone|Macintosh|Windows|Android)/) || ['unknown'])[0];
+  snap.__includes_trade = _syncIncludesTradeToken();
   return snap;
 }
 
@@ -3570,10 +3602,26 @@ async function syncPullConfig(){
     SYNC_KEYS.forEach(function(k){
       if (snap[k] != null) { try { localStorage.setItem(k, snap[k]); restored++; } catch(_){} }
     });
+    // Restore trade-token keys ONLY when the source push included them
+    // (snap.__includes_trade = true). Falling back to checking the keys'
+    // presence directly so older pushes without the flag still work.
+    var tradeRestored = 0;
+    if (snap.__includes_trade || SYNC_TRADE_KEYS.some(function(k){ return snap[k] != null; })){
+      SYNC_TRADE_KEYS.forEach(function(k){
+        if (snap[k] != null) { try { localStorage.setItem(k, snap[k]); tradeRestored++; } catch(_){} }
+      });
+      // Also enable the local opt-in flag so this device's next PUSH
+      // continues to include the trade token. Otherwise the user would
+      // have to re-tick the checkbox after every pull.
+      if (tradeRestored > 0) {
+        try { localStorage.setItem('rrjcar_sync_include_trade', '1'); } catch(_){}
+      }
+    }
     var pushedFrom = snap.__device || 'unknown';
     var pushedAt = snap.__pushed_at ? new Date(snap.__pushed_at).toLocaleString() : 'unknown';
-    _syncStatus('✓ Pulled ' + restored + ' settings (from ' + pushedFrom + ' · ' + pushedAt + ') — reloading…', 'var(--grn)');
-    if (typeof toast === 'function') toast('Settings pulled — reloading');
+    var tradeMsg = tradeRestored > 0 ? ' + trade armed' : '';
+    _syncStatus('✓ Pulled ' + restored + ' settings' + tradeMsg + ' (from ' + pushedFrom + ' · ' + pushedAt + ') — reloading…', 'var(--grn)');
+    if (typeof toast === 'function') toast('Settings pulled — reloading' + tradeMsg);
     setTimeout(function(){ location.reload(); }, 800);
   } catch (err) {
     _syncStatus('Pull failed: ' + (err && err.message || err), 'var(--ngo)');
@@ -18778,6 +18826,13 @@ function init(){
   loadKeys();
   loadWL();
   loadAppSettings();
+  // Restore the SYNC card's "include trade token" checkbox state so the
+  // user's choice persists across reloads. Persisted under
+  // rrjcar_sync_include_trade ("1" / "0"); checkbox change-handler writes it.
+  try {
+    var inclTrade = document.getElementById('sync-include-trade');
+    if (inclTrade) inclTrade.checked = (localStorage.getItem('rrjcar_sync_include_trade') === '1');
+  } catch(_){}
   loadNotifSettings();
   loadAutoTraderSettings();
   loadAutoTraderState();
