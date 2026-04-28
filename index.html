@@ -15391,15 +15391,16 @@ function _updatePreMarketPill(){
 }
 
 // One-shot probe of Tradier's quote endpoint that surfaces what the API is
-// actually returning right now for a few liquid tickers. Lets the user
-// confirm whether `change_percentage` is reflecting a pre-market gap or
-// stale prevclose data. Output goes to console + a multi-line toast.
+// actually returning right now for a few liquid tickers. Renders an in-page
+// panel above the scanner table so the user can see whether pre-market data
+// is flowing without opening devtools.
 function probePreMarketData(){
   var creds = (typeof getTradierCreds === 'function') ? getTradierCreds() : null;
   if(!creds || !creds.host || !creds.key){
-    toast('Tradier API key not configured \u2014 open the API tab first');
+    _renderProbePanel('<span style="color:var(--ngo);">Tradier API key not configured \u2014 open the API tab first.</span>');
     return;
   }
+  _renderProbePanel('<span style="color:var(--gry);">Probing Tradier\u2026</span>');
   var probeSyms = 'SPY,QQQ,NVDA,TSLA,AAPL';
   fetch(creds.host + '/v1/markets/quotes?symbols=' + probeSyms, {
     headers: { Authorization: 'Bearer ' + creds.key, Accept: 'application/json' }
@@ -15418,16 +15419,55 @@ function probePreMarketData(){
       };
     }));
     var nonZero = arr.filter(function(q){ return Math.abs(parseFloat(q.change_percentage)||0) > 0.01; }).length;
-    var preMsg = (session === 'PRE')
-      ? (nonZero > 0
-          ? '\u2713 PRE-MARKET DATA LIVE \u2014 '+nonZero+'/'+arr.length+' show non-zero change. Full table in console.'
-          : '\u26a0 All probe tickers show 0% change \u2014 Tradier may not be streaming pre-market yet, or ETF/large-caps haven\'t printed extended-hours trades. Console has raw values.')
-      : 'Session: '+session+' \u2014 '+nonZero+'/'+arr.length+' non-zero changes. See console for raw values.';
-    toast(preMsg);
+    var verdict = '';
+    if(session === 'PRE'){
+      verdict = nonZero > 0
+        ? '<span style="color:var(--grn);">\u2713 PRE-MARKET DATA LIVE \u2014 '+nonZero+'/'+arr.length+' tickers show non-zero gap.</span>'
+        : '<span style="color:var(--wrn);">\u26a0 All probe tickers show 0% change \u2014 Tradier may not be streaming pre-market through your account/proxy yet, or these names have not printed extended-hours trades.</span>';
+    } else if(session === 'POST'){
+      verdict = '<span style="color:var(--ambb);">POST-MARKET \u2014 '+nonZero+'/'+arr.length+' show non-zero change.</span>';
+    } else {
+      verdict = '<span style="color:var(--gry);">Session: '+session+' \u2014 '+nonZero+'/'+arr.length+' non-zero changes. CHG% reflects regular-session data.</span>';
+    }
+    var rows = arr.map(function(q){
+      var cp = parseFloat(q.change_percentage) || 0;
+      var cls = cp > 0 ? 'pnl-pos' : cp < 0 ? 'pnl-neg' : '';
+      var sign = cp > 0 ? '+' : '';
+      var stale = (parseFloat(q.last) === parseFloat(q.prevclose)) ? ' <span style="color:var(--gry2);font-size:9px;">(no extended-hours trade)</span>' : '';
+      return '<tr>'
+        + '<td style="font-weight:700;">'+q.symbol+'</td>'
+        + '<td>$'+(parseFloat(q.last)||0).toFixed(2)+'</td>'
+        + '<td style="color:var(--gry);">$'+(parseFloat(q.prevclose)||0).toFixed(2)+'</td>'
+        + '<td class="'+cls+'">'+sign+cp.toFixed(2)+'%'+stale+'</td>'
+        + '<td style="color:var(--gry);">'+(q.last_volume||0)+'</td>'
+        + '<td style="color:var(--gry2);font-size:10px;">'+(q.trade_date||'--')+'</td>'
+        + '</tr>';
+    }).join('');
+    var html = '<div style="font-family:var(--ff-mono);font-size:11px;line-height:1.5;">'
+      + '<div style="margin-bottom:6px;color:var(--gry);">ET: '+nyTime+' \u00b7 Session: <b style="color:var(--ambb);">'+session+'</b></div>'
+      + '<div style="margin-bottom:8px;">'+verdict+'</div>'
+      + '<table style="width:100%;font-size:11px;"><thead><tr style="color:var(--gry);font-size:10px;letter-spacing:1px;">'
+      +   '<th>SYMBOL</th><th>LAST</th><th>PREVCLOSE</th><th>%CHG</th><th>LAST VOL</th><th>TRADE DATE</th>'
+      + '</tr></thead><tbody>'+rows+'</tbody></table>'
+      + '</div>';
+    _renderProbePanel(html);
   }).catch(function(e){
     console.error('[pre-market probe] failed:', e);
-    toast('Probe failed: '+(e && e.message || e));
+    _renderProbePanel('<span style="color:var(--ngo);">Probe failed: '+(e && e.message || e)+'</span>');
   });
+}
+function _renderProbePanel(innerHtml){
+  var existing = document.getElementById('probe-panel');
+  if(!existing){
+    var bars = document.getElementById('sc-filter-bars') || document.querySelector('#tab-sc');
+    if(!bars) return;
+    var div = document.createElement('div');
+    div.id = 'probe-panel';
+    div.style.cssText = 'background:var(--bg1);border:var(--bdr);border-left:3px solid var(--ambb);padding:10px 12px;margin:6px 12px;border-radius:3px;position:relative;';
+    bars.parentNode.insertBefore(div, bars.nextSibling);
+    existing = div;
+  }
+  existing.innerHTML = '<button onclick="document.getElementById(\'probe-panel\').remove();" style="position:absolute;top:6px;right:8px;background:transparent;border:none;color:var(--gry);cursor:pointer;font-size:14px;">\u00d7</button>' + innerHtml;
 }
 
 function applyStrategyMode(mode, silent){
@@ -15497,6 +15537,13 @@ function applyStrategyMode(mode, silent){
       ? ' — heads up, it is outside 4:00–9:30am ET so `last` reflects regular-hours data'
       : '';
     toast(sm.label + ' mode applied' + note);
+    // PRE-MARKET preset is session-specific: stale cached `changePct` from a
+    // prior regular-hours scan is meaningless here. Kick off a fresh scan
+    // automatically (unless one is already running) so the user actually
+    // sees pre-market gaps instead of yesterday's intraday changes.
+    if(mode === 'preMarket' && !G.scanRunning && typeof runScan === 'function'){
+      try { runScan(); } catch(e) { console.warn('[preMarket] auto-scan failed:', e); }
+    }
   }
 }
 
