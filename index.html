@@ -1080,7 +1080,6 @@ tr.sel-row td{background:var(--blu3);}
   <button class="ntab" onclick="switchTab('api')">API</button>
   <button class="ntab" onclick="switchTab('pf')">PORTFOLIO</button>
   <button class="ntab" onclick="switchTab('ind')">INDUSTRY</button>
-  <button class="ntab" onclick="switchTab('perf')" title="Per-rule win rate, IV/HV bucket P&amp;L, and Kelly position sizing — drives data-backed strategy iteration">PERFORMANCE</button>
   <button class="ntab" onclick="switchTab('gex')" title="Gamma exposure / 30DTE options-flow (call vs put OI) for the top 200 enriched tickers. Drives the GEX Call Heavy rule.">GEX / FLOW</button>
   <!-- OPTIONS WATCHLIST button hidden per user request — underlying tab pane
        (id="tab-cw") + cwRenderTable code path retained in case of re-enable. -->
@@ -1977,77 +1976,6 @@ tr.sel-row td{background:var(--blu3);}
       <div class="ei">&#9632;</div>
       <p>Click REFRESH to load closed positions from Tradier</p>
     </div>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════════════════════
-     PERFORMANCE — per-rule win rate, IV/HV bucket P&L,
-     Kelly position sizing. Reads rrjcar_closed_trades enriched
-     with entry-snapshot fields.
-     ═══════════════════════════════════════════════════════ -->
-<div class="tab-pane" id="tab-perf">
-  <div class="stats-bar">
-    <div class="stat-box"><div class="stat-label">SAMPLE SIZE</div><div class="stat-val amb" id="perf-n">--</div></div>
-    <div class="stat-box"><div class="stat-label">WIN RATE</div><div class="stat-val amb" id="perf-wr">--</div></div>
-    <div class="stat-box"><div class="stat-label">AVG WIN</div><div class="stat-val go" id="perf-avgwin">--</div></div>
-    <div class="stat-box"><div class="stat-label">AVG LOSS</div><div class="stat-val nogo" id="perf-avgloss">--</div></div>
-    <div class="stat-box"><div class="stat-label">EXPECTANCY</div><div class="stat-val amb" id="perf-exp">--</div></div>
-    <div class="stat-box"><div class="stat-label">KELLY %</div><div class="stat-val amb" id="perf-kelly" title="Kelly fraction = (bp − q)/b. Half-Kelly cap shown — overall recommended max % of bankroll per trade.">--</div></div>
-    <div class="stat-box" style="flex:0 0 auto;display:flex;align-items:center;padding:6px 10px;border-left:1px solid var(--bg3);">
-      <button class="btn blu" style="font-size:11px;padding:6px 10px;white-space:nowrap;" onclick="renderPerformanceTab()">&#8635; REFRESH</button>
-    </div>
-  </div>
-
-  <div class="page-wrap" style="padding:0 12px;">
-
-    <!-- ── KELLY SIZING ────────────────────────────────────────────────── -->
-    <div class="card" style="margin-top:10px;">
-      <div class="card-hdr">POSITION SIZING (KELLY) <span style="font-size:10px;color:var(--gry);font-weight:400;">— half-Kelly cap; never bet full Kelly</span></div>
-      <div class="card-body" style="display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;">
-        <div style="display:flex;flex-direction:column;gap:4px;">
-          <label style="font-size:10px;color:var(--gry);font-family:var(--ff-mono);">Bankroll ($)</label>
-          <input type="number" id="perf-bankroll" value="10000" min="100" step="100" style="background:var(--bg2);border:var(--bdr);color:var(--wht);font-family:var(--ff-mono);font-size:13px;padding:5px 8px;border-radius:3px;width:120px;" oninput="renderPerformanceTab()">
-        </div>
-        <div style="display:flex;flex-direction:column;gap:4px;">
-          <label style="font-size:10px;color:var(--gry);font-family:var(--ff-mono);">Max Positions</label>
-          <input type="number" id="perf-maxpos" value="5" min="1" step="1" style="background:var(--bg2);border:var(--bdr);color:var(--wht);font-family:var(--ff-mono);font-size:13px;padding:5px 8px;border-radius:3px;width:80px;" oninput="renderPerformanceTab()">
-        </div>
-        <div style="display:flex;flex-direction:column;gap:4px;">
-          <label style="font-size:10px;color:var(--gry);font-family:var(--ff-mono);">Per-trade Cap</label>
-          <div id="perf-pertrade" style="font-family:var(--ff-mono);font-size:14px;color:var(--ambb);font-weight:700;">$--</div>
-        </div>
-        <div style="flex:1;font-family:var(--ff-mono);font-size:10px;color:var(--gry);line-height:1.5;">
-          Kelly fraction f* = (bp − q) / b, where b = avg_win/avg_loss, p = win rate, q = 1-p.
-          Half-Kelly hedges against parameter estimation error — full Kelly maximizes long-run growth but has 50%+ drawdowns.
-          Shown cap = min(half-Kelly × bankroll, bankroll / max_positions).
-        </div>
-      </div>
-    </div>
-
-    <!-- ── PER-RULE WIN RATE ───────────────────────────────────────────── -->
-    <div class="card" style="margin-top:10px;">
-      <div class="card-hdr">RULE EFFECTIVENESS <span style="font-size:10px;color:var(--gry);font-weight:400;">— win rate, avg P&L, expectancy delta when rule passed vs failed at entry</span></div>
-      <div class="card-body" id="perf-rule-tbl-wrap">
-        <div style="font-family:var(--ff-mono);font-size:11px;color:var(--gry);">Refresh to compute (requires closed trades with entry-rule snapshots).</div>
-      </div>
-    </div>
-
-    <!-- ── IV/HV BUCKETS ─────────────────────────────────────────────── -->
-    <div class="card" style="margin-top:10px;margin-bottom:10px;">
-      <div class="card-hdr">IV/HV ENTRY BUCKETS <span style="font-size:10px;color:var(--gry);font-weight:400;">— realized P&L grouped by premium expensiveness at entry</span></div>
-      <div class="card-body" id="perf-ivhv-tbl-wrap">
-        <div style="font-family:var(--ff-mono);font-size:11px;color:var(--gry);">Refresh to compute (requires closed trades with entry-IV + entry-HV20 snapshots).</div>
-      </div>
-    </div>
-
-    <!-- ── COVERAGE ──────────────────────────────────────────────── -->
-    <div class="card" style="margin-bottom:14px;">
-      <div class="card-hdr">SNAPSHOT COVERAGE <span style="font-size:10px;color:var(--gry);font-weight:400;">— how many closed trades have each entry field for analytics</span></div>
-      <div class="card-body" id="perf-coverage-wrap">
-        <div style="font-family:var(--ff-mono);font-size:11px;color:var(--gry);">Refresh to compute.</div>
-      </div>
-    </div>
-
   </div>
 </div>
 
@@ -4834,7 +4762,6 @@ function switchTab(id){
   }
   if(id==='cw'){cwRenderTable();}
   if(id==='pf'){ if(typeof renderPortfolio==='function') renderPortfolio(); }
-  if(id==='perf'){ if(typeof renderPerformanceTab==='function') renderPerformanceTab(); }
   // Refresh the live theme leaderboard whenever BS or SC tab opens — its
   // strip is in the DOM but querySelectorAll won't find it until visible
   if(id==='bs' || id==='sc'){
@@ -7678,326 +7605,6 @@ async function fetchFmpData(ticker){
     console.warn('FMP fetch error for '+ticker+':', e);
     return null;
   }
-}
-
-// ===========================================================================
-//  PERFORMANCE ANALYTICS — Kelly + per-rule win rate + IV/HV bucket P&L
-// ===========================================================================
-// Reads rrjcar_closed_trades and computes the three analyses that drive
-// data-backed strategy iteration:
-//
-//   1. Kelly fraction — recommended max % of bankroll per trade based on
-//      observed win rate + win/loss ratio. Half-Kelly cap (full Kelly is
-//      provably growth-optimal but has 50%+ drawdowns; half-Kelly hedges
-//      against parameter estimation error and is the standard practice).
-//
-//   2. Per-rule win rate — for each scoring rule, win rate + avg P&L when
-//      that rule PASSED at entry vs FAILED. Surfaces which rules actually
-//      drive your edge (delta column) so you can weight up the high-edge
-//      rules and drop the noise rules.
-//
-//   3. IV/HV bucket P&L — closed trades grouped by entry IV/HV ratio bucket.
-//      Tells you whether buying expensive premium (>1.5x ratio) is dragging
-//      down your edge. For retail option buyers, this is almost always the
-//      case — but seeing the data confirms it.
-//
-// All best-effort: trades missing entry-snapshot fields just don't appear
-// in those breakdowns. Coverage panel shows how many trades have each field
-// so the user can gauge sample sufficiency.
-
-function _loadClosedTradesForPerf(){
-  try {
-    var raw = localStorage.getItem('rrjcar_closed_trades') || '[]';
-    var arr = JSON.parse(raw);
-    if (!Array.isArray(arr)) return [];
-    return arr.filter(function(t){ return typeof t.pnl === 'number' && isFinite(t.pnl); });
-  } catch(e){ return []; }
-}
-
-// Kelly fraction. Returns object with f (full Kelly, 0-1), halfF (capped),
-// b (win/loss ratio), p (win rate), and avgWin/avgLoss for reference.
-function _computeKelly(trades){
-  var wins = trades.filter(function(t){ return t.pnl > 0; });
-  var losses = trades.filter(function(t){ return t.pnl < 0; });
-  var n = trades.length;
-  if (n === 0 || wins.length === 0 || losses.length === 0) {
-    return { n: n, p: null, b: null, f: null, halfF: null, avgWin: 0, avgLoss: 0, expectancy: 0 };
-  }
-  var avgWin = wins.reduce(function(s,t){ return s + t.pnl; }, 0) / wins.length;
-  var avgLoss = Math.abs(losses.reduce(function(s,t){ return s + t.pnl; }, 0) / losses.length);
-  var p = wins.length / n;
-  var q = 1 - p;
-  var b = avgWin / avgLoss;        // win/loss ratio
-  var f = (b * p - q) / b;          // full Kelly fraction
-  var halfF = Math.max(0, f / 2);   // half-Kelly, never negative (skip the trade if Kelly is negative)
-  var expectancy = p * avgWin - q * avgLoss;
-  return { n: n, p: p, b: b, f: f, halfF: halfF, avgWin: avgWin, avgLoss: avgLoss, expectancy: expectancy };
-}
-
-// Per-rule analysis. Returns an array of { rule, n, nPass, wrPass, wrFail,
-// avgPnlPass, avgPnlFail, edgeDelta }. Sorted by edgeDelta descending.
-function _computePerRuleStats(trades){
-  // Build map: ruleName -> { passed: [trades], failed: [trades] }
-  var byRule = {};
-  trades.forEach(function(t){
-    if (!Array.isArray(t.entryRules)) return;
-    t.entryRules.forEach(function(r){
-      if (!r || !r.n) return;
-      if (!byRule[r.n]) byRule[r.n] = { passed: [], failed: [] };
-      (r.pass ? byRule[r.n].passed : byRule[r.n].failed).push(t);
-    });
-  });
-  var rows = [];
-  Object.keys(byRule).forEach(function(name){
-    var passed = byRule[name].passed;
-    var failed = byRule[name].failed;
-    var nP = passed.length, nF = failed.length;
-    var wrP = nP ? passed.filter(function(t){ return t.pnl > 0; }).length / nP : null;
-    var wrF = nF ? failed.filter(function(t){ return t.pnl > 0; }).length / nF : null;
-    var avgP = nP ? passed.reduce(function(s,t){ return s + t.pnl; }, 0) / nP : null;
-    var avgF = nF ? failed.reduce(function(s,t){ return s + t.pnl; }, 0) / nF : null;
-    var delta = (avgP !== null && avgF !== null) ? avgP - avgF : null;
-    rows.push({
-      rule: name, nPass: nP, nFail: nF,
-      wrPass: wrP, wrFail: wrF,
-      avgPnlPass: avgP, avgPnlFail: avgF,
-      edgeDelta: delta,
-    });
-  });
-  // Sort by edgeDelta desc; nulls (insufficient data) go last
-  rows.sort(function(a, b){
-    if (a.edgeDelta === null && b.edgeDelta === null) return 0;
-    if (a.edgeDelta === null) return 1;
-    if (b.edgeDelta === null) return -1;
-    return b.edgeDelta - a.edgeDelta;
-  });
-  return rows;
-}
-
-// IV/HV bucket analysis. Bucket ranges: [0,1), [1,1.2), [1.2,1.5), [1.5,inf)
-function _computeIvHvBuckets(trades){
-  var buckets = [
-    { label: 'IV/HV < 1.0  (underpriced)',  min: 0,    max: 1.0,    color: 'var(--grn)',  trades: [] },
-    { label: 'IV/HV 1.0–1.2 (fair)',        min: 1.0,  max: 1.2,    color: 'var(--ambb)', trades: [] },
-    { label: 'IV/HV 1.2–1.5 (rich)',        min: 1.2,  max: 1.5,    color: 'var(--wrn)',  trades: [] },
-    { label: 'IV/HV > 1.5  (expensive)',    min: 1.5,  max: Infinity, color: 'var(--ngo)', trades: [] },
-  ];
-  trades.forEach(function(t){
-    if (!(t.entryIv > 0) || !(t.entryHv20 > 0)) return;
-    var ratio = t.entryIv / t.entryHv20;
-    for (var i = 0; i < buckets.length; i++) {
-      if (ratio >= buckets[i].min && ratio < buckets[i].max) { buckets[i].trades.push(t); break; }
-    }
-  });
-  return buckets.map(function(b){
-    var n = b.trades.length;
-    var wins = b.trades.filter(function(t){ return t.pnl > 0; }).length;
-    var totalPnl = b.trades.reduce(function(s,t){ return s + t.pnl; }, 0);
-    var avgPnl = n ? totalPnl / n : 0;
-    return { label: b.label, color: b.color, n: n, wr: n ? wins / n : null, totalPnl: totalPnl, avgPnl: avgPnl };
-  });
-}
-
-function _fmtPct(v, digits){ return v == null ? '—' : (v * 100).toFixed(digits || 1) + '%'; }
-function _fmtUsd(v){
-  if (v == null) return '—';
-  var s = v >= 0 ? '$' : '-$';
-  return s + Math.abs(v).toFixed(2);
-}
-
-function renderPerformanceTab(){
-  var trades = _loadClosedTradesForPerf();
-  var nEl = eid('perf-n'); if (nEl) nEl.textContent = trades.length;
-
-  var k = _computeKelly(trades);
-  if (eid('perf-wr'))      eid('perf-wr').textContent      = _fmtPct(k.p);
-  if (eid('perf-avgwin'))  eid('perf-avgwin').textContent  = _fmtUsd(k.avgWin);
-  if (eid('perf-avgloss')) eid('perf-avgloss').textContent = _fmtUsd(-k.avgLoss);
-  if (eid('perf-exp'))     eid('perf-exp').textContent     = _fmtUsd(k.expectancy);
-  if (eid('perf-kelly'))   eid('perf-kelly').textContent   = (k.halfF == null ? '—' : (k.halfF * 100).toFixed(1) + '%');
-
-  // Per-trade cap: min(half-Kelly × bankroll, bankroll / max_positions)
-  var bankroll = parseFloat((eid('perf-bankroll') && eid('perf-bankroll').value) || '10000') || 10000;
-  var maxPos = parseInt((eid('perf-maxpos') && eid('perf-maxpos').value) || '5') || 5;
-  var kellyCap = (k.halfF != null ? k.halfF * bankroll : 0);
-  var diversifyCap = bankroll / maxPos;
-  var perTradeCap = Math.min(kellyCap || diversifyCap, diversifyCap);
-  if (eid('perf-pertrade')) {
-    eid('perf-pertrade').textContent = '$' + perTradeCap.toFixed(0)
-      + (kellyCap < diversifyCap && k.halfF != null ? '  (Kelly-bound)' : '  (diversification-bound)');
-  }
-
-  // Per-rule table
-  var ruleRows = _computePerRuleStats(trades);
-  var rWrap = eid('perf-rule-tbl-wrap');
-  if (rWrap) {
-    if (ruleRows.length === 0) {
-      rWrap.innerHTML = '<div style="font-family:var(--ff-mono);font-size:11px;color:var(--gry);">No closed trades have entry-rule snapshots yet. Open + close at least one position with this build deployed to start collecting data.</div>';
-    } else {
-      var html = '<div style="overflow-x:auto;">'
-        + '<table style="width:100%;border-collapse:collapse;font-family:var(--ff-mono);font-size:11px;">'
-        + '<thead><tr style="color:var(--gry);text-align:left;border-bottom:1px solid var(--bg3);">'
-        + '<th style="padding:6px 8px;">Rule</th>'
-        + '<th style="padding:6px 8px;text-align:right;">N pass / N fail</th>'
-        + '<th style="padding:6px 8px;text-align:right;">WR pass</th>'
-        + '<th style="padding:6px 8px;text-align:right;">WR fail</th>'
-        + '<th style="padding:6px 8px;text-align:right;">Avg P&amp;L pass</th>'
-        + '<th style="padding:6px 8px;text-align:right;">Avg P&amp;L fail</th>'
-        + '<th style="padding:6px 8px;text-align:right;">Edge Δ</th>'
-        + '</tr></thead><tbody>';
-      ruleRows.forEach(function(r){
-        var deltaCol = r.edgeDelta == null ? 'var(--gry)' : (r.edgeDelta > 0 ? 'var(--grn)' : 'var(--ngo)');
-        html += '<tr style="border-bottom:1px solid var(--bg2);">'
-          + '<td style="padding:6px 8px;color:var(--wht);">'+r.rule+'</td>'
-          + '<td style="padding:6px 8px;text-align:right;color:var(--gry);">'+r.nPass+' / '+r.nFail+'</td>'
-          + '<td style="padding:6px 8px;text-align:right;">'+_fmtPct(r.wrPass)+'</td>'
-          + '<td style="padding:6px 8px;text-align:right;color:var(--gry);">'+_fmtPct(r.wrFail)+'</td>'
-          + '<td style="padding:6px 8px;text-align:right;color:'+(r.avgPnlPass != null && r.avgPnlPass >= 0 ? 'var(--grn)' : 'var(--ngo)')+';">'+_fmtUsd(r.avgPnlPass)+'</td>'
-          + '<td style="padding:6px 8px;text-align:right;color:var(--gry);">'+_fmtUsd(r.avgPnlFail)+'</td>'
-          + '<td style="padding:6px 8px;text-align:right;color:'+deltaCol+';font-weight:700;">'+_fmtUsd(r.edgeDelta)+'</td>'
-          + '</tr>';
-      });
-      html += '</tbody></table></div>';
-      html += '<div style="font-family:var(--ff-mono);font-size:9px;color:var(--gry2);margin-top:8px;">Edge Δ = Avg P&amp;L when rule passed minus Avg P&amp;L when failed. Positive Δ = the rule is contributing edge; negative Δ = the rule is filtering out winners or letting losers in. Sample size matters — ignore rows with N < 10 either column.</div>';
-      rWrap.innerHTML = html;
-    }
-  }
-
-  // IV/HV buckets
-  var ivBuckets = _computeIvHvBuckets(trades);
-  var ivWrap = eid('perf-ivhv-tbl-wrap');
-  if (ivWrap) {
-    var totalIvN = ivBuckets.reduce(function(s,b){ return s + b.n; }, 0);
-    if (totalIvN === 0) {
-      ivWrap.innerHTML = '<div style="font-family:var(--ff-mono);font-size:11px;color:var(--gry);">No closed trades have entry IV + HV20 snapshots yet. Open + close a position with this build deployed (greeks=true added to fetchPositions today).</div>';
-    } else {
-      var ivHtml = '<div style="overflow-x:auto;">'
-        + '<table style="width:100%;border-collapse:collapse;font-family:var(--ff-mono);font-size:11px;">'
-        + '<thead><tr style="color:var(--gry);text-align:left;border-bottom:1px solid var(--bg3);">'
-        + '<th style="padding:6px 8px;">Bucket</th>'
-        + '<th style="padding:6px 8px;text-align:right;">N</th>'
-        + '<th style="padding:6px 8px;text-align:right;">Win Rate</th>'
-        + '<th style="padding:6px 8px;text-align:right;">Total P&amp;L</th>'
-        + '<th style="padding:6px 8px;text-align:right;">Avg P&amp;L</th>'
-        + '</tr></thead><tbody>';
-      ivBuckets.forEach(function(b){
-        ivHtml += '<tr style="border-bottom:1px solid var(--bg2);">'
-          + '<td style="padding:6px 8px;color:'+b.color+';font-weight:700;">'+b.label+'</td>'
-          + '<td style="padding:6px 8px;text-align:right;color:var(--wht);">'+b.n+'</td>'
-          + '<td style="padding:6px 8px;text-align:right;">'+_fmtPct(b.wr)+'</td>'
-          + '<td style="padding:6px 8px;text-align:right;color:'+(b.totalPnl >= 0 ? 'var(--grn)' : 'var(--ngo)')+';">'+_fmtUsd(b.totalPnl)+'</td>'
-          + '<td style="padding:6px 8px;text-align:right;color:'+(b.avgPnl >= 0 ? 'var(--grn)' : 'var(--ngo)')+';">'+_fmtUsd(b.avgPnl)+'</td>'
-          + '</tr>';
-      });
-      ivHtml += '</tbody></table></div>';
-      ivHtml += '<div style="font-family:var(--ff-mono);font-size:9px;color:var(--gry2);margin-top:8px;">Long-premium retail traders typically see flat-to-negative avg P&amp;L in the &gt;1.5x bucket — IV crush erodes wins on directionally-correct trades. If your &gt;1.5x bucket is positive AND statistically significant (N&gt;=20), you have genuine vol-timing alpha. Otherwise, avoid that bucket.</div>';
-      ivWrap.innerHTML = ivHtml;
-    }
-  }
-
-  // Coverage report
-  var cov = {
-    rules: trades.filter(function(t){ return Array.isArray(t.entryRules); }).length,
-    iv:    trades.filter(function(t){ return t.entryIv > 0; }).length,
-    hv:    trades.filter(function(t){ return t.entryHv20 > 0; }).length,
-    theme: trades.filter(function(t){ return typeof t.entryThemeScore === 'number'; }).length,
-    score: trades.filter(function(t){ return typeof t.entryScore === 'number'; }).length,
-  };
-  var cWrap = eid('perf-coverage-wrap');
-  if (cWrap) {
-    var t = trades.length || 1;
-    cWrap.innerHTML =
-      '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;font-family:var(--ff-mono);font-size:11px;">'
-      + '<div><span style="color:var(--gry);">Entry rules:</span> <b style="color:var(--wht);">'+cov.rules+'</b> / '+trades.length+' (' + ((cov.rules/t)*100).toFixed(0) + '%)</div>'
-      + '<div><span style="color:var(--gry);">Entry IV:</span> <b style="color:var(--wht);">'+cov.iv+'</b> / '+trades.length+' (' + ((cov.iv/t)*100).toFixed(0) + '%)</div>'
-      + '<div><span style="color:var(--gry);">Entry HV20:</span> <b style="color:var(--wht);">'+cov.hv+'</b> / '+trades.length+' (' + ((cov.hv/t)*100).toFixed(0) + '%)</div>'
-      + '<div><span style="color:var(--gry);">Entry theme:</span> <b style="color:var(--wht);">'+cov.theme+'</b> / '+trades.length+' (' + ((cov.theme/t)*100).toFixed(0) + '%)</div>'
-      + '<div><span style="color:var(--gry);">Entry score:</span> <b style="color:var(--wht);">'+cov.score+'</b> / '+trades.length+' (' + ((cov.score/t)*100).toFixed(0) + '%)</div>'
-      + '</div>'
-      + '<div style="font-family:var(--ff-mono);font-size:9px;color:var(--gry2);margin-top:8px;">Trades opened BEFORE the entry-snapshot feature shipped (today) won\'t have these fields. Coverage will grow over time as new positions cycle through.</div>';
-  }
-}
-
-// ===========================================================================
-//  PERFORMANCE TRACKING — entry snapshot + closed-trade enrichment
-// ===========================================================================
-// Goal: every closed trade carries enough state from entry to compute:
-//   - Per-rule win rate + avg P&L (which rules actually drive your edge?)
-//   - IV/HV bucket P&L (does buying expensive premium hurt realized P&L?)
-//   - Kelly-fraction position sizing recommendation
-//
-// Implementation: when a NEW position is first observed by fetchPositions,
-// snapshot rule passes/fails + entry IV + entry HV20 + entry theme score
-// into G.posOpenData[symbol]. Those fields survive any later page reload via
-// localStorage. When the closed-trade reconciliation in the Closed tab runs,
-// it copies these fields into each closed trade record so analytics can
-// retrospectively bucket trades.
-
-function _captureEntrySnapshot(pod, p, optionQuote){
-  if (!pod || !p) return;
-  // Rules from current scan results (live in-memory) — best signal source
-  var scanResult = null;
-  try {
-    if (G.results && G.results.length) {
-      for (var i = 0; i < G.results.length; i++) {
-        if (G.results[i].ticker === p.underlying) { scanResult = G.results[i]; break; }
-      }
-    }
-  } catch(e){}
-  // Fallback: slim cache from last scan (persists across page reloads)
-  if (!scanResult) {
-    try {
-      var slim = JSON.parse(localStorage.getItem('op_cache_scan_results') || '[]');
-      for (var j = 0; j < slim.length; j++) {
-        if (slim[j].ticker === p.underlying) { scanResult = slim[j]; break; }
-      }
-    } catch(e){}
-  }
-  if (scanResult) {
-    if (Array.isArray(scanResult.rules)) {
-      // Compact form: just name + pass + pts (drop the long val text to keep storage small)
-      pod.entryRules = scanResult.rules.map(function(rule){
-        return { n: rule.n, pass: !!rule.pass, pts: rule.pts || 0 };
-      });
-    }
-    if (typeof scanResult.score === 'number') pod.entryScore = scanResult.score;
-    if (typeof scanResult.isGo === 'boolean') pod.entryWasGo = scanResult.isGo;
-  }
-  // Entry IV from the option quote we just fetched (greeks=true on fetchPositions)
-  try {
-    if (optionQuote && optionQuote.greeks && typeof optionQuote.greeks.smv_vol === 'number') {
-      pod.entryIv = optionQuote.greeks.smv_vol;
-    }
-  } catch(e){}
-  // Entry HV20 from cached daily history (lazy — only if cached)
-  try {
-    var days = (typeof G_HIST_CACHE !== 'undefined') ? G_HIST_CACHE[p.underlying] : null;
-    if (days && typeof computeHV === 'function') {
-      var hv = computeHV(days, 20);
-      if (hv && hv > 0) pod.entryHv20 = hv;
-    }
-  } catch(e){}
-  // Theme score at entry
-  try {
-    var ti = (typeof getThemeStrength === 'function') ? getThemeStrength(p.underlying) : null;
-    if (ti) {
-      pod.entryThemeName = ti.theme;
-      pod.entryThemeScore = ti.dailyScore;
-    }
-  } catch(e){}
-  // ATR(14) at entry. Per-user spec: ATR-derived exit prices on the positions
-  // tab are SNAPSHOTS at the time the position was opened, not live. They
-  // only update when the position is rolled (which creates a new pod). Stored
-  // alongside underlyingAtOpen so the renderer can compute static exit
-  // levels from the entry-time UL price.
-  try {
-    var hist = (typeof loadHistCache === 'function') ? loadHistCache(p.underlying) : null;
-    if (hist && hist.length >= 15 && typeof computeATR === 'function'){
-      var atr = computeATR(hist, 14);
-      if (atr && atr > 0) pod.entryAtr14 = atr;
-    }
-  } catch(e){}
-  pod.entrySnapshotTs = Date.now();
 }
 
 // ===========================================================================
@@ -12199,7 +11806,11 @@ function fetchPositionsDirect(key,mode,host,acct){
             p.pnl=contractVal-p.cost;
             p.pnlPct=p.cost?((p.pnl/p.cost)*100):0;
           }
-          // Record first-seen data (open timestamp + underlying price at open)
+          // Record first-seen data (open timestamp + underlying price at open).
+          // ATR(14) snapshot drives the static ATR-anchored exit prices in
+          // renderPositionsTable — must be captured at open and never updated
+          // until the position is rolled. underlyingAtOpen is the matching
+          // anchor price.
           if(!G.posOpenData[p.symbol]){
             G.posOpenData[p.symbol]={
               openTs: now,
@@ -12207,21 +11818,30 @@ function fetchPositionsDirect(key,mode,host,acct){
               costBasis: p.cost||0,
               qty: Math.abs(p.qty)||0,
             };
-            // PERFORMANCE TRACKING — snapshot rules + IV/HV + theme score at
-            // first sighting. These survive into closed-trade records so we
-            // can compute per-rule win rate and IV/HV bucket P&L over time.
-            // All best-effort: missing data just leaves field undefined.
-            _captureEntrySnapshot(G.posOpenData[p.symbol], p, q);
+            try {
+              var hist0 = (typeof loadHistCache === 'function') ? loadHistCache(p.underlying) : null;
+              if (hist0 && hist0.length >= 15 && typeof computeATR === 'function'){
+                var atr0 = computeATR(hist0, 14);
+                if (atr0 && atr0 > 0) G.posOpenData[p.symbol].entryAtr14 = atr0;
+              }
+            } catch(e){}
             try{localStorage.setItem('rrjcar_pos_open',JSON.stringify(G.posOpenData));}catch(e){}
           } else {
             // Patch missing costBasis/qty on entries created before this field was added
             var pod = G.posOpenData[p.symbol];
             if(!pod.costBasis && p.cost){ pod.costBasis = p.cost||0; pod.qty = Math.abs(p.qty)||0; try{localStorage.setItem('rrjcar_pos_open',JSON.stringify(G.posOpenData));}catch(e){} }
-            // Backfill snapshot fields for positions opened before this feature shipped
-            // (only if missing — never overwrite captured entry state)
-            if (typeof pod.entryRules === 'undefined' && typeof _captureEntrySnapshot === 'function') {
-              _captureEntrySnapshot(pod, p, q);
-              try{localStorage.setItem('rrjcar_pos_open',JSON.stringify(G.posOpenData));}catch(e){}
+            // Backfill entryAtr14 for positions opened before ATR snapshot shipped
+            if (typeof pod.entryAtr14 === 'undefined') {
+              try {
+                var hist1 = (typeof loadHistCache === 'function') ? loadHistCache(p.underlying) : null;
+                if (hist1 && hist1.length >= 15 && typeof computeATR === 'function'){
+                  var atr1 = computeATR(hist1, 14);
+                  if (atr1 && atr1 > 0){
+                    pod.entryAtr14 = atr1;
+                    try{localStorage.setItem('rrjcar_pos_open',JSON.stringify(G.posOpenData));}catch(e){}
+                  }
+                }
+              } catch(e){}
             }
           }
           // Attach open data + current underlying to position object
@@ -14514,19 +14134,9 @@ function fetchClosedPositions(){
     // Recovery pass: if openPrice=0 (no matching BTO in order history),
     // reconstruct from posOpenData cost basis stored at position open time
     matched.forEach(function(t){
-      // Always copy entry-snapshot fields if posOpenData has them (independent
-      // of openPrice recovery). These fields drive per-rule + IV/HV analytics
-      // in the PERF tab, so we want them on EVERY closed trade record.
       var pod = G.posOpenData && G.posOpenData[t.symbol];
-      if (pod) {
-        if (typeof pod.entryRules !== 'undefined' && typeof t.entryRules === 'undefined')      t.entryRules      = pod.entryRules;
-        if (typeof pod.entryScore !== 'undefined' && typeof t.entryScore === 'undefined')      t.entryScore      = pod.entryScore;
-        if (typeof pod.entryWasGo !== 'undefined' && typeof t.entryWasGo === 'undefined')      t.entryWasGo      = pod.entryWasGo;
-        if (typeof pod.entryIv !== 'undefined' && typeof t.entryIv === 'undefined')            t.entryIv         = pod.entryIv;
-        if (typeof pod.entryHv20 !== 'undefined' && typeof t.entryHv20 === 'undefined')        t.entryHv20       = pod.entryHv20;
-        if (typeof pod.entryThemeName !== 'undefined' && typeof t.entryThemeName === 'undefined')   t.entryThemeName  = pod.entryThemeName;
-        if (typeof pod.entryThemeScore !== 'undefined' && typeof t.entryThemeScore === 'undefined') t.entryThemeScore = pod.entryThemeScore;
-        if (typeof pod.underlyingAtOpen !== 'undefined' && typeof t.underlyingAtOpen === 'undefined') t.underlyingAtOpen = pod.underlyingAtOpen;
+      if (pod && typeof pod.underlyingAtOpen !== 'undefined' && typeof t.underlyingAtOpen === 'undefined') {
+        t.underlyingAtOpen = pod.underlyingAtOpen;
       }
       if(t.openPrice > 0) return;
       // Recover openPrice from posOpenData cost basis (existing logic)
@@ -14565,28 +14175,18 @@ function fetchClosedPositions(){
     var savedTrades = [];
     try{ savedTrades = JSON.parse(localStorage.getItem('rrjcar_closed_trades')||'[]'); }catch(e){}
     // HC-H: dedup MERGES saved + fresh — fresh API data wins on overlap, but
-    // saved entry-snapshot fields (entryRules, entryIv, entryHv20, entryThemeName,
-    // entryThemeScore, entryScore, entryWasGo, underlyingAtOpen) are preserved
-    // even if the fresh `matched` trade lacks them. Without this merge, a
-    // re-fetch after the position's posOpenData was pruned would OVERWRITE
-    // the previously enriched trade record with one missing all entry data,
-    // wiping the analytics signal for that trade permanently.
+    // underlyingAtOpen is write-once-keep-forever so a re-fetch after the
+    // position's posOpenData was pruned doesn't wipe it from the trade record.
     var tradeMap = {};
     savedTrades.forEach(function(t){ if(t.closeOrderId) tradeMap[t.closeOrderId] = t; });
     matched.forEach(function(t){
       if(!t.closeOrderId) return;
       var prior = tradeMap[t.closeOrderId];
       if (prior) {
-        // Merge: start with prior, overlay fresh — fresh wins on every field
-        // EXCEPT entry-snapshot fields, which are write-once-keep-forever.
         var merged = Object.assign({}, prior, t);
-        // Preserve prior entry fields when fresh lacks them
-        ['entryRules','entryScore','entryWasGo','entryIv','entryHv20',
-         'entryThemeName','entryThemeScore','underlyingAtOpen'].forEach(function(k){
-          if (typeof t[k] === 'undefined' && typeof prior[k] !== 'undefined') {
-            merged[k] = prior[k];
-          }
-        });
+        if (typeof t.underlyingAtOpen === 'undefined' && typeof prior.underlyingAtOpen !== 'undefined') {
+          merged.underlyingAtOpen = prior.underlyingAtOpen;
+        }
         tradeMap[t.closeOrderId] = merged;
       } else {
         tradeMap[t.closeOrderId] = t;
