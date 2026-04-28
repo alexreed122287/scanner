@@ -5538,14 +5538,17 @@ function submitLimitAtPrice(creds,acct,occSym,sym,side,qty,otype,price){
     }
     var fullMsg = msgs.join(' | ');
     // Auto-recover: if the worker rejected on the trade-token gate AND we
-    // haven't already retried, prompt the user once and replay the request.
-    // Catches the case where pre-flight didn't fire (no proxy detected,
-    // creds.mode mismatch, etc.) but the worker still demands the header.
+    // haven't already retried, wipe whatever stale token is in memory /
+    // localStorage and prompt the user for a fresh one. Without the wipe,
+    // _ensureTradeToken short-circuits on the existing (rejected) value
+    // and we'd loop sending the same bad token forever.
     var isTradeTokenReject = resp.status === 403
       && /trade[\s-]?token/i.test(fullMsg)
       && typeof window._ensureTradeToken === 'function';
     if(isTradeTokenReject && !_retried){
       _retried = true;
+      try { if(typeof _clearTradeToken === 'function') _clearTradeToken(); else { window._tradeToken = null; } }
+      catch(_) { window._tradeToken = null; }
       return window._ensureTradeToken().then(function(tok){
         if(!tok) throw new Error('Trade token required — click ENABLE TRADING in the scanner header.');
         return _placeOrder();
