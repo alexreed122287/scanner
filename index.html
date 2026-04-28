@@ -2756,9 +2756,12 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
             // X-Trade-Token (memory-only, re-prompted per session). Detect
             // method + path here so monkey-patch handles all order POST/
             // DELETE sites uniformly without each call site having to know.
+            // Note: gates ALL proxy writes regardless of mode. The worker's
+            // WRITE_AUTH_TOKEN secret is mode-agnostic, so a sandbox-mode
+            // order POST through the proxy was previously slipping through
+            // without the header and 403-ing on every roll/step-fill attempt.
             var method = (init && init.method || 'GET').toUpperCase();
-            var isOrderWrite = isLive
-              && (method === 'POST' || method === 'PUT' || method === 'DELETE')
+            var isOrderWrite = (method === 'POST' || method === 'PUT' || method === 'DELETE')
               && /\/v1\/accounts\/[^/]+\/orders/.test(u.pathname);
             var tradeToken = window._tradeToken || '';
             if (init.headers) {
