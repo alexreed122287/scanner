@@ -4605,6 +4605,7 @@ function selectAllSectors(selectAll){
   var boxes = document.querySelectorAll('.sc-sect-cb');
   boxes.forEach(function(cb){ cb.checked = selectAll; });
   updateSectorLabel();
+  if(G.results && G.results.length) applyFilters();
 }
 function onSectorCheckboxChange(){
   var boxes = document.querySelectorAll('.sc-sect-cb');
@@ -4622,6 +4623,7 @@ function onSectorCheckboxChange(){
   }
   saveSelectedSectors();
   updateSectorLabel();
+  if(G.results && G.results.length) applyFilters();
 }
 function filterSectorOptions(){
   var q = (eid('sc-sect-search').value||'').toLowerCase();
@@ -9320,6 +9322,23 @@ async function fetchDynamicUniverse(key, mode){
   var minAvgVol  = parseFloat(eid('sc-minavgvol')  ? eid('sc-minavgvol').value  : 50000) || 50000;
   var volRatioPct= parseFloat(eid('sc-volratio')   ? eid('sc-volratio').value   : 0)  || 0;
   var seen = {};
+  // Optional pre-scan theme filter — when a theme is selected in the SCAN
+  // toolbar, restrict the universe to that theme's curated members so we
+  // don't burn API calls scoring tickers that will be filtered out anyway.
+  // Empty/missing overlay falls through to "no theme filter".
+  var preTheme = (eid('sc-theme') && eid('sc-theme').value) || '';
+  var themeMembers = null;
+  if(preTheme){
+    try {
+      var t2t = (G_THEME_OVERLAY && G_THEME_OVERLAY.ticker2theme) || {};
+      var members = {};
+      Object.keys(t2t).forEach(function(tk){
+        var ti = t2t[tk];
+        if(ti && ti.theme === preTheme) members[tk] = true;
+      });
+      if(Object.keys(members).length > 0) themeMembers = members;
+    } catch(e){}
+  }
   var allTickers = UNIVERSE_FULL.filter(function(u){
     if(seen[u.t]) return false;
     seen[u.t] = true;
@@ -9328,12 +9347,14 @@ async function fetchDynamicUniverse(key, mode){
     if(!sectorAllowed(u.s)) return false;
     // Apply hard sector exclusion (e.g. health sectors except allowlist)
     if(!tickerPassesSectorExclusion(u.t, u.s)) return false;
+    // Theme pre-filter: if the user picked a theme, only scan its members
+    if(themeMembers && !themeMembers[u.t]) return false;
     return true;
   });
-  // Always include SPY as a market reference, regardless of sector filter
+  // Always include SPY as a market reference, regardless of sector/theme filter
   if(!seen['SPY']) allTickers.push({t:'SPY', s:'ETF'});
   if(allTickers.length === 0){
-    console.warn('[scan] No tickers match current sector selection');
+    console.warn('[scan] No tickers match current sector/theme selection');
     return [];
   }
   var BATCH_SIZE = 400;
@@ -10315,6 +10336,7 @@ function resetScanSettings(){
 function clearFilters(){
   // Reset dropdowns
   if(eid('sc-sect'))        eid('sc-sect').value = '';
+  if(eid('sc-theme'))       eid('sc-theme').value = '';   // 'All themes'
   if(eid('sc-sig'))         eid('sc-sig').value  = '';   // 'All' — shows both GO and NO-GO
   if(eid('sc-minscore'))    eid('sc-minscore').value = '89';  // permissive default; matches strategy floors
   if(eid('sc-maxoptprice')) eid('sc-maxoptprice').value = '';
@@ -10323,9 +10345,10 @@ function clearFilters(){
   saveSelectedSectors();
   populateSectorCheckboxes();
   updateSectorLabel();
-  // Uncheck all indicator filters
+  // Uncheck every MUST PASS / indicator filter checkbox in the toolbar
   ['filt-analyst','filt-gex','filt-proven',
    'filt-52hi','filt-rs','filt-macd','filt-tf','filt-ema200','filt-vol',
+   'filt-no-earn','filt-strong-sector',
    'filt-obclear','filt-obsupport','filt-inst-obclear','filt-inst-obsupport'].forEach(function(id){
     var el = eid(id); if(el) el.checked = false;
   });
@@ -10793,12 +10816,44 @@ function renderScan(){
   var wrap=eid('sc-tbl-wrap');
   if(!G.filtered.length){
     // If we have scan results but filters reduced to zero, message the user
-    // about that explicitly so they don't think the scan failed. If we genuinely
-    // have no scan results, show the run-a-scan prompt instead.
+    // about that explicitly and list which filters are doing the excluding so
+    // they know what to relax.
     var hasResults = G.results && G.results.length > 0;
-    var msg = hasResults
-      ? 'No tickers match the active filters \u2014 '+G.results.length+' scanned, 0 visible. <br><span style="font-size:11px;color:var(--gry2);">Uncheck a filter checkbox or lower Min Score to see matches.</span>'
-      : 'No results \u2014 run a scan first';
+    var msg;
+    if(hasResults){
+      var active = [];
+      var theme = (eid('sc-theme') && eid('sc-theme').value) || '';
+      if(theme) active.push('Theme: '+theme);
+      if(G.selectedSectors && G.selectedSectors.has('__NONE__')){
+        active.push('Sectors: NONE');
+      } else if(G.selectedSectors && G.selectedSectors.size > 0){
+        var n = G.selectedSectors.size;
+        active.push('Sectors: '+n+' selected');
+      }
+      var sig = (eid('sc-sig') && eid('sc-sig').value) || '';
+      if(sig) active.push('Signal: '+sig);
+      var minsc = +(eid('sc-minscore') && eid('sc-minscore').value) || 0;
+      if(minsc > 0) active.push('Min Score: '+minsc);
+      var maxOpt = parseFloat(eid('sc-maxoptprice') && eid('sc-maxoptprice').value) || 0;
+      if(maxOpt > 0) active.push('Max Opt $'+maxOpt);
+      var cbMap = {
+        'filt-analyst':'Analyst Revisions','filt-gex':'GEX Call Heavy','filt-proven':'PROVEN',
+        'filt-52hi':'52Wk Hi <15%','filt-rs':'RS > SPY','filt-macd':'MACD +',
+        'filt-tf':'TF Aligned','filt-ema200':'> EMA200','filt-vol':'Vol > Avg',
+        'filt-no-earn':'No Earnings','filt-strong-sector':'Strong Sector'
+      };
+      Object.keys(cbMap).forEach(function(id){ if(getIndFilter(id)) active.push(cbMap[id]); });
+      var summary = active.length
+        ? '<br><span style="font-size:11px;color:var(--amb);">Active filters: '+active.join(' \u00b7 ')+'</span>'
+        : '';
+      msg = 'No tickers match the active filters \u2014 '+G.results.length+' scanned, 0 visible.'
+          + summary
+          + '<br><span style="font-size:11px;color:var(--gry2);margin-top:6px;display:inline-block;">'
+          + '<button class="btn" style="font-size:10px;padding:3px 8px;" onclick="clearFilters()">Clear all filters</button>'
+          + '</span>';
+    } else {
+      msg = 'No results \u2014 run a scan first';
+    }
     wrap.innerHTML='<div class="empty-det" style="min-height:400px;"><img src="assets/panda-transparent.png?v=3" alt="" class="empty-det-panda"><p>'+msg+'</p></div>';
     return;
   }
@@ -12350,12 +12405,12 @@ function renderPositionsTable(pos,srcLabel){
 // localStorage so DAY P&L reflects today's actual change instead of the
 // 30%-of-totalPnl placeholder it was before.
 // B-4: reset Total P&L to $0. Clears the local closed-trades history that the
-// performance analytics + Total P&L sums consume, AND snapshots the current
-// broker realized P&L (close_pl) as a baseline so the calculation below
-// subtracts it out, displaying $0 from this point forward. Open-position
-// unrealized P&L is intentionally NOT affected — those reflect live positions.
+// Total P&L sum consumes, AND snapshots the current broker realized P&L
+// (close_pl) as a baseline so the calculation below subtracts it out,
+// displaying $0 from this point forward. Open-position unrealized P&L is
+// intentionally NOT affected — those reflect live positions.
 function resetTotalPnl(){
-  if (!confirm('Reset Total P&L counter to $0?\n\nThis clears the local closed-trades history (used for the Performance tab) and snapshots the current broker realized P&L as the new baseline. Open-position unrealized P&L is not affected.')) return;
+  if (!confirm('Reset Total P&L counter to $0?\n\nThis clears the local closed-trades history and snapshots the current broker realized P&L as the new baseline. Open-position unrealized P&L is not affected.')) return;
   try { localStorage.removeItem('rrjcar_closed_trades'); } catch(_) {}
   try {
     if (typeof G_closed !== 'undefined' && G_closed.trades) G_closed.trades = [];
