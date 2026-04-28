@@ -3406,23 +3406,39 @@ window.clearApiLog = function(){
 // itself is encrypted, so even a worker compromise leaks ciphertext only.
 
 // Whitelist: which localStorage keys actually sync. Trade token + closed-trade
-// history + per-device caches are intentionally excluded.
+// history + per-device caches are intentionally excluded. Direct-mode Tradier
+// keys (rrjcar_tradier / rrjcar_tradier_live) ARE included so a setup using
+// direct keys on one device can be replicated to another — the encrypted
+// blob's security model isn't worse than the localStorage exposure that
+// already exists on each device individually.
 var SYNC_KEYS = [
+  // Tradier connection
   'rrjcar_tradier_proxy',
   'rrjcar_tradier_proxy_live_token',
-  'rrjcar_fmp',
+  'rrjcar_tradier',                 // direct-mode sandbox key (when not using proxy)
+  'rrjcar_tradier_live',            // direct-mode live key (when not using proxy)
+  // Account + mode
   'rrjcar_mode',
   'rrjcar_acct',
   'rrjcar_acct_live',
+  // Other API keys
+  'rrjcar_fmp',
+  // Scanner config
   'rrjcar_scan_settings_v2',
-  'rrjcar_smart_exits_v1',
-  'rrjcar_gex_schedule_v1',
-  'rrjcar_notif_settings_v1',
-  'rrjcar_app_settings_v1',
   'rrjcar_sel_sectors',
   'rrjcar_wl',
+  // Engines
+  'rrjcar_smart_exits_v1',
+  'rrjcar_gex_schedule_v1',
+  'rrjcar_sf',                      // step-fill order config
+  'rrjcar_ts_global',               // trailing-stop global defaults
+  // Notifications + app
+  'rrjcar_notif_settings_v1',
+  'rrjcar_app_settings_v1',
   'rrjcar_auto_scan',
-  'rrjcar_theme'
+  'rrjcar_theme',
+  // P&L baseline (so a Reset Total P&L on one device propagates)
+  'rrjcar_pnl_baseline'
 ];
 
 function _syncStatus(msg, color){
