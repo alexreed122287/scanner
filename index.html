@@ -5475,7 +5475,23 @@ function submitLimitAtPrice(creds,acct,occSym,sym,side,qty,otype,price){
       +'&duration=day'
       +'&price='+price.toFixed(2);
   }
-  return fetch(creds.host+'/v1/accounts/'+acct+'/orders',{
+  // Pre-flight: if running through the proxy in live mode and the trade
+  // token isn't armed, the worker will 403 us. Prompt for it now (modal)
+  // so an auto-fill / step-fill / smart-exit path doesn't blow up on a
+  // stale-token error after kicking off N retries. Single-await is
+  // cheap when the token is already armed (resolves synchronously).
+  var hasProxy = false;
+  try { hasProxy = !!localStorage.getItem('rrjcar_tradier_proxy'); } catch(_) {}
+  var needsTradeToken = hasProxy
+    && creds && creds.mode === 'live'
+    && !window._tradeToken
+    && typeof window._ensureTradeToken === 'function';
+  var preFlight = needsTradeToken
+    ? window._ensureTradeToken().then(function(tok){
+        if(!tok) throw new Error('Trade token required — click ENABLE TRADING in the scanner header to arm the session token before placing orders.');
+      })
+    : Promise.resolve();
+  return preFlight.then(function(){ return fetch(creds.host+'/v1/accounts/'+acct+'/orders',{
     method:'POST',
     headers:{Authorization:'Bearer '+creds.key,Accept:'application/json','Content-Type':'application/x-www-form-urlencoded'},
     body:body
@@ -5514,7 +5530,7 @@ function submitLimitAtPrice(creds,acct,occSym,sym,side,qty,otype,price){
       msgs.unshift('HTTP '+resp.status);
     }
     throw new Error(msgs.join(' | '));
-  });
+  }); });
 }
 
 // Polls order status
