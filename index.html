@@ -11894,9 +11894,21 @@ function fetchPositionsDirect(key,mode,host,acct){
           // renderPositionsTable — must be captured at open and never updated
           // until the position is rolled. underlyingAtOpen is the matching
           // anchor price.
+          //
+          // openTs preference: Tradier's authoritative `date_acquired` first
+          // (so positions opened before this app saw them aren't mis-stamped
+          // as "opened today" — was the cause of stale rows showing up with
+          // the TODAY highlight on the Positions tab). Fall back to `now`
+          // only when Tradier didn't return a date_acquired.
           if(!G.posOpenData[p.symbol]){
+            var firstSeenTs = (function(){
+              if(!p.dateAcquired) return now;
+              var d = new Date(p.dateAcquired);
+              if(isNaN(d.getTime())) return now;
+              return d.toISOString();
+            })();
             G.posOpenData[p.symbol]={
-              openTs: now,
+              openTs: firstSeenTs,
               underlyingAtOpen: uQuotes[p.underlying]||0,
               costBasis: p.cost||0,
               qty: Math.abs(p.qty)||0,
@@ -11913,6 +11925,21 @@ function fetchPositionsDirect(key,mode,host,acct){
             // Patch missing costBasis/qty on entries created before this field was added
             var pod = G.posOpenData[p.symbol];
             if(!pod.costBasis && p.cost){ pod.costBasis = p.cost||0; pod.qty = Math.abs(p.qty)||0; try{localStorage.setItem('rrjcar_pos_open',JSON.stringify(G.posOpenData));}catch(e){} }
+            // Reconcile mis-stamped openTs: when a prior fetch defaulted
+            // openTs to "now" because date_acquired wasn't carried through,
+            // any existing position got a TODAY highlight on the Positions
+            // tab. If Tradier now reports an older date_acquired, trust it.
+            if(p.dateAcquired && pod.openTs){
+              var trueOpen = new Date(p.dateAcquired);
+              var stampedOpen = new Date(pod.openTs);
+              if(!isNaN(trueOpen.getTime()) && !isNaN(stampedOpen.getTime())){
+                // Difference > 12h → definitely the stale-stamp bug, fix it
+                if(Math.abs(trueOpen.getTime() - stampedOpen.getTime()) > 12*60*60*1000){
+                  pod.openTs = trueOpen.toISOString();
+                  try{localStorage.setItem('rrjcar_pos_open',JSON.stringify(G.posOpenData));}catch(e){}
+                }
+              }
+            }
             // Backfill entryAtr14 for positions opened before ATR snapshot shipped
             if (typeof pod.entryAtr14 === 'undefined') {
               try {
