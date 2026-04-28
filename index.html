@@ -275,6 +275,13 @@ td{border-bottom:var(--bdr);color:var(--wht);font-size:11px;padding:5px 10px;whi
    so the row doesn't visibly grow / reflow under the cursor. */
 tr:hover td{cursor:pointer;background:var(--amb3);}
 tr.sel-row td{background:var(--blu3);}
+/* Positions opened today (NY calendar date) — bright amber tint + left
+   accent stripe so the user can spot fresh opens/rolls at a glance and
+   avoid accidentally triggering a PDT day-trade flag. */
+tr.pos-row-today td{background:rgba(255,193,7,0.10);border-bottom-color:rgba(255,193,7,0.35);}
+tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
+.today-pill{display:inline-block;background:var(--ambb);color:var(--bg0);font-size:9px;font-weight:800;letter-spacing:1px;padding:1px 6px;border-radius:2px;margin-left:6px;text-shadow:none;animation:today-pulse 2.4s ease-in-out infinite;}
+@keyframes today-pulse{0%,100%{box-shadow:0 0 0 rgba(255,193,7,0);}50%{box-shadow:0 0 12px rgba(255,193,7,0.55);}}
 .badge{border-radius:2px;font-size:10px;font-weight:700;padding:1px 6px;display:inline-block;}
 .badge.go{background:rgba(0,212,255,.12);color:var(--amb);box-shadow:0 0 10px rgba(0,212,255,.2);}
 .badge.nogo{background:rgba(255,0,230,.12);color:var(--ngo);box-shadow:0 0 10px rgba(255,0,230,.15);}
@@ -1421,6 +1428,7 @@ tr.sel-row td{background:var(--blu3);}
     <div class="stat-box"><div class="stat-label">TOTAL P&amp;L <span onclick="resetTotalPnl()" title="Reset Total P&amp;L counter to $0. Clears the local closed-trades history and snapshots the current broker realized P&amp;L as the new baseline. Open-position unrealized P&amp;L is not affected." style="cursor:pointer;font-size:9px;color:var(--gry);margin-left:6px;text-decoration:underline;letter-spacing:.5px;">RESET</span></div><div class="stat-val" id="pos-pnl" title="Lifetime: realized (closed trades) + unrealized (open positions)">$0.00</div></div>
     <div class="stat-box"><div class="stat-label">DAY P&amp;L</div><div class="stat-val" id="pos-daypnl" title="Today's change in total account equity">$0.00</div></div>
     <div class="stat-box"><div class="stat-label">OPEN POSITIONS</div><div class="stat-val amb" id="pos-count">0</div></div>
+    <div class="stat-box" title="Positions opened or rolled today (NY calendar date). Closing one of these intraday counts toward your PDT day-trade tally — be careful before clicking CLOSE."><div class="stat-label">OPENED TODAY</div><div class="stat-val" id="pos-today-count" style="color:var(--ambb);">0</div></div>
     <div class="stat-box"><div class="stat-label">CASH</div><div class="stat-val amb" id="pos-cash" title="Total cash available (from Tradier balances)">--</div></div>
     <div class="stat-box"><div class="stat-label">ACCOUNT VALUE</div><div class="stat-val amb" id="pos-acctval" title="Total equity = positions market value + cash">--</div></div>
   </div>
@@ -12009,19 +12017,40 @@ function toggleTsRow(sym){
   if(!isOpen) cfgRow.classList.add('open');
 }
 
+// True if `ts` falls on the current calendar date in America/New_York. Used
+// to flag positions opened or rolled during the current trading session so
+// the user can avoid accidentally turning them into PDT day-trades by
+// closing them the same day. Resets at midnight ET.
+function _isOpenedTodayET(ts){
+  if(!ts) return false;
+  var d = new Date(ts);
+  if(isNaN(d.getTime())) return false;
+  try {
+    var fmt = { timeZone:'America/New_York', year:'numeric', month:'2-digit', day:'2-digit' };
+    return d.toLocaleDateString('en-US', fmt) === new Date().toLocaleDateString('en-US', fmt);
+  } catch(_) {
+    // Fallback for environments without IANA tz support
+    var d2 = new Date(ts), n2 = new Date();
+    return d2.getFullYear()===n2.getFullYear() && d2.getMonth()===n2.getMonth() && d2.getDate()===n2.getDate();
+  }
+}
+
 // Format a position's open timestamp as two lines: date on top, time on bottom.
 // Prefers the local capture (p.openTs, full ISO with time) over Tradier's
 // p.dateAcquired (often just the date). Returns HTML string for a <td>.
-function formatOpenedDateTime(p){
+// When `openedToday` is true, appends a TODAY pill so the row reads as
+// "do not close this intraday — PDT risk" at a glance.
+function formatOpenedDateTime(p, openedToday){
   // openTs is the local first-seen timestamp (ISO 8601 w/ time).
   // dateAcquired is from Tradier; format varies — sometimes date-only, sometimes full ISO.
   var src = p.openTs || p.dateAcquired || null;
+  var pill = openedToday ? '<span class="today-pill" title="Opened or rolled today — closing intraday counts as a PDT day-trade">TODAY</span>' : '';
   if(!src){
-    return '<td style="white-space:nowrap;color:var(--gry2);font-size:10px;">--</td>';
+    return '<td style="white-space:nowrap;color:var(--gry2);font-size:10px;">--'+pill+'</td>';
   }
   var d = new Date(src);
   if(isNaN(d.getTime())){
-    return '<td style="white-space:nowrap;color:var(--gry2);font-size:10px;">'+String(src).slice(0,10)+'</td>';
+    return '<td style="white-space:nowrap;color:var(--gry2);font-size:10px;">'+String(src).slice(0,10)+pill+'</td>';
   }
   var mm = String(d.getMonth()+1).padStart(2,'0');
   var dd = String(d.getDate()).padStart(2,'0');
@@ -12039,7 +12068,7 @@ function formatOpenedDateTime(p){
     ? '<div style="color:var(--gry);font-size:10px;line-height:1.1;">'+timeStr+'</div>'
     : '';
   return '<td style="white-space:nowrap;padding-top:6px;padding-bottom:6px;">'
-    + '<div style="color:var(--wht);font-size:11px;font-weight:600;line-height:1.1;">'+dateStr+'</div>'
+    + '<div style="color:var(--wht);font-size:11px;font-weight:600;line-height:1.1;">'+dateStr+pill+'</div>'
     + timeHtml
     + '</td>';
 }
@@ -12124,6 +12153,7 @@ function renderPositionsTable(pos,srcLabel){
     +'</tr></thead><tbody>';
   colCount = 18; // total columns (used by inline config row)
 
+  var todayCount = 0;
   pos.forEach(function(p){
     var pnlCls  = p.pnl>=0?'pnl-pos':'pnl-neg';
     var statusBadge = p.pnl>=0?'<span class="badge go">PROFIT</span>':'<span class="badge nogo">LOSS</span>';
@@ -12311,9 +12341,13 @@ function renderPositionsTable(pos,srcLabel){
       +   '<button class="btn ts-enable-btn" style="font-size:10px;padding:3px 8px;'+(cfgEnabled?'border-color:var(--grn);color:var(--grn);':'')+'" onclick="toggleTsRow(\''+sym+'\')">EDIT ▾</button>'
       + '</div></td>';
 
-    html += '<tr data-tk="'+tk+'" data-tp="'+tp+'" data-st="'+st+'" data-ex="'+ex+'" data-qty="'+qty+'" data-sym="'+sym+'">'
+    var openedToday = _isOpenedTodayET(p.openTs);
+    if(openedToday) todayCount++;
+    html += '<tr data-tk="'+tk+'" data-tp="'+tp+'" data-st="'+st+'" data-ex="'+ex+'" data-qty="'+qty+'" data-sym="'+sym+'"'
+      + (openedToday ? ' class="pos-row-today" title="Opened or rolled today — closing intraday triggers a PDT day-trade"' : '')
+      + '>'
       +'<td><b>'+tk+'</b>'+(isStock?' <span style="color:var(--gry);font-size:10px;">EQ</span>':'')+'</td>'  // TICKER
-      +formatOpenedDateTime(p)                                                                                // OPENED
+      +formatOpenedDateTime(p, openedToday)                                                                  // OPENED
       +trailCell                                                                                              // TRAIL (badge + CFG button)
       +'<td style="white-space:nowrap;"><button class="cbtn" onclick="doClose(this)">CLOSE</button></td>'    // CLOSE
       +rollCell                                                                                               // ROLL
@@ -12383,6 +12417,26 @@ function renderPositionsTable(pos,srcLabel){
   // a true cumulative TOTAL P&L (no longer resets when a trade closes).
   G.openUnrealizedPnl = totalPnl;
   eid('pos-count').textContent = pos.length;
+  var todayEl = eid('pos-today-count');
+  if(todayEl){
+    todayEl.textContent = todayCount;
+    // Bright amber when there's anything to watch out for; muted gray at zero.
+    todayEl.style.color = todayCount > 0 ? 'var(--ambb)' : 'var(--gry)';
+  }
+  // Re-render once at the next NY-midnight rollover so the TODAY highlight
+  // clears even if the user leaves the tab open overnight. Cancels any prior
+  // scheduled call so successive renders don't pile up timers.
+  if(G._todayRolloverTid) clearTimeout(G._todayRolloverTid);
+  try {
+    var nyNow = new Date(new Date().toLocaleString('en-US',{timeZone:'America/New_York'}));
+    var nyNext = new Date(nyNow); nyNext.setHours(24,0,30,0); // 30s past midnight ET, slack
+    var msUntil = nyNext.getTime() - nyNow.getTime();
+    if(msUntil > 0 && msUntil < 25*60*60*1000){
+      G._todayRolloverTid = setTimeout(function(){
+        if(G.positions && G.positions.length) renderPositionsTable(G.positions, eid('pos-src').textContent);
+      }, msUntil);
+    }
+  } catch(_){}
   if(typeof updatePosStats === 'function') updatePosStats();
 }
 
