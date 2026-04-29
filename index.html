@@ -1473,6 +1473,7 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
         <span style="color:var(--amb);font-size:10px;font-weight:700;letter-spacing:.5px;">&#9632; LIVE QUOTE</span>
         <button class="btn blu" style="font-size:10px;padding:2px 8px;" onclick="fetchLiveQuote()">&#8635; REFRESH</button>
         <span class="qp-ts" id="qp-ts"></span>
+        <span id="qp-stream-status" title="WebSocket stream state — green = receiving live ticks, blank = HTTP-only" style="font-size:10px;font-weight:700;letter-spacing:.5px;margin-left:8px;"></span>
       </div>
       <div class="quote-panel" id="quote-panel">
         <div class="qp-cell">
@@ -5174,6 +5175,8 @@ function resetQuotePanel(){
   eid('qp-ts').textContent='';
   eid('lmt-hint').textContent='';
   G.liveQuote=null;
+  // Drop any active streaming subscription when the panel is cleared
+  if (typeof _wsDetachFromTicket === 'function') _wsDetachFromTicket();
 }
 
 function showQuoteLoading(){
@@ -5190,6 +5193,217 @@ function onSymbolChange(){
     if(sym.length>=1)fetchLiveQuote();
     else resetQuotePanel();
   },600);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  TRADIER WEBSOCKET STREAMING — sub-second quotes for the active order ticket.
+//  Replaces the 5-min HTTP poll with a push subscription. Architecture:
+//    1. POST /v1/markets/events/session  → returns sessionid (5-min validity)
+//    2. WSS wss://ws.tradier.com/v1/markets/events → subscribe with sessionid
+//    3. Push events: quote / summary / trade — dispatched per-symbol to
+//       registered listeners. Throttled to 4 Hz on the UI side.
+//  Reconnect-on-close with exponential backoff. Auto-close after 30s idle.
+//  Live mode only (sandbox doesn't support streaming) — falls through to
+//  existing HTTP poll in sandbox.
+// ═══════════════════════════════════════════════════════════════════════════
+
+window._ws = window._ws || {
+  socket: null,
+  sessionid: null,
+  sessionExpires: 0,        // ms epoch
+  subscribed: new Set(),    // symbols included in last subscribe message
+  pending: new Set(),       // symbols added before socket opened
+  listeners: {},            // sym -> [callback(msg)]
+  status: 'idle',           // 'idle' | 'connecting' | 'open' | 'closed'
+  reconnectAttempts: 0,
+  reconnectTimer: null,
+  closeTimer: null,
+  lastMsgTs: 0,
+};
+
+// Fetches a single-use streaming session token from Tradier. Cached for ~4
+// minutes (Tradier expires at 5; refresh early). Throws on failure so the
+// caller can retry with backoff.
+async function _wsGetSession() {
+  var now = Date.now();
+  if (window._ws.sessionid && window._ws.sessionExpires > now + 5000) {
+    return window._ws.sessionid;
+  }
+  var creds = getTradierCreds();
+  if (!creds || !creds.key) throw new Error('No Tradier creds for WS session');
+  var resp = await fetch(creds.host + '/v1/markets/events/session', {
+    method: 'POST',
+    headers: { Authorization: 'Bearer ' + creds.key, Accept: 'application/json' },
+  });
+  if (!resp.ok) {
+    var t = ''; try { t = await resp.text(); } catch (_) {}
+    throw new Error('Session token HTTP ' + resp.status + ' — ' + (t || '').slice(0, 200));
+  }
+  var d = await resp.json();
+  var sid = d && d.stream && d.stream.sessionid;
+  if (!sid) throw new Error('Session response missing sessionid');
+  window._ws.sessionid = sid;
+  window._ws.sessionExpires = now + 4 * 60 * 1000;
+  return sid;
+}
+
+function _wsBuildSubMsg() {
+  return JSON.stringify({
+    symbols: Array.from(window._ws.subscribed),
+    sessionid: window._ws.sessionid,
+    linebreak: true,
+  });
+}
+
+function _wsConnect() {
+  if (window._ws.status === 'connecting' || window._ws.status === 'open') return;
+  // Sandbox doesn't support streaming — bail. Subscribers will still fire on
+  // listener-add but no socket will open; HTTP fallback continues to work.
+  var mode = (localStorage.getItem('rrjcar_mode') || 'sandbox').toLowerCase();
+  if (mode !== 'live') return;
+  window._ws.status = 'connecting';
+  _wsGetSession().then(function (sid) {
+    var sock = new WebSocket('wss://ws.tradier.com/v1/markets/events');
+    window._ws.socket = sock;
+    sock.addEventListener('open', function () {
+      window._ws.status = 'open';
+      window._ws.reconnectAttempts = 0;
+      window._ws.pending.forEach(function (s) { window._ws.subscribed.add(s); });
+      window._ws.pending.clear();
+      if (window._ws.subscribed.size > 0) {
+        try { sock.send(_wsBuildSubMsg()); } catch (e) {}
+      }
+    });
+    sock.addEventListener('message', function (ev) {
+      window._ws.lastMsgTs = Date.now();
+      // With linebreak:true, each event is its own JSON line. WebSocket onmessage
+      // fires once per frame which already corresponds to one event.
+      try {
+        var msg = JSON.parse(ev.data);
+        if (!msg || !msg.symbol) return;
+        var arr = window._ws.listeners[msg.symbol];
+        if (!arr || !arr.length) return;
+        for (var i = 0; i < arr.length; i++) {
+          try { arr[i](msg); } catch (e) {}
+        }
+      } catch (e) {}
+    });
+    sock.addEventListener('close', function () {
+      window._ws.status = 'closed';
+      window._ws.socket = null;
+      // Move subscribed back to pending so reconnect re-subscribes
+      window._ws.subscribed.forEach(function (s) { window._ws.pending.add(s); });
+      window._ws.subscribed.clear();
+      if (window._ws.pending.size > 0) {
+        var delay = Math.min(30000, 1000 * Math.pow(2, window._ws.reconnectAttempts));
+        window._ws.reconnectAttempts++;
+        if (window._ws.reconnectTimer) clearTimeout(window._ws.reconnectTimer);
+        window._ws.reconnectTimer = setTimeout(_wsConnect, delay);
+      }
+    });
+    sock.addEventListener('error', function () { /* close handler retries */ });
+  }).catch(function () {
+    window._ws.status = 'idle';
+    window._ws.socket = null;
+    if (window._ws.subscribed.size > 0 || window._ws.pending.size > 0) {
+      var delay = Math.min(30000, 1000 * Math.pow(2, window._ws.reconnectAttempts));
+      window._ws.reconnectAttempts++;
+      if (window._ws.reconnectTimer) clearTimeout(window._ws.reconnectTimer);
+      window._ws.reconnectTimer = setTimeout(_wsConnect, delay);
+    }
+  });
+}
+
+// Subscribe to a symbol. Returns an unsubscribe function. Idempotent —
+// multiple listeners can subscribe to the same symbol; the connection is
+// shared. Tradier expects the FULL symbol set on each subscribe message,
+// so adding/removing one symbol re-sends the entire current set.
+function _wsSubscribe(symbol, onUpdate) {
+  if (!symbol || !onUpdate) return function () {};
+  if (!window._ws.listeners[symbol]) window._ws.listeners[symbol] = [];
+  window._ws.listeners[symbol].push(onUpdate);
+  if (window._ws.status === 'open' && !window._ws.subscribed.has(symbol)) {
+    window._ws.subscribed.add(symbol);
+    try { window._ws.socket.send(_wsBuildSubMsg()); } catch (e) {}
+  } else if (!window._ws.subscribed.has(symbol)) {
+    window._ws.pending.add(symbol);
+    if (window._ws.status === 'idle' || window._ws.status === 'closed') {
+      _wsConnect();
+    }
+  }
+  if (window._ws.closeTimer) { clearTimeout(window._ws.closeTimer); window._ws.closeTimer = null; }
+  return function unsub() {
+    var arr = window._ws.listeners[symbol] || [];
+    var idx = arr.indexOf(onUpdate);
+    if (idx >= 0) arr.splice(idx, 1);
+    if (arr.length === 0) {
+      delete window._ws.listeners[symbol];
+      window._ws.subscribed.delete(symbol);
+      window._ws.pending.delete(symbol);
+      if (window._ws.status === 'open' && window._ws.socket) {
+        try { window._ws.socket.send(_wsBuildSubMsg()); } catch (e) {}
+      }
+      if (window._ws.subscribed.size === 0 && window._ws.pending.size === 0) {
+        // 30s idle grace before closing — covers tab-flip / re-open without churn
+        if (window._ws.closeTimer) clearTimeout(window._ws.closeTimer);
+        window._ws.closeTimer = setTimeout(function () {
+          if (window._ws.subscribed.size === 0 && window._ws.socket) {
+            try { window._ws.socket.close(); } catch (e) {}
+          }
+        }, 30000);
+      }
+    }
+  };
+}
+
+// Order-ticket WebSocket binding. Holds the unsub fn for the currently
+// displayed symbol so we can swap subscriptions when the ticket symbol
+// changes. UI updates throttled to 4 Hz to avoid layout thrash on noisy quotes.
+var _wsTicketSym = null;
+var _wsTicketUnsub = null;
+var _wsTicketLastUi = 0;
+function _wsAttachToTicket(symbol) {
+  if (!symbol) { _wsDetachFromTicket(); return; }
+  if (_wsTicketSym === symbol && _wsTicketUnsub) return;
+  if (_wsTicketUnsub) { _wsTicketUnsub(); _wsTicketUnsub = null; }
+  _wsTicketSym = symbol;
+  _wsTicketUnsub = _wsSubscribe(symbol, function (msg) {
+    var now = Date.now();
+    if (now - _wsTicketLastUi < 250) return;
+    _wsTicketLastUi = now;
+    if (msg.type === 'quote') {
+      var bid = parseFloat(msg.bid) || 0;
+      var ask = parseFloat(msg.ask) || 0;
+      var mid = (bid && ask) ? +((bid + ask) / 2).toFixed(2) : 0;
+      var spread = +(ask - bid).toFixed(2);
+      if (G.liveQuote) {
+        G.liveQuote.bid = bid;
+        G.liveQuote.ask = ask;
+        G.liveQuote.mid = mid;
+        G.liveQuote.mark = mid || G.liveQuote.last;
+        G.liveQuote.spread = spread;
+        if (msg.bidsz != null) G.liveQuote.bidSz = +msg.bidsz;
+        if (msg.asksz != null) G.liveQuote.askSz = +msg.asksz;
+      }
+      var bEl = eid('qp-bid'); if (bEl) bEl.textContent = '$' + fmt2(bid);
+      var aEl = eid('qp-ask'); if (aEl) aEl.textContent = '$' + fmt2(ask);
+      var mEl = eid('qp-mid'); if (mEl) mEl.textContent = '$' + fmt2(mid);
+      var sEl = eid('qp-spread'); if (sEl) sEl.textContent = '$' + fmt2(spread);
+      var bsEl = eid('qp-bid-sz'); if (bsEl && msg.bidsz != null) bsEl.textContent = 'size ' + msg.bidsz;
+      var asEl = eid('qp-ask-sz'); if (asEl && msg.asksz != null) asEl.textContent = 'size ' + msg.asksz;
+      // Mark badge to indicate live stream
+      var stEl = eid('qp-stream-status'); if (stEl) { stEl.textContent = '● LIVE'; stEl.style.color = 'var(--grn)'; }
+    } else if (msg.type === 'trade') {
+      var px = parseFloat(msg.price) || 0;
+      if (px && G.liveQuote) G.liveQuote.last = px;
+      var lEl = eid('qp-last'); if (lEl && px) lEl.textContent = '$' + fmt2(px);
+    }
+  });
+}
+function _wsDetachFromTicket() {
+  if (_wsTicketUnsub) { _wsTicketUnsub(); _wsTicketUnsub = null; }
+  _wsTicketSym = null;
+  var stEl = eid('qp-stream-status'); if (stEl) { stEl.textContent = ''; }
 }
 
 function fetchLiveQuote(){
@@ -5316,6 +5530,13 @@ function ahDelta(q){
 
 function renderQuotePanel(q){
   G.liveQuote=q;
+  // After HTTP-fetched quote bootstraps the panel, attach a WebSocket
+  // subscription so subsequent updates push in real-time. Only matters in
+  // live mode — in sandbox _wsConnect short-circuits to no-op so HTTP poll
+  // remains the single update path.
+  if (typeof _wsAttachToTicket === 'function' && q && q.sym && q.sym.indexOf('[SIM]') < 0) {
+    _wsAttachToTicket(q.sym);
+  }
   eid('qp-bid').textContent='$'+fmt2(q.bid);
   eid('qp-ask').textContent='$'+fmt2(q.ask);
   eid('qp-mid').textContent='$'+fmt2(q.mid);
