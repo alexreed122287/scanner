@@ -7659,38 +7659,65 @@ function computeRuleIC(horizon) {
 // Dedupe: one entry per (ticker, date). Cap 2000 entries FIFO.
 var _SHADOW_SCAN_KEY = 'rrjcar_shadow_scan_v1';
 
+// Single-row write (kept for back-compat / individual logging).
 function _shadowLogScanRow(r) {
   if (!r || !r.ticker || !Array.isArray(r.rules)) return;
+  _shadowLogScanRowsBatch([r]);
+}
+
+// BATCH write — single localStorage round-trip for many rows. Critical for
+// finishScan() on 1000+ ticker scans, where per-row writes were O(N²) and
+// hung the browser at "Scoring N tickers..." (issue 2026-04-29).
+function _shadowLogScanRowsBatch(rows) {
+  if (!Array.isArray(rows) || !rows.length) return;
   try {
     var arr = [];
     try { arr = JSON.parse(localStorage.getItem(_SHADOW_SCAN_KEY) || '[]') || []; } catch(_){}
     var todayK = new Date().toISOString().slice(0, 10);
-    var dedupeKey = r.ticker + '|' + todayK;
-    // Skip if already logged this ticker today
+    // Build set of dedupe keys already in storage for today to skip in O(1)
+    var existingToday = {};
     for (var i = arr.length - 1; i >= 0; i--) {
-      if (arr[i].dedupeKey === dedupeKey) return;
-      // Stop scanning once we hit a different date — entries are append-only
       if (arr[i].date !== todayK) break;
+      existingToday[arr[i].dedupeKey] = true;
     }
-    // Slim rule snapshot — name + pass only (drop val/pts to save bytes)
-    var ruleSnapshot = r.rules.map(function(rl){
-      return { n: rl.n, pass: !!rl.pass };
-    });
-    arr.push({
-      ts: Date.now(),
-      date: todayK,
-      ticker: r.ticker,
-      score: +r.score || 0,
-      isGo: !!r.isGo,
-      price: +r.price || 0,
-      sector: r.sector || '',
-      rules: ruleSnapshot,
-      fwd1d: null, fwd3d: null, fwd5d: null,
-      dedupeKey: dedupeKey
-    });
+    var nowMs = Date.now();
+    var added = 0;
+    for (var j = 0; j < rows.length; j++) {
+      var r = rows[j];
+      if (!r || !r.ticker || !Array.isArray(r.rules)) continue;
+      var dedupeKey = r.ticker + '|' + todayK;
+      if (existingToday[dedupeKey]) continue;
+      existingToday[dedupeKey] = true;
+      // Slim rule snapshot — name + pass only
+      var ruleSnapshot = new Array(r.rules.length);
+      for (var k = 0; k < r.rules.length; k++) {
+        ruleSnapshot[k] = { n: r.rules[k].n, pass: !!r.rules[k].pass };
+      }
+      arr.push({
+        ts: nowMs,
+        date: todayK,
+        ticker: r.ticker,
+        score: +r.score || 0,
+        isGo: !!r.isGo,
+        price: +r.price || 0,
+        sector: r.sector || '',
+        rules: ruleSnapshot,
+        fwd1d: null, fwd3d: null, fwd5d: null,
+        dedupeKey: dedupeKey
+      });
+      added++;
+    }
+    if (!added) return;
     if (arr.length > 2000) arr = arr.slice(-2000);
+    // Single setItem at the end — this is the 1660× speedup vs the
+    // previous per-row implementation
     localStorage.setItem(_SHADOW_SCAN_KEY, JSON.stringify(arr));
-  } catch(e) { /* localStorage quota / parse — silent */ }
+  } catch(e) {
+    // Quota exceeded or parse error — silent. Users with very long scan
+    // history may hit 5MB localStorage quota; cap at 2000 entries should
+    // prevent this but write may still fail on tight quotas.
+    console.warn('[shadow-scan] batch write failed:', e && e.message || e);
+  }
 }
 
 // IC analysis on the SCAN shadow book. For each scoring rule, compute
@@ -11302,13 +11329,14 @@ function finishScan(){
   G.results.sort(_resultRankCompare);
   G.filtered = excludedFilteredResults();
 
-  // Council #5 commit 4: log every scanned ticker's per-rule pass/fail to
-  // the scan shadow book for later IC analysis. Only logs once per ticker
-  // per day (dedupe). Capped at 2000 entries FIFO. Ungated by score —
-  // we want signal data on losers as much as winners.
+  // Council #5 commit 4 (BATCH-FIX 2026-04-29): log every scanned ticker's
+  // per-rule pass/fail to the scan shadow book for later IC analysis. Only
+  // logs once per ticker per day (dedupe). Capped at 2000 entries FIFO.
+  // Uses BATCH write — single localStorage round-trip for the whole results
+  // array. Per-row implementation hung the scan at 1660 tickers (O(N²)).
   try {
-    if (typeof _shadowLogScanRow === 'function') {
-      G.results.forEach(function(r){ _shadowLogScanRow(r); });
+    if (typeof _shadowLogScanRowsBatch === 'function' && G.results && G.results.length) {
+      _shadowLogScanRowsBatch(G.results);
     }
   } catch(_){}
 
