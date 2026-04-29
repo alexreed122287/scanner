@@ -1474,6 +1474,7 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
         <button class="btn blu" style="font-size:10px;padding:2px 8px;" onclick="fetchLiveQuote()">&#8635; REFRESH</button>
         <span class="qp-ts" id="qp-ts"></span>
         <span id="qp-stream-status" title="WebSocket stream state — green = receiving live ticks, blank = HTTP-only" style="font-size:10px;font-weight:700;letter-spacing:.5px;margin-left:8px;"></span>
+        <span id="intraday-badge" title="Intraday reversal signal — VWAP reclaim or ORB reclaim. Blank during bootstrap." style="font-size:10px;font-weight:700;letter-spacing:.5px;margin-left:10px;"></span>
       </div>
       <div class="quote-panel" id="quote-panel">
         <div class="qp-cell">
@@ -5177,6 +5178,7 @@ function resetQuotePanel(){
   G.liveQuote=null;
   // Drop any active streaming subscription when the panel is cleared
   if (typeof _wsDetachFromTicket === 'function') _wsDetachFromTicket();
+  if (typeof _intradayDetachFromTicket === 'function') _intradayDetachFromTicket();
 }
 
 function showQuoteLoading(){
@@ -5406,6 +5408,220 @@ function _wsDetachFromTicket() {
   var stEl = eid('qp-stream-status'); if (stEl) { stEl.textContent = ''; }
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+//  INTRADAY REVERSAL SCORING — VWAP-reclaim + ORB-reclaim detector.
+//
+//  Two patterns we care about for long-call entries:
+//
+//   1. VWAP RECLAIM — price was below VWAP for ≥30% of the recent 10-min
+//      window AND has now crossed and held above VWAP for ≥30 sec. This
+//      catches the textbook "morning pullback that found support and is
+//      reasserting trend" — the highest-EV intraday entry for long calls.
+//
+//   2. ORB RECLAIM — price broke below the opening range low (first 30 min
+//      of session) and has now reclaimed back above the opening range HIGH.
+//      A V-reversal pattern; rare but extremely high-conviction when it
+//      fires. Indicates the breakdown was a fake-out.
+//
+//  Both signals are computed continuously while the order ticket is active
+//  on a stock symbol, surfaced as a badge in the quote panel. Bootstraps
+//  via a one-time HTTP fetch of today's 1-min bars; subsequent updates come
+//  from the WebSocket trade-event stream (already running for the ticket).
+// ═══════════════════════════════════════════════════════════════════════════
+
+window._intraday = window._intraday || {};
+
+// Bootstrap intraday state for a ticker by pulling today's 1-min bars.
+// Computes initial VWAP (volume-weighted typical price) and ORB (opening-
+// range high/low from the first 30 bars). Stores into window._intraday[t].
+async function _intradayBootstrap(ticker) {
+  if (!ticker) return null;
+  if (window._intraday[ticker] && window._intraday[ticker].bootstrapped) {
+    return window._intraday[ticker];
+  }
+  var creds = getTradierCreds();
+  if (!creds) return null;
+  // Tradier timesales — "session_filter=open" returns regular-session-only
+  // bars, which is what we want for VWAP/ORB. start=YYYY-MM-DD covers today.
+  var today = new Date().toISOString().slice(0, 10);
+  var url = creds.host + '/v1/markets/timesales?symbol=' + encodeURIComponent(ticker)
+    + '&interval=1min&start=' + today + '&session_filter=open';
+  try {
+    var r = await fetch(url, { headers: { Authorization: 'Bearer ' + creds.key, Accept: 'application/json' } });
+    var d = await r.json();
+    var bars = (d && d.series && d.series.data) || [];
+    if (!Array.isArray(bars)) bars = [bars];
+    var st = {
+      bootstrapped: true,
+      vwapNum: 0, vwapDen: 0,           // running sum(typicalPrice × volume), sum(volume)
+      priceSeries: [],                   // [{ts, price}], rolling
+      orbHigh: null, orbLow: null,       // opening-range high/low (first 30 bars)
+      lastSignal: null,                  // 'vwap-reclaim' | 'orb-reclaim' | null
+      lastSignalTs: 0,
+    };
+    bars.forEach(function (b, i) {
+      var hi = +b.high || 0, lo = +b.low || 0, cl = +b.close || 0;
+      var typical = (hi + lo + cl) / 3;
+      var vol = +b.volume || 0;
+      if (typical && vol) {
+        st.vwapNum += typical * vol;
+        st.vwapDen += vol;
+      }
+      if (cl) st.priceSeries.push({ ts: new Date(b.time).getTime(), price: cl });
+      if (i < 30) {
+        if (hi) st.orbHigh = (st.orbHigh == null) ? hi : Math.max(st.orbHigh, hi);
+        if (lo) st.orbLow  = (st.orbLow  == null) ? lo : Math.min(st.orbLow,  lo);
+      }
+    });
+    window._intraday[ticker] = st;
+    return st;
+  } catch (e) {
+    return null;
+  }
+}
+
+// Update intraday state with a single WS trade event. Returns the current
+// signal string (or null) after evaluating reversal conditions.
+function _intradayUpdate(ticker, msg) {
+  var st = window._intraday[ticker];
+  if (!st) return null;
+  if (!msg || msg.type !== 'trade') return st.lastSignal;
+  var price = parseFloat(msg.price) || 0;
+  var size = parseFloat(msg.size) || 0;
+  if (!price) return st.lastSignal;
+  if (size > 0) { st.vwapNum += price * size; st.vwapDen += size; }
+  st.priceSeries.push({ ts: Date.now(), price: price });
+  // Cap memory: keep ~600 most recent points (~10 min at 1Hz)
+  if (st.priceSeries.length > 600) st.priceSeries.shift();
+  return _intradayDetectSignal(ticker);
+}
+
+// Pure function: given current intraday state, classify the reversal
+// signal. Returns 'vwap-reclaim' | 'orb-reclaim' | null. Side-effect: updates
+// st.lastSignal + st.lastSignalTs when state transitions.
+function _intradayDetectSignal(ticker) {
+  var st = window._intraday[ticker];
+  if (!st || !st.priceSeries.length) return null;
+  var pts = st.priceSeries;
+  var nowPt = pts[pts.length - 1];
+  var nowPx = nowPt.price;
+  var nowTs = nowPt.ts;
+  var vwap = st.vwapDen > 0 ? st.vwapNum / st.vwapDen : 0;
+
+  // VWAP RECLAIM
+  // Was below VWAP for ≥30% of recent 10 min?
+  var tenMinAgo = nowTs - 10 * 60000;
+  var recent = pts.filter(function (p) { return p.ts >= tenMinAgo; });
+  var belowFrac = recent.length > 0
+    ? recent.filter(function (p) { return p.price < vwap; }).length / recent.length
+    : 0;
+  // Above-streak duration in ms — walk backward while points are above VWAP
+  var aboveStreakMs = 0;
+  for (var i = pts.length - 1; i >= 0; i--) {
+    if (pts[i].price >= vwap) {
+      aboveStreakMs = nowTs - pts[i].ts;
+    } else break;
+  }
+  var vwapReclaim = vwap > 0
+    && nowPx > vwap
+    && belowFrac >= 0.30
+    && aboveStreakMs >= 30000;
+
+  // ORB RECLAIM
+  // Did price dip below the opening-range LOW at any point AND is now
+  // above the opening-range HIGH?
+  var orbReclaim = false;
+  if (st.orbLow != null && st.orbHigh != null) {
+    var sawDip = pts.some(function (p) { return p.price < st.orbLow; });
+    orbReclaim = sawDip && nowPx > st.orbHigh;
+  }
+
+  var newSignal = orbReclaim ? 'orb-reclaim'
+                : vwapReclaim ? 'vwap-reclaim'
+                : null;
+  if (newSignal !== st.lastSignal) {
+    st.lastSignal = newSignal;
+    st.lastSignalTs = newSignal ? nowTs : 0;
+  }
+  return st.lastSignal;
+}
+
+// Snapshot of intraday state for UI / scoring rule consumption.
+// Pure read; safe to call on every paint.
+function intradayGetState(ticker) {
+  var st = window._intraday[ticker];
+  if (!st) return null;
+  var vwap = st.vwapDen > 0 ? st.vwapNum / st.vwapDen : 0;
+  var nowPx = st.priceSeries.length ? st.priceSeries[st.priceSeries.length - 1].price : null;
+  return {
+    signal: st.lastSignal,
+    signalTs: st.lastSignalTs,
+    vwap: vwap,
+    nowPrice: nowPx,
+    aboveVwap: nowPx != null && vwap > 0 && nowPx > vwap,
+    orbHigh: st.orbHigh,
+    orbLow: st.orbLow,
+    bootstrapped: !!st.bootstrapped,
+    sampleCount: st.priceSeries.length,
+  };
+}
+
+// Order-ticket intraday subscription. Mirrors _wsAttachToTicket but
+// subscribes to the underlying STOCK ticker (not the option OCC), since
+// VWAP / ORB are computed on the underlying. Idempotent.
+var _intradayTicketSym = null;
+var _intradayTicketUnsub = null;
+async function _intradayAttachToTicket(underlyingTicker) {
+  if (!underlyingTicker) { _intradayDetachFromTicket(); return; }
+  if (_intradayTicketSym === underlyingTicker && _intradayTicketUnsub) return;
+  if (_intradayTicketUnsub) { _intradayTicketUnsub(); _intradayTicketUnsub = null; }
+  _intradayTicketSym = underlyingTicker;
+  await _intradayBootstrap(underlyingTicker);
+  _intradayRenderBadge(underlyingTicker);
+  // Subscribe to WS trade events on the underlying — separate listener
+  // from the quote-panel listener so they don't race on throttling.
+  if (typeof _wsSubscribe === 'function') {
+    _intradayTicketUnsub = _wsSubscribe(underlyingTicker, function (msg) {
+      _intradayUpdate(underlyingTicker, msg);
+      // Render at most every 2s on UI to avoid layout cost
+      if (!_intradayLastRender || Date.now() - _intradayLastRender > 2000) {
+        _intradayRenderBadge(underlyingTicker);
+      }
+    });
+  }
+}
+var _intradayLastRender = 0;
+function _intradayDetachFromTicket() {
+  if (_intradayTicketUnsub) { _intradayTicketUnsub(); _intradayTicketUnsub = null; }
+  _intradayTicketSym = null;
+  var bEl = eid('intraday-badge'); if (bEl) bEl.textContent = '';
+}
+
+function _intradayRenderBadge(ticker) {
+  _intradayLastRender = Date.now();
+  var bEl = eid('intraday-badge');
+  if (!bEl) return;
+  var s = intradayGetState(ticker);
+  if (!s || !s.bootstrapped) {
+    bEl.textContent = ''; return;
+  }
+  var label, color;
+  if (s.signal === 'orb-reclaim') {
+    label = '✓ ORB RECLAIM'; color = 'var(--grn)';
+  } else if (s.signal === 'vwap-reclaim') {
+    label = '✓ VWAP RECLAIM'; color = 'var(--grn)';
+  } else if (s.aboveVwap) {
+    label = '↑ above VWAP'; color = 'var(--ambb)';
+  } else {
+    label = '↓ below VWAP'; color = 'var(--gry)';
+  }
+  bEl.textContent = label;
+  bEl.style.color = color;
+  bEl.title = (s.signal ? 'Reversal signal: '+s.signal+' at '+new Date(s.signalTs).toLocaleTimeString()+' | ' : '')
+    + 'VWAP $'+(s.vwap||0).toFixed(2)+' | last $'+(s.nowPrice||0).toFixed(2)
+    + (s.orbHigh != null ? ' | ORB $'+s.orbLow.toFixed(2)+'-$'+s.orbHigh.toFixed(2) : '');
+}
+
 function fetchLiveQuote(){
   var sym=eid('ord-sym').value.trim().toUpperCase();
   if(!sym){resetQuotePanel();return;}
@@ -5537,6 +5753,16 @@ function renderQuotePanel(q){
   if (typeof _wsAttachToTicket === 'function' && q && q.sym && q.sym.indexOf('[SIM]') < 0) {
     _wsAttachToTicket(q.sym);
   }
+  // Intraday reversal subscription — always tracks the UNDERLYING (not the
+  // option OCC), since VWAP/ORB are computed on the equity. Pull the
+  // underlying ticker from the order ticket form, not from q.sym (which
+  // may be the OCC for option quotes).
+  try {
+    if (typeof _intradayAttachToTicket === 'function') {
+      var underlying = (eid('ord-sym') ? eid('ord-sym').value : '').trim().toUpperCase();
+      if (underlying) _intradayAttachToTicket(underlying);
+    }
+  } catch(_){}
   eid('qp-bid').textContent='$'+fmt2(q.bid);
   eid('qp-ask').textContent='$'+fmt2(q.ask);
   eid('qp-mid').textContent='$'+fmt2(q.mid);
@@ -6197,11 +6423,15 @@ function submitOrder(){
 
   // \u2500\u2500\u2500 PRE-TRADE STRATEGY GATE \u2500\u2500\u2500
   // Only on OPEN orders for option contracts. Surfaces data-backed leakage
-  // points (penny strike, far-OTM delta, sub-14 DTE, wide spread) and asks
-  // for explicit confirm. Not a block \u2014 user clicks Continue Anyway to override.
-  // Skip on close orders (you should always be able to exit a position) and
-  // on equity orders (rules don't apply).
-  if (type !== 'STOCK' && (action === 'BUY_TO_OPEN' || action === 'SELL_TO_OPEN')) {
+  // points (penny strike, far-OTM delta, sub-14 DTE, wide spread).
+  // Three friction tiers: 0 warnings \u2192 no gate; 1 warning \u2192 confirm() dialog;
+  // \u22652 warnings \u2192 typed-phrase override + 60s cooldown + final confirm.
+  // Skip on close orders (always exit-able) and equity orders (rules N/A).
+  // Bypass sentinel: set after a hard-block cooldown completes; valid for 5s
+  // so the re-invoking submitOrder doesn't loop the gate.
+  var bypassActive = window._strategyGateBypass && (Date.now() - window._strategyGateBypass) < 5000;
+  if (bypassActive) { window._strategyGateBypass = 0; }
+  if (!bypassActive && type !== 'STOCK' && (action === 'BUY_TO_OPEN' || action === 'SELL_TO_OPEN')) {
     try {
       var lq = G.liveQuote || {};
       var dteCalc = null;
@@ -6215,12 +6445,60 @@ function submitOrder(){
         dte:   dteCalc
       });
       if (warns.length) {
-        var msg = 'STRATEGY WARNING \u2014 this contract has '+warns.length+' known leakage point'+(warns.length>1?'s':'')+':\n\n'
-                + warns.join('\n')
-                + '\n\nContinue anyway?';
-        if (!confirm(msg)) {
-          toast('Order cancelled \u2014 strategy gate');
-          return;
+        // HARD BLOCK with typed-override + 60-second delay (council verdict
+        // 2026-04-29). Prior confirm() was "theater" per the Contrarian.
+        // Threshold: \u22652 warnings \u2192 hard block; 1 warning still uses confirm.
+        // The hard-block path is async (Promise), so submitOrder must be
+        // restructured to await it. We do that with an IIFE that returns
+        // a thenable + a continuation-style structure.
+        var hardBlock = warns.length >= 2;
+        var msg = 'STRATEGY GATE \u2014 this contract has '+warns.length+' known leakage point'+(warns.length>1?'s':'')+':\n\n'
+                + warns.join('\n');
+        if (!hardBlock) {
+          if (!confirm(msg + '\n\nContinue anyway?')) {
+            toast('Order cancelled \u2014 strategy gate');
+            return;
+          }
+        } else {
+          // Multi-violation: typed override + 60s cooldown + final confirm.
+          // The phrase requires reading the violations carefully \u2014 autopilot
+          // typing won't pass.
+          var phrase = 'I ACKNOWLEDGE THE LEAKAGE';
+          var typed = prompt(msg
+            + '\n\n\u26a0 HARD BLOCK \u2014 '+warns.length+' violations exceeds threshold.'
+            + '\n\nTo override, type EXACTLY:\n\n  '+phrase
+            + '\n\n(Cancel or any other input \u2192 abort.)');
+          if (!typed || typed.trim() !== phrase) {
+            toast('Order cancelled \u2014 hard-block (override phrase not entered)');
+            return;
+          }
+          // Async cooldown: setTimeout-based. Submit button stays disabled,
+          // toast countdown runs every 10s. After 60s, final confirm fires.
+          // submitOrder() short-circuits here; final placement runs from the
+          // setTimeout callback.
+          var submitBtn = document.querySelector('button[onclick="submitOrder()"]');
+          if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'HOLD 60s'; }
+          toast('Override accepted \u2014 60s cooling-off period before submission');
+          var releaseAt = Date.now() + 60000;
+          var tick = function(){
+            var remaining = Math.ceil((releaseAt - Date.now())/1000);
+            if (remaining > 0) {
+              if (submitBtn) submitBtn.textContent = 'HOLD '+remaining+'s';
+              setTimeout(tick, 1000);
+            } else {
+              if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = '\u25b2 SUBMIT ORDER'; }
+              if (!confirm('60-second cooling-off complete.\n\nFINAL CONFIRMATION \u2014 submit with '+warns.length+' acknowledged leakage point'+(warns.length>1?'s':'')+'?\n\n'+warns.join('\n'))) {
+                toast('Order cancelled at final confirmation');
+                return;
+              }
+              // Re-invoke submitOrder; the warns.length === 0 path now runs
+              // because we set a sentinel flag to skip the gate on this re-entry.
+              window._strategyGateBypass = Date.now();
+              setTimeout(function(){ submitOrder(); }, 0);
+            }
+          };
+          setTimeout(tick, 1000);
+          return;  // submitOrder ends here; tick() resumes flow after cooldown
         }
       }
     } catch(e) { /* gate is best-effort; never block on its own bug */ }
@@ -6908,6 +7186,134 @@ function simOpt(price){
   var exp=expDate.toISOString().slice(0,10);
   return{strike:strike,spread:spread,spreadPct:spreadPct,delta:delta,ext:ext,dte:dte,optPr:optPr,oi:oi,vol:vol2,exp:exp};
 }
+// ═══════════════════════════════════════════════════════════════════════════
+//  SHADOW BOOK — auto-log every high-conviction ranker pick (whether traded
+//  or not) so we can measure ranker edge independent of operator discretion.
+//  Per Council Verdict 2026-04-29 (Expansionist's mechanism for B/C's
+//  evidence-of-edge requirement).
+//
+//  Each entry is written ONCE per (ticker, expiry, type) per 24h. Cap 500
+//  entries in localStorage (FIFO eviction). Forward-return fields (fwd1d,
+//  fwd3d, fwd5d) start null and are filled by a separate refresh pass.
+// ═══════════════════════════════════════════════════════════════════════════
+
+var _SHADOW_KEY = 'rrjcar_shadow_book_v1';
+var _SHADOW_SCORE_THRESHOLD = 70;   // _optScore is 0-100; 70 = strong on all 3 factors
+
+function _shadowLoad() {
+  try { return JSON.parse(localStorage.getItem(_SHADOW_KEY) || '[]') || []; }
+  catch(_) { return []; }
+}
+function _shadowSave(arr) {
+  try {
+    if (arr.length > 500) arr = arr.slice(-500);
+    localStorage.setItem(_SHADOW_KEY, JSON.stringify(arr));
+  } catch(_){}
+}
+// Idempotent — checks 24h dedupe by (ticker, expiry, type).
+function _shadowMaybeLog(opt, ticker, score, livePrice, expDate) {
+  if (!opt || !ticker || !(score >= _SHADOW_SCORE_THRESHOLD)) return;
+  if (!opt.greeks) return;
+  var arr = _shadowLoad();
+  var typeChar = (opt.option_type || 'call')[0].toUpperCase();
+  var dedupeKey = ticker + '|' + expDate + '|' + typeChar + '|' + opt.strike;
+  var nowMs = Date.now();
+  var dayMs = 86400000;
+  // Skip if the same key was logged within the last 24h
+  for (var i = arr.length - 1; i >= 0 && (nowMs - arr[i].ts) < dayMs; i--) {
+    if (arr[i].dedupeKey === dedupeKey) return;
+  }
+  arr.push({
+    ts: nowMs,
+    asof: new Date(nowMs).toISOString(),
+    ticker: ticker,
+    occSym: opt.symbol || '',
+    strike: +opt.strike || 0,
+    type: typeChar,
+    exp: expDate || '',
+    delta: opt.greeks ? +opt.greeks.delta || 0 : 0,
+    iv: opt.greeks ? +opt.greeks.smv_vol || 0 : 0,
+    oi: +opt.open_interest || 0,
+    vol: +opt.volume || 0,
+    bid: +opt.bid || 0,
+    ask: +opt.ask || 0,
+    score: +score,
+    underlyingPx: +livePrice || 0,
+    dedupeKey: dedupeKey,
+    fwd1d: null,    // populated by _shadowRefreshForward (separate pass)
+    fwd3d: null,
+    fwd5d: null,
+  });
+  _shadowSave(arr);
+}
+
+// Forward-return refresh: for each shadow entry that's old enough but
+// missing forward returns, fetch the option's price 1d/3d/5d after entry.
+// Best-effort — uses Tradier timesales 1-day-resolution. Skips if no creds.
+async function _shadowRefreshForward() {
+  var arr = _shadowLoad();
+  if (!arr.length) return { updated: 0, total: arr.length };
+  var creds = getTradierCreds();
+  if (!creds) return { updated: 0, total: arr.length, error: 'no creds' };
+  var nowMs = Date.now();
+  var dayMs = 86400000;
+  var updated = 0;
+  for (var i = 0; i < arr.length; i++) {
+    var e = arr[i];
+    var ageDays = (nowMs - e.ts) / dayMs;
+    var needs = (ageDays >= 1 && e.fwd1d == null)
+             || (ageDays >= 3 && e.fwd3d == null)
+             || (ageDays >= 5 && e.fwd5d == null);
+    if (!needs) continue;
+    if (!e.occSym) continue;
+    try {
+      var url = creds.host + '/v1/markets/quotes?symbols=' + encodeURIComponent(e.occSym);
+      var r = await fetch(url, { headers: { Authorization: 'Bearer ' + creds.key, Accept: 'application/json' }});
+      var d = await r.json();
+      var q = d && d.quotes && d.quotes.quote;
+      if (q) {
+        var lastPx = +q.last || +q.close || 0;
+        if (lastPx > 0) {
+          var entryPx = (+e.bid + +e.ask) / 2;
+          var ret = entryPx > 0 ? ((lastPx - entryPx) / entryPx) * 100 : null;
+          if (ageDays >= 1 && e.fwd1d == null) e.fwd1d = ret;
+          if (ageDays >= 3 && e.fwd3d == null) e.fwd3d = ret;
+          if (ageDays >= 5 && e.fwd5d == null) e.fwd5d = ret;
+          updated++;
+        }
+      }
+    } catch(err) { /* swallow per-entry */ }
+  }
+  if (updated) _shadowSave(arr);
+  return { updated: updated, total: arr.length };
+}
+
+// Aggregate shadow-book stats — exposed for UI / console inspection.
+function shadowBookStats() {
+  var arr = _shadowLoad();
+  function avg(vals) {
+    var v = vals.filter(function(x){ return x != null && isFinite(x); });
+    return v.length ? v.reduce(function(s,x){return s+x;},0)/v.length : null;
+  }
+  function winrate(vals) {
+    var v = vals.filter(function(x){ return x != null && isFinite(x); });
+    return v.length ? v.filter(function(x){return x>0;}).length / v.length : null;
+  }
+  return {
+    total_entries: arr.length,
+    fwd1d_n: arr.filter(function(e){return e.fwd1d!=null;}).length,
+    fwd3d_n: arr.filter(function(e){return e.fwd3d!=null;}).length,
+    fwd5d_n: arr.filter(function(e){return e.fwd5d!=null;}).length,
+    fwd1d_avg_pct: avg(arr.map(function(e){return e.fwd1d;})),
+    fwd3d_avg_pct: avg(arr.map(function(e){return e.fwd3d;})),
+    fwd5d_avg_pct: avg(arr.map(function(e){return e.fwd5d;})),
+    fwd1d_winrate: winrate(arr.map(function(e){return e.fwd1d;})),
+    fwd3d_winrate: winrate(arr.map(function(e){return e.fwd3d;})),
+    fwd5d_winrate: winrate(arr.map(function(e){return e.fwd5d;})),
+    sample: arr.slice(-5),
+  };
+}
+
 // Unified composite score for an option contract. Used by:
 //   - fetchOptionContract (Order Ticket FIND BEST)
 //   - rollLoadChain      (Roll modal chain)
@@ -7070,6 +7476,10 @@ function fetchOptionContract(ticker,simPrice,callback,monthFilter){
      var intrinsic=Math.max(price-chosen.strike,0);
      var extrinsic=Math.max(mid-intrinsic,0);
      var extPct=mid>0?(extrinsic/mid*100):0;
+     // Shadow-book log: every winner with score ≥ threshold is recorded
+     // regardless of whether the user actually trades it. Independent of
+     // operator discretion — gives us pure ranker-edge signal over time.
+     try { _shadowMaybeLog(chosen, ticker, winner._score || _optScore(chosen), price, winner.expDate); } catch(_){}
 
      callback({
        strike:     chosen.strike,
@@ -14474,7 +14884,16 @@ async function submitRollMultileg(c, acct, q1, q2, maxAtt, delay){
     } catch(_) {}
 
     try {
-      var resp = await fetch(c.host + '/v1/accounts/' + acct + '/orders', {
+      // Defense-in-depth: explicitly set mode=live in the URL. The fetch
+      // monkey-patch normally appends this when rewriting api.tradier.com
+      // → proxy.workers.dev, but multileg orders are too critical to depend
+      // on the patch firing correctly across cache lifetimes / page reloads.
+      // Setting it directly on the URL guarantees the worker routes to
+      // production Tradier (not sandbox) regardless of patch state.
+      var orderUrl = c.host + '/v1/accounts/' + acct + '/orders';
+      var modeParam = ((localStorage.getItem('rrjcar_mode') || 'sandbox').toLowerCase() === 'live') ? 'live' : 'sandbox';
+      orderUrl += (orderUrl.indexOf('?') >= 0 ? '&' : '?') + 'mode=' + modeParam;
+      var resp = await fetch(orderUrl, {
         method: 'POST', headers: orderHeaders, body: body
       });
       var txt = await resp.text();
