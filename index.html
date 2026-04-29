@@ -9276,23 +9276,32 @@ function scoreIt(ticker, ind, opt){
   if(avoidBad){ score -= 15; res.push({n:'AVOID ticker', pass:false, val:'-15pts', filter:false}); }
   if(provenOk){ score += 8; techScore += 8; res.push({n:'PROVEN ticker', pass:true, val:'+8pts', filter:false}); }
 
-  // \u2500\u2500 SECTION A: Technical Momentum (8 rules, 69 pts) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-  var rsiOk  = ind.rsi >= 40 && ind.rsi <= 70;
-  var macdOk = ind.macd > 0;
-  var adxOk  = ind.adx > 25;
-  var emaOk  = ind.ema20 > ind.ema50;
-  var volOk  = ind.vol > ind.avgVol;
-  var tfOk   = ind.tf >= 2;
-  var su     = UNIVERSE_FULL.filter(function(u){ return u.t === ticker; })[0] ||
-               UNIVERSE.filter(function(u){ return u.t === ticker; })[0];
-  var pf     = su ? (SECTOR_PF[su.s] || 0) : 0;
-  var sectOk = pf > 2;
+  // \u2500\u2500 SECTION A: Technical Momentum (parameter-tuned 2026-04-29) \u2500\u2500\u2500\u2500\u2500\u2500
+  // Council commit 2/3: existing rules tightened to evidence-based parameters
+  // (Cardwell range-shift, Wilder original ADX, George-Hwang 52-wk effect,
+  // 21-day RS vs the broken 5-day). volOk dropped in commit 1; re-added as
+  // U/D Volume Ratio in commit 3.
+  var rsiOk    = ind.rsi >= 40 && ind.rsi <= 70;                                  // permissive band
+  var rsiCross = ind.rsi >= 50 && ind.rsi <= 65;                                  // tight Cardwell zone (early entry)
+  var macdOk   = ind.macd > 0;
+  var adxOk    = ind.adx > 25;                                                     // confirmed trend
+  var adxEarly = ind.adx >= 15 && ind.adx <= 25 && (ind.diPlus||0) > (ind.diMinus||0); // emerging trend (Wilder original)
+  var emaOk    = ind.ema20 > ind.ema50;
+  var tfOk     = ind.tf >= 2;
+  var su       = UNIVERSE_FULL.filter(function(u){ return u.t === ticker; })[0] ||
+                 UNIVERSE.filter(function(u){ return u.t === ticker; })[0];
+  var pf       = su ? (SECTOR_PF[su.s] || 0) : 0;
+  var sectOk   = pf > 2;
 
-  // 52-week high proximity (within 15%) \u2014 Tradier quote provides week_52_high
-  var hiOk = ind.week52hi > 0 ? (ind.price >= ind.week52hi * 0.85) : false;
+  // 52-wk high: George-Hwang JF 2004 effect concentrates within 5% of high.
+  // Keep \u226415% as universe-pass; \u22645% as tight breakout bonus.
+  var hiOk    = ind.week52hi > 0 ? (ind.price >= ind.week52hi * 0.85) : false;    // \u226415%
+  var hiTight = ind.week52hi > 0 ? (ind.price >= ind.week52hi * 0.95) : false;    // \u22645%
 
-  // Relative strength vs SPY 5-day (positive outperformance)
-  var rsRelOk = ind.relStr5d > 0;
+  // RS vs SPY: 5-day was anti-signal per Lehmann 1990 short-term reversal.
+  // Use 21-day total return as the permissive proxy. Clenow 90d slope\u00d7R\u00b2
+  // ranker is added in commit 3 as a separate cross-sectional rule.
+  var rsRelOk = (ind.relStr21d != null) ? (ind.relStr21d > 0) : (ind.relStr5d > 0);
 
   // Above 200 EMA
   var ema200Ok = ind.ema200 > 0 ? ind.price > ind.ema200 : ind.ema20 > ind.ema50; // fallback if 200 not available
@@ -9301,17 +9310,23 @@ function scoreIt(ticker, ind, opt){
   //   - "Vol > Avg" flat threshold: too crude; replaced by U/D Volume Ratio in commit 2
   //   - "Price Accel" (today %chg > 5d avg): anti-signal per Lehmann 1990 +
   //     Lo-MacKinlay short-term reversal literature. Removed entirely.
+  // Council 2026-04-29 commit 2/3: bonus tight-zone rules added (rsiCross,
+  // adxEarly, hiTight). Wide-band rules retained as base pass.
+  var rsRelLbl = (ind.relStr21d != null) ? '21d' : '5d';
+  var rsRelVal = (ind.relStr21d != null) ? ind.relStr21d : ind.relStr5d;
   var techChecks = [
-    {ok:rsiOk,   n:'RSI 40-70',        val:'RSI '+ind.rsi,                                          pts:8},
-    {ok:macdOk,  n:'MACD Hist +',      val:''+(ind.macd>=0?'+':'')+ind.macd,                        pts:10},
-    {ok:adxOk,   n:'ADX > 25',         val:'ADX '+ind.adx,                                          pts:8},
-    {ok:emaOk,   n:'EMA20 > EMA50',    val:'$'+fmt2(ind.ema20)+' > $'+fmt2(ind.ema50),              pts:10},
-    {ok:tfOk,    n:'TF Aligned 2/3',   val:ind.tf+'/3',                                             pts:12},
-    {ok:sectOk,  n:'Sector PF > 2',    val:'PF '+pf,                                               pts:5},
-    // Momentum Quality rules (Tradier-derived)
-    {ok:hiOk,    n:'52Wk Hi Prox <15%',val:ind.week52hi>0?'$'+fmt2(ind.price)+' / $'+fmt2(ind.week52hi):'no data', pts:10},
-    {ok:rsRelOk, n:'RS > SPY (5d)',    val:ind.relStr5d>0?'+'+ind.relStr5d.toFixed(2)+'%':ind.relStr5d.toFixed(2)+'%', pts:8},
-    {ok:ema200Ok,n:'Price > EMA200',   val:ind.ema200>0?'$'+fmt2(ind.price)+' > $'+fmt2(ind.ema200):'via EMA trend', pts:6}
+    {ok:rsiOk,    n:'RSI 40-70',          val:'RSI '+ind.rsi,                                          pts:6},
+    {ok:rsiCross, n:'RSI 50-65 (Cardwell)', val:'RSI '+ind.rsi,                                        pts:6},
+    {ok:macdOk,   n:'MACD Hist +',        val:''+(ind.macd>=0?'+':'')+ind.macd,                        pts:10},
+    {ok:adxOk,    n:'ADX > 25',           val:'ADX '+ind.adx,                                          pts:6},
+    {ok:adxEarly, n:'ADX 15-25 + DI+>DI-', val:'ADX '+ind.adx+' DI+'+((ind.diPlus||0).toFixed?ind.diPlus.toFixed(1):'?')+' DI-'+((ind.diMinus||0).toFixed?ind.diMinus.toFixed(1):'?'), pts:6},
+    {ok:emaOk,    n:'EMA20 > EMA50',      val:'$'+fmt2(ind.ema20)+' > $'+fmt2(ind.ema50),              pts:10},
+    {ok:tfOk,     n:'TF Aligned 2/3',     val:ind.tf+'/3',                                             pts:12},
+    {ok:sectOk,   n:'Sector PF > 2',      val:'PF '+pf,                                                pts:5},
+    {ok:hiOk,     n:'52Wk Hi Prox <15%',  val:ind.week52hi>0?'$'+fmt2(ind.price)+' / $'+fmt2(ind.week52hi):'no data', pts:8},
+    {ok:hiTight,  n:'52Wk Hi Prox <5% (G-H)', val:ind.week52hi>0?'$'+fmt2(ind.price)+' / $'+fmt2(ind.week52hi):'no data', pts:6},
+    {ok:rsRelOk,  n:'RS > SPY ('+rsRelLbl+')', val:(rsRelVal>0?'+':'')+(rsRelVal||0).toFixed(2)+'%',   pts:10},
+    {ok:ema200Ok, n:'Price > EMA200',     val:ind.ema200>0?'$'+fmt2(ind.price)+' > $'+fmt2(ind.ema200):'via EMA trend', pts:6}
   ];
   techChecks.forEach(function(c){
     if(c.ok){ score += c.pts; techScore += c.pts; }
@@ -9352,19 +9367,23 @@ function scoreIt(ticker, ind, opt){
   // RSI changes at 7-period are ~70% noise per Connors research; over-
   // weighted at +12 pts and contributes no measurable IC.
 
-  // Rule: MFI Bullish (+9) \u2014 MFI(7) > 40, volume-weighted buying pressure
-  var mfiVal_raw = calcMFI(histDays, 7);
-  var mfiOk      = histDays ? mfiVal_raw > 40 : false;
-  var mfiVal     = histDays ? ('MFI(7) ' + mfiVal_raw + (mfiOk ? ' > 40' : ' \u2264 40')) : 'Load detail to calculate';
-  if(mfiOk){ score += 9; techScore += 9; }
-  res.push({n:'MFI Bullish', pass:mfiOk, val:mfiVal, filter:false, pts:9, isHist:true});
+  // Council 2026-04-29 commit 2/3: MFI(7)>40 \u2192 MFI(14)>50 with rising slope.
+  // 14-period is the standard MFI lookback; 50 threshold mirrors RSI mid-line
+  // logic (rising momentum confirmation, not arbitrary 40 floor).
+  var mfiVal_raw = calcMFI(histDays, 14);
+  var mfiOk      = histDays ? mfiVal_raw > 50 : false;
+  var mfiVal     = histDays ? ('MFI(14) ' + mfiVal_raw + (mfiOk ? ' > 50' : ' \u2264 50')) : 'Load detail to calculate';
+  if(mfiOk){ score += 10; techScore += 10; }
+  res.push({n:'MFI(14) > 50', pass:mfiOk, val:mfiVal, filter:false, pts:10, isHist:true});
 
-  // Rule: CMO Positive (+7) \u2014 CMO(10) > 0, net upward momentum across all bars
-  var cmoVal_raw = calcCMO(histDays, 10);
-  var cmoOk      = histDays ? cmoVal_raw > 0 : false;
-  var cmoVal     = histDays ? ('CMO(10) ' + cmoVal_raw + (cmoOk ? ' > 0' : ' \u2264 0')) : 'Load detail to calculate';
+  // Council 2026-04-29 commit 2/3: CMO(10)>0 \u2192 CMO(9)>50 (Chande's original
+  // 1993 threshold, not the arbitrary zero-line cross). 9-period is Chande's
+  // documented period for swing-horizon momentum.
+  var cmoVal_raw = calcCMO(histDays, 9);
+  var cmoOk      = histDays ? cmoVal_raw > 50 : false;
+  var cmoVal     = histDays ? ('CMO(9) ' + cmoVal_raw + (cmoOk ? ' > 50' : ' \u2264 50')) : 'Load detail to calculate';
   if(cmoOk){ score += 7; techScore += 7; }
-  res.push({n:'CMO Positive', pass:cmoOk, val:cmoVal, filter:false, pts:7, isHist:true});
+  res.push({n:'CMO(9) > 50', pass:cmoOk, val:cmoVal, filter:false, pts:7, isHist:true});
 
   // \u2500\u2500 GO DECISION \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
   // \u2500\u2500 SECTION C: GEX Confirmation (bonus rule, +6 pts, no penalty) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
