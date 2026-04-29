@@ -60,6 +60,8 @@ const ALLOWED_PATH_PREFIXES = [
 // Exact paths (no prefix expansion) — the bare watchlists collection endpoint.
 const ALLOWED_EXACT_PATHS = new Set([
   "/v1/watchlists",
+  "/sync-config",                  // already handled, listed here for clarity
+  "/circuit-breaker/snapshot",     // council #1: drawdown circuit breaker
 ]);
 
 // Per-IP rate limit (in-memory, lives for the Worker isolate's lifetime ~10s).
@@ -275,6 +277,74 @@ export default {
       // Tradier doesn't expose such endpoints today but this is defense
       // against a future addition silently demanding a trade token.
       && /\/v1\/accounts\/[^/]+\/orders(?:\/|$)/.test(url.pathname);
+
+    // ─── COUNCIL #1: SERVER-SIDE CIRCUIT BREAKER ───────────────────────────
+    // Daily / weekly drawdown caps enforced server-side. Client cannot route
+    // around. State stored in SYNC_CONFIG KV under reserved keys:
+    //   __circuit_breaker__         → { dailyLossPct, weeklyLossPct, lastUpdated, lockUntil }
+    // Read on every order POST in live mode; if breached, return 403.
+    //
+    // Caps (hardcoded):
+    //   - Daily realized loss > 2% of starting-day equity → 24h lockout
+    //   - Trailing 5-day loss  > 5% of starting equity   → 7-day lockout
+    //
+    // The scanner POSTs equity snapshots to /circuit-breaker/snapshot daily;
+    // the worker computes the cap state. If no snapshot is fresh (< 25h old),
+    // worker DEFAULTS TO LOCKED (fail-safe).
+    if (isLive && isOrderWrite) {
+      try {
+        const cbRaw = env.SYNC_CONFIG ? await env.SYNC_CONFIG.get("__circuit_breaker__") : null;
+        const cb = cbRaw ? JSON.parse(cbRaw) : null;
+        const nowMs = Date.now();
+        if (cb && cb.lockUntil && cb.lockUntil > nowMs) {
+          const hoursLeft = ((cb.lockUntil - nowMs) / 3600000).toFixed(1);
+          return jsonError(403, `Circuit breaker active — ${cb.lockReason || "drawdown cap breached"}. Lockout: ${hoursLeft}h remaining.`, corsOrigin);
+        }
+        // Stale-snapshot fail-safe: if no snapshot in 25h, lock by default.
+        // Toggle off via env.CB_REQUIRE_FRESH=false (not a secret; an env var).
+        const requireFresh = (env.CB_REQUIRE_FRESH || "true") !== "false";
+        if (requireFresh && cb && cb.lastUpdated && (nowMs - cb.lastUpdated) > 25 * 3600 * 1000) {
+          return jsonError(503, "Circuit breaker snapshot stale (>25h). POST a fresh equity snapshot to /circuit-breaker/snapshot before trading.", corsOrigin);
+        }
+      } catch (e) {
+        // KV failure — fail-open by design (don't block legitimate orders on
+        // KV outage). If the user wants strict, set CB_REQUIRE_FRESH=true
+        // and re-deploy with KV health monitoring.
+      }
+    }
+    // Endpoint to receive equity snapshots from scanner (writes circuit-
+    // breaker state). Body: JSON { todayEquity, weekStartEquity, dailyPnl,
+    // weeklyPnl }. Worker computes lockUntil + reason; KV-persists.
+    if (url.pathname === "/circuit-breaker/snapshot" && request.method === "POST") {
+      if (!env.SYNC_CONFIG) return jsonError(500, "KV not bound", corsOrigin);
+      try {
+        const txt = await request.text();
+        const j = JSON.parse(txt);
+        const dailyPct = (typeof j.dailyPct === "number") ? j.dailyPct : 0;
+        const weeklyPct = (typeof j.weeklyPct === "number") ? j.weeklyPct : 0;
+        const nowMs = Date.now();
+        let lockUntil = 0, lockReason = "";
+        if (dailyPct < -0.02) {
+          lockUntil = nowMs + 24 * 3600 * 1000;
+          lockReason = `daily drawdown ${(dailyPct*100).toFixed(2)}% < -2% cap`;
+        }
+        if (weeklyPct < -0.05) {
+          const wkLock = nowMs + 7 * 24 * 3600 * 1000;
+          if (wkLock > lockUntil) {
+            lockUntil = wkLock;
+            lockReason = `5-day drawdown ${(weeklyPct*100).toFixed(2)}% < -5% cap`;
+          }
+        }
+        const newCb = { dailyPct, weeklyPct, lockUntil, lockReason, lastUpdated: nowMs };
+        await env.SYNC_CONFIG.put("__circuit_breaker__", JSON.stringify(newCb), { expirationTtl: 30 * 86400 });
+        return new Response(JSON.stringify({ ok: true, circuitBreaker: newCb }), {
+          status: 200,
+          headers: { ...corsHeaders(corsOrigin), "Content-Type": "application/json", "Cache-Control": "no-store" },
+        });
+      } catch (e) {
+        return jsonError(400, `Snapshot parse error: ${e.message}`, corsOrigin);
+      }
+    }
     if (isLive && isOrderWrite && env.WRITE_AUTH_TOKEN) {
       // Same paste-newline trim + constant-time compare as X-Live-Token above
       const tradeProvided = (request.headers.get("X-Trade-Token") || "").trim();

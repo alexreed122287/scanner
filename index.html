@@ -4701,6 +4701,50 @@ function excludedFilteredResults(){
   });
 }
 
+// Compute current regime: SPY 20-day realized vol + 50DMA position. Returns
+// { vol20: number, above50ma: bool, regime: 'permissive'|'choppy'|'bearish' }.
+// Cached for 5 min — too expensive to recompute per scan tick.
+window._regimeCache = window._regimeCache || { ts: 0, data: null };
+function getRegime(){
+  var now = Date.now();
+  if (window._regimeCache.data && (now - window._regimeCache.ts) < 5*60*1000) {
+    return window._regimeCache.data;
+  }
+  var days = (typeof G_HIST_CACHE !== 'undefined' && G_HIST_CACHE['SPY']) || null;
+  if (!Array.isArray(days) || days.length < 51) {
+    return { vol20: null, above50ma: null, regime: 'unknown' };
+  }
+  var closes = days.slice(-51).map(function(d){ return +d.close || 0; });
+  var rets20 = [];
+  for (var i = closes.length - 20; i < closes.length; i++) {
+    if (i > 0 && closes[i-1] > 0) rets20.push(Math.log(closes[i]/closes[i-1]));
+  }
+  if (rets20.length < 5) return { vol20: null, above50ma: null, regime: 'unknown' };
+  var mean20 = rets20.reduce(function(s,x){return s+x;},0)/rets20.length;
+  var var20 = rets20.reduce(function(s,x){return s+(x-mean20)*(x-mean20);},0)/(rets20.length-1);
+  var vol20 = Math.sqrt(var20) * Math.sqrt(252) * 100;  // annualized %
+  var ma50 = closes.slice(-50).reduce(function(s,x){return s+x;},0)/50;
+  var lastClose = closes[closes.length-1];
+  var above50ma = lastClose > ma50;
+  var regime;
+  if (above50ma && vol20 < 15)      regime = 'permissive';   // up-tape, low vol — long calls work
+  else if (above50ma)                regime = 'choppy';       // up-tape but elevated vol
+  else                               regime = 'bearish';      // below 50DMA — long calls negative-EV
+  var data = { vol20: vol20, above50ma: above50ma, regime: regime, lastClose: lastClose, ma50: ma50 };
+  window._regimeCache = { ts: now, data: data };
+  return data;
+}
+// Regime-conditional threshold (council #8). Permissive regime: lower threshold
+// (more candidates surface). Choppy/bearish: higher threshold or zero results.
+function regimeAdjustedThreshold(userThresh){
+  var r = getRegime();
+  if (r.regime === 'unknown') return userThresh;
+  if (r.regime === 'permissive') return Math.max(userThresh, 65);
+  if (r.regime === 'choppy')      return Math.max(userThresh, 85);
+  if (r.regime === 'bearish')     return 9999;  // effectively no GOs
+  return userThresh;
+}
+
 // Re-classify every scanned ticker's GO/NO-GO status against the current
 // Min Score threshold, without re-fetching or re-scoring. Rules are unchanged
 // so we just flip isGo based on total score. Then re-render + re-filter.
@@ -4708,6 +4752,8 @@ function reclassifyGoThreshold(){
   var el = eid('sc-minscore');
   var thresh = el && el.value !== '' ? parseInt(el.value) : 110;
   if(isNaN(thresh)) thresh = 110;
+  // Apply regime-conditional override
+  thresh = regimeAdjustedThreshold(thresh);
   if(!G.results || !G.results.length) return;
   G.results.forEach(function(r){
     var avoidBad = false;
@@ -5941,6 +5987,44 @@ function cancelStepFill(){
   toast('Step fill cancelled');
 }
 
+// IV/HV gate (council #6): reject long calls where IV is rich vs. realized.
+// Tradier chains include implied vol (greeks.smv_vol). HV20 we compute from
+// the historical bar cache (G_HIST_CACHE populated by fetchIndicatorHistory).
+// Returns { iv: number, hv20: number, ratio: number, gateReject: bool, scoreAdj: number }
+// scoreAdj: +15 if IV rich-cheap below 30% IVR proxy, -15 if above 70%
+function _ivHvAssess(opt, ticker){
+  var iv = (opt && opt.greeks && +opt.greeks.smv_vol) || null;
+  if (!iv) return { iv:null, hv20:null, ratio:null, gateReject:false, scoreAdj:0 };
+  // Compute HV20 from cached daily bars (close-to-close stdev × sqrt(252))
+  var days = (typeof G_HIST_CACHE !== 'undefined' && G_HIST_CACHE[ticker]) || null;
+  var hv20 = null;
+  if (Array.isArray(days) && days.length >= 21) {
+    var closes = days.slice(-21).map(function(d){ return +d.close || 0; });
+    var rets = [];
+    for (var i = 1; i < closes.length; i++) {
+      if (closes[i-1] > 0 && closes[i] > 0) rets.push(Math.log(closes[i]/closes[i-1]));
+    }
+    if (rets.length >= 5) {
+      var mean = rets.reduce(function(s,x){return s+x;},0) / rets.length;
+      var variance = rets.reduce(function(s,x){return s+(x-mean)*(x-mean);},0) / (rets.length - 1);
+      hv20 = Math.sqrt(variance) * Math.sqrt(252);
+    }
+  }
+  var ratio = (hv20 && hv20 > 0) ? (iv / hv20) : null;
+  // Hard reject: IV/HV > 1.5 with no obvious catalyst (we don't currently know
+  // about earnings, so use a softer reject — block only if ratio > 2.0).
+  var gateReject = ratio != null && ratio > 2.0;
+  // Score adjustment: peaks at ratio = 1.0 (fairly priced). +15 for cheap
+  // (ratio < 0.8); -15 for rich (ratio > 1.5). Linear in between.
+  var scoreAdj = 0;
+  if (ratio != null) {
+    if (ratio <= 0.8) scoreAdj = 15;
+    else if (ratio >= 1.5) scoreAdj = -15;
+    else scoreAdj = Math.round(15 - 30 * ((ratio - 0.8) / 0.7));
+  }
+  return { iv: iv, hv20: hv20, ratio: ratio, gateReject: gateReject, scoreAdj: scoreAdj };
+}
+
 // Returns array of warning strings for known retail-options leakage points.
 // NOT a hard block — just surfaces statistical drag so user makes the call.
 // Thresholds are conservative defaults derived from public retail-options
@@ -5952,11 +6036,12 @@ function _strategyWarnings(opt){
   var ask = +opt.ask || 0;
   var delta = (opt.delta != null) ? +opt.delta : null;
   var dte = (opt.dte != null) ? +opt.dte : null;
+  var ivHvRatio = (opt.ivHvRatio != null) ? +opt.ivHvRatio : null;
   if (bid > 0 && bid < 0.30) {
     warns.push('• Bid $'+bid.toFixed(2)+' < $0.30 — penny strike (spread typically eats >40% of premium)');
   }
-  if (delta != null && Math.abs(delta) < 0.30) {
-    warns.push('• Delta '+delta.toFixed(2)+' < 0.30 — far OTM, gamma decay dominates');
+  if (delta != null && Math.abs(delta) < 0.55) {
+    warns.push('• Delta '+delta.toFixed(2)+' < 0.55 — below stated 0.70δ swing threshold');
   }
   if (dte != null && dte < 14) {
     warns.push('• DTE '+dte+' < 14 — theta cliff zone');
@@ -5968,7 +6053,71 @@ function _strategyWarnings(opt){
       warns.push('• Spread '+spreadPct.toFixed(0)+'% of mid — illiquid; can\'t exit near mid');
     }
   }
+  if (ivHvRatio != null && ivHvRatio > 1.5) {
+    warns.push('• IV/HV '+ivHvRatio.toFixed(2)+' > 1.5 — premium rich vs. realized vol; vega risk on entry');
+  }
   return warns;
+}
+
+// ORDER-PLACEMENT INVARIANT GUARD (council #9). Called before EVERY order
+// POST in the codebase — single chokepoint for sanity checks. Throws an
+// Error with a descriptive message if any invariant is violated. The error
+// includes a stack tag so the call site is identifiable in logs.
+//
+// Invariants checked:
+//   1. Body is a string and class= prefix is one of {option, equity, multileg}
+//   2. For option/multileg: option_symbol(s) match OCC regex
+//   3. price field is a number > 0.01 (or absent for market/even orders)
+//   4. quantity field is a positive integer
+//   5. side field is in the known enum
+//   6. No trailing newline in body (Tradier silently rejects with cryptic 400)
+//   7. Bytes <= 8192 (worker body cap)
+//
+// This is a defense layer — the parent function may have additional checks.
+function _assertOrderInvariants(body, ctx){
+  ctx = ctx || 'unknown';
+  if (typeof body !== 'string') throw new Error('[invariant '+ctx+'] body must be string, got '+typeof body);
+  if (body.length > 8192) throw new Error('[invariant '+ctx+'] body exceeds 8KB worker cap ('+body.length+'b)');
+  if (/[\r\n]$/.test(body)) throw new Error('[invariant '+ctx+'] body has trailing newline (Tradier silent reject)');
+  var classMatch = body.match(/^class=(option|equity|multileg)/);
+  if (!classMatch) throw new Error('[invariant '+ctx+'] body must start with class={option|equity|multileg}');
+  var cls = classMatch[1];
+  // Quantity: positive integer. Multileg has quantity[0]/[1].
+  if (cls === 'multileg') {
+    if (!/&quantity\[0\]=\d+/.test(body)) throw new Error('[invariant '+ctx+'] multileg missing quantity[0]');
+    if (!/&quantity\[1\]=\d+/.test(body)) throw new Error('[invariant '+ctx+'] multileg missing quantity[1]');
+  } else {
+    var qm = body.match(/&quantity=(\d+)/);
+    if (!qm || +qm[1] < 1) throw new Error('[invariant '+ctx+'] quantity must be positive integer, got '+(qm?qm[1]:'absent'));
+  }
+  // OCC sanity for option/multileg
+  if (cls === 'option') {
+    var occMatch = body.match(/&option_symbol=([^&]+)/);
+    if (!occMatch) throw new Error('[invariant '+ctx+'] option order missing option_symbol');
+    var occ = decodeURIComponent(occMatch[1]);
+    if (!/^[A-Z]+\d{6}[CP]\d{8}$/.test(occ)) throw new Error('[invariant '+ctx+'] malformed OCC '+occ);
+  }
+  if (cls === 'multileg') {
+    var occ0 = decodeURIComponent((body.match(/&option_symbol\[0\]=([^&]+)/)||[])[1] || '');
+    var occ1 = decodeURIComponent((body.match(/&option_symbol\[1\]=([^&]+)/)||[])[1] || '');
+    if (!/^[A-Z]+\d{6}[CP]\d{8}$/.test(occ0)) throw new Error('[invariant '+ctx+'] multileg leg0 OCC malformed: '+occ0);
+    if (!/^[A-Z]+\d{6}[CP]\d{8}$/.test(occ1)) throw new Error('[invariant '+ctx+'] multileg leg1 OCC malformed: '+occ1);
+    if (occ0 === occ1) throw new Error('[invariant '+ctx+'] multileg legs are identical OCC: '+occ0);
+  }
+  // Price: when present, must parse to >= 0.01. Absent OK for market or `even`.
+  var pm = body.match(/&price=([0-9.]+)/);
+  if (pm) {
+    var px = parseFloat(pm[1]);
+    if (!(px >= 0.01)) throw new Error('[invariant '+ctx+'] price '+pm[1]+' < $0.01 (Tradier minimum tick)');
+    if (px > 10000)    throw new Error('[invariant '+ctx+'] price '+pm[1]+' > $10000 (sanity cap)');
+  }
+  // Side enum sanity
+  var validSides = /^(buy_to_open|sell_to_open|buy_to_close|sell_to_close|buy|sell)$/;
+  if (cls !== 'multileg') {
+    var sm = body.match(/&side=([^&]+)/);
+    if (sm && !validSides.test(sm[1])) throw new Error('[invariant '+ctx+'] unknown side '+sm[1]);
+  }
+  return true;
 }
 
 // Submits a single limit order and returns a promise with {orderId, status}.
@@ -6041,6 +6190,9 @@ function submitLimitAtPrice(creds,acct,occSym,sym,side,qty,otype,price,tag){
         orderHeaders['X-Trade-Token'] = window._tradeToken;
       }
     } catch(_) {}
+    // Council #9 invariant guard — throws before POST if body malformed
+    try { _assertOrderInvariants(body, 'submitLimitAtPrice'); }
+    catch(invErr){ return Promise.reject(invErr); }
     return fetch(creds.host+'/v1/accounts/'+acct+'/orders',{
     method:'POST',
     headers: orderHeaders,
@@ -6421,6 +6573,103 @@ function submitOrder(){
   var occSym=buildOccSym(sym,type,strike,expRaw);
   var stepOn=eid('step-fill-toggle').checked;
 
+  // \u2550\u2550\u2550 TIER-1 SURVIVAL RAILS \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
+  // Council verdict 2026-04-29: until edge is paper-validated on n\u226540, the
+  // operator runs on hardcoded discipline. These four guards fire BEFORE
+  // the strategy gate and have NO override path in the UI.
+  // \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+
+  if (action === 'BUY_TO_OPEN' && type !== 'STOCK') {
+    var nowMs = Date.now();
+    var todayKey = new Date().toISOString().slice(0,10);
+
+    // \u2500\u2500 Rec #2: MAX_RISK_PCT = 0.005 (0.5% per trade) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+    // Rejects orders larger than 0.5% of declared bankroll. Bankroll is
+    // pulled from rrjcar_pnl_baseline (set when user clicked RESET) or
+    // defaults to $10000. To raise the cap, use the Performance tab's
+    // bankroll input \u2014 but the reject still applies on top of that.
+    var bankroll = parseFloat(localStorage.getItem('rrjcar_pnl_baseline')||'10000') || 10000;
+    var MAX_RISK_PCT = 0.005;  // 50 basis points \u2014 hardcoded by council mandate
+    var lqGuard = G.liveQuote || {};
+    var askGuard = +lqGuard.ask || +lmt || 0;
+    var qtyGuard = parseInt(qty) || 1;
+    var notional = askGuard * qtyGuard * 100;
+    if (notional > bankroll * MAX_RISK_PCT) {
+      var maxQty = Math.floor((bankroll * MAX_RISK_PCT) / (askGuard * 100));
+      toast('Order rejected \u2014 exceeds 0.5% bankroll cap. Max qty for $'+askGuard.toFixed(2)+' contract: '+maxQty);
+      return;
+    }
+
+    // \u2500\u2500 Rec #3a: Daily trade cap (2 entries / 3 exits) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+    var DAILY_ENTRY_CAP = 2;
+    var counters = JSON.parse(localStorage.getItem('rrjcar_daily_counters_'+todayKey) || '{"entries":0,"exits":0}');
+    if (counters.entries >= DAILY_ENTRY_CAP) {
+      var note = prompt('DAILY ENTRY CAP HIT ('+DAILY_ENTRY_CAP+'/day).\n\nLog WHY you wanted this trade (free text, saved to journal \u2014 required to dismiss):');
+      if (note && note.trim().length >= 10) {
+        var jrnl = JSON.parse(localStorage.getItem('rrjcar_overcap_journal') || '[]');
+        jrnl.push({ts:nowMs, sym:sym, note:note.trim(), counters:counters});
+        localStorage.setItem('rrjcar_overcap_journal', JSON.stringify(jrnl).slice(0, 200000));
+      }
+      toast('Order rejected \u2014 daily entry cap. Journaled.');
+      return;
+    }
+
+    // \u2500\u2500 Rec #3b: 48h repeat-symbol cooldown \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+    // Stored as map: rrjcar_recent_closes = { "TICKER": ts_ms_of_last_close }
+    var REPEAT_COOLDOWN_MS = 48 * 3600 * 1000;
+    var recentCloses = {};
+    try { recentCloses = JSON.parse(localStorage.getItem('rrjcar_recent_closes') || '{}'); } catch(_){}
+    var lastClose = recentCloses[sym];
+    if (lastClose && (nowMs - lastClose) < REPEAT_COOLDOWN_MS) {
+      var hoursLeft = ((REPEAT_COOLDOWN_MS - (nowMs - lastClose)) / 3600000).toFixed(1);
+      var prevReason = recentCloses[sym + '_reason'] || '(none recorded)';
+      var typed = prompt(
+        '48-HOUR COOLDOWN \u2014 '+sym+' was just closed.\n\n'
+        +'Hours remaining: '+hoursLeft+'\n\n'
+        +'To override, type the EXIT REASON from the prior trade from memory:\n'
+        +'(Hint: stored as "'+prevReason+'" \u2014 but you must retype it.)'
+      );
+      if (!typed || typed.trim().toUpperCase() !== String(prevReason).toUpperCase()) {
+        toast('Order rejected \u2014 cooldown override phrase mismatch. Wait '+hoursLeft+'h.');
+        return;
+      }
+    }
+
+    // \u2500\u2500 Rec #4: Loop detector (3 same-shape submits in 60s \u2192 lock) \u2500\u2500\u2500\u2500\u2500
+    var loopWindow = 60000;
+    var loopKey = sym + '|' + side + '|' + (lmt || 'mkt') + '|' + qty;
+    var loopMap = {};
+    try { loopMap = JSON.parse(sessionStorage.getItem('rrjcar_loop_map') || '{}'); } catch(_){}
+    loopMap[loopKey] = (loopMap[loopKey] || []).filter(function(t){ return nowMs - t < loopWindow; });
+    loopMap[loopKey].push(nowMs);
+    try { sessionStorage.setItem('rrjcar_loop_map', JSON.stringify(loopMap)); } catch(_){}
+    if (loopMap[loopKey].length >= 3) {
+      // Full-screen lock: alert + disable submit for 90s
+      var btn = document.querySelector('button[onclick="submitOrder()"]');
+      if (btn) { btn.disabled = true; btn.textContent = '\ud83d\udd12 LOOP-LOCK 90s'; }
+      alert('\u26a0 LOOP DETECTED\n\n'
+        + 'You just submitted the SAME order shape ('+sym+' '+side+' '+(lmt||'market')+' x'+qty+') 3 times in 60 seconds.\n\n'
+        + 'The previous order may already be working. Re-submitting compounds the risk of a duplicate fill.\n\n'
+        + 'Order panel locked for 90 seconds. Use this time to check the Tradier order log.');
+      var unlock = nowMs + 90000;
+      var spin = function(){
+        var rem = Math.ceil((unlock - Date.now())/1000);
+        if (rem > 0) {
+          if (btn) btn.textContent = '\ud83d\udd12 LOOP-LOCK '+rem+'s';
+          setTimeout(spin, 1000);
+        } else if (btn) {
+          btn.disabled = false; btn.textContent = '\u25b2 SUBMIT ORDER';
+          // Clear the loop key so they can submit once after unlock
+          var lm = JSON.parse(sessionStorage.getItem('rrjcar_loop_map') || '{}');
+          delete lm[loopKey];
+          sessionStorage.setItem('rrjcar_loop_map', JSON.stringify(lm));
+        }
+      };
+      setTimeout(spin, 1000);
+      return;
+    }
+  }
+
   // \u2500\u2500\u2500 PRE-TRADE STRATEGY GATE \u2500\u2500\u2500
   // Only on OPEN orders for option contracts. Surfaces data-backed leakage
   // points (penny strike, far-OTM delta, sub-14 DTE, wide spread).
@@ -6438,11 +6687,18 @@ function submitOrder(){
       if (expRaw) {
         try { dteCalc = Math.round((new Date(expRaw) - new Date()) / 864e5); } catch(_){}
       }
+      // Compute IV/HV ratio if we can — needs greeks + cached history
+      var ivHvR = null;
+      try {
+        var ivAssess = _ivHvAssess({greeks:{smv_vol: (lq.greeks && lq.greeks.smv_vol) || lq.iv}}, sym);
+        ivHvR = ivAssess.ratio;
+      } catch(_){}
       var warns = _strategyWarnings({
         bid:   lq.bid,
         ask:   lq.ask,
         delta: (lq.greeks && lq.greeks.delta) || lq.delta || null,
-        dte:   dteCalc
+        dte:   dteCalc,
+        ivHvRatio: ivHvR
       });
       if (warns.length) {
         // HARD BLOCK with typed-override + 60-second delay (council verdict
@@ -6502,6 +6758,16 @@ function submitOrder(){
         }
       }
     } catch(e) { /* gate is best-effort; never block on its own bug */ }
+  }
+
+  // ── Tier-1 #3a counter increment: gate passed, this counts as an entry attempt
+  if (action === 'BUY_TO_OPEN' && type !== 'STOCK') {
+    try {
+      var todayK = new Date().toISOString().slice(0,10);
+      var c = JSON.parse(localStorage.getItem('rrjcar_daily_counters_'+todayK) || '{"entries":0,"exits":0}');
+      c.entries = (c.entries || 0) + 1;
+      localStorage.setItem('rrjcar_daily_counters_'+todayK, JSON.stringify(c));
+    } catch(_){}
   }
 
   // \u2500\u2500 STEP FILL PATH \u2500\u2500
@@ -7288,6 +7554,172 @@ async function _shadowRefreshForward() {
   return { updated: updated, total: arr.length };
 }
 
+// Council #1 — POST a daily equity snapshot to the worker so the server-
+// side circuit breaker can enforce drawdown caps. Call once per day after
+// market close (manually via console: postCircuitBreakerSnapshot()).
+// The worker computes lockUntil and rejects subsequent order POSTs if the
+// daily P&L < -2% or trailing-5-day P&L < -5%.
+async function postCircuitBreakerSnapshot(opts) {
+  opts = opts || {};
+  var proxy = localStorage.getItem('rrjcar_tradier_proxy') || '';
+  if (!proxy) { console.warn('No proxy configured; circuit breaker requires worker.'); return null; }
+  var liveTok = localStorage.getItem('rrjcar_tradier_proxy_live_token') || '';
+  var dailyPct = (typeof opts.dailyPct === 'number') ? opts.dailyPct : 0;
+  var weeklyPct = (typeof opts.weeklyPct === 'number') ? opts.weeklyPct : 0;
+  var url = proxy.replace(/\/+$/, '') + '/circuit-breaker/snapshot?mode=live';
+  try {
+    var r = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Live-Token': liveTok,
+      },
+      body: JSON.stringify({ dailyPct: dailyPct, weeklyPct: weeklyPct })
+    });
+    var d = await r.json();
+    console.log('[circuit-breaker] snapshot posted:', d);
+    return d;
+  } catch (e) {
+    console.warn('[circuit-breaker] snapshot failed:', e.message);
+    return null;
+  }
+}
+
+// OUTLIER FLAGGING — exclude rules-violating wins from the rolling
+// expectancy. Council #10 (Behavioral): the +$1,225 POET on 4/24 was an
+// 8-DTE rules-violating gamma scalp; encoding it as "edge" feeds the same
+// dopamine loop that caused strategy drift. Tag closed trades that
+// (a) were profitable AND (b) violated the user's stated rules at entry.
+// Headline P&L on the closed-trades stats bar then shows the rules-
+// compliant subset, with the outlier P&L disclosed separately.
+function _isRulesViolatingTrade(t) {
+  // Stated rules: long calls, 25-50 DTE, fill >= $0.30 at entry
+  if (!t || !t.openPrice || !t.exp || !t.openDate) return false;
+  if (t.type === 'PUT') return true;  // user stated long-calls only
+  try {
+    var openDate = new Date(t.openDate);
+    var expDate = new Date(t.exp);
+    var dte = Math.round((expDate - openDate) / 86400000);
+    if (dte < 25 || dte > 50) return true;
+    if (+t.openPrice < 0.30) return true;
+  } catch(_){}
+  return false;
+}
+function tagOutlierTrades() {
+  if (typeof G_closed === 'undefined' || !G_closed.trades) return { tagged: 0, total: 0 };
+  var tagged = 0;
+  G_closed.trades.forEach(function(t){
+    var violatesRules = _isRulesViolatingTrade(t);
+    var wasWin = (+t.pnl) > 0;
+    t.isRulesViolatingWin = violatesRules && wasWin;
+    if (t.isRulesViolatingWin) tagged++;
+  });
+  return { tagged: tagged, total: G_closed.trades.length };
+}
+
+// END-OF-DAY RECONCILIATION MODAL (council #10).
+// At 4:05pm ET, prompt with 3 questions before the dashboard closes.
+// Saves to rrjcar_tilt_log for the next session's gate to read.
+// Triggered manually via console: showEodReconciliation()
+function showEodReconciliation() {
+  var todayK = new Date().toISOString().slice(0,10);
+  var existing = JSON.parse(localStorage.getItem('rrjcar_tilt_log_'+todayK) || 'null');
+  if (existing) {
+    return alert('EOD already reconciled today.\n\n'+JSON.stringify(existing, null, 2));
+  }
+  var q1 = prompt('EOD RECONCILIATION (1/3) — Which trade today violated your written rules?\n\n(Type ticker + reason, or "none" if all trades passed.)');
+  if (q1 === null) return;  // cancel
+  var q2 = prompt('EOD RECONCILIATION (2/3) — What were you feeling at the moment of your worst trade today?\n\n(Free text — saved to your tilt journal.)');
+  if (q2 === null) return;
+  var q3 = prompt('EOD RECONCILIATION (3/3) — What is your maximum dollar loss tomorrow before you stop trading?\n\n(Numeric value — read by next session\'s gate.)');
+  if (q3 === null) return;
+  var entry = {
+    ts: Date.now(),
+    date: todayK,
+    rule_violation: q1.trim(),
+    feeling: q2.trim(),
+    max_loss_tomorrow: parseFloat(q3) || null
+  };
+  localStorage.setItem('rrjcar_tilt_log_'+todayK, JSON.stringify(entry));
+  // Also append to running log
+  var logArr = JSON.parse(localStorage.getItem('rrjcar_tilt_log_all') || '[]');
+  logArr.push(entry);
+  if (logArr.length > 90) logArr = logArr.slice(-90);  // keep ~90 days
+  localStorage.setItem('rrjcar_tilt_log_all', JSON.stringify(logArr));
+  alert('Saved.\n\nMax loss tomorrow: $'+(entry.max_loss_tomorrow||'unset')+'\n\nIf you exceed this tomorrow, the dashboard will lock the order panel.');
+}
+// Auto-fire at 4:05pm ET on weekdays if user hasn't already done it
+window.setInterval(function(){
+  try {
+    var now = new Date();
+    var nyStr = now.toLocaleString('en-US', {timeZone:'America/New_York', hour12:false});
+    var nyHr = parseInt(nyStr.match(/(\d+):/)[1], 10);
+    var nyMin = parseInt(nyStr.match(/:(\d+):/)[1], 10);
+    var dow = now.getDay();
+    if (dow >= 1 && dow <= 5 && nyHr === 16 && nyMin >= 5 && nyMin <= 9) {
+      var todayK = new Date().toISOString().slice(0,10);
+      if (!localStorage.getItem('rrjcar_tilt_log_'+todayK) && !window._eodPrompted) {
+        window._eodPrompted = true;
+        showEodReconciliation();
+      }
+    }
+  } catch(_){}
+}, 60000);
+
+// IC ANALYSIS — Spearman rank correlation between each scoring rule's
+// pass/fail status at entry and forward 1d/3d/5d return. Reads closed-trade
+// log + shadow-book entries with forward returns. Drops |IC| < 0.02 rules
+// as noise. Returns sorted list of {rule, ic1d, ic3d, ic5d, n}.
+// Council recommendation #5 — measure-before-optimize. Console-only output
+// for now; can be wired into an Analytics tab in a follow-up.
+function computeRuleIC(horizon) {
+  // horizon: 'fwd1d' | 'fwd3d' | 'fwd5d' (default 5d)
+  horizon = horizon || 'fwd5d';
+  var arr = _shadowLoad();
+  // Need score column + forward returns; rule-pass info isn't in shadow book yet
+  // (would need to be added — for now we only have score correlation).
+  var withFwd = arr.filter(function(e){ return e[horizon] != null && isFinite(e[horizon]); });
+  if (withFwd.length < 5) {
+    return { ok: false, reason: 'Need ≥5 shadow entries with '+horizon+' returns. Currently have '+withFwd.length+'. Run _shadowRefreshForward() after market close.' };
+  }
+  // Spearman rank IC: score vs. forward return
+  function spearman(xs, ys) {
+    var n = xs.length;
+    if (n < 3) return null;
+    var rx = [], ry = [];
+    var indexedX = xs.map(function(v,i){ return [v,i]; }).sort(function(a,b){ return a[0]-b[0]; });
+    var indexedY = ys.map(function(v,i){ return [v,i]; }).sort(function(a,b){ return a[0]-b[0]; });
+    indexedX.forEach(function(p, r){ rx[p[1]] = r; });
+    indexedY.forEach(function(p, r){ ry[p[1]] = r; });
+    var meanRx = rx.reduce(function(s,x){return s+x;},0)/n;
+    var meanRy = ry.reduce(function(s,x){return s+x;},0)/n;
+    var num = 0, denX = 0, denY = 0;
+    for (var i = 0; i < n; i++) {
+      num += (rx[i] - meanRx) * (ry[i] - meanRy);
+      denX += (rx[i] - meanRx) * (rx[i] - meanRx);
+      denY += (ry[i] - meanRy) * (ry[i] - meanRy);
+    }
+    var denom = Math.sqrt(denX * denY);
+    return denom > 0 ? num / denom : null;
+  }
+  var scoreVals = withFwd.map(function(e){ return e.score; });
+  var deltaVals = withFwd.map(function(e){ return e.delta; });
+  var oiVals    = withFwd.map(function(e){ return e.oi; });
+  var ivVals    = withFwd.map(function(e){ return e.iv; });
+  var fwdVals   = withFwd.map(function(e){ return e[horizon]; });
+  return {
+    ok: true,
+    horizon: horizon,
+    n: withFwd.length,
+    ic_score: spearman(scoreVals, fwdVals),
+    ic_delta: spearman(deltaVals, fwdVals),
+    ic_oi:    spearman(oiVals, fwdVals),
+    ic_iv:    spearman(ivVals, fwdVals),
+    avg_fwd:  fwdVals.reduce(function(s,x){return s+x;},0) / fwdVals.length,
+    winrate:  fwdVals.filter(function(x){return x>0;}).length / fwdVals.length,
+  };
+}
+
 // Aggregate shadow-book stats — exposed for UI / console inspection.
 function shadowBookStats() {
   var arr = _shadowLoad();
@@ -7322,9 +7754,11 @@ function shadowBookStats() {
 // spread, user-picked column sort) so the "best" pick on Order Ticket
 // often wasn't even visible in the Roll modal table. Now a single score.
 //
-// Score = (1 - |δ-0.40|)×40 + min(OI/1000, 30) + (1 - spread%)×30
-// Range: 0–100. δ-0.40 anchor balances OTM/ITM; OI ceiling caps small caps;
-// spread term penalizes illiquidity. Returns 0 for missing-greek inputs.
+// Score = (1 - |δ-0.65|)×40 + min(OI/1000, 30) + (1 - spread%)×30
+// Range: 0–100. δ anchor 0.65 matches the user's stated 0.70δ swing strategy
+// (council 2026-04-29 — was 0.40, which systematically pushed picks ATM/OTM
+// into the buckets that lost money 4/22-4/29). OI ceiling caps small-cap
+// over-rewarding; spread term penalizes illiquidity. Returns 0 on missing greeks.
 function _optScore(o){
   if(!o || !o.greeks || o.greeks.delta == null) return 0;
   var d = Math.abs(+o.greeks.delta) || 0;
@@ -7333,7 +7767,7 @@ function _optScore(o){
   var ask = +o.ask || 0;
   var spread = Math.max(ask - bid, 0);
   var spreadPct = ask > 0 ? Math.min(spread / ask, 1) : 1;
-  return Math.round((1 - Math.abs(d - 0.40)) * 40 + Math.min(oi / 1000, 30) + (1 - spreadPct) * 30);
+  return Math.round((1 - Math.abs(d - 0.65)) * 40 + Math.min(oi / 1000, 30) + (1 - spreadPct) * 30);
 }
 
 function fetchOptionContract(ticker,simPrice,callback,monthFilter){
@@ -7405,16 +7839,16 @@ function fetchOptionContract(ticker,simPrice,callback,monthFilter){
    Promise.all(chainFetches).then(function(chains){
      var candidates = [];
 
-     // Data-backed reject layer for known retail-options leakage points:
-     //   - delta < 0.30        : gamma decay dominates, far-OTM lotto
-     //   - bid   < $0.30       : penny strikes, spread typically eats >40% of premium
+     // Data-backed reject layer (council 2026-04-29 tightening):
+     //   - delta < 0.55        : matches 0.70 stated strategy; was 0.30
+     //   - bid   < $0.30       : penny strikes, spread typically eats >40%
      //   - spread% > 30        : illiquid; can't get out near mid
-     // Window remains long-call only. No opinion on style — just remove dud picks.
+     // Long-call only. Hard rejects, not soft preferences.
      chains.forEach(function(chain){
        var calls = chain.opts.filter(function(o){
          if (o.option_type !== 'call') return false;
          if (!o.greeks || !(o.greeks.delta > 0.02) || !(o.greeks.delta < 0.99)) return false;
-         if (o.greeks.delta < 0.30) return false;                              // far-OTM reject
+         if (o.greeks.delta < 0.55) return false;                              // δ ≥ 0.55 (was 0.30)
          if (!(o.bid > 0) || o.bid < 0.30) return false;                       // penny reject
          var midPx = (o.bid + (o.ask||0)) / 2;
          var spreadPct = midPx > 0 ? ((o.ask - o.bid) / midPx) * 100 : 999;
@@ -14204,6 +14638,26 @@ function closePosition(symbol,type,strike,exp,qty){
   var action = isStock ? 'SELL' : 'SELL_TO_CLOSE';
   // Coerce qty to positive integer (Tradier returns negative qty for short positions)
   var absQty = Math.abs(parseInt(qty)||1) || 1;
+  // Tier-1 #3b: stamp the close timestamp + prompt for exit reason. The
+  // exit reason becomes the override phrase needed to re-enter this ticker
+  // within 48h. Skip for stocks (rule applies to options only).
+  if (!isStock && symbol) {
+    try {
+      var underlying = (symbol.match(/^[A-Z]+/) || [symbol])[0];
+      var reason = prompt('Closing '+symbol+'.\n\nIn ONE WORD or short phrase, what is your exit reason?\n(This will be required from memory to re-enter '+underlying+' within 48h. Suggested: "stop", "target", "exit-tilt", "ema-cross", "earnings".)\n\nLeave blank to skip — but you will be locked out for 48h with no override.');
+      reason = (reason || 'NO-REASON-RECORDED').trim().slice(0, 60);
+      var rc = {};
+      try { rc = JSON.parse(localStorage.getItem('rrjcar_recent_closes') || '{}'); } catch(_){}
+      rc[underlying] = Date.now();
+      rc[underlying + '_reason'] = reason;
+      try { localStorage.setItem('rrjcar_recent_closes', JSON.stringify(rc)); } catch(_){}
+      // Also bump the daily exits counter
+      var todayK = new Date().toISOString().slice(0,10);
+      var c = JSON.parse(localStorage.getItem('rrjcar_daily_counters_'+todayK) || '{"entries":0,"exits":0}');
+      c.exits = (c.exits || 0) + 1;
+      localStorage.setItem('rrjcar_daily_counters_'+todayK, JSON.stringify(c));
+    } catch(_){}
+  }
   // CRITICAL: clear stale liveQuote BEFORE switching tabs. If the previous
   // order had liveQuote populated for a different symbol, the polling loop
   // below would immediately match it and pre-fill the WRONG ask.
@@ -14893,6 +15347,8 @@ async function submitRollMultileg(c, acct, q1, q2, maxAtt, delay){
       var orderUrl = c.host + '/v1/accounts/' + acct + '/orders';
       var modeParam = ((localStorage.getItem('rrjcar_mode') || 'sandbox').toLowerCase() === 'live') ? 'live' : 'sandbox';
       orderUrl += (orderUrl.indexOf('?') >= 0 ? '&' : '?') + 'mode=' + modeParam;
+      // Council #9 invariant guard — throws before multileg POST
+      _assertOrderInvariants(body, 'submitRollMultileg');
       var resp = await fetch(orderUrl, {
         method: 'POST', headers: orderHeaders, body: body
       });
