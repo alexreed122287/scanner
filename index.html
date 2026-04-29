@@ -1181,7 +1181,7 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
     <!-- B-2 default Min Score bumped 89 -> 100. With theme overlay (added 2026-04)
          scores trend ~10 pts higher, so the historical "GO rate" at 89 became
          too permissive. 100 preserves the prior selectivity. Adjust to taste. -->
-    <label>Min Score <input type="number" id="sc-minscore" value="100" style="width:60px;" onchange="reclassifyGoThreshold()"></label>
+    <label>Min Score <input type="number" id="sc-minscore" value="150" style="width:60px;" onchange="reclassifyGoThreshold()" title="Council 2026-04-29: bumped from 100 → 150 to match the new ~250-pt max from added Minervini Template, Pocket Pivot, VCP, BBW Squeeze, Donchian, JT 12-1, U/D Volume rules. ≈ 60% of max."></label>
     <button class="btn" onclick="applyFilters()">FILTER</button>
     <button class="btn" onclick="clearFilters()" style="border-color:var(--gry2);color:var(--gry);">CLEAR</button>
   </div>
@@ -4746,8 +4746,8 @@ function regimeAdjustedThreshold(userThresh){ return userThresh; }
 // so we just flip isGo based on total score. Then re-render + re-filter.
 function reclassifyGoThreshold(){
   var el = eid('sc-minscore');
-  var thresh = el && el.value !== '' ? parseInt(el.value) : 110;
-  if(isNaN(thresh)) thresh = 110;
+  var thresh = el && el.value !== '' ? parseInt(el.value) : 150;
+  if(isNaN(thresh)) thresh = 150;
   // Apply regime-conditional override
   thresh = regimeAdjustedThreshold(thresh);
   if(!G.results || !G.results.length) return;
@@ -9385,6 +9385,182 @@ function scoreIt(ticker, ind, opt){
   if(cmoOk){ score += 7; techScore += 7; }
   res.push({n:'CMO(9) > 50', pass:cmoOk, val:cmoVal, filter:false, pts:7, isHist:true});
 
+  // ═══ COUNCIL 2026-04-29 COMMIT 3/3: NEW EVIDENCE-BASED RULES ════════════
+  // All rules below use G_HIST_CACHE[ticker] (daily bars). Skip silently when
+  // histDays is null — these rules are additive, not blocking.
+
+  // ── RULE: Minervini Trend Template (Stage 2 confirmation, +15) ────────
+  // From Mark Minervini's "Trade Like a Stock Market Wizard" (2013) SEPA.
+  // Eight criteria; we enforce the 6 computable from daily bars:
+  //   1. Price > MA50    2. Price > MA150    3. Price > MA200
+  //   4. MA50 > MA150 > MA200 (proper stack)
+  //   5. MA200 trending up over last 22 bars (slope positive)
+  //   6. ≥30% above 52-wk low
+  // (Criteria 7-8: ≤25% from 52-wk hi already covered by hiOk; RS Rating ≥70
+  //  approximated by rsRelOk in commit 2.)
+  var minerviniOk = false, minerviniDetail = 'Need ≥210 bars';
+  if (histDays && histDays.length >= 210) {
+    var closes = histDays.map(function(d){ return +d.close || 0; });
+    var lows   = histDays.map(function(d){ return +d.low || 0; });
+    var price  = closes[closes.length - 1];
+    var ma50   = closes.slice(-50).reduce(function(s,x){return s+x;},0) / 50;
+    var ma150  = closes.slice(-150).reduce(function(s,x){return s+x;},0) / 150;
+    var ma200  = closes.slice(-200).reduce(function(s,x){return s+x;},0) / 200;
+    var ma200_22d_ago = closes.slice(-222, -200).reduce(function(s,x){return s+x;},0) / 22;
+    // ma200 slope: compare current ma200 to a ma200 calculated 22 bars ago
+    var closesEarly = closes.slice(-222, -22);
+    var ma200_prior = closesEarly.length === 200
+      ? closesEarly.reduce(function(s,x){return s+x;},0) / 200
+      : ma200;
+    var ma200Rising = ma200 > ma200_prior;
+    var low52w = Math.min.apply(null, lows.slice(-252));
+    var pctAboveLow = low52w > 0 ? ((price - low52w) / low52w) * 100 : 0;
+    var c1 = price > ma50;
+    var c2 = price > ma150;
+    var c3 = price > ma200;
+    var c4 = ma50 > ma150 && ma150 > ma200;
+    var c5 = ma200Rising;
+    var c6 = pctAboveLow >= 30;
+    var passCount = [c1,c2,c3,c4,c5,c6].filter(Boolean).length;
+    minerviniOk = passCount === 6;
+    minerviniDetail = passCount + '/6 (px>MA50:'+(c1?'✓':'✗')+' px>MA150:'+(c2?'✓':'✗')+' px>MA200:'+(c3?'✓':'✗')+' stack:'+(c4?'✓':'✗')+' MA200↑:'+(c5?'✓':'✗')+' +'+pctAboveLow.toFixed(0)+'%>52wkLo:'+(c6?'✓':'✗')+')';
+  }
+  if (minerviniOk) { score += 15; techScore += 15; }
+  res.push({n:'Minervini Trend Template', pass:minerviniOk, val:minerviniDetail, filter:false, pts:15, isHist:true});
+
+  // ── RULE: Pocket Pivot (O'Neil/Morales-Kacher, +15) ───────────────────
+  // Today's volume > largest down-day volume of prior 10 days,
+  // close > 10DMA, close in upper half of day's range, not >5% extended.
+  var pocketOk = false, pocketDetail = 'Need ≥11 bars';
+  if (histDays && histDays.length >= 11) {
+    var lastBar = histDays[histDays.length - 1];
+    var prior10 = histDays.slice(-11, -1);
+    var maxDownVol = 0;
+    prior10.forEach(function(b){
+      var c = +b.close, o = +b.open;
+      if (c < o) maxDownVol = Math.max(maxDownVol, +b.volume || 0);
+    });
+    var todayVol = +lastBar.volume || 0;
+    var todayClose = +lastBar.close, todayHigh = +lastBar.high, todayLow = +lastBar.low;
+    var ma10 = histDays.slice(-10).map(function(d){ return +d.close || 0; })
+                  .reduce(function(s,x){return s+x;},0) / 10;
+    var rangeMid = (todayHigh + todayLow) / 2;
+    var v1 = maxDownVol > 0 && todayVol > maxDownVol;
+    var v2 = todayClose > ma10;
+    var v3 = todayClose >= rangeMid;
+    var v4 = ma10 > 0 && (todayClose - ma10) / ma10 < 0.05;  // not >5% extended
+    pocketOk = v1 && v2 && v3 && v4;
+    pocketDetail = 'vol '+(todayVol/1000).toFixed(0)+'k vs maxDownVol '+(maxDownVol/1000).toFixed(0)+'k '+(v1?'✓':'✗')
+                 +' | px '+todayClose.toFixed(2)+' vs MA10 '+ma10.toFixed(2)+' '+(v2?'✓':'✗')
+                 +' | upperHalf '+(v3?'✓':'✗')+' | <5%ext '+(v4?'✓':'✗');
+  }
+  if (pocketOk) { score += 15; techScore += 15; }
+  res.push({n:'Pocket Pivot', pass:pocketOk, val:pocketDetail, filter:false, pts:15, isHist:true});
+
+  // ── RULE: U/D Volume Ratio 50d ≥ 1.5 (O'Neil IBD, +12 tiered) ─────────
+  // sum(volume on up-close days) / sum(volume on down-close days) over 50d.
+  // ≥2.0 = strong sponsorship (+12), ≥1.5 = accumulation (+8), ≥1.25 = neutral-up (+4).
+  var udPts = 0, udVal = 'Need ≥51 bars';
+  if (histDays && histDays.length >= 51) {
+    var upVol = 0, dnVol = 0;
+    var bars50 = histDays.slice(-50);
+    for (var i = 1; i < bars50.length; i++) {
+      var c = +bars50[i].close, p = +bars50[i-1].close, v = +bars50[i].volume || 0;
+      if (c > p) upVol += v; else if (c < p) dnVol += v;
+    }
+    var udRatio = dnVol > 0 ? upVol / dnVol : (upVol > 0 ? 99 : 0);
+    udPts = udRatio >= 2.0 ? 12 : udRatio >= 1.5 ? 8 : udRatio >= 1.25 ? 4 : 0;
+    udVal = 'U/D '+udRatio.toFixed(2)+' ('+(udPts === 12 ? 'strong' : udPts === 8 ? 'accum' : udPts === 4 ? 'mild' : 'weak')+')';
+  }
+  if (udPts > 0) { score += udPts; techScore += udPts; }
+  res.push({n:'U/D Volume Ratio (50d)', pass:udPts > 0, val:udVal, filter:false, pts:udPts || 12, isHist:true});
+
+  // ── RULE: VCP / Volatility Contraction (Minervini, +12) ───────────────
+  // ATR(14) today / ATR(14) 30d ago < 0.70 = supply contracting before breakout.
+  var vcpOk = false, vcpDetail = 'Need ≥45 bars';
+  if (histDays && histDays.length >= 45) {
+    if (typeof computeATR === 'function') {
+      var atrNow = computeATR(histDays, 14);
+      var atrPrior = computeATR(histDays.slice(0, -30), 14);
+      if (atrNow > 0 && atrPrior > 0) {
+        var ratio = atrNow / atrPrior;
+        vcpOk = ratio < 0.70;
+        vcpDetail = 'ATR(14) ratio '+ratio.toFixed(2)+' '+(vcpOk ? '✓ (<0.70 contraction)' : '✗ (need <0.70)');
+      } else {
+        vcpDetail = 'ATR computation returned 0';
+      }
+    } else {
+      vcpDetail = 'computeATR missing';
+    }
+  }
+  if (vcpOk) { score += 12; techScore += 12; }
+  res.push({n:'VCP — ATR Contraction', pass:vcpOk, val:vcpDetail, filter:false, pts:12, isHist:true});
+
+  // ── RULE: Bollinger Bandwidth Squeeze (+10) ───────────────────────────
+  // BB(20,2) bandwidth at <20th percentile of trailing 120 days = compressed.
+  var bbwOk = false, bbwDetail = 'Need ≥120 bars';
+  if (histDays && histDays.length >= 120) {
+    var bbw = [];
+    for (var k = histDays.length - 120; k < histDays.length; k++) {
+      var window20 = histDays.slice(k - 19, k + 1).map(function(d){ return +d.close || 0; });
+      if (window20.length < 20) continue;
+      var meanW = window20.reduce(function(s,x){return s+x;},0) / 20;
+      var varW = window20.reduce(function(s,x){return s+(x-meanW)*(x-meanW);},0) / 20;
+      var stdW = Math.sqrt(varW);
+      var upper = meanW + 2 * stdW;
+      var lower = meanW - 2 * stdW;
+      bbw.push(meanW > 0 ? (upper - lower) / meanW : 0);
+    }
+    if (bbw.length > 0) {
+      var sorted = bbw.slice().sort(function(a,b){return a-b;});
+      var p20 = sorted[Math.floor(sorted.length * 0.20)];
+      var bbwNow = bbw[bbw.length - 1];
+      bbwOk = bbwNow <= p20;
+      bbwDetail = 'BBW '+bbwNow.toFixed(3)+' vs p20 '+p20.toFixed(3)+' '+(bbwOk ? '✓ squeeze' : '✗ no squeeze');
+    }
+  }
+  if (bbwOk) { score += 10; techScore += 10; }
+  res.push({n:'BBW Squeeze (<p20 of 120d)', pass:bbwOk, val:bbwDetail, filter:false, pts:10, isHist:true});
+
+  // ── RULE: Donchian 20d Breakout + Volume (+12) ────────────────────────
+  // Today closes above the 20-day high on volume ≥ 1.5× 50d avg.
+  // Turtle Traders methodology (Dennis/Eckhardt 1983-88).
+  var donchianOk = false, donchianDetail = 'Need ≥51 bars';
+  if (histDays && histDays.length >= 51) {
+    var lastBar2 = histDays[histDays.length - 1];
+    var prior20High = Math.max.apply(null, histDays.slice(-21, -1).map(function(d){ return +d.high || 0; }));
+    var avgVol50 = histDays.slice(-50).map(function(d){ return +d.volume || 0; })
+                      .reduce(function(s,x){return s+x;},0) / 50;
+    var todayVol2 = +lastBar2.volume || 0;
+    var todayClose2 = +lastBar2.close;
+    var b1 = todayClose2 > prior20High;
+    var b2 = avgVol50 > 0 && todayVol2 >= avgVol50 * 1.5;
+    donchianOk = b1 && b2;
+    donchianDetail = 'close '+todayClose2.toFixed(2)+' vs 20d hi '+prior20High.toFixed(2)+' '+(b1?'✓':'✗')
+                   +' | vol '+(todayVol2/1000).toFixed(0)+'k vs 1.5×50d '+(avgVol50*1.5/1000).toFixed(0)+'k '+(b2?'✓':'✗');
+  }
+  if (donchianOk) { score += 12; techScore += 12; }
+  res.push({n:'20d Donchian Breakout', pass:donchianOk, val:donchianDetail, filter:false, pts:12, isHist:true});
+
+  // ── RULE: JT 12-1 Cross-Sectional Momentum (+15) ──────────────────────
+  // Total return from t-252 to t-21 (skip last month — Jegadeesh-Titman 1993,
+  // confirmed by Asness-Moskowitz-Pedersen 2013). Threshold: top quintile of
+  // typical S&P 500 momentum (~+25% over the window). Approximated via
+  // hard threshold here since cross-sectional ranking would require
+  // computing on the entire scanned universe simultaneously.
+  var jtOk = false, jtDetail = 'Need ≥252 bars';
+  if (histDays && histDays.length >= 252) {
+    var px_t252 = +histDays[histDays.length - 252].close || 0;
+    var px_t21  = +histDays[histDays.length - 21].close || 0;
+    if (px_t252 > 0 && px_t21 > 0) {
+      var jt12_1 = ((px_t21 - px_t252) / px_t252) * 100;
+      jtOk = jt12_1 >= 25;  // top-quintile proxy
+      jtDetail = '12-1 ret '+jt12_1.toFixed(1)+'% '+(jtOk ? '✓ (≥25 ~ top quintile)' : '✗ (need ≥25)');
+    }
+  }
+  if (jtOk) { score += 15; techScore += 15; }
+  res.push({n:'JT 12-1 Momentum', pass:jtOk, val:jtDetail, filter:false, pts:15, isHist:true});
+
   // \u2500\u2500 GO DECISION \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
   // \u2500\u2500 SECTION C: GEX Confirmation (bonus rule, +6 pts, no penalty) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
   // Looks up G.gexData populated by the GEX/Flow tab after runGex() is called
@@ -9394,22 +9570,24 @@ function scoreIt(ticker, ind, opt){
       if(G.gexData[gi].t === ticker){ gexEntry = G.gexData[gi]; break; }
     }
   }
-  // GEX Call Heavy — TIERED for long-calls-only:
-  //   ≥70% calls = +8 (strong call-side conviction; meaningful flow signal)
-  //   55-69%     = +4 (mild lean; still positive but not high-conviction)
-  //   <55%       = 0  (rule fails)
-  // Was binary +6 — tiering rewards stronger flow conviction more, weakens
-  // the "barely call-heavy" signal that was being treated as full credit.
+  // GEX Call Heavy — TIERED with extreme-positioning PENALTY (council 3/3).
+  // Long calls benefit from emerging call-side flow but at extremes (≥75%
+  // call-side OI), positioning is crowded and dealers pin or fade — call-
+  // heavy at the top is a CONTRARIAN signal, not bullish confirmation.
+  //   55-69%   = +4  (emerging lean; constructive)
+  //   70-74%   = +6  (strong but not crowded)
+  //   ≥75%     = -6  (overcrowded; mean-reversion risk per council)
+  //   <55%     = 0   (no signal)
   var gexCallPct = gexEntry ? gexEntry.call : 0;
   var gexCallHeavy = gexCallPct >= 55;
-  var gexStrong = gexCallPct >= 70;
-  var gexPts = gexStrong ? 8 : (gexCallHeavy ? 4 : 0);
+  var gexCrowded = gexCallPct >= 75;
+  var gexPts = gexCrowded ? -6 : (gexCallPct >= 70 ? 6 : (gexCallHeavy ? 4 : 0));
   var gexVal = gexEntry
     ? (gexEntry.sim ? '[SIM] ' : '') + gexEntry.call + '% calls / ' + gexEntry.put + '% puts'
-      + (gexStrong ? ' ★' : gexCallHeavy ? '' : '')
+      + (gexCrowded ? ' ⚠ overcrowded' : (gexCallPct >= 70 ? ' ✓ strong' : (gexCallHeavy ? ' constructive' : '')))
     : 'Run GEX/Flow tab first';
-  if(gexPts > 0){ score += gexPts; techScore += gexPts; }
-  res.push({n:'GEX Call Heavy', pass:gexCallHeavy, val:gexVal, filter:false, pts:gexPts, isGex:true});
+  if(gexPts !== 0){ score += gexPts; techScore += gexPts; }
+  res.push({n:'GEX Call Flow', pass:gexCallHeavy && !gexCrowded, val:gexVal, filter:false, pts:gexPts, isGex:true});
 
   // Rule: Strong Sector (+8 / -8) — sector-rotation overlay from industry pipeline.
   // Bumped from +5/-5 for the long-calls-only user: bullish unhedged bets
