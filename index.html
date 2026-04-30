@@ -8575,7 +8575,8 @@ async function _bgEnrichTick() {
 function _stopBgEnrichment(reason) {
   var st = window._bgEnrich;
   if (st.intervalId) { clearInterval(st.intervalId); st.intervalId = null; }
-  console.log('[bg-enrich] stopped ('+reason+') — enriched '+st.enriched+'/'+st.total+' in '+Math.round((Date.now()-st.startedAt)/1000)+'s');
+  var elapsedSec = (st.startedAt && st.startedAt > 0) ? Math.round((Date.now()-st.startedAt)/1000) : 0;
+  console.log('[bg-enrich] stopped ('+reason+') — enriched '+st.enriched+'/'+st.total+' in '+elapsedSec+'s');
   st.active = false;
   // Final re-sort + render
   try {
@@ -20595,8 +20596,8 @@ function init(){
   loadThemeOverlay()
     .then(function(){ try { populateThemeDropdown(); } catch(e){} })
     .catch(function(e){ console.warn('[init] theme overlay failed:', e && e.message); });
-  // Adanos miniature chips in the header — start the 5-min refresh loop.
-  try { _startAdanosChips(); } catch(e){ console.warn('[init] adanos chips failed:', e && e.message); }
+  // Adanos sentiment chips removed 2026-04-29 (commit 2a2b3b9). Init line
+  // here was leftover boot-call to deleted _startAdanosChips() — removed.
   // Pre-market session pill — show 4:00–9:30am ET, hide otherwise. Re-checked
   // every minute so the boundary transitions self-correct.
   try { _updatePreMarketPill(); setInterval(_updatePreMarketPill, 60 * 1000); } catch(_){}
