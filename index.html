@@ -9716,10 +9716,30 @@ async function fetchEarningsCalendarBulk(){
   var today = new Date();
   var from = today.toISOString().split('T')[0];
   var to   = new Date(today.getTime() + EARNINGS_LOOKAHEAD_DAYS * 86400000).toISOString().split('T')[0];
-  var url  = 'https://financialmodelingprep.com/stable/earning-calendar?from=' + from + '&to=' + to + '&apikey=' + fmpKey;
+  // FMP renamed earning-calendar at some point; try the current `/stable/earnings-calendar`
+  // (plural) first, fall back to the legacy `/api/v3/earning_calendar` (underscore).
+  // The old `/stable/earning-calendar` (singular hyphen) returns 404 — that was the
+  // 2026-04-30 bug. Order matters: stable path is preferred for newer keys, v3 covers
+  // legacy and Starter-tier compatibility.
+  var qs = '?from=' + from + '&to=' + to + '&apikey=' + fmpKey;
+  var urls = [
+    'https://financialmodelingprep.com/stable/earnings-calendar' + qs,
+    'https://financialmodelingprep.com/api/v3/earning_calendar' + qs
+  ];
 
   try {
-    var r = await window.fmpFetch(url);
+    var r = null, lastErr = null;
+    for (var ui = 0; ui < urls.length; ui++) {
+      try {
+        var resp = await window.fmpFetch(urls[ui]);
+        if (resp && resp.ok) { r = resp; break; }
+        lastErr = 'HTTP ' + (resp && resp.status);
+      } catch(fetchErr) { lastErr = fetchErr && fetchErr.message; }
+    }
+    if (!r) {
+      console.warn('[earnings] all FMP endpoints failed:', lastErr);
+      return G_EARNINGS_CACHE;
+    }
     var data = await r.json();
     if (!Array.isArray(data)) return G_EARNINGS_CACHE;
     var fresh = {};
@@ -12091,13 +12111,16 @@ function finishScan(){
           console.log('[scan] GEX auto-trigger skipped \u2014 newer scan in progress');
           return;
         }
-        // Skip if GEX was just refreshed (e.g. by the scheduled fire). Two
-        // simultaneous GEX runs (post-scan + scheduled) would double the
-        // 400-call API load and trigger the cascading 429s the user just hit.
-        // 30 min window matches the freshness threshold used elsewhere.
-        if (typeof _gexFreshWithin === 'function' && _gexFreshWithin(30)) {
-          console.log('[scan] GEX auto-trigger skipped \u2014 GEX data is <30min old');
-          try { addAlert('GEX', 'Auto-trigger skipped \u2014 GEX data is fresh (<30min)', 'warn'); } catch(e){}
+        // Skip if GEX was just refreshed AND covers enough of the current
+        // results. A stale cache with only 8 tickers from a prior scheduled
+        // fire or manual click must not block a full 200-ticker refresh after
+        // a new scan. Coverage threshold: at least 50% of the top-200 slice.
+        var _gexCoverage = (G.gexData || []).length;
+        var _gexExpected = Math.min(200, (G.results || []).length);
+        var _gexCoversEnough = _gexExpected > 0 && _gexCoverage >= _gexExpected * 0.5;
+        if (typeof _gexFreshWithin === 'function' && _gexFreshWithin(30) && _gexCoversEnough) {
+          console.log('[scan] GEX auto-trigger skipped \u2014 GEX data is <30min old and covers ' + _gexCoverage + '/' + _gexExpected + ' tickers');
+          try { addAlert('GEX', 'Auto-trigger skipped \u2014 GEX data is fresh (<30min, ' + _gexCoverage + ' tickers)', 'warn'); } catch(e){}
           return;
         }
         addAlert('GEX', 'Auto-refreshing GEX (top 200 tickers, ~4min) after scan...', 'warn');
@@ -12900,6 +12923,14 @@ function _gexScheduleTick(){
   for (var i = 0; i < times.length; i++) {
     if (Math.abs(nowMin - times[i]) <= 1) {
       G._gexLastFireMin = nowMin;
+      // Guard: skip if no scan results exist yet (page loaded but no scan
+      // run). Without this, a scheduled fire at 9:35 ET on a fresh page
+      // runs GEX against UNIVERSE.slice(0,30) and caches a tiny result set
+      // that blocks the post-scan auto-trigger's freshness check.
+      if (!G.results || G.results.length < 20) {
+        console.log('[gex] auto-schedule skipped — G.results has ' + (G.results||[]).length + ' entries (need scan first)');
+        return;
+      }
       console.log('[gex] auto-schedule fire ('+G.gexAutoSchedule+', ET minute '+nowMin+')');
       try { addAlert('GEX', 'Auto-refresh GEX (scheduled)', 'warn'); } catch(e){}
       try { runGex(); } catch(e) { console.warn('[gex] scheduled fire errored:', e.message); }
