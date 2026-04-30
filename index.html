@@ -11543,7 +11543,12 @@ function finishScan(){
     // covers GO-threshold candidates with margin) and explicitly logs +
     // toasts on quota failure so the user knows.
     try {
-      var SLIM_CAP = 300;
+      // SLIM_CAP 200 + heavy rule-entry trim. Each ticker's rules array was
+      // ~150 bytes/rule \u00d7 26 rules = ~3.9 KB; for 300 tickers that's >1 MB
+      // \u2014 over Safari's localStorage limit. Now ~30 bytes/rule \u00d7 13 passing
+      // \u00d7 200 tickers = ~78 KB. renderBuySig + buildDetail re-derive val/
+      // filter/isFmp/isHist from scoreIt() on detail click.
+      var SLIM_CAP = 200;
       var ranked = G.results.slice().sort(_resultRankCompare);
       var slim = ranked.slice(0, SLIM_CAP).map(function(r){
         return { ticker:r.ticker, sector:r.sector, score:r.score, isGo:r.isGo,
@@ -11552,9 +11557,13 @@ function finishScan(){
                  volume:r.volume, avgVol:r.avgVol,
                  fmpEnriched:!!r.fmpEnriched, indEnriched:!!r.indEnriched,
                  ind: r.ind || {},
-                 // Trim rules to only PASSING ones \u2014 failing rules can be re-derived
-                 // on detail click. Roughly halves the rule-array size.
-                 rules: Array.isArray(r.rules) ? r.rules.filter(function(rl){ return rl.pass; }) : [],
+                 // Aggressive rule-entry trim: keep only PASSING rules and
+                 // strip all metadata except {n, pts}. val/filter/isFmp/isHist
+                 // get re-derived by scoreIt() on detail-pane click.
+                 rules: Array.isArray(r.rules)
+                   ? r.rules.filter(function(rl){ return rl.pass; })
+                            .map(function(rl){ return { n: rl.n, pts: rl.pts }; })
+                   : [],
                  passes: Array.isArray(r.passes) ? r.passes : []
         };
       });
