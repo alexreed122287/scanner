@@ -66,8 +66,12 @@ const ALLOWED_EXACT_PATHS = new Set([
 
 // Per-IP rate limit (in-memory, lives for the Worker isolate's lifetime ~10s).
 // Set just below Tradier's documented 120/min cap so the limiter is the
-// chokepoint, not the upstream.
-const RATE_PER_IP_PER_MIN = 100;
+// chokepoint, not the upstream. Bumped 100 → 115 (2026-04-29) — the deeper
+// 400-day history fetch + scanner enrichment burst was hitting 100/min.
+// Tradier's 120 limit gives 5-call headroom which the burst doesn't typically
+// fill once the enrichment count is also reduced (SC_ENRICH_LIMIT 200→60 in
+// scanner). Watch the cf-ray + 429 logs in production.
+const RATE_PER_IP_PER_MIN = 115;
 const _rateMap = new Map();   // ip -> [timestamps]
 function rateLimited(ip) {
   const now = Date.now();

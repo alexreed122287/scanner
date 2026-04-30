@@ -8513,7 +8513,16 @@ async function fetchIndicatorHistory(ticker){
     var days = d.history && d.history.day ? d.history.day : [];
     if(!Array.isArray(days)) days = [days];
     if(days.length < 3) return null;
-    saveHistCache(ticker, days);
+    // Don't cache short responses as "good" data. If we asked for 400 days
+    // but got <50 (rate limit, ticker recently IPO'd, sandbox stub, etc.),
+    // mark it for refetch on next call by skipping the localStorage write.
+    // In-memory G_HIST_CACHE still gets the short data for THIS session so
+    // the rules can compute on what's there — just don't persist it.
+    if (days.length >= 100) {
+      saveHistCache(ticker, days);
+    } else {
+      console.warn('[hist] '+ticker+' returned only '+days.length+' bars — not caching to localStorage; will retry next session');
+    }
     return days;
   } catch(e){ return null; }
 }
@@ -11385,11 +11394,14 @@ function finishScan(){
   if(btn){ btn.disabled = false; btn.textContent = '\u21bb SCAN'; }
 
   // Pre-fetch FMP data for top scored tickers in background \u2014 warms cache before user clicks.
-  // SC_ENRICH_LIMIT bumped from 50 \u2192 200 so the user has to click far fewer
-  // tickers to get full (FMP analyst grades + Tradier indicator history) scores.
-  // Queue respects rate-limit cooldowns instead of firing N setTimeouts that all
-  // get rejected when 429 hits mid-scan. FMP @ 250ms = 240 req/min (Starter cap = 300).
-  var SC_ENRICH_LIMIT = 200;
+  // 2026-04-29: dropped 200 \u2192 60 because the deeper 400-day history fetch
+  // (commit 0d8e388) was hitting Tradier's 120/min rate limit. With 60
+  // enrich calls + ~17 bulk quote calls + room for ad-hoc clicks, total
+  // worker traffic stays under the 115/min cap. Trade-off: user has to
+  // click MORE tickers to get full scores beyond the top 60. Tickers below
+  // rank 60 still appear in the scan list with bulk-quote scores; clicking
+  // their detail pane fetches indicator history on-demand.
+  var SC_ENRICH_LIMIT = 60;
   var enrichTotal = Math.min(SC_ENRICH_LIMIT, G.results.length);
   var fmpDone = 0, indDone = 0;
   // Watchdog — after 6 minutes, finalize the scan no matter what's still in
