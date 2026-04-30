@@ -8468,6 +8468,12 @@ function loadHistCache(ticker){
     if(!raw) return null;
     var obj = JSON.parse(raw);
     if(Date.now() - (obj.ts||0) > 86400000) return null;
+    // 2026-04-29: history fetch window bumped from 25 → 400 days for the new
+    // evidence-based scoring rules (Minervini Template, JT 12-1, BBW Squeeze
+    // need ≥210 bars). Treat any cached entry with < 100 bars as a stale
+    // cache miss to force a refetch. Backward-compat: existing 24h cache
+    // entries from the old 25-day window auto-invalidate.
+    if(!obj.days || !Array.isArray(obj.days) || obj.days.length < 100) return null;
     return obj.days;
   } catch(e){ return null; }
 }
@@ -8489,7 +8495,14 @@ async function fetchIndicatorHistory(ticker){
   var mode=localStorage.getItem('rrjcar_mode')||'sandbox';
   var host=mode==='live'?'https://api.tradier.com':'https://sandbox.tradier.com';
   var end  = new Date().toISOString().split('T')[0];
-  var start= new Date(Date.now()-25*864e5).toISOString().split('T')[0];
+  // 400 calendar days ≈ 280 trading days — enough for JT 12-1 momentum (252
+  // bars) + skip-month buffer (21 bars). Old window was 25 days which was
+  // sized for ATR(14)/RSI(7); new evidence-based rules (Minervini Template,
+  // BBW Squeeze, Donchian, U/D Vol, JT 12-1, VCP) need much deeper history.
+  // Cost: ~10x more bytes per fetch, but the 24h localStorage + 30-min in-memory
+  // caches mean this is a one-time-per-ticker cost. Tradier rate limit is by
+  // call count, not byte count, so no quota impact.
+  var start= new Date(Date.now()-400*864e5).toISOString().split('T')[0];
   try{
     // 30-min in-memory TTL on top of the 24h localStorage cache (loadHistCache).
     // The localStorage cache handles repeat sessions; the in-memory cache + rate
