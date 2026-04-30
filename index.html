@@ -16563,7 +16563,7 @@ function showAutoSubmitModal(r, optData){
   var tickerEl = eid('hc-modal-ticker'), detailEl = eid('hc-modal-details'), orderEl = eid('hc-modal-order');
   if(tickerEl) tickerEl.textContent = r.ticker + ' \u2605 HIGH CONVICTION';
   if(detailEl) detailEl.innerHTML =
-    'Score: <b style="color:var(--grn);">' + r.score + '/150</b>'
+    'Score: <b style="color:var(--grn);">' + r.score + '/240</b>'
     + ' &nbsp;|&nbsp; Sector: ' + r.sector
     + ' &nbsp;|&nbsp; Price: $' + fmt2(r.price) + '<br>'
     + 'PROVEN \u2713 &nbsp; Analyst Revisions \u2191 \u2713 &nbsp; GEX Call Heavy \u2713';
@@ -16646,7 +16646,7 @@ function checkHighConvictionSignals(results){
     _saveNotifCooldowns();
     var rulesSummary = 'PROVEN \u2713  Analyst Rev \u2191 \u2713  GEX Call Heavy \u2713  Score ' + r.score;
     var price = r.price || 0;
-    addAlert(r.ticker, '\u2605 HIGH CONVICTION \u2014 Score ' + r.score + '/150 | ' + r.sector + ' | $' + price.toFixed(2), 'go');
+    addAlert(r.ticker, '\u2605 HIGH CONVICTION \u2014 Score ' + r.score + '/240 | ' + r.sector + ' | $' + price.toFixed(2), 'go');
     fireBrowserNotif(r.ticker, r.score, r.sector, price, rulesSummary);
     fireEmailAlert(r.ticker, r.score, r.sector, price, rulesSummary);
     fired.push(r.ticker);
