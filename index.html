@@ -657,6 +657,11 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
   /* ── Order Ticket: stack all rows vertically, full-width inputs ── */
   .ord-form{max-width:100% !important;padding:10px !important;}
   .ord-row{flex-direction:column !important;gap:8px !important;}
+  /* Collapse the 2-col order body so the action panel falls below the form
+     on narrow viewports — sticky positioning is also dropped so it doesn't
+     hover over the step-fill log. */
+  .ord-body-2col{flex-direction:column !important;}
+  .ord-actions-panel{flex:0 0 auto !important;border-left:none !important;border-top:1px solid var(--bg3) !important;position:static !important;width:100%;}
   .ord-field{min-width:0 !important;width:100%;}
   .ord-field input, .ord-field select{width:100% !important;}
   /* Live-quote panel: 3 cols on mobile instead of 5 */
@@ -1523,7 +1528,12 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
 <div class="tab-pane" id="tab-order">
   <div class="page-wrap">
     <div class="card"><div class="card-hdr">ORDER TICKET</div>
-    <div class="card-body ord-form">
+    <!-- Two-column layout: input form on the left (narrow, focused), actions
+         docked on the right as a sticky panel so SUBMIT/PREVIEW/CLEAR are
+         always reachable without scrolling past the step-fill log. The form
+         retains its existing max-width and child structure unchanged. -->
+    <div class="card-body ord-body-2col" style="display:flex;gap:0;align-items:flex-start;padding:0;">
+    <div class="ord-form" style="flex:1 1 auto;">
 
       <!-- SYMBOL + TYPE row -->
       <div class="ord-row">
@@ -1772,14 +1782,18 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
         <div class="step-fill-log" id="step-fill-log"></div>
       </div>
 
-      <!-- ACTION BUTTONS -->
-      <div class="ord-row">
-        <button class="btn blu" onclick="previewOrder()">PREVIEW ORDER</button>
-        <button class="btn grn" onclick="submitOrder()">&#9650; SUBMIT ORDER</button>
-        <button class="btn" onclick="clearOrder()">CLEAR</button>
-      </div>
-      <div class="ord-result" id="ord-result"></div>
-    </div></div>
+    </div><!-- /.ord-form -->
+    <!-- Right action panel — sticky vertical button stack. Sits next to the
+         form on wide viewports; mobile media query collapses ord-body-2col
+         back to a vertical flow so this panel falls below the form. -->
+    <div class="ord-actions-panel" style="flex:0 0 240px;padding:16px 14px;border-left:1px solid var(--bg3);align-self:stretch;display:flex;flex-direction:column;gap:10px;position:sticky;top:8px;">
+      <div style="font-family:var(--ff-mono);font-size:10px;color:var(--amb);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">ACTIONS</div>
+      <button class="btn blu" style="width:100%;padding:10px;font-weight:700;" onclick="previewOrder()">PREVIEW ORDER</button>
+      <button class="btn grn" style="width:100%;padding:10px;font-weight:700;font-size:13px;" onclick="submitOrder()">&#9650; SUBMIT ORDER</button>
+      <button class="btn" style="width:100%;padding:8px;" onclick="clearOrder()">CLEAR</button>
+      <div class="ord-result" id="ord-result" style="margin-top:8px;font-size:11px;"></div>
+    </div>
+    </div><!-- /.ord-body-2col --></div>
 
     <!-- ── P&L PAYOFF CHART ── -->
     <div class="card" id="ord-pnl-card" style="display:none;">
