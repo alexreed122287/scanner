@@ -292,6 +292,13 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
 .flt-bar.collapsible .sec-toggle{font-family:var(--ff-mono);font-size:10px;color:var(--amb);letter-spacing:.5px;background:none;border:none;padding:0 6px 0 0;}
 .flt-bar.collapsible.collapsed > *:not(.sec-toggle){display:none !important;}
 .flt-bar.collapsible.collapsed{padding-top:6px;padding-bottom:6px;}
+/* Scanner detail panel — keep all interior content (especially button
+   rows) inside the panel boundary. The det-hdr and any .ord-row inside
+   wrap rather than overflow horizontally; watchlist buttons + action
+   buttons stay clickable without horizontal scroll. */
+#sc-detail .det-hdr, #sc-detail .ord-row, #bs-detail .det-hdr, #bs-detail .ord-row{flex-wrap:wrap;}
+#sc-detail *, #bs-detail *{max-width:100%;}
+#sc-detail button, #bs-detail button{flex-shrink:0;}
 /* GEX coverage indicator on scanner rows. Green ✓ if the ticker already
    has GEX data; amber 'RUN' pill if it doesn't (clickable to fetch
    just-this-ticker so the user can score tickers outside the top-200 cap). */
@@ -1328,7 +1335,7 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
   </div>
   <div id="sc-body" style="flex:1;display:flex;flex-direction:row;overflow:hidden;">
     <div class="tbl-wrap" id="sc-tbl-wrap" style="width:340px;min-width:220px;flex-shrink:0;overflow:auto;border-right:1px solid var(--bg3);"><div class="empty-det" id="sc-empty" style="min-height:200px;"><div class="ei">&#9632;</div><p>Run a scan to see results</p></div></div>
-    <div id="sc-det-empty" style="display:none;"></div><div id="sc-detail" style="flex:1;overflow:auto;display:none;"></div>
+    <div id="sc-det-empty" style="display:none;"></div><div id="sc-detail" style="flex:1;overflow-y:auto;overflow-x:hidden;display:none;align-self:flex-start;position:sticky;top:0;max-height:100%;"></div>
   </div>
 </div>
 
@@ -10986,6 +10993,20 @@ function chainRowClick(ticker, strike, expDate){
 }
 
 function viewDetail(ticker,detId,emptyId){
+ // Toggle behavior — clicking the SAME ticker again closes the detail
+ // panel. User spec: 'Allow clicking the same ticker again to close the
+ // popup'. Skipped when called programmatically with a force flag (e.g.
+ // post-GEX rescore re-render at index.html:13560).
+ if (G.selTicker === ticker && arguments[2] !== '__force_open__'
+     && !arguments[3]) {
+   var det0 = eid(detId), emp0 = eid(emptyId);
+   if (det0) det0.style.display = 'none';
+   if (emp0) emp0.style.display = 'flex';
+   document.querySelectorAll('tr.sel-row').forEach(function(row){row.classList.remove('sel-row');});
+   document.querySelectorAll('.sig-card.sel').forEach(function(c){c.classList.remove('sel');});
+   G.selTicker = null;
+   return;
+ }
  var r=null;
  for(var i=0;i<G.results.length;i++){if(G.results[i].ticker===ticker){r=G.results[i];break;}}
  if(!r)return;
