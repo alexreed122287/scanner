@@ -86,10 +86,10 @@ a{color:var(--blu);text-decoration:none;}
 #hdr-logo .panda-icon{height:48px;width:auto;object-fit:contain;filter:drop-shadow(0 0 6px rgba(0,212,255,.4)) drop-shadow(0 0 2px rgba(0,212,255,.25));flex-shrink:0;}
 #hdr{border-bottom:none !important;box-shadow:none !important;}
 #hdr-tickers{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;flex:1;}
-.htick{font-size:12px;white-space:nowrap;}
+.htick{font-size:13px;white-space:nowrap;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;}
 .htick .ts{color:var(--gry);}
 .htick .tv{color:var(--wht);font-weight:600;}
-.htick .tc{font-size:11px;}
+.htick .tc{font-size:12px;letter-spacing:0;text-transform:none;font-weight:500;}
 .tc.up{color:var(--blu);}
 .tc.dn{color:var(--wrn);}
 #hdr-right{display:flex;align-items:center;gap:8px;white-space:nowrap;font-size:11px;}
@@ -697,7 +697,7 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
      state of the scan/auth/balance widgets. */
   #hdr{height:auto !important;min-height:104px !important;padding:6px 10px !important;flex-wrap:wrap !important;gap:6px 8px !important;align-items:center !important;align-content:flex-start !important;}
   #hdr-tickers{flex-wrap:wrap !important;gap:8px 12px !important;justify-content:flex-start !important;flex:1 1 100%;order:3;padding:4px 0;border-top:1px solid rgba(0,212,255,0.1);min-height:32px;}
-  .htick{font-size:12px;}
+  .htick{font-size:13px;}
   #hdr-logo{font-size:16px !important;letter-spacing:2px !important;flex:0 0 auto;order:1;}
   #hdr-logo .panda-icon{height:36px !important;}
   #hdr-right{flex-wrap:wrap !important;gap:6px !important;font-size:12px !important;flex:1 1 auto;order:2;justify-content:flex-end;min-height:48px;}
@@ -1098,12 +1098,12 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
   <button class="ntab active" onclick="switchTab('sc')">FULL SCANNER</button>
   <button class="ntab" onclick="switchTab('pos')">POSITIONS</button>
   <button class="ntab" onclick="switchTab('order')">ORDER TICKET</button>
-  <button class="ntab" onclick="switchTab('al')">ALERTS</button>
   <button class="ntab" onclick="switchTab('api')">API</button>
   <button class="ntab" onclick="switchTab('pf')">PORTFOLIO</button>
   <button class="ntab" onclick="switchTab('ind')">INDUSTRY</button>
   <button class="ntab" onclick="switchTab('gex')" title="Gamma exposure / 30DTE options-flow (call vs put OI) for the top 200 enriched tickers. Drives the GEX Call Heavy rule.">GEX / FLOW</button>
   <button class="ntab" onclick="switchTab('wl')">WATCHLIST</button>
+  <button class="ntab" onclick="switchTab('al')">ALERTS</button>
   <!-- OPTIONS WATCHLIST button hidden per user request — underlying tab pane
        (id="tab-cw") + cwRenderTable code path retained in case of re-enable. -->
   <button class="ntab" style="display:none;" onclick="switchTab('cw')">&#9734; OPTIONS WATCHLIST</button>
@@ -1165,7 +1165,7 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
     <button class="btn" onclick="applyStrategyMode('breakout')">&#9650; BREAKOUT</button>
     <button class="btn" onclick="applyStrategyMode('momentum')">&#9654; MOMENTUM</button>
     <button class="btn" style="border-color:var(--grn);color:var(--grn);" onclick="applyStrategyMode('bestItmCalls')">&#9670; BEST ITM CALLS</button>
-    <button class="btn" style="border-color:var(--ambb);color:var(--ambb);" onclick="applyStrategyMode('preMarket')" title="Surface pre-market gappers — biggest absolute %change vs prior close. Most useful between 4:00am and 9:30am ET when Tradier's `last` field reflects pre-market quotes.">&#9650; PRE-MARKET</button>
+    <button class="btn" style="border-color:var(--ambb);color:var(--ambb);" onclick="applyStrategyMode('preMarket')" title="Surface gappers — biggest absolute %change vs prior close. Useful any time the extended-hours session is active (pre-market 4:00–9:30am ET, after-hours 4:00–8:00pm ET) and on weekends to inspect the latest extended-hours print. No time-of-day gating.">&#9650; PRE/POST MARKET</button>
     <button class="btn" style="font-size:10px;padding:3px 8px;border-color:var(--gry2);color:var(--gry);" onclick="probePreMarketData()" title="One-shot live fetch of SPY/QQQ/NVDA/TSLA/AAPL — surfaces the raw `change_percentage` Tradier is returning right now. Use it to verify pre-market data is flowing.">VERIFY</button>
     <button class="btn" style="border-color:var(--gry2);color:var(--gry);" onclick="applyStrategyMode('clear')">&#10005; CLEAR</button>
     <span id="pre-market-pill" style="display:none;font-family:var(--ff-mono);font-size:9px;font-weight:800;letter-spacing:1.5px;background:var(--ambb);color:var(--bg0);padding:2px 8px;border-radius:2px;animation:today-pulse 2.4s ease-in-out infinite;" title="Pre-market session is active — Tradier `last` reflects extended-hours quotes. Use the PRE-MARKET preset to sort by gap %.">PRE-MARKET LIVE</span>
@@ -1222,6 +1222,7 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
   </div>
   <div class="flt-bar" style="flex-wrap:wrap;gap:6px;">
     <button class="btn blu" id="sc-run-btn" onclick="runScan()">↻ SCAN</button>
+    <span id="sc-last-scan" class="dyn-w" style="color:var(--gry);font-size:10px;font-family:var(--ff-mono);width:230px;text-align:left;" title="Timestamp of the most recent SCAN completion. Persists across page reloads from localStorage.">Last scan: never</span>
     <span style="color:var(--gry);font-size:10px;letter-spacing:.5px;border-left:1px solid var(--gry2);padding-left:14px;margin-left:4px;">SCREENER</span>
     <label>Min Price $<input type="number" id="sc-minprice" value="1" min="1" style="width:70px;" title="Only include stocks above this price"></label>
     <label>Max Price $<input type="number" id="sc-maxprice" placeholder="any" min="1" style="width:80px;" title="Only include stocks below this price — leave blank for no limit"></label>
@@ -1524,7 +1525,7 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
       <!-- STRIKE + EXPIRY (options only) -->
       <div class="ord-row ord-opt-only">
         <div class="ord-field"><label>STRIKE</label><input id="ord-strike" type="number" placeholder="150.00" onchange="updateOrdChart()" oninput="updateOrdChart()"></div>
-        <div class="ord-field"><label>EXPIRY (YYYY-MM-DD)</label><input id="ord-exp" type="date" onchange="updateOrdChart()"></div>
+        <div class="ord-field"><label>EXPIRATION DATE</label><input id="ord-exp" type="date" onchange="updateOrdChart()"></div>
       </div>
 
       <!-- ── AUTO-SELECT CONTRACT — options only ── -->
@@ -11296,6 +11297,14 @@ function setScanComplete(stats){
     hdr.textContent = '✓ ' + (stats.go||0) + ' GO / ' + (stats.scored||0) + ' scored';
     hdr.title = summary + '  · click to view results';
   }
+  // Last-scan timestamp next to the SCAN button — also persists, so the user
+  // can tell at a glance when the visible results were generated.
+  var lastEl = eid('sc-last-scan');
+  if(lastEl){
+    var d = new Date();
+    lastEl.textContent = '✓ Scan complete ' + d.toLocaleTimeString();
+    lastEl.style.color = 'var(--grn)';
+  }
   // Desktop notification (only when user explicitly enabled). Falls back silently.
   try {
     if('Notification' in window && Notification.permission === 'granted'
@@ -17438,8 +17447,8 @@ var STRATEGY_MODES = {
   // HIGH CONVICTION ~83%, BREAKOUT/MOMENTUM ~67%, BEST ITM CALLS ~75%.
   highConviction: {
     label: '\u2605 HIGH CONVICTION',
-    desc: 'PROVEN ticker + Score \u2265200 + Analyst Revisions \u2191 + GEX Call Heavy \u2014 rarest, highest-quality setups (\u224883% of max)',
-    filters: {sig:'GO', minScore:200, analyst:true, proven:true, gex:true}
+    desc: 'PROVEN ticker + Score \u2265160 + Analyst Revisions \u2191 + GEX Call Heavy \u2014 rarest, highest-quality setups (\u226567% of max)',
+    filters: {sig:'GO', minScore:160, analyst:true, proven:true, gex:true}
   },
   breakout: {
     label: '\u25b2 BREAKOUT',
@@ -17458,8 +17467,8 @@ var STRATEGY_MODES = {
               minPrice:5, minAvgVol:1000000, volRatio:100, maxOptPrice:8}
   },
   preMarket: {
-    label: '\u25b2 PRE-MARKET',
-    desc: 'Pre-market gappers \u2014 Tradier `last` during 4:00\u20139:30am ET reflects pre-market quotes. Permissive thresholds (intraday indicators are unreliable before the open) and results sorted by absolute gap %.',
+    label: '\u25b2 PRE/POST MARKET',
+    desc: 'Extended-hours gappers \u2014 sorted by absolute gap %. Tradier `last` reflects pre-market quotes 4:00\u20139:30am ET, after-hours quotes 4:00\u20138:00pm ET, and the most recent extended-hours print on weekends. Permissive thresholds (intraday technicals are unreliable outside RTH).',
     // Loose criteria: technical indicators are noisy before the cash open.
     // Liquidity gate kept (1M avg vol) so the gappers are tradeable. Sort by
     // |changePct| handled in applyStrategyMode (post-filter).
@@ -20981,6 +20990,18 @@ function init(){
     var scanAge = cacheAge(CACHE_KEYS.scanTs);
     showStaleBanner('tab-bs', 'Showing last scan'+(scanAge?' ('+scanAge+')':'')+' — no live data loaded yet', 'runScan');
   }
+  // Hydrate the SCAN-button timestamp from cache so it survives reload
+  try {
+    var lastTs = cacheGet(CACHE_KEYS.scanTs);
+    if (lastTs) {
+      var lastEl = eid('sc-last-scan');
+      if (lastEl) {
+        var d = new Date(lastTs);
+        lastEl.textContent = 'Last scan: ' + d.toLocaleTimeString();
+        lastEl.style.color = 'var(--gry)';
+      }
+    }
+  } catch(_){}
 
   // 2. Positions
   var cachedPos = cacheGet(CACHE_KEYS.positions);
