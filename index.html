@@ -10780,10 +10780,27 @@ async function loadOptionChain(ticker){
 
   // Build expiration selector
   var _today = new Date(); _today.setHours(0,0,0,0);
+  // Detect the nearest standard monthly expiration (3rd Friday of a month —
+  // day-of-month 15..21 AND day-of-week=Friday). User spec: open chain
+  // defaults to nearest monthly. Falls back to dates[0] if no monthly is
+  // found in the first 16 expirations.
+  function _isMonthlyExp(dStr){
+    var dt = new Date(dStr+'T00:00:00');
+    var dom = dt.getDate();
+    var dow = dt.getDay();
+    return dow === 5 && dom >= 15 && dom <= 21;
+  }
+  var nearestMonthly = null;
+  for (var di = 0; di < dates.length; di++) {
+    if (_isMonthlyExp(dates[di])) { nearestMonthly = dates[di]; break; }
+  }
+  var defaultExp = nearestMonthly || dates[0];
   var selOpts = dates.slice(0,16).map(function(d){
     var expMs = new Date(d+'T00:00:00').getTime();
     var dte   = Math.round((expMs - _today.getTime()) / 86400000);
-    return '<option value="'+d+'">'+d+' ('+dte+'d)</option>';
+    var sel = (d === defaultExp) ? ' selected' : '';
+    var monthlyTag = _isMonthlyExp(d) ? ' M' : '';
+    return '<option value="'+d+'"'+sel+'>'+d+' ('+dte+'d)'+monthlyTag+'</option>';
   }).join('');
 
   chainDiv.innerHTML =
@@ -10797,8 +10814,9 @@ async function loadOptionChain(ticker){
     '<select id="chain-exp-'+ticker+'" onchange="renderChainForExp(\''+ticker+'\',this.value,'+underlyingPrice+')">'+selOpts+'</select>'+
     '<span style="color:var(--gry);font-size:10px;margin-left:8px;">TYPE</span>'+
     '<select id="chain-type-'+ticker+'" onchange="renderChainForExp(\''+ticker+'\',eid(\'chain-exp-'+ticker+'\').value,'+underlyingPrice+')">'+
+    // Default 'calls' per user spec 2026-05-02 — long-calls strategy
+    '<option value="calls" selected>Calls only</option>'+
     '<option value="both">Calls + Puts</option>'+
-    '<option value="calls">Calls only</option>'+
     '<option value="puts">Puts only</option>'+
     '</select>'+
     '<span style="color:var(--gry);font-size:10px;margin-left:8px;">STRIKES</span>'+
@@ -10811,8 +10829,8 @@ async function loadOptionChain(ticker){
     '</div>'+
     '<div class="chain-wrap" id="chain-tbl-'+ticker+'"><div class="chain-loading">Loading chain...</div></div>';
 
-  // Auto-load first expiration
-  await renderChainForExp(ticker, dates[0], underlyingPrice);
+  // Auto-load the nearest-monthly expiration (or first if no monthly found)
+  await renderChainForExp(ticker, defaultExp, underlyingPrice);
 }
 
 async function renderChainForExp(ticker, expDate, underlyingPrice){
@@ -10888,10 +10906,25 @@ async function renderChainForExp(ticker, expDate, underlyingPrice){
     return '<th class="'+(cls||'')+'" style="'+style+'" '+onclick+'>'+t+arrow+'</th>';
   }
 
+  // Calls-only view (user spec 2026-05-02): column order STRIKE · Bid ·
+  // Ask · OI · Last · Delta. Drops Vol + IV to keep the row compact and
+  // ordered by what matters for entering a long call: where (strike),
+  // for how much (bid/ask), how liquid (OI), where it last printed
+  // (last), and what the directional exposure is (delta).
+  // 'both' and 'puts' modes keep the legacy split-table layout.
   var hdr = '<tr>';
-  if(colsCall) hdr += _th('OI','c_oi','chain-hdr-calls')+_th('Vol','c_vol','chain-hdr-calls')+_th('IV','c_iv','chain-hdr-calls')+_th('Delta','c_delta','chain-hdr-calls')+_th('Bid','c_bid','chain-hdr-calls')+_th('Ask','c_ask','chain-hdr-calls')+_th('Last','c_last','chain-hdr-calls');
-  hdr += _th('STRIKE','strike',  'strike-col');
-  if(colsPut) hdr += _th('Last','p_last','chain-hdr-puts')+_th('Bid','p_bid','chain-hdr-puts')+_th('Ask','p_ask','chain-hdr-puts')+_th('Delta','p_delta','chain-hdr-puts')+_th('IV','p_iv','chain-hdr-puts')+_th('Vol','p_vol','chain-hdr-puts')+_th('OI','p_oi','chain-hdr-puts');
+  if (showType === 'calls') {
+    hdr += _th('STRIKE','strike','strike-col')
+        + _th('Bid','c_bid','chain-hdr-calls')
+        + _th('Ask','c_ask','chain-hdr-calls')
+        + _th('OI','c_oi','chain-hdr-calls')
+        + _th('Last','c_last','chain-hdr-calls')
+        + _th('Delta','c_delta','chain-hdr-calls');
+  } else {
+    if(colsCall) hdr += _th('OI','c_oi','chain-hdr-calls')+_th('Vol','c_vol','chain-hdr-calls')+_th('IV','c_iv','chain-hdr-calls')+_th('Delta','c_delta','chain-hdr-calls')+_th('Bid','c_bid','chain-hdr-calls')+_th('Ask','c_ask','chain-hdr-calls')+_th('Last','c_last','chain-hdr-calls');
+    hdr += _th('STRIKE','strike',  'strike-col');
+    if(colsPut) hdr += _th('Last','p_last','chain-hdr-puts')+_th('Bid','p_bid','chain-hdr-puts')+_th('Ask','p_ask','chain-hdr-puts')+_th('Delta','p_delta','chain-hdr-puts')+_th('IV','p_iv','chain-hdr-puts')+_th('Vol','p_vol','chain-hdr-puts')+_th('OI','p_oi','chain-hdr-puts');
+  }
   hdr += '</tr>';
 
   // Apply sort to allStrikes
@@ -10946,14 +10979,25 @@ async function renderChainForExp(ticker, expDate, underlyingPrice){
     var putStar = (p && strike === putBest.strike && putBest.score > 0)
       ? '<span style="color:var(--amb);font-size:9px;" title="Best put by composite score (delta+OI+spread)">★</span> ' : '';
     var row = '<tr class="'+(isATM?'atm':'')+'" data-tk="'+ticker+'" data-str="'+strike+'" data-exp="'+expDate+'" onclick="chainRowClick(this.dataset.tk,this.dataset.str,this.dataset.exp)">';
-    if(colsCall){
+    if (showType === 'calls') {
+      // Calls-only: STRIKE · Bid · Ask · OI · Last · Delta (per user spec)
       var cc = callITM?'chain-itm':'chain-otm';
-      row += _td(_oi(c&&c.open_interest),cc)+_td(_oi(c&&c.volume),cc)+_td(c&&c.greeks?_iv(c.greeks.smv_vol):'--',cc)+_td(c&&c.greeks?_f(c.greeks.delta):'--',cc)+_td(c?DS+_f(c.bid):'--',cc)+_td(c?DS+_f(c.ask):'--',cc)+_td((callStar)+(c?DS+_f(c.last):'--'),cc);
-    }
-    row += _td(DS+fmt2(strike)+(isATM?' &#9670;':''),'strike-col');
-    if(colsPut){
-      var pc = putITM?'chain-itm':'chain-otm';
-      row += _td((putStar)+(p?DS+_f(p.last):'--'),pc)+_td(p?DS+_f(p.bid):'--',pc)+_td(p?DS+_f(p.ask):'--',pc)+_td(p&&p.greeks?_f(p.greeks.delta):'--',pc)+_td(p&&p.greeks?_iv(p.greeks.smv_vol):'--',pc)+_td(_oi(p&&p.volume),pc)+_td(_oi(p&&p.open_interest),pc);
+      row += _td(DS+fmt2(strike)+(isATM?' &#9670;':''),'strike-col')
+          + _td(c?DS+_f(c.bid):'--',cc)
+          + _td(c?DS+_f(c.ask):'--',cc)
+          + _td(_oi(c&&c.open_interest),cc)
+          + _td((callStar)+(c?DS+_f(c.last):'--'),cc)
+          + _td(c&&c.greeks?_f(c.greeks.delta):'--',cc);
+    } else {
+      if(colsCall){
+        var cc2 = callITM?'chain-itm':'chain-otm';
+        row += _td(_oi(c&&c.open_interest),cc2)+_td(_oi(c&&c.volume),cc2)+_td(c&&c.greeks?_iv(c.greeks.smv_vol):'--',cc2)+_td(c&&c.greeks?_f(c.greeks.delta):'--',cc2)+_td(c?DS+_f(c.bid):'--',cc2)+_td(c?DS+_f(c.ask):'--',cc2)+_td((callStar)+(c?DS+_f(c.last):'--'),cc2);
+      }
+      row += _td(DS+fmt2(strike)+(isATM?' &#9670;':''),'strike-col');
+      if(colsPut){
+        var pc = putITM?'chain-itm':'chain-otm';
+        row += _td((putStar)+(p?DS+_f(p.last):'--'),pc)+_td(p?DS+_f(p.bid):'--',pc)+_td(p?DS+_f(p.ask):'--',pc)+_td(p&&p.greeks?_f(p.greeks.delta):'--',pc)+_td(p&&p.greeks?_iv(p.greeks.smv_vol):'--',pc)+_td(_oi(p&&p.volume),pc)+_td(_oi(p&&p.open_interest),pc);
+      }
     }
     row += '</tr>';
     return row;
