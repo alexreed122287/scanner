@@ -298,6 +298,20 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
 .gex-pill.mis{background:rgba(255,179,0,.10);color:var(--ambb);border:1px solid rgba(255,179,0,.4);cursor:pointer;}
 .gex-pill.mis:hover{background:rgba(255,179,0,.25);}
 .gex-pill.busy{background:rgba(0,212,255,.10);color:var(--blu);border:1px solid rgba(0,212,255,.4);cursor:wait;}
+/* Top-themes ribbon: marquee scroll right→left, pause on hover. The
+   inner .themes-marquee element contains TWO copies of the same content
+   so when the first copy translates -50% (one-copy-width), the second
+   copy is in view, creating a seamless infinite loop with no jump.
+   Each theme entry inside is .theme-chip which is click-to-filter. */
+.top-themes-strip{overflow:hidden !important;}
+.themes-marquee{display:inline-flex;flex-wrap:nowrap;gap:24px;align-items:center;animation:themes-scroll 90s linear infinite;will-change:transform;}
+.themes-marquee:hover{animation-play-state:paused;}
+@keyframes themes-scroll{
+  0%{transform:translateX(0);}
+  100%{transform:translateX(-50%);}
+}
+.theme-chip{cursor:pointer;white-space:nowrap;flex-shrink:0;transition:opacity .15s;}
+.theme-chip:hover{opacity:.7;text-decoration:underline;}
 .flt-bar label{color:var(--gry);font-size:10px;display:inline-flex;align-items:center;gap:6px;letter-spacing:.5px;}
 .flt-bar select,.flt-bar input{background:var(--bg2);border:var(--bdr);color:var(--wht);font-family:var(--ff);font-size:11px;padding:6px 8px;border-radius:3px;height:30px;box-sizing:border-box;}
 /* Buttons inside filter bars: lock height to match inputs/selects so the row
@@ -1217,7 +1231,26 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
       <select id="sc-sect" style="display:none;"><option value="">All</option></select>
     </label>
     <!-- Order: Sector → Theme → Signal → Min Score (per user spec). -->
-    <label title="Filter scan results to tickers in the chosen theme. Populated from theme_scores.json — see INDUSTRY tab for the full theme list and current ranks.">Theme <select id="sc-theme" onchange="applyFilters();_scheduleFilterRescan();" style="min-width:120px;"><option value="">All themes</option></select></label>
+    <label title="Multi-select theme filter — pick any number of themes to include. Themes are populated from theme_scores.json (see INDUSTRY tab). Selecting nothing = include all themes.">Themes
+      <span class="sect-wrap">
+        <button type="button" id="sc-theme-btn" class="sect-btn" onclick="toggleThemeDropdown(event)">
+          <span id="sc-theme-label">All</span>
+          <span class="sect-arr">▾</span>
+        </button>
+        <div id="sc-theme-dd" class="sect-dd" style="display:none;" onclick="event.stopPropagation();">
+          <div class="sect-dd-hdr">
+            <button type="button" class="btn" onclick="selectAllThemes(true)">ALL</button>
+            <button type="button" class="btn" onclick="selectAllThemes(false)">NONE</button>
+            <button type="button" class="btn blu" onclick="closeThemeDropdown()">APPLY</button>
+          </div>
+          <input type="text" class="sect-dd-search" id="sc-theme-search" placeholder="Search themes..." oninput="filterThemeOptions()">
+          <div id="sc-theme-opts"></div>
+        </div>
+      </span>
+      <!-- Hidden legacy single-select kept so any unmigrated code path that
+           reads eid('sc-theme').value resolves to '' rather than throwing. -->
+      <select id="sc-theme" style="display:none;"><option value="">All themes</option></select>
+    </label>
     <label>Signal <select id="sc-sig"><option value="">All</option><option value="GO" selected>GO</option><option value="NO-GO">NO-GO</option></select></label>
     <!-- B-2 default Min Score bumped 89 -> 100. With theme overlay (added 2026-04)
          scores trend ~10 pts higher, so the historical "GO rate" at 89 became
@@ -4492,6 +4525,8 @@ var G={results:[],filtered:[],gexData:[],wlTickers:[],positions:[],alerts:[],
   tsActive:false,tsTimer:null,tsState:{},tsTriggered:{},tsConfig:{},posRefreshTimer:null,
   selectedSectors:(function(){try{var s=JSON.parse(localStorage.getItem('rrjcar_sel_sectors')||'[]');return new Set(s);}catch(e){return new Set();}}()),
   knownSectors:new Set(),
+  selectedThemes:(function(){try{var s=JSON.parse(localStorage.getItem('rrjcar_sel_themes')||'[]');return new Set(s);}catch(e){return new Set();}}()),
+  knownThemes:new Set(),
   equityTrail:(function(){try{return JSON.parse(localStorage.getItem('rrjcar_eq_trail')||'{}');}catch(e){return {};}}()),
   equityTrailTimer:null,
   posOpenData:(function(){try{return JSON.parse(localStorage.getItem('rrjcar_pos_open')||'{}')}catch(e){return {}}}())};
@@ -4697,6 +4732,159 @@ function sectorAllowed(sec){
   if(G.selectedSectors.size === 0) return true; // empty = all
   if(G.selectedSectors.has('__NONE__')) return false;
   return G.selectedSectors.has(sec);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  MULTI-SELECT THEME FILTER
+//  G.selectedThemes = Set of theme names. Empty set = "all themes".
+//  '__NONE__' sentinel = explicit "show nothing" (mirrors sectors).
+//  Themes are scraped from G_THEME_OVERLAY.ticker2theme; updated whenever
+//  populateThemeDropdown fires (after every theme_scores.json load).
+// ═══════════════════════════════════════════════════════════════════════════
+function saveSelectedThemes(){
+  try{ localStorage.setItem('rrjcar_sel_themes', JSON.stringify(Array.from(G.selectedThemes))); }catch(e){}
+}
+function gatherKnownThemes(){
+  try{
+    var t2t = (typeof G_THEME_OVERLAY !== 'undefined' && G_THEME_OVERLAY && G_THEME_OVERLAY.ticker2theme) || {};
+    Object.keys(t2t).forEach(function(tk){ var ti = t2t[tk]; if (ti && ti.theme) G.knownThemes.add(ti.theme); });
+  }catch(e){}
+}
+function getVisibleThemes(){
+  gatherKnownThemes();
+  return Array.from(G.knownThemes).filter(function(t){ return t && t !== '--'; });
+}
+function themeMemberCounts(){
+  // How many G.results tickers belong to each theme — surfaced as (N) hint
+  // next to each checkbox so the user can see which themes are well-represented.
+  var c = {};
+  try{
+    if (G.results && typeof G_THEME_OVERLAY !== 'undefined' && G_THEME_OVERLAY && G_THEME_OVERLAY.ticker2theme) {
+      G.results.forEach(function(r){
+        var ti = G_THEME_OVERLAY.ticker2theme[r.ticker];
+        if (ti && ti.theme) c[ti.theme] = (c[ti.theme]||0) + 1;
+      });
+    }
+  }catch(e){}
+  return c;
+}
+function populateThemeCheckboxes(){
+  var box = eid('sc-theme-opts');
+  if(!box) return;
+  var themes = getVisibleThemes().sort(function(a,b){return a.localeCompare(b);});
+  var counts = themeMemberCounts();
+  var html = '';
+  themes.forEach(function(t){
+    var checked = G.selectedThemes.size === 0 || G.selectedThemes.has(t);
+    var safe = String(t).replace(/"/g,'&quot;');
+    var cnt = counts[t] ? ' <span class="sect-opt-count">('+counts[t]+')</span>' : '';
+    html += '<label class="sect-opt" data-sect="'+safe+'">'
+          + '<input type="checkbox" class="sc-theme-cb" value="'+safe+'"'+(checked?' checked':'')+' onchange="onThemeCheckboxChange()">'
+          + '<span>'+_esc(t)+'</span>'+cnt+'</label>';
+  });
+  box.innerHTML = html || '<div style="color:var(--gry);font-size:11px;padding:4px;">No themes loaded yet — wait for theme_scores.json</div>';
+  updateThemeLabel();
+}
+function updateThemeLabel(){
+  var lbl = eid('sc-theme-label');
+  if(!lbl) return;
+  var visible = getVisibleThemes();
+  var totalKnown = visible.length;
+  var visibleSet = new Set(visible);
+  var selectedVisible = 0;
+  G.selectedThemes.forEach(function(t){ if(visibleSet.has(t)) selectedVisible++; });
+  var n = (G.selectedThemes.has('__NONE__')) ? 0 : selectedVisible;
+  if(G.selectedThemes.size === 0 || n === totalKnown){
+    lbl.innerHTML = 'All <span class="sect-cnt">('+totalKnown+')</span>';
+  } else if(n === 1){
+    var only = '';
+    G.selectedThemes.forEach(function(t){ if(visibleSet.has(t)) only = t; });
+    lbl.innerHTML = (only.length>22?only.slice(0,20)+'…':only);
+  } else {
+    lbl.innerHTML = n+' of '+totalKnown+' <span class="sect-cnt">selected</span>';
+  }
+}
+function toggleThemeDropdown(ev){
+  if(ev){ ev.stopPropagation(); }
+  var dd = eid('sc-theme-dd');
+  if(!dd) return;
+  var open = dd.style.display !== 'none';
+  if(open){ dd.style.display = 'none'; }
+  else {
+    populateThemeCheckboxes();
+    dd.style.display = 'block';
+    setTimeout(function(){ document.addEventListener('click', _themeDDOutsideClick, {once:true}); }, 0);
+  }
+}
+function _themeDDOutsideClick(e){
+  var dd = eid('sc-theme-dd');
+  var btn = eid('sc-theme-btn');
+  if(!dd) return;
+  if(dd.style.display === 'none') return;
+  if(dd.contains(e.target) || (btn && btn.contains(e.target))) {
+    setTimeout(function(){ document.addEventListener('click', _themeDDOutsideClick, {once:true}); },0);
+    return;
+  }
+  closeThemeDropdown();
+}
+function closeThemeDropdown(){
+  var dd = eid('sc-theme-dd');
+  if(dd) dd.style.display = 'none';
+  applyFilters();
+  if (typeof _scheduleFilterRescan === 'function') _scheduleFilterRescan();
+}
+function selectAllThemes(selectAll){
+  if(selectAll){
+    G.selectedThemes = new Set(getVisibleThemes());
+  } else {
+    G.selectedThemes = new Set(['__NONE__']);
+  }
+  saveSelectedThemes();
+  var boxes = document.querySelectorAll('.sc-theme-cb');
+  boxes.forEach(function(cb){ cb.checked = selectAll; });
+  updateThemeLabel();
+  if(G.results && G.results.length) applyFilters();
+}
+function onThemeCheckboxChange(){
+  var boxes = document.querySelectorAll('.sc-theme-cb');
+  var picked = [];
+  boxes.forEach(function(cb){ if(cb.checked) picked.push(cb.value); });
+  var total = getVisibleThemes().length;
+  if(picked.length === 0){
+    G.selectedThemes = new Set(['__NONE__']);
+  } else if(picked.length === total){
+    G.selectedThemes = new Set();
+  } else {
+    G.selectedThemes = new Set(picked);
+  }
+  saveSelectedThemes();
+  updateThemeLabel();
+  if(G.results && G.results.length) applyFilters();
+}
+function filterThemeOptions(){
+  var q = (eid('sc-theme-search').value||'').toLowerCase();
+  var opts = document.querySelectorAll('#sc-theme-opts .sect-opt');
+  opts.forEach(function(o){
+    var s = (o.getAttribute('data-sect')||'').toLowerCase();
+    o.style.display = (!q || s.indexOf(q) !== -1) ? '' : 'none';
+  });
+}
+function themeAllowed(themeName){
+  if(G.selectedThemes.size === 0) return true; // empty = all
+  if(G.selectedThemes.has('__NONE__')) return false;
+  if(!themeName) return true;  // ticker has no theme assignment — don't drop it
+  return G.selectedThemes.has(themeName);
+}
+// Click-from-ribbon entry point: replace the current selection with this
+// single theme so the user can drill into one with a single click.
+function selectOnlyTheme(themeName){
+  if(!themeName) return;
+  G.selectedThemes = new Set([themeName]);
+  saveSelectedThemes();
+  updateThemeLabel();
+  applyFilters();
+  if (typeof _scheduleFilterRescan === 'function') _scheduleFilterRescan();
+  try { toast('Filtered to theme: ' + themeName); } catch(_){}
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -9644,19 +9832,31 @@ function renderTopThemesStrip(){
               :             '⚡↓↓';
     var sign = r.rs >= 0 ? '+' : '';
     var rankBit = rank ? '<b style="color:var(--gry2);">'+rank+'.</b> ' : '';
-    return '<span style="color:'+col+';" title="'+r.n+' members in current scan">'
-         + rankBit + r.theme + ' ' + sign + r.rs.toFixed(1) + '% ' + arrow
+    var safe = String(r.theme).replace(/"/g,'&quot;').replace(/'/g,"\\'");
+    return '<span class="theme-chip" style="color:'+col+';" '
+         + 'onclick="selectOnlyTheme(\''+safe+'\')" '
+         + 'title="'+r.n+' members in current scan — click to filter scanner to this theme">'
+         + rankBit + _esc(r.theme) + ' ' + sign + r.rs.toFixed(1) + '% ' + arrow
          + '</span>';
   }
 
   var leaders  = rows.slice(0, 5);
   var laggards = rows.slice(-3).reverse();
 
-  var html = '<span style="color:var(--ambb);font-size:10px;letter-spacing:1.5px;font-weight:700;">TOP THEMES NOW:</span> '
+  var content = '<span style="color:var(--ambb);font-size:10px;letter-spacing:1.5px;font-weight:700;">TOP THEMES NOW:</span> '
     + leaders.map(function(r,i){return fmtRow(r, i+1);}).join('  <span style="color:var(--bg3);">·</span>  ')
     + '  <span style="color:var(--bg3);">|</span>  '
     + '<span style="color:var(--ngo);font-size:10px;letter-spacing:1.5px;font-weight:700;">LAGGARDS:</span> '
     + laggards.map(function(r){return fmtRow(r);}).join('  <span style="color:var(--bg3);">·</span>  ');
+
+  // The marquee animation translates -50% to loop seamlessly, so we render
+  // the content TWICE side by side; the second copy slides into view as
+  // the first slides off. aria-hidden on the duplicate so screen readers
+  // don't read the same headlines twice.
+  var html = '<div class="themes-marquee">'
+           + '<span style="display:inline-flex;gap:24px;align-items:center;padding-right:24px;">' + content + '</span>'
+           + '<span style="display:inline-flex;gap:24px;align-items:center;padding-right:24px;" aria-hidden="true">' + content + '</span>'
+           + '</div>';
 
   els.forEach(function(el){ el.innerHTML = html; });
 }
@@ -12198,35 +12398,25 @@ function _scheduleFilterRescan(){
 // model of "where is rotation today?". Called from init() (after theme overlay
 // hydrates) and any time theme data refreshes.
 function populateThemeDropdown(){
-  var sel = document.getElementById('sc-theme');
-  if (!sel) return;
-  var prev = sel.value;
-  var byName = {};
+  // Hydrate G.knownThemes from the just-loaded overlay, then refresh the
+  // multi-select widget label/checkboxes. Was a single-select <select>;
+  // now drives the .sect-wrap-style picker so themes filter like sectors.
   try {
     var t2t = (G_THEME_OVERLAY && G_THEME_OVERLAY.ticker2theme) || {};
     Object.keys(t2t).forEach(function(tk){
       var ti = t2t[tk];
-      if (!ti || !ti.theme) return;
-      if (!(ti.theme in byName) || (ti.dailyScore || 0) > byName[ti.theme]) {
-        byName[ti.theme] = ti.dailyScore || 0;
-      }
+      if (ti && ti.theme) G.knownThemes.add(ti.theme);
     });
   } catch(e){}
-  var themes = Object.keys(byName).map(function(n){ return {name: n, score: byName[n]}; });
-  themes.sort(function(a,b){ return a.name.localeCompare(b.name); });
-  var html = '<option value="">All themes</option>';
-  themes.forEach(function(t){
-    var label = t.name + (t.score ? ' ('+Math.round(t.score)+')' : '');
-    html += '<option value="'+_esc(t.name)+'">'+_esc(label)+'</option>';
-  });
-  sel.innerHTML = html;
-  if (prev) sel.value = prev;   // preserve user selection across re-populate
+  // Refresh the dropdown if it's currently open, otherwise just the label
+  var dd = eid('sc-theme-dd');
+  if (dd && dd.style.display !== 'none') populateThemeCheckboxes();
+  else updateThemeLabel();
 }
 
 function applyFilters(){
   var sig     = eid('sc-sig').value;
   var minsc   = +eid('sc-minscore').value||0;
-  var theme   = (eid('sc-theme') && eid('sc-theme').value) || '';
   var maxOptPr= parseFloat(eid('sc-maxoptprice') ? eid('sc-maxoptprice').value : 0) || 0;
 
   // Indicator filter checkboxes
@@ -12263,13 +12453,13 @@ function applyFilters(){
     if(sig === 'GO' && !r.isGo) return false;
     if(sig === 'NO-GO' && r.isGo) return false;
     if(r.score < minsc) return false;
-    // B-3: theme filter. Look up the ticker's theme via the overlay map.
-    // Empty string = "All themes" (no filter).
-    if(theme){
-      var ti2 = (G_THEME_OVERLAY && G_THEME_OVERLAY.ticker2theme && G_THEME_OVERLAY.ticker2theme[r.ticker]) || null;
-      var rTheme = (ti2 && ti2.theme) || '';
-      if(rTheme !== theme) return false;
-    }
+    // Multi-select theme filter (was single-string match against #sc-theme).
+    // themeAllowed handles empty=all, __NONE__=show-nothing, and the picked
+    // set otherwise. Tickers with no theme assignment pass through (don't
+    // get culled by a theme filter the user didn't intend to exclude them).
+    var ti2 = (typeof G_THEME_OVERLAY !== 'undefined' && G_THEME_OVERLAY && G_THEME_OVERLAY.ticker2theme && G_THEME_OVERLAY.ticker2theme[r.ticker]) || null;
+    var rTheme = (ti2 && ti2.theme) || '';
+    if (!themeAllowed(rTheme)) return false;
     // Max option price filter \u2014 uses last known option price from scan or detail fetch
     if(maxOptPr > 0 && r.opt && r.opt.optPr > 0 && r.opt.optPr > maxOptPr) return false;
 
@@ -12446,6 +12636,11 @@ function resetScanSettings(){
   try { saveSelectedSectors(); } catch(e){}
   if (typeof populateSectorCheckboxes === 'function') populateSectorCheckboxes();
   if (typeof updateSectorLabel === 'function') updateSectorLabel();
+  // Same reset for themes — empty Set = all themes
+  G.selectedThemes = new Set();
+  try { saveSelectedThemes(); } catch(e){}
+  if (typeof populateThemeCheckboxes === 'function') populateThemeCheckboxes();
+  if (typeof updateThemeLabel === 'function') updateThemeLabel();
   try { localStorage.removeItem(SCAN_SETTINGS_KEY); } catch(e){}
   if (typeof applyFilters === 'function') applyFilters();
   if (typeof reclassifyGoThreshold === 'function') reclassifyGoThreshold();
@@ -12464,6 +12659,11 @@ function clearFilters(){
   saveSelectedSectors();
   populateSectorCheckboxes();
   updateSectorLabel();
+  // Same reset for theme multi-select
+  G.selectedThemes = new Set();
+  saveSelectedThemes();
+  populateThemeCheckboxes();
+  updateThemeLabel();
   // Uncheck every MUST PASS / indicator filter checkbox in the toolbar
   ['filt-analyst','filt-gex','filt-proven',
    'filt-52hi','filt-rs','filt-macd','filt-tf','filt-ema200','filt-vol',
@@ -12658,8 +12858,12 @@ function renderScan(){
     var msg;
     if(hasResults){
       var active = [];
-      var theme = (eid('sc-theme') && eid('sc-theme').value) || '';
-      if(theme) active.push('Theme: '+theme);
+      // Themes filter — count selected from the multi-select set
+      if(G.selectedThemes && G.selectedThemes.has('__NONE__')){
+        active.push('Themes: NONE');
+      } else if(G.selectedThemes && G.selectedThemes.size > 0){
+        active.push('Themes: '+G.selectedThemes.size+' selected');
+      }
       if(G.selectedSectors && G.selectedSectors.has('__NONE__')){
         active.push('Sectors: NONE');
       } else if(G.selectedSectors && G.selectedSectors.size > 0){
