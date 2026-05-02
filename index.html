@@ -1327,6 +1327,36 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
     <span id="sc-universe-label" style="display:none;"></span>
   </div>
   </div><!-- /#sc-filter-bars -->
+  <!-- Categorized scan-results stat strip — counts of HIGH CONVICTION,
+       BREAKOUT, MOMENTUM, BEST ITM CALLS, and PRE/POST MARKET matches
+       inside the most recent scan. Populated by _renderScanCategoryStrip
+       on setScanComplete. Each chip clicks through to apply that preset. -->
+  <div class="stats-bar" id="sc-cat-strip" style="display:none;border-bottom:var(--bdr);">
+    <div class="stat-box" data-cat="highConviction" onclick="applyStrategyMode('highConviction')" style="cursor:pointer;" title="Click to filter to HIGH CONVICTION setups only.">
+      <div class="stat-label">★ HIGH CONVICTION</div>
+      <div class="stat-val amb"><span class="cat-count">--</span><span class="cat-of" style="color:var(--gry);font-size:13px;font-weight:400;"> / --</span></div>
+    </div>
+    <div class="stat-box" data-cat="breakout" onclick="applyStrategyMode('breakout')" style="cursor:pointer;" title="Click to filter to BREAKOUT setups only.">
+      <div class="stat-label">▲ BREAKOUT</div>
+      <div class="stat-val amb"><span class="cat-count">--</span><span class="cat-of" style="color:var(--gry);font-size:13px;font-weight:400;"> / --</span></div>
+    </div>
+    <div class="stat-box" data-cat="momentum" onclick="applyStrategyMode('momentum')" style="cursor:pointer;" title="Click to filter to MOMENTUM setups only.">
+      <div class="stat-label">▶ MOMENTUM</div>
+      <div class="stat-val amb"><span class="cat-count">--</span><span class="cat-of" style="color:var(--gry);font-size:13px;font-weight:400;"> / --</span></div>
+    </div>
+    <div class="stat-box" data-cat="bestItmCalls" onclick="applyStrategyMode('bestItmCalls')" style="cursor:pointer;" title="Click to filter to BEST ITM CALLS only.">
+      <div class="stat-label">◆ BEST ITM</div>
+      <div class="stat-val amb"><span class="cat-count">--</span><span class="cat-of" style="color:var(--gry);font-size:13px;font-weight:400;"> / --</span></div>
+    </div>
+    <div class="stat-box" data-cat="preMarket" onclick="applyStrategyMode('preMarket')" style="cursor:pointer;" title="Click to filter to PRE/POST MARKET gappers (uses HC criteria).">
+      <div class="stat-label">▲ PRE/POST</div>
+      <div class="stat-val amb"><span class="cat-count">--</span><span class="cat-of" style="color:var(--gry);font-size:13px;font-weight:400;"> / --</span></div>
+    </div>
+    <div class="stat-box" style="flex:0 0 auto;padding:6px 12px;border-left:1px solid var(--bg3);">
+      <div class="stat-label">SCAN AT</div>
+      <div class="stat-val amb" id="sc-cat-strip-ts" style="font-size:13px;font-family:var(--ff-mono);">--</div>
+    </div>
+  </div>
   <!-- Live theme leaderboard (same render as BUY SIGNALS — both .top-themes-strip
        elements get updated by renderTopThemesStrip via querySelectorAll). -->
   <div class="top-themes-strip" style="background:var(--bg1);border-bottom:var(--bdr);padding:5px 10px;font-family:var(--ff-mono);font-size:11px;white-space:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;letter-spacing:.3px;"></div>
@@ -11658,6 +11688,64 @@ function _renderScanDataStatus(stats){
   };
 }
 
+// Categorized scan-results stat strip — replaces the legacy single-count
+// 'X scored' chip with per-preset breakdowns. For each STRATEGY_MODES key
+// we re-evaluate its filter rules against G.results and emit '<matches> / <scored>'.
+// Categories overlap (a ticker can be HIGH CONVICTION + MOMENTUM); each
+// chip is independent. The shared SCAN AT timestamp is the latest scan
+// completion time persisted to localStorage.
+function _matchesPreset(r, filters){
+  if (!r) return false;
+  if (filters.sig === 'GO' && !r.isGo) return false;
+  if (filters.sig === 'NO-GO' && r.isGo) return false;
+  if (filters.minScore && r.score < filters.minScore) return false;
+  // Indicator-rule predicates — each maps to an entry in r.passes (the
+  // array of passing-rule names that scoreIt produced for this ticker).
+  // If r.passes is missing (legacy cached result), assume the rule did
+  // NOT pass — better to under-count than over-count for the strip.
+  var passes = Array.isArray(r.passes) ? r.passes : [];
+  function has(name){ return passes.indexOf(name) >= 0; }
+  if (filters.analyst && !(has('Analyst Revisions Up') || has('Analyst Revisions ↑') || has('Analyst Up'))) return false;
+  if (filters.gex && !(has('GEX Call Heavy') || has('Call Heavy GEX'))) return false;
+  if (filters.proven && !(has('PROVEN') || has('PROVEN Ticker'))) return false;
+  if (filters.hi52 && !(has('Near 52Wk Hi') || has('52Wk Hi'))) return false;
+  if (filters.rs && !has('RS > SPY')) return false;
+  if (filters.macd && !(has('MACD +') || has('MACD Bullish'))) return false;
+  if (filters.tf && !(has('TF Aligned 2/3') || has('Timeframes Aligned'))) return false;
+  if (filters.ema200 && !(has('Above EMA200') || has('Above 200 EMA'))) return false;
+  if (filters.vol && !(has('Vol > Avg') || has('Volume > Avg'))) return false;
+  if (filters.minPrice    && (r.price || 0)   < filters.minPrice) return false;
+  if (filters.minAvgVol   && (r.avgVol || r.volume || 0) < filters.minAvgVol) return false;
+  if (filters.maxOptPrice && r.opt && r.opt.optPr > 0 && r.opt.optPr > filters.maxOptPrice) return false;
+  return true;
+}
+function _renderScanCategoryStrip(){
+  var strip = eid('sc-cat-strip');
+  if (!strip) return;
+  var results = G.results || [];
+  if (!results.length) { strip.style.display = 'none'; return; }
+  strip.style.display = 'flex';
+  var scored = results.length;
+  ['highConviction','breakout','momentum','bestItmCalls','preMarket'].forEach(function(mode){
+    var sm = STRATEGY_MODES && STRATEGY_MODES[mode];
+    if (!sm) return;
+    var box = strip.querySelector('[data-cat="'+mode+'"]');
+    if (!box) return;
+    var n = 0;
+    for (var i = 0; i < results.length; i++) {
+      if (_matchesPreset(results[i], sm.filters)) n++;
+    }
+    var countEl = box.querySelector('.cat-count');
+    var ofEl = box.querySelector('.cat-of');
+    if (countEl) countEl.textContent = n;
+    if (ofEl) ofEl.textContent = ' / ' + scored;
+    // Color the count by hit-rate: green if any HC-tier match, gray if none
+    if (countEl) countEl.style.color = n > 0 ? 'var(--grn)' : 'var(--gry)';
+  });
+  var ts = eid('sc-cat-strip-ts');
+  if (ts) ts.textContent = new Date().toLocaleTimeString();
+}
+
 function setScanComplete(stats){
   // stats: {scanned, passed, scored, go, nogo}
   var bar = eid('sc-prog-bar');
@@ -11701,6 +11789,10 @@ function setScanComplete(stats){
   // user can see WHY a ticker scored low or has no GEX rule outcome,
   // instead of silently looking at incomplete data.
   try { _renderScanDataStatus(stats); } catch(e){ console.warn('[scan] data-status render threw:', e.message); }
+  // Categorized scan-results stat strip — counts how many G.results match
+  // each STRATEGY_MODES preset's filter rules. Click a chip to filter to
+  // that category. Updates the SCAN AT timestamp shared across all chips.
+  try { _renderScanCategoryStrip(); } catch(e){ console.warn('[scan] category-strip render threw:', e.message); }
   // Desktop notification (only when user explicitly enabled). Falls back silently.
   try {
     if('Notification' in window && Notification.permission === 'granted'
@@ -21506,6 +21598,14 @@ function init(){
         lastEl.textContent = 'Last scan: ' + d.toLocaleTimeString();
         lastEl.style.color = 'var(--gry)';
       }
+      // Same hydration for the categorized stat strip — its counts come
+      // from G.results which we already restored above; just need the
+      // timestamp seeded so the strip reflects the cached scan's age.
+      var stripTs = eid('sc-cat-strip-ts');
+      if (stripTs) stripTs.textContent = new Date(lastTs).toLocaleTimeString();
+    }
+    if (G.results && G.results.length && typeof _renderScanCategoryStrip === 'function') {
+      _renderScanCategoryStrip();
     }
   } catch(_){}
 
