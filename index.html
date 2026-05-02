@@ -268,6 +268,12 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
    ctrl-h:    30px (height of every button / input / select inside flt-bar)
 */
 .flt-bar{background:var(--bg1);border-bottom:var(--bdr);display:flex;flex-wrap:wrap;gap:10px;padding:10px 14px;flex-shrink:0;align-items:center;}
+/* Stable-width container for live-updating text (counters, timestamps, status
+   labels). Without these, growing text inside a flex row pushes adjacent
+   controls — e.g. the GEX progress chip dragged the AUTO dropdown leftward
+   each time the chip text widened. Pin the box width, force tabular digits,
+   ellipsis-truncate worst case, and the surrounding layout stays put. */
+.dyn-w{display:inline-block;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:middle;}
 .flt-bar label{color:var(--gry);font-size:10px;display:inline-flex;align-items:center;gap:6px;letter-spacing:.5px;}
 .flt-bar select,.flt-bar input{background:var(--bg2);border:var(--bdr);color:var(--wht);font-family:var(--ff);font-size:11px;padding:6px 8px;border-radius:3px;height:30px;box-sizing:border-box;}
 /* Buttons inside filter bars: lock height to match inputs/selects so the row
@@ -2120,8 +2126,8 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
           <option value="3x">3x daily (9:35, 12:00, 15:00 ET)</option>
         </select>
       </label>
-      <span id="gex-progress" style="color:var(--amb);font-size:10px;font-family:var(--ff-mono);min-width:0;"></span>
-      <span id="gex-ts" style="color:var(--gry);font-size:10px;">Click RUN to fetch flow data</span>
+      <span id="gex-progress" class="dyn-w" style="color:var(--amb);font-size:10px;font-family:var(--ff-mono);width:340px;text-align:right;"></span>
+      <span id="gex-ts" class="dyn-w" style="color:var(--gry);font-size:10px;width:240px;text-align:right;">Click RUN to fetch flow data</span>
       <button class="btn blu" style="font-size:11px;padding:5px 14px;" onclick="runGex()" title="Fetch 30DTE options chain for the top 200 ranked tickers (~4 min, paced by Tradier rate limit). Auto-fires 20s after every scan + on the schedule selected to the left.">&#8635; RUN GEX</button>
     </div>
   </div>
@@ -2155,7 +2161,7 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
   <div class="flt-bar" style="justify-content:space-between;align-items:center;">
     <span style="font-family:var(--ff-brand);font-size:12px;color:var(--amb);letter-spacing:2px;">OPTIONS WATCHLIST</span>
     <div style="display:flex;gap:8px;align-items:center;">
-      <span style="color:var(--gry);font-size:10px;" id="cw-last-update"></span>
+      <span class="dyn-w" style="color:var(--gry);font-size:10px;width:200px;text-align:right;" id="cw-last-update"></span>
       <button class="btn" style="font-size:10px;padding:3px 10px;" onclick="cwRefreshAll()">&#8635; REFRESH ALL</button>
       <button class="btn" style="font-size:10px;padding:3px 10px;border-color:var(--ngo);color:var(--ngo);" onclick="cwClearExpired()">CLEAR EXPIRED</button>
     </div>
@@ -2171,9 +2177,9 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
   <div class="flt-bar" style="justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
     <span style="font-family:var(--ff-brand);font-size:12px;color:var(--amb);letter-spacing:2px;">PORTFOLIO BUILDER</span>
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-      <span style="color:var(--gry);" title="The Tradier account ID being pulled. Set via /v1/user/profile auto-discovery on first PULL TRADIER. Click API tab to verify.">Tradier acct: <b id="pf-acct-display" style="color:var(--ambb);font-family:var(--ff-mono);">--</b></span>
-      <span style="color:var(--gry);" title="Cash + cash-equivalents from Tradier balances endpoint. Pulled together with positions when you click PULL TRADIER.">Cash: <b id="pf-cash-display" style="color:var(--grn);font-family:var(--ff-mono);">$--</b></span>
-      <span style="color:var(--gry);font-size:10px;" id="pf-last-update">Not loaded</span>
+      <span style="color:var(--gry);" title="The Tradier account ID being pulled. Set via /v1/user/profile auto-discovery on first PULL TRADIER. Click API tab to verify.">Tradier acct: <b id="pf-acct-display" class="dyn-w" style="color:var(--ambb);font-family:var(--ff-mono);min-width:100px;text-align:left;">--</b></span>
+      <span style="color:var(--gry);" title="Cash + cash-equivalents from Tradier balances endpoint. Pulled together with positions when you click PULL TRADIER.">Cash: <b id="pf-cash-display" class="dyn-w" style="color:var(--grn);font-family:var(--ff-mono);min-width:110px;text-align:left;">$--</b></span>
+      <span class="dyn-w" style="color:var(--gry);font-size:10px;width:180px;text-align:right;" id="pf-last-update">Not loaded</span>
       <button class="btn blu" style="font-size:10px;padding:3px 10px;" onclick="pfRefreshAll()">&#8635; REFRESH ALL</button>
       <button class="btn" style="font-size:10px;padding:3px 10px;border-color:var(--amb);color:var(--amb);" onclick="pfCopyAllTickers()" title="Copy comma-separated unique tickers from all columns">COPY ALL TICKERS</button>
       <button class="btn" style="font-size:10px;padding:3px 10px;border-color:var(--grn);color:var(--grn);" onclick="pfAddColumn()">+ ADD COLUMN</button>
