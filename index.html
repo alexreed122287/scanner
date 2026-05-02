@@ -277,6 +277,19 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
    each time the chip text widened. Pin the box width, force tabular digits,
    ellipsis-truncate worst case, and the surrounding layout stays put. */
 .dyn-w{display:inline-block;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:middle;}
+/* Collapsible primitive — applied to .card and .flt-bar. Click the header
+   to hide/show the body; state persists per-id in localStorage. The chevron
+   is a generated ::before so we don't have to touch every existing header. */
+.card.collapsible .card-hdr,.flt-bar.collapsible .sec-toggle{cursor:pointer;user-select:none;}
+.card.collapsible .card-hdr::before,.flt-bar.collapsible .sec-toggle::before{
+  content:'\25be';display:inline-block;margin-right:8px;color:var(--amb);
+  transition:transform .15s ease;font-size:11px;
+}
+.card.collapsible.collapsed .card-hdr::before,.flt-bar.collapsible.collapsed .sec-toggle::before{transform:rotate(-90deg);}
+.card.collapsible.collapsed .card-body{display:none;}
+.flt-bar.collapsible .sec-toggle{font-family:var(--ff-mono);font-size:10px;color:var(--amb);letter-spacing:.5px;background:none;border:none;padding:0 6px 0 0;}
+.flt-bar.collapsible.collapsed > *:not(.sec-toggle){display:none !important;}
+.flt-bar.collapsible.collapsed{padding-top:6px;padding-bottom:6px;}
 .flt-bar label{color:var(--gry);font-size:10px;display:inline-flex;align-items:center;gap:6px;letter-spacing:.5px;}
 .flt-bar select,.flt-bar input{background:var(--bg2);border:var(--bdr);color:var(--wht);font-family:var(--ff);font-size:11px;padding:6px 8px;border-radius:3px;height:30px;box-sizing:border-box;}
 /* Buttons inside filter bars: lock height to match inputs/selects so the row
@@ -1162,8 +1175,8 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
   <!-- Strategy mode quick filters — inline gap/font overrides removed; the
        base .flt-bar / .flt-bar .btn rules now drive sizing for consistency
        with every other filter row in the app. -->
-  <div class="flt-bar" style="border-bottom:1px solid var(--bg3);">
-    <span style="font-family:var(--ff-mono);font-size:10px;color:var(--amb);letter-spacing:.5px;">STRATEGY</span>
+  <div class="flt-bar collapsible" id="sc-bar-strategy" style="border-bottom:1px solid var(--bg3);">
+    <button type="button" class="sec-toggle" title="Collapse / expand the STRATEGY presets row">STRATEGY</button>
     <button class="btn blu" onclick="applyStrategyMode('highConviction')">&#9733; HIGH CONVICTION</button>
     <button class="btn" onclick="applyStrategyMode('breakout')">&#9650; BREAKOUT</button>
     <button class="btn" onclick="applyStrategyMode('momentum')">&#9654; MOMENTUM</button>
@@ -1174,7 +1187,8 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
     <span id="pre-market-pill" style="display:none;font-family:var(--ff-mono);font-size:9px;font-weight:800;letter-spacing:1.5px;background:var(--ambb);color:var(--bg0);padding:2px 8px;border-radius:2px;animation:today-pulse 2.4s ease-in-out infinite;" title="Pre-market session is active — Tradier `last` reflects extended-hours quotes. Use the PRE-MARKET preset to sort by gap %.">PRE-MARKET LIVE</span>
     <span id="strategy-desc-sc" style="font-family:var(--ff-mono);font-size:10px;color:var(--gry);font-style:italic;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;"></span>
   </div>
-  <div class="flt-bar">
+  <div class="flt-bar collapsible" id="sc-bar-filters">
+    <button type="button" class="sec-toggle" title="Collapse / expand the FILTERS row">FILTERS</button>
     <label>Sectors
       <span class="sect-wrap">
         <button type="button" id="sc-sect-btn" class="sect-btn" onclick="toggleSectorDropdown(event)">
@@ -1207,8 +1221,8 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
   <!-- ── INDICATOR FILTERS ── inherits .flt-bar padding/gap; flex-wrap:nowrap
        only override is to keep all chips on one row. Container scrolls
        horizontally if chips exceed viewport width. -->
-  <div class="flt-bar must-pass-row" style="flex-wrap:nowrap;border-top:1px solid var(--bg3);overflow-x:auto;width:100%;">
-    <span style="font-family:var(--ff-mono);font-size:10px;color:var(--amb);letter-spacing:.5px;margin-right:4px;">MUST PASS:</span>
+  <div class="flt-bar must-pass-row collapsible" id="sc-bar-mustpass" style="flex-wrap:nowrap;border-top:1px solid var(--bg3);overflow-x:auto;width:100%;">
+    <button type="button" class="sec-toggle" title="Collapse / expand the MUST PASS chips row" style="margin-right:4px;">MUST PASS:</button>
     <label class="ind-filter-lbl"><input type="checkbox" class="ind-filter" id="filt-analyst" onchange="applyFilters()"> <span>Analyst Revisions &#8593;</span></label>
     <label class="ind-filter-lbl"><input type="checkbox" class="ind-filter" id="filt-gex" onchange="applyFilters()"> <span>GEX Call Heavy</span></label>
     <label class="ind-filter-lbl"><input type="checkbox" class="ind-filter" id="filt-proven" onchange="applyFilters()"> <span>PROVEN Ticker</span></label>
@@ -1223,7 +1237,8 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
     <input type="text" id="sc-search" placeholder="Search ticker..." oninput="onScSearch()" style="margin-left:auto;font-family:var(--ff-mono);font-size:11px;padding:3px 8px;background:var(--bg1);border:1px solid var(--bg3);border-radius:3px;color:var(--amb);width:160px;">
     <span id="sc-filter-count" style="font-family:var(--ff-mono);font-size:10px;color:var(--gry);"></span>
   </div>
-  <div class="flt-bar" style="flex-wrap:wrap;gap:6px;">
+  <div class="flt-bar collapsible" id="sc-bar-screener" style="flex-wrap:wrap;gap:6px;">
+    <button type="button" class="sec-toggle" title="Collapse / expand the SCAN button + SCREENER row">SCREENER</button>
     <button class="btn blu" id="sc-run-btn" onclick="runScan()">↻ SCAN</button>
     <span id="sc-last-scan" class="dyn-w" style="color:var(--gry);font-size:10px;font-family:var(--ff-mono);width:230px;text-align:left;" title="Timestamp of the most recent SCAN completion. Persists across page reloads from localStorage.">Last scan: never</span>
     <span style="color:var(--gry);font-size:10px;letter-spacing:.5px;border-left:1px solid var(--gry2);padding-left:14px;margin-left:4px;">SCREENER</span>
@@ -1752,7 +1767,7 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
   <div class="page-wrap">
 
     <!-- ── NOTIFICATION SETTINGS ── -->
-    <div class="card"><div class="card-hdr">&#9650; HIGH-CONVICTION ALERT SETTINGS</div>
+    <div class="card collapsible" id="hc-alerts-card" data-default-collapsed><div class="card-hdr">&#9650; HIGH-CONVICTION ALERT SETTINGS</div>
     <div class="card-body api-form">
       <div style="font-family:var(--ff-mono);font-size:10px;color:var(--gry);margin-bottom:14px;line-height:1.7;">
         Fires when a ticker matches: <span style="color:var(--grn);">PROVEN + Score &ge;90 + Analyst Revisions &uarr; + GEX Call Heavy</span><br>
@@ -1856,7 +1871,7 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
     </div></div>
 
     <!-- ── AUTO-TRADER ── -->
-    <div class="card" id="at-card">
+    <div class="card collapsible" id="at-card" data-default-collapsed>
       <div class="card-hdr" style="display:flex;align-items:center;justify-content:space-between;">
         <span>&#9889; AUTO-TRADER — FULLY AUTOMATED EXECUTION</span>
         <span id="at-status-badge" style="font-family:var(--ff-mono);font-size:10px;padding:2px 10px;border-radius:2px;background:var(--redd);color:var(--red);">OFF</span>
@@ -2011,7 +2026,7 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
       <span id="api-counter-tab" onclick="showApiBreakdown()" title="Click to view per-endpoint breakdown" style="cursor:pointer;font-family:var(--ff-mono);font-size:14px;font-weight:700;color:var(--amb);">0</span>
       <span style="font-family:var(--ff-mono);font-size:10px;color:var(--gry);">(resets at midnight ET)</span>
     </div>
-    <div class="card"><div class="card-hdr">API CONFIGURATION</div>
+    <div class="card collapsible" id="api-card"><div class="card-hdr">API CONFIGURATION</div>
     <div class="card-body api-form">
       <div class="api-row"><label>FMP API KEY (financialmodelingprep.com)</label><input id="api-fmp" type="password" placeholder="Enter FMP key..."><div class="api-status" id="fmp-status"></div></div>
       <div class="api-row"><label>TRADIER API KEY</label><input id="api-tr" type="password" placeholder="Enter Tradier key..."><div class="api-status" id="tr-status"></div></div>
@@ -21656,6 +21671,34 @@ window.addEventListener('resize', function(){
 window.addEventListener('DOMContentLoaded', function(){
   if(typeof applyAutoScanSettings === 'function') applyAutoScanSettings();
 });
+
+// Collapsible sections — wires .card.collapsible / .flt-bar.collapsible click
+// handlers and restores the persisted open/closed state from localStorage.
+// Defaults: any element with [data-default-collapsed] starts collapsed on
+// first visit (user can override; the override sticks).
+function initCollapsibles(){
+  document.querySelectorAll('.card.collapsible, .flt-bar.collapsible').forEach(function(el){
+    if(!el.id) return;
+    var key = 'op_collapse_' + el.id;
+    var stored = null;
+    try { stored = localStorage.getItem(key); } catch(_){}
+    if (stored === '1') el.classList.add('collapsed');
+    else if (stored === '0') el.classList.remove('collapsed');
+    else if (el.hasAttribute('data-default-collapsed')) el.classList.add('collapsed');
+    var trigger = el.classList.contains('flt-bar')
+      ? el.querySelector('.sec-toggle')
+      : el.querySelector('.card-hdr');
+    if (!trigger) return;
+    trigger.addEventListener('click', function(e){
+      // Don't toggle when the user clicks an interactive child (CLEAR button,
+      // input, link, etc.) inside the header.
+      if (e.target.closest('button:not(.sec-toggle), a, input, select')) return;
+      el.classList.toggle('collapsed');
+      try { localStorage.setItem(key, el.classList.contains('collapsed') ? '1' : '0'); } catch(_){}
+    });
+  });
+}
+window.addEventListener('DOMContentLoaded', initCollapsibles);
 
 window.addEventListener('DOMContentLoaded',init);</script>
 </body>
