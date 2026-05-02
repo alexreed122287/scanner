@@ -2120,6 +2120,7 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
           <option value="3x">3x daily (9:35, 12:00, 15:00 ET)</option>
         </select>
       </label>
+      <span id="gex-progress" style="color:var(--amb);font-size:10px;font-family:var(--ff-mono);min-width:0;"></span>
       <span id="gex-ts" style="color:var(--gry);font-size:10px;">Click RUN to fetch flow data</span>
       <button class="btn blu" style="font-size:11px;padding:5px 14px;" onclick="runGex()" title="Fetch 30DTE options chain for the top 200 ranked tickers (~4 min, paced by Tradier rate limit). Auto-fires 20s after every scan + on the schedule selected to the left.">&#8635; RUN GEX</button>
     </div>
@@ -12928,7 +12929,10 @@ function _gexScheduleTick(){
       // runs GEX against UNIVERSE.slice(0,30) and caches a tiny result set
       // that blocks the post-scan auto-trigger's freshness check.
       if (!G.results || G.results.length < 20) {
-        console.log('[gex] auto-schedule skipped — G.results has ' + (G.results||[]).length + ' entries (need scan first)');
+        var n = (G.results||[]).length;
+        console.log('[gex] auto-schedule skipped — G.results has ' + n + ' entries (need scan first)');
+        try { addAlert('GEX', 'Scheduled fire skipped — only '+n+' scan results (need 20+). Run SCAN first.', 'warn'); } catch(_){}
+        var pe = eid('gex-progress'); if (pe) pe.textContent = 'scheduled fire skipped — run SCAN first';
         return;
       }
       console.log('[gex] auto-schedule fire ('+G.gexAutoSchedule+', ET minute '+nowMin+')');
@@ -13030,7 +13034,10 @@ function runGex(){
 
   // Sequential dispatcher with N-millisecond spacing between dispatches.
   // Returns Promise<Array<resolvedValue>> in input order.
-  function _gexPaced(items, delayMs, doFn){
+  // onProgress(done, total, phase) fires after each item settles so callers
+  // can update the status bar live instead of leaving the user staring at
+  // the same "Fetching..." text for 2-4 minutes while 400 calls drain.
+  function _gexPaced(items, delayMs, doFn, onProgress, phase){
     return new Promise(function(resolve){
       if (items.length === 0) return resolve([]);
       var results = new Array(items.length);
@@ -13042,6 +13049,9 @@ function runGex(){
         try { p = doFn(items[i]); } catch(e) { p = Promise.reject(e); }
         Promise.resolve(p).then(function(r){ results[i] = r; }).catch(function(){ results[i] = null; }).then(function(){
           done++;
+          if (typeof onProgress === 'function') {
+            try { onProgress(done, items.length, phase); } catch(_){}
+          }
           if (done === items.length) resolve(results);
         });
         setTimeout(next, delayMs);
@@ -13049,6 +13059,27 @@ function runGex(){
       next();
     });
   }
+
+  // Live progress reporter — updates the #gex-progress chip in the tab header
+  // every time a ticker settles. Two-phase format ("expiries 47/200 • chains 0/200")
+  // so the user can see which step is in flight. Also tracks 429 throttle state.
+  var _gexProgEl = eid('gex-progress');
+  var _gexProgState = { exp:0, chain:0, total:gexTickers.length, t0:Date.now() };
+  function _renderGexProgress(){
+    if(!_gexProgEl) return;
+    var s = _gexProgState;
+    var elapsed = Math.round((Date.now() - s.t0)/1000);
+    var throttled = (T_RATE && T_RATE.throttledUntil > Date.now())
+      ? ' • throttled '+Math.ceil((T_RATE.throttledUntil - Date.now())/1000)+'s'
+      : '';
+    _gexProgEl.textContent = 'expiries '+s.exp+'/'+s.total+' • chains '+s.chain+'/'+s.total+' • '+elapsed+'s'+throttled;
+  }
+  function _onExpiryProgress(done, total){ _gexProgState.exp = done; _renderGexProgress(); }
+  function _onChainProgress(done, total){ _gexProgState.chain = done; _renderGexProgress(); }
+  // Tick once a second so the elapsed-time and throttled countdown stay live
+  // even between actual settlements (long 429 pauses, etc.).
+  var _gexProgTick = setInterval(_renderGexProgress, 1000);
+  _renderGexProgress();
 
   function _fetchOneExpiry(t){
     return tradierFetch(host+'/v1/markets/options/expirations?symbol='+t+'&includeAllRoots=true', {
@@ -13071,7 +13102,7 @@ function runGex(){
     .catch(function(){ return {ticker:t, expiry:null}; });
   }
 
-  _gexPaced(gexTickers, GEX_DISPATCH_MS, _fetchOneExpiry).then(function(expiries){
+  _gexPaced(gexTickers, GEX_DISPATCH_MS, _fetchOneExpiry, _onExpiryProgress, 'expiries').then(function(expiries){
     // Step 2: fetch options chains for tickers that have a valid expiry \u2014 also paced
     function _fetchOneChain(e){
       if(!e || !e.expiry) return Promise.resolve({ticker:(e&&e.ticker)||'', chain:[], expiry:null});
@@ -13087,7 +13118,7 @@ function runGex(){
       .catch(function(){ return {ticker:e.ticker, chain:[], expiry:e.expiry}; });
     }
 
-    _gexPaced(expiries, GEX_DISPATCH_MS, _fetchOneChain).then(function(chains){
+    _gexPaced(expiries, GEX_DISPATCH_MS, _fetchOneChain, _onChainProgress, 'chains').then(function(chains){
       // Step 3: compute net flow from call OI vs put OI
       G.gexData = chains.map(function(c){
         var result = G.results.filter(function(r){ return r.t===c.ticker||r.ticker===c.ticker; })[0];
@@ -13144,6 +13175,13 @@ function runGex(){
         };
       });
 
+      // Stop the live progress ticker and finalize the chip with totals
+      try { clearInterval(_gexProgTick); } catch(_){}
+      if (_gexProgEl) {
+        var emptyCount = G.gexData.filter(function(r){ return !r.callOI && !r.putOI; }).length;
+        var elapsed = Math.round((Date.now() - _gexProgState.t0)/1000);
+        _gexProgEl.textContent = 'done in '+elapsed+'s'+(emptyCount?(' \u2014 '+emptyCount+' empty'):'');
+      }
       renderGex();
       // Persist so reload doesn't lose data within the 2h TTL window
       saveGexCache();
@@ -13173,6 +13211,8 @@ function runGex(){
   })
   .catch(function(e){
     console.warn('GEX fetch error:', e);
+    try { clearInterval(_gexProgTick); } catch(_){}
+    if (_gexProgEl) _gexProgEl.textContent = 'failed \u2014 sim fallback';
     // Fall back to simulated
     G.gexData = sourceTickers.slice(0,20).map(function(t){
       var gex=(Math.random()>0.5?1:-1)*Math.floor(rnd(100,9000));
@@ -13210,12 +13250,17 @@ function renderGex(){
     + '</tr></thead><tbody>';
   G.gexData.forEach(function(r){
     var gexCls=r.gex>0?'pnl-pos':'pnl-neg';
+    // Tag rows that came back empty (Tradier returned no chain — out-of-hours,
+    // illiquid ticker, expired chain) so they don't look like a bug. Without
+    // this they render as "+0M, 0c/0p, PUT HEAVY" which is misleading.
+    var isEmpty = !r.sim && !r.callOI && !r.putOI;
     var simBadge=r.sim?'<span style="font-size:9px;color:var(--gry);margin-left:4px;">[SIM]</span>':'';
+    var emptyBadge=isEmpty?'<span style="font-size:9px;color:var(--ngo);margin-left:4px;" title="Tradier returned no options chain for this ticker — illiquid, expired, or out-of-hours data gap.">[NO DATA]</span>':'';
     var expDisplay = r.exp
       ? (r.exp.split('-').slice(1).join('/') + ' / $' + fmt2(r.flip))
       : (r.flip ? '$'+fmt2(r.flip) : '--');
-    html+='<tr data-ticker="'+_esc(r.t)+'" onclick="viewDetail(this.dataset.ticker,\'gx-detail\',\'gx-det-empty\')">'
-      +'<td><b>'+_esc(r.t)+'</b>'+simBadge+'</td>'
+    html+='<tr data-ticker="'+_esc(r.t)+'" onclick="viewDetail(this.dataset.ticker,\'gx-detail\',\'gx-det-empty\')"'+(isEmpty?' style="opacity:0.5;"':'')+'>'
+      +'<td><b>'+_esc(r.t)+'</b>'+simBadge+emptyBadge+'</td>'
       +'<td class="'+gexCls+'">'+(r.gex>0?'+':'')+r.gex+'M</td>'
       +'<td style="font-family:var(--ff-mono);font-size:11px;color:var(--grn);">'+(r.callOI ? fmtK(r.callOI) : '--')+'</td>'
       +'<td style="font-family:var(--ff-mono);font-size:11px;color:var(--ngo);">'+(r.putOI ? fmtK(r.putOI) : '--')+'</td>'
