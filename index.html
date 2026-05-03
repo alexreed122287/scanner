@@ -97,7 +97,10 @@ a{color:var(--blu);text-decoration:none;}
 #hdr-logo{color:var(--amb);font-weight:700;font-size:clamp(16px, 1.5vw, 28px);letter-spacing:clamp(2px, 0.25vw, 5px);white-space:nowrap;font-family:var(--ff-brand);text-shadow:0 0 12px rgba(0,212,255,.7);display:flex;align-items:center;gap:clamp(10px, 1vw, 22px);position:relative;z-index:10;}
 #hdr-logo .panda-icon{height:clamp(48px, 5vw, 84px);width:auto;object-fit:contain;filter:drop-shadow(0 0 6px rgba(0,212,255,.4)) drop-shadow(0 0 2px rgba(0,212,255,.25));flex-shrink:0;}
 #hdr{border-bottom:none !important;box-shadow:none !important;}
-#hdr-tickers{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;flex:1;}
+#hdr-tickers{display:flex;gap:12px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;justify-content:flex-start;flex:1;min-width:0;}
+#hdr-tickers::-webkit-scrollbar{height:4px;}
+#hdr-tickers::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:2px;}
+#hdr-tickers > *{flex-shrink:0;}
 .htick{font-size:13px;white-space:nowrap;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;}
 .htick .ts{color:var(--gry);}
 .htick .tv{color:var(--wht);font-weight:600;}
@@ -156,7 +159,10 @@ a{color:var(--blu);text-decoration:none;}
 #mode-badge{background:var(--amb3);color:var(--ambb);border:1px solid var(--amb);font-size:10px;font-weight:700;}
 /* z-index higher than logo so any overflow from header can't cover the
    tab text (defense against the header-obstruction class of bug). */
-#nav{display:flex;flex-wrap:wrap;flex-shrink:0;background:var(--bg1);border-bottom:var(--bdr);overflow-x:hidden;padding:0 8px;position:relative;z-index:20;}
+#nav{display:flex;flex-wrap:nowrap;flex-shrink:0;background:var(--bg1);border-bottom:var(--bdr);overflow-x:auto;-webkit-overflow-scrolling:touch;padding:0 8px;position:relative;z-index:20;}
+#nav::-webkit-scrollbar{height:4px;}
+#nav::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:2px;}
+#nav .ntab{flex-shrink:0;}
 .ntab{background:none;border:none;border-bottom:2px solid transparent;color:var(--gry);cursor:pointer;font-family:var(--ff);font-size:13px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;padding:10px 16px;white-space:nowrap;transition:all .2s;}
 .ntab:hover{color:var(--wht);}
 .ntab.active{color:var(--amb);border-bottom-color:var(--amb);text-shadow:0 0 15px rgba(0,212,255,.4);}
@@ -231,11 +237,13 @@ a{color:var(--blu);text-decoration:none;}
   /* iPad portrait: keep two-pane scanner but give the table a fair share */
   #sc-tbl-wrap{flex:0 0 55% !important;}
   #sc-detail{flex:1 1 45% !important;}
-  /* Tab nav: WRAP onto rows if total width exceeds viewport. User spec
-     2026-05-02: tabs were hidden behind horizontal-scroll on 1024px
-     windows because total .ntab width (~1070px) exceeded viewport. */
-  #nav{flex-wrap:wrap !important;overflow-x:hidden !important;}
-  .ntab{flex:0 1 auto;}
+  /* Tab nav: nowrap + horizontal scroll per user spec 2026-05-03
+     ('main tabs are still wrapping when page is resized'). User
+     prefers swipe-to-reveal hidden tabs over a multi-row stack on
+     laptop / iPad portrait. iPhone (≤480px) keeps the wrap rule
+     above so all 9 tabs are visible without horizontal swipe. */
+  #nav{flex-wrap:nowrap !important;overflow-x:auto !important;}
+  .ntab{flex:0 0 auto;}
 }
 
 /* ═════════════════════════════════════════════════════════════════════
@@ -978,7 +986,9 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
      down. Reserving a 2-row min-height keeps the layout stable through every
      state of the scan/auth/balance widgets. */
   #hdr{height:auto !important;min-height:104px !important;padding:6px 10px !important;flex-wrap:wrap !important;gap:6px 8px !important;align-items:center !important;align-content:flex-start !important;}
-  #hdr-tickers{flex-wrap:wrap !important;gap:8px 12px !important;justify-content:flex-start !important;flex:1 1 100%;order:3;padding:4px 0;border-top:1px solid rgba(0,212,255,0.1);min-height:32px;}
+  /* iPad indices strip: nowrap + horizontal scroll per user spec
+     2026-05-03 (was wrap which spilled SPY/QQQ/etc onto 2-3 rows). */
+  #hdr-tickers{flex-wrap:nowrap !important;overflow-x:auto !important;-webkit-overflow-scrolling:touch;justify-content:flex-start !important;flex:1 1 100%;order:3;padding:4px 0;border-top:1px solid rgba(0,212,255,0.1);min-height:32px;gap:14px !important;}
   .htick{font-size:13px;}
   #hdr-logo{font-size:16px !important;letter-spacing:2px !important;flex:0 0 auto;order:1;}
   #hdr-logo .panda-icon{height:36px !important;}
@@ -13565,8 +13575,11 @@ function renderScan(){
     // E.g. "2  ↓ RS 5D" means this row tied with row 1 on score+tech+fund
     // but was beaten on RS 5D. Top row shows just the rank with no arrow.
     var _why = _whyRankedBelow(r, idx > 0 ? rowSrc[idx-1] : null);
-    var _whyTitle = _why ? 'Ranked #'+(idx+1)+' — beat by row #'+idx+' on '+_why.replace(/^[↓=]\s*/,'')
-                         : 'Top of ranked list';
+    // Tooltip: spell out the full sort order so the user understands
+    // 'RS 5D' as a label only fires after score + techScore have tied.
+    var _whyTitle = _why
+      ? 'Ranked #'+(idx+1)+' — beat by row #'+idx+' on '+_why.replace(/^[↓=]\s*/,'')+'.\n\nSort priority: 1) score 2) techScore 3) RS 5D 4) theme score 5) volume. The first non-tied factor wins, so when this label says "RS 5D" the rows above and below tied on score AND techScore.'
+      : 'Top of ranked list';
     var _whyCol = _why === '' ? 'var(--grn)'
                : _why === '↓ score' ? 'var(--gry)'
                : _why === '= tied' ? 'var(--gry)'
@@ -13578,7 +13591,7 @@ function renderScan(){
     if (_gxEntry && !_gxEntry.sim) {
       gexPill = '<span class="gex-pill ok" title="GEX data loaded — '+_gxEntry.flow+', '+_gxEntry.call+'% calls">✓</span>';
     } else {
-      gexPill = '<span class="gex-pill mis" data-tk="'+tk+'" onclick="event.stopPropagation();runGexForTicker(\''+tk+'\')" title="No GEX data for '+tk+' (outside top-200 batch). Click to fetch single-ticker flow.">RUN</span>';
+      gexPill = '<span class="gex-pill mis" data-tk="'+tk+'" onclick="event.stopPropagation();runGexForTicker(\''+tk+'\')" title="RUN GEX for this ticker — fetches the 30-day options chain and computes call vs put OI flow + gamma flip strike. This ticker is outside the top-200 batch that runs automatically after every scan, so its GEX rule + bullish-flow indicator are still empty. Click RUN to fetch just this ticker (≈3s, 2 API calls). The button flips to ✓ once data lands.">RUN</span>';
     }
     rows+='<tr data-ticker="'+tk+'" onclick="viewDetail(this.dataset.ticker,\'sc-detail\',\'sc-det-empty\')">'
       +'<td style="text-align:center;padding:0;">'+starHTML(tk,14)+'</td>'
@@ -13628,7 +13641,10 @@ function renderScan(){
 // (~4 min). 2h TTL — flow data older than that isn't trustworthy enough to
 // drive new entries, but recent enough to bridge a quick reload.
 var GEX_CACHE_KEY = 'rrjcar_gex_data_v1';
-var GEX_CACHE_TTL_MS = 2 * 60 * 60 * 1000;     // 2 hours
+// 24h TTL per user spec 2026-05-03 — GEX should persist across reloads
+// without re-scanning. OI shifts daily so 24h is the natural boundary;
+// next-day scan will replace it.
+var GEX_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 
 function saveGexCache(){
   if (!G.gexData || !G.gexData.length) return;
@@ -19159,7 +19175,10 @@ function updateHeaderQuotes(){
       }
       chgPct = chgPct || 0;
       if(span) span.textContent='$'+fmt2(price);
-      hqCache[p.id]=price;
+      // Cache both price AND chgPct so the on-reload hydrate can restore
+      // the last-known % change instead of leaving '(--)' until the next
+      // live poll completes. User spec 2026-05-03.
+      hqCache[p.id]={price:price, chgPct:chgPct};
       var cel=eid('h-'+p.id+'-c');
       if(cel){
         var ahMark = '';
@@ -22014,15 +22033,24 @@ function init(){
     // stale-banner removed 2026-05-02 per user spec
   }
 
-  // 3. Header quotes — restore last known values silently, no banner needed
+  // 3. Header quotes — restore last known price AND % change silently.
+  // Cache schema is now {price, chgPct} per id; legacy bare-number
+  // entries still parse via typeof check below.
   var cachedHQ = cacheGet(CACHE_KEYS.headerQ);
   if(cachedHQ){
     try{
       var _hqIds=['spy','qqq','dia','iwm','vix','gld','spx'];
       _hqIds.forEach(function(id){
-        if(cachedHQ[id]!==undefined){
-          var _e=eid('h-'+id);
-          if(_e) _e.textContent='$'+fmt2(cachedHQ[id]);
+        var v = cachedHQ[id];
+        if (v === undefined || v === null) return;
+        var price = (typeof v === 'object') ? v.price : v;
+        var chgPct = (typeof v === 'object' && v.chgPct != null) ? v.chgPct : null;
+        var _e = eid('h-'+id);
+        if (_e) _e.textContent = '$'+fmt2(price);
+        var _c = eid('h-'+id+'-c');
+        if (_c && chgPct != null) {
+          _c.textContent = '('+(chgPct>=0?'+':'')+chgPct.toFixed(2)+'%)';
+          _c.className = 'tc '+(chgPct>=0?'up':'dn');
         }
       });
     }catch(e){}
