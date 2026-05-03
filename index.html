@@ -169,6 +169,13 @@ a{color:var(--blu);text-decoration:none;}
 .split{display:flex;flex:1;overflow:hidden;}
 .split-l{width:30%;border-right:2px solid var(--amb3);overflow-y:auto;display:flex;flex-direction:column;}
 .split-r{width:70%;display:flex;flex-direction:column;overflow:hidden;}
+/* Watchlist tab: wider table side so SYMBOL + COMPANY NAME + CHG % +
+   SIGNAL + BUY + close all fit without horizontal scroll. Chart side
+   still gets the majority — the chart is meaningful at 50%+ width. */
+#tab-wl .split-l{width:42%;}
+#tab-wl .split-r{width:58%;}
+#tab-wl #wl-tbl-wrap table{font-size:12px;width:100%;}
+#tab-wl #wl-tbl-wrap th,#tab-wl #wl-tbl-wrap td{padding:6px 8px;}
 .sec-head{background:var(--bg2);border-bottom:var(--bdr);color:var(--amb);font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:7px 12px;position:sticky;top:0;z-index:5;text-shadow:0 0 20px rgba(0,212,255,.3);}
 .sig-card{border-bottom:var(--bdr);cursor:pointer;padding:8px 10px;transition:background .15s;display:flex;justify-content:space-between;align-items:flex-start;}
 .sig-card:hover{background:var(--bg2);}
@@ -1122,6 +1129,12 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
     <span id="hdr-autoscan" title="Auto-scan settings — click to expand" onclick="toggleAutoScanPanel()" style="cursor:pointer;background:rgba(255,0,230,0.06);border:1px solid rgba(255,0,230,0.30);border-radius:3px;padding:1px 7px;font-size:10px;font-family:var(--ff-mono);color:var(--ngo);letter-spacing:.5px;user-select:none;">AUTO: OFF</span>
   </div>
 </div>
+<!-- Single themes ribbon, lives directly under the indices header so it's
+     visible regardless of which tab is active. Was previously a per-tab
+     strip inside FULL SCANNER + BUY SIGNALS; now consolidated into one
+     global ribbon. renderTopThemesStrip uses querySelectorAll so this
+     single element gets updated without code changes. -->
+<div class="top-themes-strip" style="background:var(--bg1);border-bottom:var(--bdr);padding:5px 10px;font-family:var(--ff-mono);font-size:11px;white-space:nowrap;overflow-x:hidden;letter-spacing:.3px;"></div>
 
 <!-- Auto-scan settings panel — collapsed by default; opens below header on click -->
 <div id="autoscan-panel" style="display:none;background:var(--bg1);border-bottom:var(--bdr);padding:10px 16px;font-family:var(--ff-mono);font-size:11px;color:var(--gry);">
@@ -1199,10 +1212,8 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
       <span>Hide NO-GO</span>
     </label>
   </div>
-  <!-- Live theme leaderboard — top 5 by intraday RS vs SPY + bottom 3 laggards.
-       Updates after every scan. Min-width:0 + overflow allows horizontal
-       scroll on narrow viewports without breaking the layout. -->
-  <div class="top-themes-strip" style="background:var(--bg1);border-bottom:var(--bdr);padding:5px 10px;font-family:var(--ff-mono);font-size:11px;white-space:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;letter-spacing:.3px;"></div>
+  <!-- Live theme leaderboard moved to a single global ribbon under the
+       indices header (top of page) — see #hdr block above. -->
   <div class="split">
     <div class="split-l">
       <div class="sec-head">GO SIGNALS</div><div id="bs-go-list"></div>
@@ -1230,15 +1241,14 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
        with every other filter row in the app. -->
   <div class="flt-bar collapsible" id="sc-bar-strategy" data-default-collapsed style="border-bottom:1px solid var(--bg3);">
     <button type="button" class="sec-toggle" title="Collapse / expand the STRATEGY presets row">STRATEGY</button>
-    <button class="btn blu" onclick="applyStrategyMode('highConviction')">&#9733; HIGH CONVICTION</button>
-    <button class="btn" onclick="applyStrategyMode('breakout')">&#9650; BREAKOUT</button>
-    <button class="btn" onclick="applyStrategyMode('momentum')">&#9654; MOMENTUM</button>
-    <button class="btn" style="border-color:var(--grn);color:var(--grn);" onclick="applyStrategyMode('bestItmCalls')">&#9670; BEST ITM CALLS</button>
-    <button class="btn" style="border-color:var(--ambb);color:var(--ambb);" onclick="applyStrategyMode('preMarket')" title="Surface gappers — biggest absolute %change vs prior close. Useful any time the extended-hours session is active (pre-market 4:00–9:30am ET, after-hours 4:00–8:00pm ET) and on weekends to inspect the latest extended-hours print. No time-of-day gating.">&#9650; PRE/POST MARKET</button>
+    <button class="btn blu" onclick="applyStrategyMode('highConviction')" title="PROVEN ticker + Score ≥150 + Analyst Revisions ↑ + GEX Call Heavy — rarest, highest-quality setups (≈63% of max).">&#9733; HIGH CONVICTION</button>
+    <button class="btn" onclick="applyStrategyMode('breakout')" title="Near 52-week high + RS > SPY + MACD + + TF Aligned 2/3 — stocks breaking out with market leadership.">&#9650; BREAKOUT</button>
+    <button class="btn" onclick="applyStrategyMode('momentum')" title="MACD + + Above EMA200 + Vol > Avg + RS > SPY — strong trending stocks with volume confirmation.">&#9654; MOMENTUM</button>
+    <button class="btn" style="border-color:var(--grn);color:var(--grn);" onclick="applyStrategyMode('bestItmCalls')" title="Score ≥180 + liquid (\$5+, 1M+ avg vol) + in-play today + contract ≤\$8 — deep-ITM (δ 0.70–0.90) calls on bullish momentum names.">&#9670; BEST ITM CALLS</button>
+    <button class="btn" style="border-color:var(--ambb);color:var(--ambb);" onclick="applyStrategyMode('preMarket')" title="Extended-hours gappers screened with the SAME filters as HIGH CONVICTION (PROVEN + Score ≥150 + Analyst Revisions ↑ + GEX Call Heavy), then sorted by absolute gap %. Use any time the extended-hours session is active or on weekends.">&#9650; PRE/POST MARKET</button>
     <button class="btn" style="font-size:10px;padding:3px 8px;border-color:var(--gry2);color:var(--gry);" onclick="probePreMarketData()" title="One-shot live fetch of SPY/QQQ/NVDA/TSLA/AAPL — surfaces the raw `change_percentage` Tradier is returning right now. Use it to verify pre-market data is flowing.">VERIFY</button>
     <button class="btn" style="border-color:var(--gry2);color:var(--gry);" onclick="applyStrategyMode('clear')">&#10005; CLEAR</button>
     <span id="pre-market-pill" style="display:none;font-family:var(--ff-mono);font-size:9px;font-weight:800;letter-spacing:1.5px;background:var(--ambb);color:var(--bg0);padding:2px 8px;border-radius:2px;animation:today-pulse 2.4s ease-in-out infinite;" title="Pre-market session is active — Tradier `last` reflects extended-hours quotes. Use the PRE-MARKET preset to sort by gap %.">PRE-MARKET LIVE</span>
-    <span id="strategy-desc-sc" style="font-family:var(--ff-mono);font-size:10px;color:var(--gry);font-style:italic;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;"></span>
   </div>
   <div class="flt-bar collapsible" id="sc-bar-filters" data-default-collapsed>
     <button type="button" class="sec-toggle" title="Collapse / expand the FILTERS row">FILTERS</button>
@@ -1286,7 +1296,7 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
     <!-- B-2 default Min Score bumped 89 -> 100. With theme overlay (added 2026-04)
          scores trend ~10 pts higher, so the historical "GO rate" at 89 became
          too permissive. 100 preserves the prior selectivity. Adjust to taste. -->
-    <label>Min Score <input type="number" id="sc-minscore" value="150" style="width:60px;" onchange="reclassifyGoThreshold()" title="Default 150 (≈63% of ~240-pt max). Calibrated to observed score distribution — top of distribution sits near 140-160; 150 keeps GO list focused on conviction setups without being so strict that nothing fires."></label>
+    <label>Min Score <input type="number" id="sc-minscore" value="150" style="width:80px;" onchange="reclassifyGoThreshold()" title="Default 150 (≈63% of ~240-pt max). Calibrated to observed score distribution — top of distribution sits near 140-160; 150 keeps GO list focused on conviction setups without being so strict that nothing fires."></label>
     <button class="btn" onclick="applyFilters()">FILTER</button>
     <button class="btn" onclick="clearFilters()" style="border-color:var(--gry2);color:var(--gry);">CLEAR</button>
   </div>
@@ -1315,11 +1325,11 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
     <span id="sc-last-scan" class="dyn-w" style="color:var(--gry);font-size:10px;font-family:var(--ff-mono);width:230px;text-align:left;" title="Timestamp of the most recent SCAN completion. Persists across page reloads from localStorage.">Last scan: never</span>
     <span id="sc-data-status" class="dyn-w" style="display:none;font-size:10px;font-family:var(--ff-mono);width:200px;text-align:left;cursor:pointer;" title="Click for data-coverage details from the last scan."></span>
     <span style="color:var(--gry);font-size:10px;letter-spacing:.5px;border-left:1px solid var(--gry2);padding-left:14px;margin-left:4px;">SCREENER</span>
-    <label>Min Price $<input type="number" id="sc-minprice" value="1" min="1" style="width:70px;" title="Only include stocks above this price"></label>
-    <label>Max Price $<input type="number" id="sc-maxprice" placeholder="any" min="1" style="width:80px;" title="Only include stocks below this price — leave blank for no limit"></label>
-    <label>Min AvgVol <input type="number" id="sc-minavgvol" value="500000" min="100000" step="100000" style="width:110px;" title="Min average daily volume"></label>
-    <label>Today Vol % <input type="number" id="sc-volratio" placeholder="any" min="0" max="200" style="width:64px;" title="Today volume must be at least X% of avg volume. Leave blank to skip this filter.">%</label>
-    <label title="Filter OUT tickers where the option contract costs more than this amount. Uses last scanned option price.">Max Opt $ <input type="number" id="sc-maxoptprice" placeholder="any" min="0" step="0.50" style="width:80px;"></label>
+    <label>Min Price $<input type="number" id="sc-minprice" value="1" min="1" style="width:90px;" title="Only include stocks above this price"></label>
+    <label>Max Price $<input type="number" id="sc-maxprice" placeholder="any" min="1" style="width:100px;" title="Only include stocks below this price — leave blank for no limit"></label>
+    <label>Min AvgVol <input type="number" id="sc-minavgvol" value="500000" min="100000" step="100000" style="width:140px;" title="Min average daily volume"></label>
+    <label>Today Vol % <input type="number" id="sc-volratio" placeholder="any" min="0" max="200" style="width:90px;" title="Today volume must be at least X% of avg volume. Leave blank to skip this filter.">%</label>
+    <label title="Filter OUT tickers where the option contract costs more than this amount. Uses last scanned option price.">Max Opt $ <input type="number" id="sc-maxoptprice" placeholder="any" min="0" step="0.50" style="width:100px;"></label>
     <button class="btn" style="border-color:var(--grn);color:var(--grn);" onclick="saveScanSettings()" title="Save current screener + filter settings to localStorage. Restored on every page load.">SAVE</button>
     <button class="btn" style="border-color:var(--gry2);color:var(--gry);" onclick="resetScanSettings()" title="Reset screener + filters to factory defaults. Does NOT clear saved API keys or tokens.">&#8634; RESET</button>
     <button class="btn grn" style="margin-left:auto;" onclick="exportGoTickers('sc')" title="Copy a comma-separated list of all GO-signal tickers from current filtered results">▲ EXPORT GOs</button>
@@ -1357,9 +1367,9 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
       <div class="stat-val amb" id="sc-cat-strip-ts" style="font-size:13px;font-family:var(--ff-mono);">--</div>
     </div>
   </div>
-  <!-- Live theme leaderboard (same render as BUY SIGNALS — both .top-themes-strip
-       elements get updated by renderTopThemesStrip via querySelectorAll). -->
-  <div class="top-themes-strip" style="background:var(--bg1);border-bottom:var(--bdr);padding:5px 10px;font-family:var(--ff-mono);font-size:11px;white-space:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;letter-spacing:.3px;"></div>
+  <!-- Live theme leaderboard moved to a single global ribbon under the
+       indices header (top of page) — see #hdr block. -->
+
   <!-- Progress bar -->
   <div id="sc-progress-wrap" style="display:none;padding:6px 12px;background:var(--bg1);border-bottom:1px solid var(--bg3);">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
@@ -4632,6 +4642,15 @@ function fmt2(n){return isNaN(n)?'--':(+n).toFixed(2);}
 function fmtP(n){return isNaN(n)?'--':(+n).toFixed(2)+'%';}
 function fmtD(n){if(isNaN(n))return'--';var v=+n;return(v<0?'-$':'$')+Math.abs(v).toFixed(2);}
 function fmtK(n){if(!n||isNaN(n))return'0';if(Math.abs(n)>=1e6)return(n/1e6).toFixed(1)+'M';if(Math.abs(n)>=1e3)return(n/1e3).toFixed(1)+'K';return''+Math.round(n);}
+// Thousands-separator formatter for raw numeric cells (volume, OI, etc.)
+// where the user wants the full number visible with commas — e.g. 1,234,567.
+// fmtK still abbreviates to K/M; use fmtComma when the user wants to see
+// every digit. NaN/null/0 return '0' so empty cells stay distinguishable
+// from the literal value 0.
+function fmtComma(n){
+  if(n==null||isNaN(n))return'0';
+  return Math.round(n).toLocaleString('en-US');
+}
 function rnd(a,b){return a+Math.random()*(b-a);}
 function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
 
@@ -13314,7 +13333,7 @@ function renderScan(){
       +'<td style="font-size:11px;color:var(--gry);">'+r.sector+'</td>'
       +'<td>$'+fmt2(r.price)+'</td>'
       +'<td class="'+chgCls+'">'+(r.changePct>=0?'+':'')+fmtP(r.changePct)+'</td>'
-      +'<td>'+fmtK(r.volume)+'</td>'
+      +'<td title="Raw volume">'+fmtComma(r.volume)+'</td>'
       +'<td class="'+techCls+'" style="font-size:11px;">'+tech+'</td>'
       +'<td class="'+fundCls+'" style="font-size:11px;color:'+(fund>0?'var(--amb)':'var(--gry)')+';">'+fund+'</td>'
       +'<td class="'+rsCellCls+'" style="font-size:11px;">'+rsCellTxt+'</td>';
@@ -13893,26 +13912,41 @@ function refreshWL(){
 
   // Render a table row from a resolved quote (real or simulated) — shared
   // by both the Tradier and fallback paths so the UI stays consistent.
+  // Watchlist columns reduced 2026-05-02 per user spec to: SYMBOL,
+  // COMPANY NAME, CHG %, SIGNAL, BUY (button \u2192 openContractPanel),
+  // and the close-icon column. Drops PRICE / CHG / VOLUME \u2014 those
+  // already live in the chart panel on the right.
   function renderTable(quoteByTicker, label){
-    var html='<table><thead><tr><th>SYMBOL</th><th>PRICE</th><th>CHG</th><th>CHG%</th><th>VOLUME</th><th>SIGNAL</th><th></th></tr></thead><tbody>';
+    var html='<table><thead><tr>'
+      + '<th>SYMBOL</th><th>COMPANY</th><th>CHG %</th><th>SIGNAL</th><th>BUY</th><th></th>'
+      + '</tr></thead><tbody>';
     G.wlTickers.forEach(function(t){
+      var existingResult = null;
+      for (var ri = 0; ri < G.results.length; ri++) {
+        if (G.results[ri].ticker === t) { existingResult = G.results[ri]; break; }
+      }
+      var coName = (existingResult && existingResult.companyName) || '--';
       var q = quoteByTicker[t] || null;
       if(!q){
-        // Graceful: show row with dashes instead of dropping the ticker
-        html+='<tr data-ticker="'+t+'"><td><b>'+t+'</b></td><td>--</td><td>--</td><td>--</td><td>--</td><td><span class="badge nogo">--</span></td>'
-            +'<td><button class="cbtn" onclick="event.stopPropagation();removeWL(this.parentNode.parentNode.dataset.ticker)">\u2717</button></td></tr>';
+        html+='<tr data-ticker="'+t+'"><td><b>'+t+'</b></td>'
+          +'<td style="color:var(--gry);font-size:11px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+_esc(coName)+'</td>'
+          +'<td>--</td><td><span class="badge nogo">--</span></td>'
+          +'<td>--</td>'
+          +'<td><button class="cbtn" onclick="event.stopPropagation();removeWL(this.parentNode.parentNode.dataset.ticker)">\u2717</button></td>'
+          +'</tr>';
         return;
       }
       var u=null;for(var i=0;i<UNIVERSE.length;i++){if(UNIVERSE[i].t===t){u=UNIVERSE[i];break;}}if(!u)u={s:'--'};
       var ind=simInd(t,q.price),opt=simOpt(q.price),sc=scoreIt(t,ind,opt);
-      var existing=false;for(var j=0;j<G.results.length;j++){if(G.results[j].ticker===t){existing=true;break;}}
-      if(!existing){G.results.push({ticker:t,sector:u.s,price:q.price,change:q.change,changePct:q.changePct,volume:q.volume,ind:ind,opt:opt,score:sc.score,isGo:sc.isGo,filtersPass:sc.filtersPass,rules:sc.rules,passes:sc.passes});}
-      var chgCls=q.change>=0?'pnl-pos':'pnl-neg';var sigBadge=sc.isGo?'<span class="badge go">GO</span>':'<span class="badge nogo">NO-GO</span>';
+      if(!existingResult){G.results.push({ticker:t,sector:u.s,companyName:coName!=='--'?coName:'',price:q.price,change:q.change,changePct:q.changePct,volume:q.volume,ind:ind,opt:opt,score:sc.score,isGo:sc.isGo,filtersPass:sc.filtersPass,rules:sc.rules,passes:sc.passes});}
+      var chgCls=q.changePct>=0?'pnl-pos':'pnl-neg';
+      var sigBadge=sc.isGo?'<span class="badge go">GO</span>':'<span class="badge nogo">NO-GO</span>';
       html+='<tr data-ticker="'+t+'" onclick="wlSelectTicker(this.dataset.ticker)">'
-        +'<td><b>'+t+'</b></td><td>$'+fmt2(q.price)+'</td>'
-        +'<td class="'+chgCls+'">'+(q.change>=0?'+':'')+fmt2(q.change)+'</td>'
+        +'<td><b>'+t+'</b></td>'
+        +'<td style="color:var(--gry);font-size:11px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="'+_esc(coName)+'">'+_esc(coName)+'</td>'
         +'<td class="'+chgCls+'">'+(q.changePct>=0?'+':'')+fmtP(q.changePct)+'</td>'
-        +'<td>'+fmtK(q.volume)+'</td><td>'+sigBadge+'</td>'
+        +'<td>'+sigBadge+'</td>'
+        +'<td><button class="btn" style="font-size:10px;padding:3px 10px;white-space:nowrap;border-color:var(--amb);color:var(--amb);background:var(--amb3);" onclick="event.stopPropagation();openContractPanel(\''+t+'\')" title="View call contracts for '+t+'">\u25b2 BUY</button></td>'
         +'<td><button class="cbtn" onclick="event.stopPropagation();removeWL(this.parentNode.parentNode.dataset.ticker)">\u2717</button></td>'
         +'</tr>';
     });
