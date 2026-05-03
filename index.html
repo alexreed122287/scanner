@@ -19509,11 +19509,11 @@ function renderContractPanel(ticker, contracts){
     return dy>=15 && dy<=21;
   }
 
-  var watched = cwGetAll();
+  // WATCH-per-contract removed 2026-05-03 per user spec \u2014 only the BUY
+  // NOW action remains in the contract panel. Watchlist still tracks
+  // underlying tickers via the scanner row's star icon.
   tbody.innerHTML = sorted.map(function(c){
     var o = c.opt;
-    var watchKey = ticker+'_'+o.strike+'_'+c.expDate+'_C';
-    var isWatched = !!watched[watchKey];
     var dteCls = c.dte <= 14 ? 'color:var(--ngo)' : c.dte <= 45 ? 'color:var(--ambb)' : 'color:var(--wht)';
     var deltaCls = 'color:var(--wht)';
     var scoreColor = c.totalScore>=65?'var(--amb)':c.totalScore>=45?'var(--wrn)':'var(--ngo)';
@@ -19531,12 +19531,8 @@ function renderContractPanel(ticker, contracts){
       '<td style="padding:8px 14px;color:var(--gry);">'+fmtK(o.open_interest||0)+'</td>'+
       '<td style="padding:8px 14px;font-weight:700;color:'+scoreColor+'">'+Math.round(c.totalScore)+'</td>'+
       '<td style="padding:8px 14px;text-align:center;white-space:nowrap;">'+
-        '<button class="btn" style="font-size:10px;padding:3px 10px;margin-right:6px;background:var(--amb3);border-color:var(--amb);color:var(--amb);" '+
+        '<button class="btn" style="font-size:10px;padding:3px 10px;background:var(--amb3);border-color:var(--amb);color:var(--amb);" '+
           'onclick="cpBuyNow(\''+ticker+'\','+o.strike+',\''+c.expDate+'\','+c.mid+')">&#9650; BUY NOW</button>'+
-        '<button class="btn" style="font-size:10px;padding:3px 10px;'+(isWatched?'background:rgba(0,212,255,.2);border-color:var(--amb);color:var(--amb);':'border-color:var(--gry2);color:var(--gry);"')+'" '+
-          'id="watch-btn-'+watchKey+'" '+
-          'onclick="cwToggleWatch(\''+ticker+'\','+o.strike+',\''+c.expDate+'\','+c.mid+','+c.delta+','+Math.round(c.totalScore)+')">'+
-          (isWatched?'&#9733; WATCHING':'&#9734; WATCH')+'</button>'+
       '</td>'+
     '</tr>';
   }).join('');
