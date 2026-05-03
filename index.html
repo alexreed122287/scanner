@@ -1546,36 +1546,8 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
     <span id="sc-universe-label" style="display:none;"></span>
   </div>
   </div><!-- /#sc-filter-bars -->
-  <!-- Categorized scan-results stat strip — counts of HIGH CONVICTION,
-       BREAKOUT, MOMENTUM, BEST ITM CALLS, and PRE/POST MARKET matches
-       inside the most recent scan. Populated by _renderScanCategoryStrip
-       on setScanComplete. Each chip clicks through to apply that preset. -->
-  <div class="stats-bar" id="sc-cat-strip" style="display:none;border-bottom:var(--bdr);">
-    <div class="stat-box" data-cat="highConviction" onclick="applyStrategyMode('highConviction')" style="cursor:pointer;" title="Click to filter to HIGH CONVICTION setups only.">
-      <div class="stat-label">★ HIGH CONVICTION</div>
-      <div class="stat-val amb"><span class="cat-count">--</span><span class="cat-of" style="color:var(--gry);font-size:13px;font-weight:400;"> / --</span></div>
-    </div>
-    <div class="stat-box" data-cat="breakout" onclick="applyStrategyMode('breakout')" style="cursor:pointer;" title="Click to filter to BREAKOUT setups only.">
-      <div class="stat-label">▲ BREAKOUT</div>
-      <div class="stat-val amb"><span class="cat-count">--</span><span class="cat-of" style="color:var(--gry);font-size:13px;font-weight:400;"> / --</span></div>
-    </div>
-    <div class="stat-box" data-cat="momentum" onclick="applyStrategyMode('momentum')" style="cursor:pointer;" title="Click to filter to MOMENTUM setups only.">
-      <div class="stat-label">▶ MOMENTUM</div>
-      <div class="stat-val amb"><span class="cat-count">--</span><span class="cat-of" style="color:var(--gry);font-size:13px;font-weight:400;"> / --</span></div>
-    </div>
-    <div class="stat-box" data-cat="bestItmCalls" onclick="applyStrategyMode('bestItmCalls')" style="cursor:pointer;" title="Click to filter to BEST ITM CALLS only.">
-      <div class="stat-label">◆ BEST ITM</div>
-      <div class="stat-val amb"><span class="cat-count">--</span><span class="cat-of" style="color:var(--gry);font-size:13px;font-weight:400;"> / --</span></div>
-    </div>
-    <div class="stat-box" data-cat="preMarket" onclick="applyStrategyMode('preMarket')" style="cursor:pointer;" title="Click to filter to PRE/POST MARKET gappers (uses HC criteria).">
-      <div class="stat-label">▲ PRE/POST</div>
-      <div class="stat-val amb"><span class="cat-count">--</span><span class="cat-of" style="color:var(--gry);font-size:13px;font-weight:400;"> / --</span></div>
-    </div>
-    <div class="stat-box" style="flex:0 0 auto;padding:6px 12px;border-left:1px solid var(--bg3);">
-      <div class="stat-label">SCAN AT</div>
-      <div class="stat-val amb" id="sc-cat-strip-ts" style="font-size:13px;font-family:var(--ff-mono);">--</div>
-    </div>
-  </div>
+  <!-- Categorized scan-results stat strip removed 2026-05-03 per user spec. -->
+
   <!-- Live theme leaderboard moved to a single global ribbon under the
        indices header (top of page) — see #hdr block. -->
 
@@ -10184,33 +10156,27 @@ function renderTopThemesStrip(){
     return;
   }
 
+  // User spec 2026-05-03: drop ⚡ / ↑ / ↓ glyphs and the LAGGARDS half
+  // of the ribbon. Chips now show '<rank>. <theme name> +X.X%' only.
   function fmtRow(r, rank){
-    var col = r.rs > 2     ? 'var(--grn)'
-            : r.rs > 0     ? 'var(--amb)'
-            : r.rs > -1    ? 'var(--gry)'
-            :                'var(--ngo)';
-    var arrow = r.rs > 2  ? '⚡↑↑'
-              : r.rs > 0  ? '↑'
-              : r.rs > -2 ? '·'
-              :             '⚡↓↓';
+    var col = r.rs > 2 ? 'var(--grn)'
+            : r.rs > 0 ? 'var(--amb)'
+            :            'var(--gry)';
     var sign = r.rs >= 0 ? '+' : '';
     var rankBit = rank ? '<b style="color:var(--gry2);">'+rank+'.</b> ' : '';
     var safe = String(r.theme).replace(/"/g,'&quot;').replace(/'/g,"\\'");
     return '<span class="theme-chip" style="color:'+col+';" '
          + 'onclick="selectOnlyTheme(\''+safe+'\')" '
          + 'title="'+r.n+' members in current scan — click to filter scanner to this theme">'
-         + rankBit + _esc(r.theme) + ' ' + sign + r.rs.toFixed(1) + '% ' + arrow
+         + rankBit + _esc(r.theme) + ' ' + sign + r.rs.toFixed(1) + '%'
          + '</span>';
   }
 
-  var leaders  = rows.slice(0, 5);
-  var laggards = rows.slice(-3).reverse();
+  // Top industries only — no laggards section per user spec.
+  var leaders = rows.slice(0, 8);
 
   var content = '<span style="color:var(--ambb);font-size:10px;letter-spacing:1.5px;font-weight:700;">TOP THEMES NOW:</span> '
-    + leaders.map(function(r,i){return fmtRow(r, i+1);}).join('<span style="color:var(--bg3);margin:0 4px;">·</span>')
-    + '  <span style="color:var(--bg3);">|</span>  '
-    + '<span style="color:var(--ngo);font-size:10px;letter-spacing:1.5px;font-weight:700;">LAGGARDS:</span> '
-    + laggards.map(function(r){return fmtRow(r);}).join('<span style="color:var(--bg3);margin:0 4px;">·</span>');
+    + leaders.map(function(r,i){return fmtRow(r, i+1);}).join('<span style="color:var(--bg3);margin:0 4px;">·</span>');
 
   // The marquee animation translates -50% to loop seamlessly, so we render
   // the content TWICE side by side; the second copy slides into view as
