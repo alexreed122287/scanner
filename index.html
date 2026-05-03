@@ -14077,7 +14077,24 @@ function renderGex(){
     + th('NET GEX') + th('CALL OI') + th('PUT OI') + th('GAMMA FLIP')
     + th('CALL OI %') + th('PUT OI %') + th('DTE') + th('EXP / STRIKE') + th('FLOW')
     + '</tr></thead><tbody>';
-  G.gexData.forEach(function(r){
+  // Bullish-only ranking 2026-05-03 per user spec: filter to CALL HEAVY
+  // (call% >= 50) AND drop NO DATA / sim placeholders, then sort
+  // most-bullish first by Call OI %, with |NET GEX| magnitude as the
+  // tiebreaker (higher conviction floats up). Result: top of list =
+  // strongest bullish flow conviction = best long-call candidates.
+  var bullishSorted = (G.gexData || [])
+    .filter(function(r){
+      if (!r) return false;
+      var hasData = (r.callOI || r.putOI) || r.sim;
+      if (!hasData) return false;
+      return (r.call || 0) >= 50;
+    })
+    .slice()
+    .sort(function(a,b){
+      if ((b.call||0) !== (a.call||0)) return (b.call||0) - (a.call||0);
+      return Math.abs(b.gex||0) - Math.abs(a.gex||0);
+    });
+  bullishSorted.forEach(function(r){
     var gexCls=r.gex>0?'pnl-pos':'pnl-neg';
     // Tag rows that came back empty (Tradier returned no chain — out-of-hours,
     // illiquid ticker, expired chain) so they don't look like a bug. Without
@@ -14104,7 +14121,7 @@ function renderGex(){
   html+='</tbody></table>';
   wrap.innerHTML=html;
   var _gt3=eid('gex-ts'); if(_gt3) _gt3.textContent='Updated: '+new Date().toLocaleTimeString()
-    +' \u2014 '+(G.results&&G.results.length>0?'top scan results':'static list');
+    +' \u2014 '+bullishSorted.length+' bullish of '+(G.gexData||[]).length+' (call-heavy ranked top \u2192 bottom)';
 }
 
 // Single-ticker GEX fetch — used by the scanner's amber RUN GEX pill so
