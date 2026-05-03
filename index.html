@@ -1003,16 +1003,15 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
   #api-counter-badge{display:none !important;}
   #clk, #mkt-status{font-size:12px !important;padding:4px 6px !important;white-space:nowrap;}
 
-  /* App body needs to recompute height since header is taller now.
-     H-1: use 100dvh (dynamic viewport height) on browsers that support it
-     so the calculation tracks the visible area as iOS Safari's URL bar
-     collapses on scroll, instead of using 100vh which is always the
-     largest-possible viewport (causing a subtle bottom-clip when the URL
-     bar is visible). Older browsers fall back to 100vh via the first rule. */
-  #app{height:auto !important;min-height:calc(100vh - 130px) !important;}
-  @supports (height: 100dvh){
-    #app{min-height:calc(100dvh - 130px) !important;}
-  }
+  /* #app: honor the body flex layout (flex:1 + min-height:0 from base
+     rule). Was overriding with min-height:calc(100vh - 130px) which
+     over-reserved space — the actual top chrome (header + ribbon +
+     wrapped tab nav) can be 185px on tablet portrait, and the 130px
+     estimate forced #app to overflow the viewport, clipping the
+     bottom of any tab content (e.g. watchlist chart slider). User
+     spec 2026-05-03: 'I cannot see the bottom scroll bar on the
+     chart it appears to be cutting off at the bottom'. */
+  #app{flex:1 !important;min-height:0 !important;height:auto !important;overflow:hidden !important;}
 
   /* ── Tab bar: larger tap zones ── */
   .ntab{font-size:13px !important;padding:14px 18px !important;min-height:50px !important;}
