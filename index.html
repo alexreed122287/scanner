@@ -72,7 +72,12 @@ body.light-mode{font-weight:600;}
 body{
   background:var(--bg0);color:var(--wht);font-family:var(--ff);
   font-size:13px;font-weight:500;line-height:1.5;
-  min-height:100vh;overflow-x:hidden;
+  /* Lock body to the viewport so #app + tab panes own their scroll
+     individually. Without this the page itself was scrollable, which
+     caused the scanner detail panel (sticky inside #sc-body) to scroll
+     out of view when the user scrolled the table. User spec 2026-05-02:
+     'framed in scroll area where the popup would always appear'. */
+  height:100vh;overflow:hidden;display:flex;flex-direction:column;
   background-image:
     radial-gradient(ellipse at 15% 15%, rgba(0,212,255,.04) 0%, transparent 45%),
     radial-gradient(ellipse at 85% 85%, rgba(255,0,230,.03) 0%, transparent 45%),
@@ -156,7 +161,7 @@ a{color:var(--blu);text-decoration:none;}
 .ntab:hover{color:var(--wht);}
 .ntab.active{color:var(--amb);border-bottom-color:var(--amb);text-shadow:0 0 15px rgba(0,212,255,.4);}
 /* App container — height accounts for new 56px header + 42px nav */
-#app{height:calc(100vh - 100px);overflow:hidden;position:relative;}
+#app{flex:1;min-height:0;overflow:hidden;position:relative;}
 .tab-pane{display:none;height:100%;overflow:hidden;}
 /* Hide the mobile filter toggle on desktop \u2014 the CSS that reveals it only applies in @media(max-width:768px) */
 .mobile-filter-toggle{display:none !important;}
@@ -1382,9 +1387,18 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
       <div id="sc-prog-bar" style="background:var(--amb);height:4px;border-radius:2px;width:0%;transition:width 0.2s;"></div>
     </div>
   </div>
-  <div id="sc-body" style="flex:1;display:flex;flex-direction:row;overflow:hidden;">
-    <div class="tbl-wrap" id="sc-tbl-wrap" style="width:340px;min-width:220px;flex-shrink:0;overflow:auto;border-right:1px solid var(--bg3);"><div class="empty-det" id="sc-empty" style="min-height:200px;"><div class="ei">&#9632;</div><p>Run a scan to see results</p></div></div>
-    <div id="sc-det-empty" style="display:none;"></div><div id="sc-detail" style="flex:1;overflow-y:auto;overflow-x:hidden;display:none;align-self:flex-start;position:sticky;top:0;max-height:100%;"></div>
+  <!-- Framed scroll layout: table on left, detail panel on right.
+       Each pane has its own overflow:auto so they scroll independently
+       INSIDE the body — no page-level scroll, no sticky-positioning
+       quirks. min-height:0 / min-width:0 on the flex children let them
+       actually constrain to the parent's bounds (without it, flex
+       children grow to their content's intrinsic size and overflow
+       the row). User spec 2026-05-02: 'framed in scroll area where
+       the popup would always appear and where the tickers would be
+       scrollable through within that frame'. -->
+  <div id="sc-body" style="flex:1;display:flex;flex-direction:row;overflow:hidden;min-height:0;">
+    <div class="tbl-wrap" id="sc-tbl-wrap" style="flex:0 0 50%;min-width:340px;overflow:auto;border-right:1px solid var(--bg3);min-height:0;"><div class="empty-det" id="sc-empty" style="min-height:200px;"><div class="ei">&#9632;</div><p>Run a scan to see results</p></div></div>
+    <div id="sc-det-empty" style="display:none;"></div><div id="sc-detail" style="flex:1;min-width:0;overflow-y:auto;overflow-x:hidden;display:none;"></div>
   </div>
 </div>
 
@@ -5148,7 +5162,7 @@ function switchTab(id){
       G_closed.raw    = cachedClosed.raw||[];
       renderClosedTable();
       var clAge=cacheAge('op_cache_closed_ts');
-      showStaleBanner('tab-closed','Showing cached trade history'+(clAge?' ('+clAge+')':'')+' — not live','fetchClosedPositions');
+      // stale-banner removed 2026-05-02 per user spec
     } else {
       fetchClosedPositions();
     }
@@ -5190,7 +5204,7 @@ function switchTab(id){
         try{ if(typeof renderBuySig==='function') renderBuySig(); }catch(e){}
         try{ if(typeof renderScan==='function') renderScan(); }catch(e){}
         var sa = cacheAge(CACHE_KEYS.scanTs);
-        try{ showStaleBanner(id==='bs'?'tab-bs':'tab-sc','Showing last scan'+(sa?' ('+sa+')':'')+' \u2014 click SCAN to refresh','runScan'); }catch(e){}
+        // stale-banner removed 2026-05-02 per user spec
       }
     } else {
       // Already have results in memory \u2014 just re-render in case the user
@@ -5207,7 +5221,7 @@ function switchTab(id){
     if(cp&&cp.length&&!G._posLoadedLive){
       renderPositionsTable(cp,(cl||'[CACHED]')+' — cached');
       var pa=cacheAge(CACHE_KEYS.posTs);
-      showStaleBanner('tab-pos','Showing cached positions'+(pa?' ('+pa+')':'')+' — not live','fetchPositions');
+      // stale-banner removed 2026-05-02 per user spec
     } else if(G.acctId){
       fetchPositions();
     }
@@ -14001,8 +14015,12 @@ function refreshWL(){
       for (var ri = 0; ri < G.results.length; ri++) {
         if (G.results[ri].ticker === t) { existingResult = G.results[ri]; break; }
       }
-      var coName = (existingResult && existingResult.companyName) || '--';
       var q = quoteByTicker[t] || null;
+      // Prefer Tradier's description from the just-fetched watchlist quote
+      // (q.companyName), then fall back to a cached scan result, then '--'.
+      // Was only checking G.results — tickers added directly to the watchlist
+      // (without a prior scan) showed '--' because G.results never held them.
+      var coName = (q && q.companyName) || (existingResult && existingResult.companyName) || '--';
       if(!q){
         html+='<tr data-ticker="'+t+'"><td><b>'+t+'</b></td>'
           +'<td style="color:var(--gry);font-size:11px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+_esc(coName)+'</td>'
@@ -14058,7 +14076,8 @@ function refreshWL(){
             price:  price,
             change: +chg || 0,
             changePct: +chgP || 0,
-            volume: +q.volume || 0
+            volume: +q.volume || 0,
+            companyName: (q.description || '').trim()
           };
         });
       } catch(e){}
@@ -18867,19 +18886,21 @@ function updateHeaderQuotes(){
       var cel=eid('h-'+p.id+'-c');
       if(cel){
         var ahMark = '';
-        // Show a tiny AH marker when the print is after-hours (and we can
-        // compute it — VIX and some indices don't report trade_date)
+        // After-hours marker — bumped from 8px to 10px so it's actually
+        // readable. ·AH +X.XX% appended to the daily change so the user
+        // sees both: regular-session % change AND extended-hours move.
         if(typeof isAHTrade === 'function' && isAHTrade(q)){
           var ah = typeof ahDelta === 'function' ? ahDelta(q) : null;
           if(ah){
             var s = ah.pct >= 0 ? '+' : '';
-            ahMark = ' <span style="font-size:8px;opacity:0.75;letter-spacing:0;">·AH ' + s + ah.pct.toFixed(2) + '%</span>';
+            var ahCol = ah.pct >= 0 ? 'var(--grn)' : '#ef4444';
+            ahMark = ' <span style="font-size:10px;color:'+ahCol+';letter-spacing:0;font-weight:600;" title="After-hours change vs RTH close">·AH '+s+ah.pct.toFixed(2)+'%</span>';
           } else {
-            ahMark = ' <span style="font-size:8px;opacity:0.6;letter-spacing:0;">·AH</span>';
+            ahMark = ' <span style="font-size:10px;opacity:0.6;letter-spacing:0;" title="After-hours session active (delta unavailable)">·AH</span>';
           }
         }
-        cel.innerHTML='('+(chgPct>=0?'+':'')+chgPct.toFixed(2)+'%)'+ahMark;
-        cel.className='tc '+(chgPct>=0?'up':'dn');
+        cel.innerHTML = '('+(chgPct>=0?'+':'')+chgPct.toFixed(2)+'%)' + ahMark;
+        cel.className = 'tc '+(chgPct>=0?'up':'dn');
       }
     });
     // Cache header quotes for page reload
@@ -19756,6 +19777,11 @@ function hideStaleBanner(id){
   var old = id && document.getElementById('stale-'+id);
   if(old) old.remove();
 }
+// Defensive cleanup — sweep any leftover stale-* banner elements
+// on every navigation in case a prior cached HTML rendered one.
+window.addEventListener('DOMContentLoaded', function(){
+  document.querySelectorAll('[id^="stale-"]').forEach(function(el){ el.remove(); });
+});
 
 
 // ─── PORTFOLIO BUILDER ENGINE (injected) ───────────────────────────────
@@ -21676,7 +21702,7 @@ function init(){
     if(typeof renderBuySig==='function') renderBuySig();
     if(typeof renderScan==='function') renderScan();
     var scanAge = cacheAge(CACHE_KEYS.scanTs);
-    showStaleBanner('tab-bs', 'Showing last scan'+(scanAge?' ('+scanAge+')':'')+' — no live data loaded yet', 'runScan');
+    // stale-banner removed 2026-05-02 per user spec
   }
   // Hydrate the SCAN-button timestamp from cache so it survives reload
   try {
@@ -21706,7 +21732,7 @@ function init(){
     G.positions = cachedPos;
     renderPositionsTable(cachedPos, (cachedPosLabel||'[CACHED]')+' — cached');
     var posAge = cacheAge(CACHE_KEYS.posTs);
-    showStaleBanner('tab-pos', 'Showing cached positions'+(posAge?' ('+posAge+')':'')+' — not live', 'fetchPositions');
+    // stale-banner removed 2026-05-02 per user spec
   }
 
   // 3. Header quotes — restore last known values silently, no banner needed
