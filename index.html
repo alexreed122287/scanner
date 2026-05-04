@@ -12667,15 +12667,16 @@ function finishScan(){
     // Refresh the live theme leaderboard strip — uses the freshly-computed
     // intraday RS map so leaders update on every scan completion.
     try { if (typeof renderTopThemesStrip === 'function') renderTopThemesStrip(); } catch(e){}
-    // High-conviction signal check — fires AFTER enrichment fully drains so
-    // alerts + auto-fill use final scores including FMP, indicator history,
-    // theme RS, and broken-trend penalty. Was previously firing on
-    // preliminary scores immediately after the bulk pass; user would get
-    // routed to a pre-filled order ticket on a ticker whose final score
-    // was actually below the GO threshold.
-    try { if (typeof checkHighConvictionSignals === 'function') checkHighConvictionSignals(G.results); } catch(e){
-      console.warn('[scan] high-conviction check threw post-enrichment:', e.message);
-    }
+    // High-conviction signal check DEFERRED — was firing here right after
+    // bulk enrichment, BEFORE the 3s stragglers cleanup pass + the ~20s
+    // post-scan auto GEX. User report 2026-05-03: 'the push I'm getting
+    // of buy notifications is before scoring is completed'. The check
+    // now runs only inside the runGex completion callback (~25s after
+    // SCAN click) when ALL scoring inputs have settled — Tradier
+    // history, FMP fundamentals, theme RS, GEX Call Heavy, broken-trend
+    // penalty. Stragglers cleanup at +3s does its own re-render but the
+    // notification gate moves with the GEX trigger so we don't fire on
+    // partially-scored data.
     // STRAGGLERS CLEANUP PASS — re-enrich any top-200 ticker that finished
     // the scan with indEnriched=false. Common causes:
     //   - Tradier 429 dropped that ticker's history fetch (resolves with null)
@@ -12689,16 +12690,22 @@ function finishScan(){
     setTimeout(function(){
       if (capturedGen !== G._scanGen) return;     // new scan superseded us
       var stragglers = G.results.slice(0, enrichTotal).filter(function(r){ return !r.indEnriched; });
-      if (stragglers.length === 0) return;
+      if (stragglers.length === 0) {
+        // No stragglers — scoring is settled. Fire HC notifications now
+        // (was firing post-bulk-pass before, before any cleanup).
+        try { if (typeof checkHighConvictionSignals === 'function') checkHighConvictionSignals(G.results); } catch(e){ console.warn('[scan] HC check (no-stragglers path) threw:', e.message); }
+        return;
+      }
       console.log('[scan] cleanup pass: re-enriching ' + stragglers.length + ' stragglers');
       var sIdx = 0;
       function _retryNext(){
         if (sIdx >= stragglers.length) {
           console.log('[scan] cleanup pass complete');
-          // Final re-render so the cleanup-enriched tickers' updated scores show
           G.results.sort(_resultRankCompare);
           G.filtered = excludedFilteredResults();
           renderBuySig(); renderScan();
+          // Stragglers settled — NOW fire the HC check on final scores.
+          try { if (typeof checkHighConvictionSignals === 'function') checkHighConvictionSignals(G.results); } catch(e){ console.warn('[scan] HC check (post-cleanup) threw:', e.message); }
           return;
         }
         if (capturedGen !== G._scanGen) return;
