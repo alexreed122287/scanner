@@ -7563,23 +7563,27 @@ async function runStepFill(creds,acct,occSym,sym,side,qty,startPrice,limitPrice,
     } else if(status==='pending'||status==='open'||status==='partially_filled'){
       consecutiveRejected = 0;     // healthy lifecycle resets the abort counter
       var stepDir=goingUp?'stepping up':'stepping down';
-      // Was already at limit BEFORE this attempt? Then there's nowhere
-      // further to step \u2014 cancel and exit cleanly. Otherwise: cancel and
-      // step. The pre-step at-limit check (instead of post-step) is what
-      // fixes the user-reported "Exceeded price limit \u2014 stopping." after
-      // attempt 1 when start==limit. We tried at the limit; that's the
-      // last legitimate attempt at this price band, so stop.
+      // When already at the limit price (or when start==limit, every
+      // attempt is at the limit), don't break \u2014 clamp and keep retrying
+      // at the same price until maxAttempts is reached. User spec
+      // 2026-05-04: setting Start=$X and Limit=$X means "retry at $X
+      // for all N attempts", not "give up after 1". The price-clamp
+      // below + maxAttempts cap together prevent unbounded loops.
       var wasAtLimit = _atLimit(currentC);
-      sfLog('Not filled \u2014 cancelling #'+orderId+(wasAtLimit?' (already at limit price)':' and '+stepDir+'...'),'sent');
-      await cancelOrder(creds,acct,orderId);
       if (wasAtLimit){
-        sfLog('Already at price limit '+(goingUp?'(ask)':'(bid)')+' \u2014 stopping.','cancelled');
-        break;
+        sfLog('Not filled \u2014 cancelling #'+orderId+' and retrying at limit $'+fmt2(limitC/100)+'...','sent');
+      } else {
+        sfLog('Not filled \u2014 cancelling #'+orderId+' and '+stepDir+'...','sent');
       }
-      currentC = _step(currentC);
-      // Post-step: if the new price overshoots the limit, clamp instead
-      // of breaking \u2014 gives the loop one more retry AT the limit.
-      if (goingUp ? (currentC > limitC) : (currentC < limitC)) currentC = limitC;
+      await cancelOrder(creds,acct,orderId);
+      if (!wasAtLimit){
+        currentC = _step(currentC);
+        // Post-step: if the new price overshoots the limit, clamp so the
+        // next iteration retries AT the limit instead of past it.
+        if (goingUp ? (currentC > limitC) : (currentC < limitC)) currentC = limitC;
+      }
+      // wasAtLimit==true: leave currentC unchanged so next iteration retries
+      // at the same limit price.
     } else {
       // status === 'rejected' | 'expired' | 'error' | 'unknown' | etc.
       consecutiveRejected++;
