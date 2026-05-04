@@ -1,13 +1,18 @@
 {
   "name": "Option Panda",
   "short_name": "Panda",
-  "description": "Option Panda — options trading scanner, market breadth, and order terminal.",
+  "description": "Options trading scanner, market breadth analyzer, and order terminal — single-user dashboard for long-call swing trades.",
   "start_url": "./index.html",
+  "id": "/scanner/",
   "scope": "./",
   "display": "standalone",
-  "orientation": "any",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui", "browser"],
+  "orientation": "portrait",
   "background_color": "#050d14",
   "theme_color": "#050d14",
+  "lang": "en-US",
+  "dir": "ltr",
+  "categories": ["finance", "productivity", "business"],
   "icons": [
     {
       "src": "assets/icon-192.png",
@@ -16,10 +21,22 @@
       "purpose": "any"
     },
     {
+      "src": "assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
       "src": "assets/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     },
     {
       "src": "assets/apple-touch-icon.png",
@@ -27,5 +44,44 @@
       "type": "image/png",
       "purpose": "any"
     }
-  ]
+  ],
+  "shortcuts": [
+    {
+      "name": "Run Scan",
+      "short_name": "Scan",
+      "description": "Open the scanner and run a fresh scan",
+      "url": "./index.html?action=scan",
+      "icons": [{ "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Open Positions",
+      "short_name": "Positions",
+      "description": "View open positions with live P&L",
+      "url": "./index.html?tab=pos",
+      "icons": [{ "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Order Ticket",
+      "short_name": "Order",
+      "description": "Place a new option order",
+      "url": "./index.html?tab=order",
+      "icons": [{ "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Trading History",
+      "short_name": "History",
+      "description": "Closed trades + win-rate stats",
+      "url": "./index.html?tab=closed",
+      "icons": [{ "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ],
+  "prefer_related_applications": false,
+  "related_applications": [],
+  "edge_side_panel": {
+    "preferred_width": 480
+  },
+  "launch_handler": {
+    "client_mode": ["focus-existing", "auto"]
+  },
+  "handle_links": "preferred"
 }
