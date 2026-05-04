@@ -2,6 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<!-- Cache-busting: GitHub Pages serves index.html with default cache-control:
+     max-age=600 (10 min). When the file changes, mobile Safari + iOS PWA
+     install both keep serving the old copy until that TTL elapses. Force
+     no-cache + no-store + must-revalidate so a refresh always pulls the
+     newest deploy. Also a unique build-id meta tag so we can detect
+     stale-cached state at runtime and trigger a one-shot reload. -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="op-build" content="2026-05-04T11:15-stepfill-freestep">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -1399,7 +1409,7 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
 </head>
 <body>
 <div id="hdr">
-  <div id="hdr-logo"><img src="assets/pandas2.png" alt="" class="panda-icon"><span>OPTION PANDA</span><span id="clk-logo" style="margin-left:14px;font-family:var(--ff-mono);font-size:12px;color:var(--amb);letter-spacing:.5px;font-weight:400;">--:--:--</span></div>
+  <div id="hdr-logo"><img src="assets/pandas2.png" alt="" class="panda-icon"><span>OPTION PANDA</span><span id="clk-logo" style="margin-left:14px;font-family:var(--ff-mono);font-size:12px;color:var(--amb);letter-spacing:.5px;font-weight:400;">--:--:--</span><span id="hdr-version" title="Build version. If this doesn't match the latest commit, hard-refresh (Cmd+Shift+R or close+reopen the tab) to clear cached HTML." style="margin-left:10px;font-family:var(--ff-mono);font-size:9px;color:var(--gry);letter-spacing:.5px;font-weight:400;cursor:help;">v—</span></div>
   <div id="hdr-tickers">
     <span class="htick"><span class="ts">SPY </span><span class="tv" id="h-spy">--</span> <span class="tc" id="h-spy-c">(--)</span></span>
     <span class="htick"><span class="ts">QQQ </span><span class="tv" id="h-qqq">--</span> <span class="tc" id="h-qqq-c">(--)</span></span>
@@ -20001,7 +20011,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '1.0';
+var APP_VERSION = '1.1.0-stepfill-freestep';
 // Page-source fallback constants removed. Each visitor now provides their own
 // API credentials via the API tab (or, for Tradier, sets up the worker proxy
 // at worker/tradier-proxy/ \u2014 keys never reach the browser at all).
@@ -22928,6 +22938,15 @@ function init(){
         }, 80);
       }
     }
+  } catch(_){}
+
+  // Surface the build version in the header chip so the user can confirm
+  // they're on fresh code after a deploy. If they ever see an old version
+  // string after a refresh, they have a stale localStorage / Service Worker /
+  // browser cache, and the chip's title attr tells them how to clear it.
+  try {
+    var verEl = document.getElementById('hdr-version');
+    if (verEl) verEl.textContent = 'v'+APP_VERSION;
   } catch(_){}
 
   addAlert('SYS','Option Panda v'+APP_VERSION+' initialized — cached data loaded, no API calls on startup','go');
