@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-04T11:15-stepfill-freestep">
+<meta name="op-build" content="2026-05-04T11:30-quote-refresh-history">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -1491,6 +1491,7 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
   <button class="ntab" style="display:none;" onclick="switchTab('bs')">BUY SIGNALS</button>
   <button class="ntab active" onclick="switchTab('sc')">FULL SCANNER</button>
   <button class="ntab" onclick="switchTab('pos')">POSITIONS</button>
+  <button class="ntab" onclick="switchTab('closed')" title="Trading history — open + close + P&L per round-trip on a single row, plus win-rate / profit-factor / Sortino stats. Pulled from Tradier's filled-orders feed.">HISTORY</button>
   <button class="ntab" onclick="switchTab('order')">ORDER TICKET</button>
   <button class="ntab" onclick="switchTab('api')">API</button>
   <button class="ntab" onclick="switchTab('pf')">PORTFOLIO</button>
@@ -1987,8 +1988,8 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
 
       <!-- STRIKE + EXPIRY (options only) -->
       <div class="ord-row ord-opt-only">
-        <div class="ord-field"><label>STRIKE</label><input id="ord-strike" type="number" placeholder="150.00" onchange="updateOrdChart()" oninput="updateOrdChart()"></div>
-        <div class="ord-field"><label>EXPIRATION DATE</label><input id="ord-exp" type="date" onchange="updateOrdChart()"></div>
+        <div class="ord-field"><label>STRIKE</label><input id="ord-strike" type="number" placeholder="150.00" onchange="updateOrdChart();fetchLiveQuote()" oninput="updateOrdChart()"></div>
+        <div class="ord-field"><label>EXPIRATION DATE</label><input id="ord-exp" type="date" onchange="updateOrdChart();fetchLiveQuote()"></div>
       </div>
 
       <!-- ── AUTO-SELECT CONTRACT — options only ── -->
@@ -2051,7 +2052,7 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
         </div>
         <div class="ord-field">
           <label>LIMIT PRICE <span id="lmt-hint" style="color:var(--grn);font-size:9px;"></span></label>
-          <input id="ord-lmt" type="number" placeholder="0.00" step="0.01" onchange="updateOrdChart();calcQtyFromBudget()" oninput="updateOrdChart();calcQtyFromBudget()">
+          <input id="ord-lmt" type="number" placeholder="0.00" step="0.01" onchange="updateOrdChart();calcQtyFromBudget()" oninput="this.dataset.userEdited='1';updateOrdChart();calcQtyFromBudget()">
         </div>
         <div class="ord-field" id="ord-stop-wrap" style="display:none;">
           <label>STOP PRICE</label>
@@ -6954,6 +6955,36 @@ function ahDelta(q){
 
 function renderQuotePanel(q){
   G.liveQuote=q;
+  // Auto-update the order ticket's limit price + step-fill mode label
+  // every time a fresh quote arrives. Per user spec 2026-05-04: "have
+  // those default asks and bids refresh based off the refreshed quotes".
+  // The price snaps to ask for any SELL_TO_CLOSE / SELL action and to bid
+  // for any BUY_TO_OPEN / BUY action. Skipped when ord-lmt has been
+  // user-edited recently (we don't want to clobber a hand-typed limit on
+  // every websocket tick) — guarded by the data-user-edited flag.
+  try {
+    var actionEl = eid('ord-action');
+    var lmt = eid('ord-lmt');
+    if (actionEl && lmt && q && (q.bid || q.ask)){
+      var isBuy = (actionEl.value || '').indexOf('BUY') === 0;
+      var px = isBuy ? q.bid : q.ask;
+      // Only auto-snap when the limit field hasn't been hand-edited or
+      // when its current value matches the previous auto-snapped price
+      // (so user edits stay sticky, but a stale auto-snapped value
+      // refreshes with the new quote).
+      var prevAuto = parseFloat(lmt.dataset.autoSnap || '0');
+      var curVal = parseFloat(lmt.value || '0');
+      var canSnap = !lmt.dataset.userEdited
+        || (prevAuto > 0 && Math.abs(curVal - prevAuto) < 0.001);
+      if (canSnap && px && px > 0){
+        lmt.value = px.toFixed(2);
+        lmt.dataset.autoSnap = px.toFixed(2);
+        delete lmt.dataset.userEdited;
+      }
+    }
+    // Keep the step-fill label/start-side in sync with the current action
+    if (typeof updateStepFillMode === 'function') updateStepFillMode();
+  } catch(_){}
   // After HTTP-fetched quote bootstraps the panel, attach a WebSocket
   // subscription so subsequent updates push in real-time. Only matters in
   // live mode — in sandbox _wsConnect short-circuits to no-op so HTTP poll
@@ -7064,14 +7095,17 @@ function updateStepFillMode(){
   var selling=isSellAction(action);
   var lbl=eid('sf-mode-label');
   var sfStart=eid('sf-start');
+  // Hard default per user spec 2026-05-04: ALWAYS ask for sells (close),
+  // ALWAYS bid for buys (open). Was: only switched when current value
+  // contradicted the action \u2014 left 'mid' alone, which surprised the user.
   if(selling){
     lbl.innerHTML='\u25bc STEP FILL MODE \u2014 Start at ASK, step down toward BID (best sell price)';
     lbl.style.color='var(--wrn)';
-    if(sfStart && sfStart.value !== 'ask') sfStart.value='ask';
+    if(sfStart) sfStart.value='ask';
   } else {
     lbl.innerHTML='\u25b2 STEP FILL MODE \u2014 Start at BID, step up toward ASK (best buy price)';
     lbl.style.color='var(--grn)';
-    if(sfStart && sfStart.value==='ask') sfStart.value='bid';
+    if(sfStart) sfStart.value='bid';
   }
   // Auto-anchor the limit price to the side appropriate for the new action:
   // - Any BUY  \u2192 BID (patient: only fill if seller hits our bid)
@@ -20011,7 +20045,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '1.1.0-stepfill-freestep';
+var APP_VERSION = '1.2.0-quote-refresh-history';
 // Page-source fallback constants removed. Each visitor now provides their own
 // API credentials via the API tab (or, for Tradier, sets up the worker proxy
 // at worker/tradier-proxy/ \u2014 keys never reach the browser at all).
@@ -20173,6 +20207,32 @@ var CW_KEY    = 'panda_watchlist';
 
 function openContractPanel(ticker){
   CP_TICKER = ticker;
+  // iPhone fix 2026-05-04: when the user taps ▲ BUY on a row, the
+  // sc-detail bottom-sheet (if open from a prior row click) was staying
+  // ON TOP of the scanner table at z-index 7500. After the contract
+  // panel modal (z-index 8000) closes, the bottom sheet was still
+  // covering 80vh of the screen, making the scanner look "disappeared".
+  // Close any open scanner/buy-signals detail panel and clear its
+  // selection so the table is fully visible behind the modal AND when
+  // the modal closes.
+  try {
+    var det = document.getElementById('sc-detail');
+    var emp = document.getElementById('sc-det-empty');
+    if (det && det.style.display !== 'none'){
+      det.style.display = 'none';
+      if (emp) emp.style.display = 'flex';
+      if (typeof _setSelDetailWidth === 'function') _setSelDetailWidth('sc-detail', false);
+    }
+    var bsDet = document.getElementById('bs-detail');
+    var bsEmp = document.getElementById('bs-empty');
+    if (bsDet && bsDet.style.display !== 'none'){
+      bsDet.style.display = 'none';
+      if (bsEmp) bsEmp.style.display = 'flex';
+    }
+    document.querySelectorAll('tr.sel-row').forEach(function(row){row.classList.remove('sel-row');});
+    document.querySelectorAll('.sig-card.sel').forEach(function(c){c.classList.remove('sel');});
+    if (typeof G !== 'undefined') G.selTicker = null;
+  } catch(_){}
   var panel = document.getElementById('contract-panel');
   panel.style.display = 'flex';
   document.getElementById('cp-ticker').textContent = ticker;
