@@ -925,7 +925,17 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
 
   /* ── Order Ticket: stack all rows vertically, full-width inputs ── */
   .ord-form{max-width:100% !important;padding:10px !important;}
-  .ord-row{flex-direction:column !important;gap:8px !important;}
+  /* Reset the desktop nowrap+overflow-x on .ord-row — on iPhone we want
+     buttons to be reachable without horizontal swipe. flex-direction:column
+     stacks inputs+buttons; overflow-x:visible removes the desktop swipe
+     surface so children render normally; flex-shrink:1 lets buttons size
+     down to row width instead of pushing past the edge. SAVE KEYS / CLEAR /
+     TEST APIS were getting cut off the right side of the API tab on iPhone
+     because the desktop default kept .ord-row in nowrap+overflow-x:auto. */
+  .ord-row{flex-direction:column !important;gap:8px !important;
+    flex-wrap:wrap !important;overflow-x:visible !important;}
+  .ord-row > *{flex-shrink:1 !important;}
+  .ord-row > button.btn{width:100% !important;}
   /* Collapse the 2-col order body so the action panel falls below the form
      on narrow viewports — sticky positioning is also dropped so it doesn't
      hover over the step-fill log. */
@@ -974,6 +984,61 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
   /* ── Utility: hide descriptive helper text that clutters mobile ── */
   .mobile-hide-helper{display:none !important;}
   .strategy-desc, #strategy-desc-sc{display:none !important;}
+
+  /* ── iPhone polish 2026-05-04 ──
+     The 4-segment chip header (STRATEGY / FILTERS / MUST PASS / SCREENER)
+     wraps onto two rows at 375px width. Make the chips full-row width so
+     they're easy to thumb-tap and the visual hierarchy is clear when one
+     is open. Without this they squeeze sub-44px and tap accuracy drops. */
+  #sc-action-row .sec-seg{flex:1 1 calc(50% - 6px) !important;
+    min-height:38px !important;font-size:11px !important;
+    justify-content:center !important;padding:8px 6px !important;}
+  /* When a chip is OPEN, the bar below should be visible AND the chips
+     should remain visible above it — guarantee no `mobile-collapsed`
+     stragglers re-hide it (defense-in-depth alongside the JS scrub). */
+  #sc-filter-bars .flt-bar.collapsible:not(.collapsed){display:flex !important;}
+  /* When a filter bar is expanded inside the strategy/screener chip
+     groups, allow the bar to break onto multiple lines so its contents
+     fit the iPhone width without horizontal scroll (except MUST PASS,
+     which is intentionally horizontal-scroll). */
+  #sc-bar-strategy:not(.collapsed),
+  #sc-bar-filters:not(.collapsed),
+  #sc-bar-screener:not(.collapsed){flex-wrap:wrap !important;gap:8px !important;}
+  /* Strategy preset buttons: each on its own row at iPhone width. The
+     desktop layout puts 5 ★/▲/▶/◆/▲ buttons in a single line; on iPhone
+     that wraps into 3 lines but with awkward orphans. Stacking them
+     full-width gives uniform tap targets and keeps the one-tap mental
+     model. */
+  #sc-bar-strategy:not(.collapsed) .btn{flex:1 1 100% !important;
+    min-height:42px !important;text-align:center !important;}
+  /* MUST PASS chips: keep horizontal-scroll but pad the row so the last
+     chip isn't clipped behind the search input on the right edge. */
+  #sc-bar-mustpass{padding-right:170px !important;}
+  /* Search input docked at the right edge of MUST PASS row — on iPhone
+     it should be full-width on its own line below the chips for clarity. */
+  #sc-bar-mustpass:not(.collapsed){flex-wrap:wrap !important;
+    overflow-x:visible !important;padding-right:10px !important;}
+  #sc-bar-mustpass #sc-search{margin-left:0 !important;
+    width:100% !important;flex:1 1 100% !important;}
+
+  /* API tab: the test-result panel can grow long; cap and scroll within. */
+  #api-test-result{max-height:240px !important;overflow:auto !important;}
+
+  /* GEX table: the new EXP / STRIKE split columns need horizontal scroll
+     on iPhone since the table can't shrink past its content width. */
+  #gx-tbl-wrap{overflow-x:auto !important;-webkit-overflow-scrolling:touch;}
+  #gx-tbl-wrap table{min-width:780px;}
+
+  /* Generic table-wraps: explicit horizontal scroll surface so columns
+     never clip silently. */
+  .tbl-wrap{overflow-x:auto !important;-webkit-overflow-scrolling:touch;}
+
+  /* Headers / sticky bars: ensure SCAN action row never wraps the
+     SCAN button to a 3rd line — keep SCAN + EXPORT GOs on the second
+     row when chips occupy row 1. */
+  #sc-action-row{flex-wrap:wrap !important;gap:6px !important;}
+  #sc-action-row #sc-run-btn-top, #sc-action-row #sc-export-go-top{
+    flex:1 1 calc(50% - 4px) !important;min-height:42px !important;}
 }
 
 /* iPhone-specific: treat very narrow screens as needing extra compression */
@@ -2847,7 +2912,7 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
       <span id="api-counter-tab" onclick="showApiBreakdown()" title="Click to view per-endpoint breakdown" style="cursor:pointer;font-family:var(--ff-mono);font-size:14px;font-weight:700;color:var(--amb);">0</span>
       <span style="font-family:var(--ff-mono);font-size:10px;color:var(--gry);">(resets at midnight ET)</span>
     </div>
-    <div class="card collapsible" id="api-card" data-default-collapsed><div class="card-hdr">API CONFIGURATION</div>
+    <div class="card collapsible" id="api-card"><div class="card-hdr">API CONFIGURATION</div>
     <div class="card-body api-form">
       <div class="api-row"><label>FMP API KEY (financialmodelingprep.com)</label><input id="api-fmp" type="password" placeholder="Enter FMP key..."><div class="api-status" id="fmp-status"></div></div>
       <div class="api-row"><label>TRADIER API KEY</label><input id="api-tr" type="password" placeholder="Enter Tradier key..."><div class="api-status" id="tr-status"></div></div>
@@ -5836,37 +5901,16 @@ function reclassifyGoThreshold(){
   toast('GO threshold set to '+thresh+' \u2014 '+goCount+' GOs');
 }
 
-// ── Mobile: collapse/expand the scanner filter bars ──
-function toggleMobileFilters(){
-  var wrap = eid('sc-filter-bars');
-  var btn  = eid('sc-mobile-filter-btn');
-  if(!wrap) return;
-  var bars = wrap.querySelectorAll('.flt-bar');
-  var collapsed = bars[0] && bars[0].classList.contains('mobile-collapsed');
-  bars.forEach(function(b){
-    if(collapsed) b.classList.remove('mobile-collapsed');
-    else b.classList.add('mobile-collapsed');
-  });
-  if(btn) btn.classList.toggle('open', collapsed);
-}
-// Collapse filters by default on mobile
-(function(){
-  try{
-    if(window.matchMedia('(max-width:768px)').matches){
-      // Run after DOM is ready
-      var doit = function(){
-        var wrap = document.getElementById('sc-filter-bars');
-        if(!wrap) return;
-        wrap.querySelectorAll('.flt-bar').forEach(function(b){ b.classList.add('mobile-collapsed'); });
-      };
-      if(document.readyState === 'loading'){
-        document.addEventListener('DOMContentLoaded', doit, {once:true});
-      } else {
-        doit();
-      }
-    }
-  }catch(e){}
-})();
+// ── Legacy mobile-filter toggle (superseded by the 4-segment chip header
+//    at the top of the scanner — STRATEGY / FILTERS / MUST PASS / SCREENER).
+//    Kept as a no-op so any stray onclick from older HTML doesn't error.
+//    The original IIFE that auto-applied mobile-collapsed on ≤768px was
+//    REMOVED 2026-05-04: it added a class to every .flt-bar that then made
+//    the new chip-driven toggleSecSeg ineffective on iPhone — tapping
+//    STRATEGY removed `collapsed` but `mobile-collapsed` (still present)
+//    kept the bar hidden via display:none. The new chip system uses
+//    `data-default-collapsed` + the `collapsed` class only.
+function toggleMobileFilters(){ /* deprecated — see comment above */ }
 
 function addAlert(tk,msg,type){
   G.alerts.unshift({tk:tk,msg:msg,type:type,ts:new Date().toLocaleTimeString()});
@@ -5918,6 +5962,12 @@ function switchTab(id){
   var pane=eid('tab-'+id);if(pane)pane.classList.add('active');
   var btn=document.querySelector('.ntab[onclick="switchTab(\''+id+'\')"]');
   if(btn)btn.classList.add('active');
+  // Persist the active tab so a reload returns the user to where they were
+  // instead of always landing on FULL SCANNER. 2026-05-04: user spec
+  // 'cache results to where if i left and came back or refreshed any of
+  // the pages, it will show the last scan results' — this also covers the
+  // active-tab dimension of "where they were".
+  try { localStorage.setItem('rrjcar_active_tab', id); } catch(_){}
   _updateHelpFab(id);
   if(id==='al')renderAlerts();
   if(id==='ind')renderIndustryTab();
@@ -14677,14 +14727,15 @@ function renderGex(){
     'CALL OI %': 'Call OI as a percentage of total OI (calls + puts), blended 60% by OI and 40% by today\u2019s volume. >50% = call-heavy / bullish positioning. <50% = put-heavy / bearish.',
     'PUT OI %': 'Put OI percentage (100 \u2212 Call OI %). High values indicate hedging or bearish positioning.',
     'DTE': 'Calendar days to expiration of the referenced options chain. The scanner picks the chain closest to 35 DTE within the 20-70 day window.',
-    'EXP / STRIKE': 'Expiration date of the chain GEX was computed against, and the gamma-flip strike. These are the contract specs the rest of this row\u2019s metrics reference.',
+    'EXP': 'Expiration date of the chain GEX was computed against. Format MM/DD.',
+    'STRIKE': 'Gamma-flip strike \u2014 the strike (within \u00b110% of spot) with the highest combined open interest. The contract specs the rest of this row\u2019s metrics reference.',
     'FLOW': 'Aggregate directional bias from call/put OI. CALL HEAVY = bullish setup. PUT HEAVY = bearish setup.'
   };
   function th(label){ return '<th title="'+_esc(defs[label]||'')+'" style="cursor:default;">'+label+'</th>'; }
   var html='<table><thead><tr>'
     + '<th>SYMBOL</th>'
     + th('NET GEX') + th('CALL OI') + th('PUT OI') + th('GAMMA FLIP')
-    + th('CALL OI %') + th('PUT OI %') + th('DTE') + th('EXP / STRIKE') + th('FLOW')
+    + th('CALL OI %') + th('PUT OI %') + th('DTE') + th('EXP') + th('STRIKE') + th('FLOW')
     + '</tr></thead><tbody>';
   // Bullish-only ranking 2026-05-03 per user spec: filter to CALL HEAVY
   // (call% >= 50) AND drop NO DATA / sim placeholders, then sort
@@ -14711,9 +14762,9 @@ function renderGex(){
     var isEmpty = !r.sim && !r.callOI && !r.putOI;
     var simBadge=r.sim?'<span style="font-size:9px;color:var(--gry);margin-left:4px;">[SIM]</span>':'';
     var emptyBadge=isEmpty?'<span style="font-size:9px;color:var(--ngo);margin-left:4px;" title="Tradier returned no options chain for this ticker — illiquid, expired, or out-of-hours data gap.">[NO DATA]</span>':'';
-    var expDisplay = r.exp
-      ? (r.exp.split('-').slice(1).join('/') + ' / $' + fmt2(r.flip))
-      : (r.flip ? '$'+fmt2(r.flip) : '--');
+    var expCell = r.exp ? r.exp.split('-').slice(1).join('/') : '--';
+    var flipNum = parseFloat(r.flip);
+    var strikeCell = (isFinite(flipNum) && flipNum > 0) ? ('$' + fmt2(flipNum)) : '--';
     html+='<tr data-ticker="'+_esc(r.t)+'" onclick="viewDetail(this.dataset.ticker,\'gx-detail\',\'gx-det-empty\')"'+(isEmpty?' style="opacity:0.5;"':'')+'>'
       +'<td><b>'+_esc(r.t)+'</b>'+simBadge+emptyBadge+'</td>'
       +'<td class="'+gexCls+'">'+(r.gex>0?'+':'')+r.gex+'M</td>'
@@ -14723,7 +14774,8 @@ function renderGex(){
       +'<td class="pnl-pos">'+r.call+'%</td>'
       +'<td class="pnl-neg">'+r.put+'%</td>'
       +'<td style="color:var(--gry);font-size:11px;">'+(r.dte||'--')+'d</td>'
-      +'<td style="font-family:var(--ff-mono);font-size:11px;color:var(--gry);">'+expDisplay+'</td>'
+      +'<td style="font-family:var(--ff-mono);font-size:11px;color:var(--gry);white-space:nowrap;">'+expCell+'</td>'
+      +'<td style="font-family:var(--ff-mono);font-size:11px;color:var(--ambb);font-weight:700;white-space:nowrap;">'+strikeCell+'</td>'
       +'<td><span class="badge '+r.flowCls+'">'+r.flow+'</span></td>'
       +'</tr>';
   });
@@ -22587,7 +22639,18 @@ function init(){
   // Restore screener + filter settings (Save Settings button writes the snapshot)
   if (typeof loadScanSettings === 'function') loadScanSettings();
   // GEX cache + auto-schedule
-  if (typeof loadGexCache === 'function') loadGexCache();
+  if (typeof loadGexCache === 'function') {
+    var hadGex = loadGexCache();
+    // If GEX cache hydrated AND the user's last tab was GEX, render now so
+    // the table shows on first paint (don't wait for the user to click GEX
+    // again). switchTab('gex') below also re-renders, but this covers the
+    // case where the GEX cache loaded before tab restore fires.
+    if (hadGex && G.gexData && G.gexData.length){
+      setTimeout(function(){
+        try { if (typeof renderGex === 'function') renderGex(); } catch(_){}
+      }, 200);
+    }
+  }
   if (typeof loadGexSchedule === 'function') {
     loadGexSchedule();
     if (G.gexAutoSchedule !== 'off') startGexAutoSchedule();
@@ -22755,6 +22818,27 @@ function init(){
       }
     });
   }catch(e){}
+
+  // Restore the last-active tab from a prior session — picks up the user
+  // exactly where they left off (matches the user spec 2026-05-04 to make
+  // any page restore on reload). Falls back to 'sc' (FULL SCANNER) when no
+  // tab has been remembered, which preserves the original first-load
+  // experience. Defer slightly so the panes have mounted + the SCAN tab's
+  // initial active state has been replaced cleanly. We also re-render the
+  // GEX table here if that's the saved tab — switchTab's GEX branch only
+  // calls renderGex when G.gexData is non-empty, which it is by now after
+  // loadGexCache() ran above.
+  try {
+    var savedTab = localStorage.getItem('rrjcar_active_tab');
+    if (savedTab && savedTab !== 'sc'){
+      var validTabs = ['sc','wl','pos','order','api','pf','ind','gex','al','howto','closed','cw','bs'];
+      if (validTabs.indexOf(savedTab) >= 0){
+        setTimeout(function(){
+          try { switchTab(savedTab); } catch(_){}
+        }, 80);
+      }
+    }
+  } catch(_){}
 
   addAlert('SYS','Option Panda v'+APP_VERSION+' initialized — cached data loaded, no API calls on startup','go');
 
@@ -23344,6 +23428,13 @@ window.addEventListener('DOMContentLoaded', function(){
 // Defaults: any element with [data-default-collapsed] starts collapsed on
 // first visit (user can override; the override sticks).
 function initCollapsibles(){
+  // Cleanup: strip the legacy `mobile-collapsed` class. Older sessions on
+  // ≤768px viewports auto-applied it via an IIFE that's been removed; any
+  // bar still carrying it would stay invisible on iPhone regardless of the
+  // chip toggle. One-time scrub on every init.
+  document.querySelectorAll('.flt-bar.mobile-collapsed').forEach(function(b){
+    b.classList.remove('mobile-collapsed');
+  });
   document.querySelectorAll('.card.collapsible, .flt-bar.collapsible').forEach(function(el){
     if(!el.id) return;
     var key = 'op_collapse_' + el.id;
@@ -23378,6 +23469,9 @@ window.addEventListener('DOMContentLoaded', initCollapsibles);
 function toggleSecSeg(targetId){
   var target = document.getElementById(targetId);
   if (!target) return;
+  // Defensive: strip the legacy mobile-collapsed class if any prior session
+  // applied it. Without this the chip toggle fights an inherited display:none.
+  target.classList.remove('mobile-collapsed');
   target.classList.toggle('collapsed');
   var key = 'op_collapse_' + targetId;
   try { localStorage.setItem(key, target.classList.contains('collapsed') ? '1' : '0'); } catch(_){}
