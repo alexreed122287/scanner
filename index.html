@@ -1406,6 +1406,7 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
   <button class="ntab" onclick="switchTab('gex')" title="Gamma exposure / 30DTE options-flow (call vs put OI) for the top 200 enriched tickers. Drives the GEX Call Heavy rule.">GEX / FLOW</button>
   <button class="ntab" onclick="switchTab('wl')">WATCHLIST</button>
   <button class="ntab" onclick="switchTab('al')">ALERTS</button>
+  <button class="ntab" onclick="switchTab('howto')" title="First-time walkthrough — what every tab does, how to set up API keys, how to read the scanner, how to place + manage trades.">&#10067; HOW TO</button>
   <!-- OPTIONS WATCHLIST button hidden per user request — underlying tab pane
        (id="tab-cw") + cwRenderTable code path retained in case of re-enable. -->
   <button class="ntab" style="display:none;" onclick="switchTab('cw')">&#9734; OPTIONS WATCHLIST</button>
@@ -2318,6 +2319,286 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
     <!-- ── SYSTEM ALERTS LOG ── -->
     <div class="card"><div class="card-hdr">SYSTEM ALERTS LOG <button class="btn" style="font-size:10px;padding:2px 8px;float:right;" onclick="G.alerts=[];renderAlerts();">CLEAR</button></div>
     <div id="alerts-list"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     HOW TO — first-time walkthrough
+     ═══════════════════════════════════════════════════════ -->
+<div class="tab-pane" id="tab-howto">
+  <div class="page-wrap" style="max-width:980px;margin:0 auto;line-height:1.55;">
+    <div style="padding:18px 4px 12px;border-bottom:1px solid var(--bg3);margin-bottom:14px;">
+      <div style="font-family:var(--ff-brand);font-size:18px;color:var(--amb);letter-spacing:2px;text-shadow:0 0 12px rgba(0,212,255,.4);">▲ OPTION PANDA — HOW TO</div>
+      <div style="color:var(--gry);font-size:12px;margin-top:4px;">A walkthrough of every tab, what each setting does, and the order to use them in. Read top-to-bottom on first visit.</div>
+    </div>
+
+    <div class="card collapsible" id="howto-quickstart">
+      <div class="card-hdr">▶ QUICKSTART — 5 MINUTES TO YOUR FIRST SCAN</div>
+      <div class="card-body" style="font-size:13px;color:var(--wht);">
+        <ol style="padding-left:20px;line-height:1.8;">
+          <li><b>Open the API tab.</b> Paste your <b>Tradier API key</b> (live or sandbox). Optionally paste an <b>FMP key</b> for fundamentals (analyst grades). Pick mode (sandbox/live). Click <b>SAVE KEYS</b>.</li>
+          <li><b>Switch to FULL SCANNER.</b> Default filters are already calibrated: Min Score 160, Signal=GO, Min Price $1, Min AvgVol 500,000.</li>
+          <li><b>Click ↻ SCAN.</b> Bulk pass scores ~1500 tickers in &lt;30s. The 60 highest get deep enrichment (Tradier history + FMP). Background pass fills ranks 61–200 over the next ~2 minutes.</li>
+          <li><b>Look for green GO badges</b> on rows scoring ≥160. The <b>★ HIGH CONVICTION</b> preset (top of strategy row) further filters to rows that ALSO have PROVEN + Analyst Up + GEX Call Heavy.</li>
+          <li><b>Click any row</b> to open its detail panel (right side on desktop, bottom sheet on iPhone). Click <b>▲ BUY</b> to open the contract popup; pick a strike + expiry, then ▲ BUY NOW launches the Order Ticket pre-filled.</li>
+          <li><b>Manage open positions</b> from the POSITIONS tab. Enable Trailing Stop and Smart Exits at the bottom of that tab to auto-close on adverse moves.</li>
+        </ol>
+        <div style="background:var(--amb3);padding:8px 12px;border-radius:3px;margin-top:8px;font-family:var(--ff-mono);font-size:11px;color:var(--ambb);">
+          <b>Pro tip:</b> Page reloads preserve your scan results, GEX data, positions, and trail-stop config via localStorage — no re-fetch on refresh. Cache TTLs: scan results 30min, GEX 24h, positions 5min.
+        </div>
+      </div>
+    </div>
+
+    <div class="card collapsible" id="howto-fullscanner" data-default-collapsed>
+      <div class="card-hdr">▶ FULL SCANNER TAB</div>
+      <div class="card-body" style="font-size:13px;color:var(--wht);">
+        <p><b>Purpose:</b> The primary tab. Scores ~1500 tickers across 14+ technical and fundamental rules, ranks them, and surfaces the ones most likely to move.</p>
+
+        <p style="color:var(--ambb);font-weight:700;margin-top:14px;">Sticky header bar (always visible)</p>
+        <ul style="padding-left:20px;">
+          <li><b>▶ STRATEGY · ▶ FILTERS · ▶ MUST PASS · ▶ SCREENER</b> — four collapsible filter sections. Click any segment to expand. State persists per-session.</li>
+          <li><b>↻ SCAN</b> — runs the scan. Click anytime regardless of which sections are open. Disabled mid-scan.</li>
+          <li><b>▲ EXPORT GOs</b> — copies a comma-separated list of all GO-tier tickers to clipboard.</li>
+          <li><b>Last scan timestamp</b> — when the visible data was generated.</li>
+          <li><b>⚠ data gaps chip</b> — appears if the bulk pass didn't fully enrich the top-200. Hover for details (Tradier history N/200, FMP fundamentals N/200, GEX coverage). Background pass usually closes these gaps within 2 minutes.</li>
+        </ul>
+
+        <p style="color:var(--ambb);font-weight:700;margin-top:14px;">STRATEGY presets</p>
+        <ul style="padding-left:20px;">
+          <li><b>★ HIGH CONVICTION</b> — PROVEN + Score ≥160 + Analyst Revisions ↑ + GEX Call Heavy. ~67% of max score; rarest setups.</li>
+          <li><b>▲ BREAKOUT</b> — Near 52-week high + RS &gt; SPY + MACD + + TF Aligned 2/3.</li>
+          <li><b>▶ MOMENTUM</b> — MACD + + Above EMA200 + Vol &gt; Avg + RS &gt; SPY.</li>
+          <li><b>◆ BEST ITM CALLS</b> — Score ≥180 + liquid + contract ≤$8. Deep-ITM (δ 0.70–0.90) candidates.</li>
+          <li><b>▲ PRE/POST MARKET</b> — same filters as HIGH CONVICTION but the table re-sorts by absolute % gap so the biggest movers float to the top. Use during 4:00–9:30am ET (pre) or 4:00–8:00pm ET (post).</li>
+          <li><b>VERIFY</b> — diagnostic only. Pings Tradier with 5 sentinel tickers and shows the raw `change_percentage`/`last_volume`/`trade_date` fields so you can confirm extended-hours data is flowing through your proxy.</li>
+          <li><b>✕ CLEAR</b> — removes any active preset. Restores score-based ranking.</li>
+        </ul>
+
+        <p style="color:var(--ambb);font-weight:700;margin-top:14px;">FILTERS row</p>
+        <ul style="padding-left:20px;">
+          <li><b>Sectors</b> — multi-select. Empty = all. Useful for narrowing scans to specific industries.</li>
+          <li><b>Themes</b> — multi-select industry themes (e.g. "AI Infrastructure", "Memory & Storage"). Hydrated from theme_scores.json. Click any chip in the scrolling ribbon at the top to filter to just that theme.</li>
+          <li><b>Signal</b> — GO / NO-GO / All.</li>
+          <li><b>Min Score</b> — composite score floor. Default 160. Range 0–240.</li>
+          <li><b>FILTER / CLEAR</b> — applies / resets the criteria.</li>
+        </ul>
+
+        <p style="color:var(--ambb);font-weight:700;margin-top:14px;">MUST PASS chips</p>
+        <p>Each checkbox forces the corresponding rule to pass for a ticker to appear. Hover any chip for definition (Analyst Revisions ↑, GEX Call Heavy, PROVEN, 52Wk Hi, RS &gt; SPY, MACD +, TF Aligned, Above EMA200, Vol &gt; Avg, No Earnings, Strong Sector). Stack as needed.</p>
+
+        <p style="color:var(--ambb);font-weight:700;margin-top:14px;">SCREENER row</p>
+        <ul style="padding-left:20px;">
+          <li><b>Min Price / Max Price</b> — $1+ default. Set Max Price if you only buy small-caps.</li>
+          <li><b>Min AvgVol</b> — formatted with commas. 500,000 default. Lower = more candidates, but illiquid contracts.</li>
+          <li><b>Today Vol %</b> — only show tickers whose today's volume is at least N% of average. Catches volume spikes.</li>
+          <li><b>Max Opt $</b> — filter out tickers whose ATM option is too expensive.</li>
+          <li><b>SAVE / RESET</b> — persist your filter snapshot to localStorage / restore factory defaults.</li>
+        </ul>
+
+        <p style="color:var(--ambb);font-weight:700;margin-top:14px;">Results table</p>
+        <ul style="padding-left:20px;">
+          <li><b># rank</b> — sort priority is: <code>score → techScore → RS 5D → theme dailyScore → volume</code>. The "↓ X" annotation shows which factor decided that row's position vs the row above. (Pre/Post preset overrides this with absolute gap %.)</li>
+          <li><b>SYMBOL</b> — click to open detail panel. Click again to close. The <b>RUN</b> pill next to a symbol means GEX hasn't been computed for that ticker (it's outside the top-200 batch). Click RUN to fetch single-ticker GEX (~3s).</li>
+          <li><b>SCORE</b> — composite out of ~240 max points.</li>
+          <li><b>SIGNAL</b> — GO (green, score ≥ Min Score) or NO-GO.</li>
+          <li><b>BUY</b> — opens the contract popup with all calls ranked by liquidity × OI score.</li>
+          <li><b>THEME / SECTOR / PRICE / CHG % / VOLUME / TECH / FUND / RS 5D</b> — sortable columns. Click any header to sort.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card collapsible" id="howto-positions" data-default-collapsed>
+      <div class="card-hdr">▶ POSITIONS TAB</div>
+      <div class="card-body" style="font-size:13px;color:var(--wht);">
+        <p><b>Purpose:</b> Live view of your open Tradier positions plus auto-exit configuration.</p>
+
+        <p style="color:var(--ambb);font-weight:700;margin-top:10px;">Header row</p>
+        <p>Total P&L · Day P&L · Open Positions · Opened Today · Cash · Account Value plus REFRESH and CLEAR buttons all on one line. Click <b>RESET</b> next to Total P&L to zero the lifetime counter (snapshots current Tradier realized P&L as the new baseline).</p>
+
+        <p style="color:var(--ambb);font-weight:700;margin-top:10px;">Position table</p>
+        <p>Sorted by DTE ascending (soonest expiry first); STOCK rows pinned to bottom. Columns: TICKER · OPENED · CLOSE · ROLL · QTY · PRICE (current contract mid) · EQUITY (qty × price × multiplier) · P/L $ · P/L % · STRIKE · EXP · DTE · STOCK PRICE · ENTRY PRICE · B/E · 1/2 ATR · 1 ATR · EMERGENCY EXIT · TRAIL.</p>
+        <p>The three ATR columns (1/2, 1, EMERGENCY) are <b>computed at entry time</b> from the underlying's ATR(14) on the day you first saw the position — they NEVER recompute as the stock moves. They refresh only on a roll.</p>
+
+        <p style="color:var(--ambb);font-weight:700;margin-top:10px;">▲ TRAILING STOP (below table)</p>
+        <p>Per-position trailing stop with a global poller. Configure activate %, pullback %, and close mode (step fill / market order). Master toggle at top; per-row overrides via the EDIT ▾ button in the TRAIL column. Auto-arm on load is opt-in.</p>
+
+        <p style="color:var(--ambb);font-weight:700;margin-top:10px;">⚠ SMART EXITS (below trailing stop)</p>
+        <p>Three independent rules that auto-close based on the underlying's behavior:</p>
+        <ul style="padding-left:20px;">
+          <li><b>RULE 1 — INTRADAY EMERGENCY:</b> close any time during market hours if the underlying moves N×ATR adverse from entry.</li>
+          <li><b>RULE 2 — EOD ATR (&lt;15min to close):</b> same threshold but only fires in the last 15 minutes — captures rolled-over positions before overnight decay.</li>
+          <li><b>RULE 3 — EOD EMA10/20 CROSS:</b> trend-failure exit. Calls close if EMA10 &lt; EMA20; puts opposite.</li>
+        </ul>
+        <p style="color:var(--wrn);font-size:11px;">Smart Exits requires the trade-token armed (TRADE: armed in header).</p>
+      </div>
+    </div>
+
+    <div class="card collapsible" id="howto-orderticket" data-default-collapsed>
+      <div class="card-hdr">▶ ORDER TICKET TAB</div>
+      <div class="card-body" style="font-size:13px;color:var(--wht);">
+        <p><b>Purpose:</b> Place option orders (single legs) or stock orders. Submit / Preview / Clear are pinned to the bottom on phones, sticky on the right on laptop.</p>
+        <ul style="padding-left:20px;">
+          <li><b>SYMBOL · TYPE</b> — start here. Type=CALL is default; STOCK / ETF for shares.</li>
+          <li><b>LIVE QUOTE</b> — bid / mid / ask / last / mark. Auto-refreshes when symbol changes.</li>
+          <li><b>STRIKE · EXPIRATION DATE</b> — direct input. Or use AUTO-SELECT below.</li>
+          <li><b>▲ AUTO-SELECT CONTRACT</b> — pick a target month (or "Any 10–35 DTE"), click FIND BEST. Scores every contract by delta × OI × spread and fills the highest in the form.</li>
+          <li><b>ACTION · QTY · UP TO $</b> — BUY/SELL TO OPEN/CLOSE. Set "UP TO $" instead of QTY to size by budget; QTY auto-calculates as <code>floor($ / (price × 100))</code>.</li>
+          <li><b>ORDER TYPE</b> — Market / Limit (default) / Stop / Stop Limit / Trailing Stop.</li>
+          <li><b>LIMIT PRICE</b> — quick-set buttons: SET BID / SET MID / SET ASK based on the live quote.</li>
+          <li><b>DURATION</b> — DAY / GTC / Pre / Post.</li>
+          <li><b>STEP FILL MODE</b> (ON by default) — for buys: starts at BID, walks up toward ASK over N attempts to capture a better fill than just lifting the ask. Configurable: max attempts, fill wait, spread coverage %, fallback (give up / market).</li>
+          <li><b>PREVIEW ORDER</b> — shows the broker-side preview without submitting. Always do this on first run.</li>
+          <li><b>▲ SUBMIT ORDER</b> — fires the order through Tradier. Live mode requires the trade token armed.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card collapsible" id="howto-api" data-default-collapsed>
+      <div class="card-hdr">▶ API TAB</div>
+      <div class="card-body" style="font-size:13px;color:var(--wht);">
+        <p><b>Purpose:</b> Configure API keys. Default-collapsed because you set it once.</p>
+        <ul style="padding-left:20px;">
+          <li><b>FMP API KEY</b> — financialmodelingprep.com. Free tier: 250 calls/day. Required for Analyst Revisions ↑ + fundamentals.</li>
+          <li><b>TRADIER API KEY</b> — for quotes + chains + history + order routing. Sandbox key for paper trading.</li>
+          <li><b>TRADIER MODE</b> — SANDBOX (paper) or LIVE (real money). Mode propagates to all Tradier endpoints.</li>
+          <li><b>DEFAULT ACCOUNT NUMBER</b> — auto-discovered on first PULL TRADIER from /v1/user/profile.</li>
+          <li><b>TRADIER PROXY URL</b> (optional) — Cloudflare Worker that proxies Tradier so your key never lives in the browser. See worker/tradier-proxy/README.md.</li>
+          <li><b>TRADIER PROXY LIVE-MODE TOKEN</b> — shared secret for the worker's LIVE_MODE_TOKEN gate. Defense-in-depth so a leaked workers.dev URL can't drain your live account.</li>
+          <li><b>SAVE KEYS / CLEAR KEYS</b> — keys persist to localStorage on this device only.</li>
+          <li><b>CROSS-DEVICE SETTINGS SYNC</b> (collapsed below) — encrypts your settings with a master secret you choose, stores in Cloudflare KV, restores on any device with the same secret. Trade token is excluded from sync (security-by-design).</li>
+          <li><b>API COUNTER</b> — Tradier calls today, resets at midnight ET. Click for per-endpoint breakdown.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card collapsible" id="howto-portfolio" data-default-collapsed>
+      <div class="card-hdr">▶ PORTFOLIO TAB</div>
+      <div class="card-body" style="font-size:13px;color:var(--wht);">
+        <p><b>Purpose:</b> Multi-account portfolio aggregator. Drop in stock/option positions from multiple brokerages (Tradier, Fidelity, Schwab, IBKR, etc.) and see them in one view.</p>
+        <ul style="padding-left:20px;">
+          <li>Click <b>↻ PULL TRADIER</b> on the first column to auto-import live Tradier positions.</li>
+          <li>Click <b>+ ADD COLUMN</b> to add another account (paste positions in any format — patterns: "100 AAPL @ 185", "1 NVDA 250 CALL 06/05/26", etc.).</li>
+          <li><b>EXPORT CSV</b> — long-form, one row per position.</li>
+          <li><b>EXPORT MATRIX</b> — wide-form: ticker rows, account columns; useful for spreadsheet aggregation.</li>
+          <li><b>RESET</b> — clears all columns. Manual entries survive page reloads via localStorage.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card collapsible" id="howto-industry" data-default-collapsed>
+      <div class="card-hdr">▶ INDUSTRY TAB</div>
+      <div class="card-body" style="font-size:13px;color:var(--wht);">
+        <p><b>Purpose:</b> Theme rotation map. Shows daily / weekly / monthly composite scores for each industry theme (e.g. AI Infrastructure, Energy, Banks). Composite is built from price action, breadth, and breakout density across theme members.</p>
+        <ul style="padding-left:20px;">
+          <li><b>INTRADAY / DAILY / WEEKLY / MONTHLY</b> tabs — switch the time scale.</li>
+          <li><b>Themes</b> are sorted by current score, top to bottom.</li>
+          <li><b>↻ REFRESH</b> — re-loads theme_scores.json from disk if you've regenerated it server-side.</li>
+        </ul>
+        <p>The theme leaderboard ribbon at the top of every page (under the indices) is computed from this data; click any chip there to filter the scanner to that theme.</p>
+      </div>
+    </div>
+
+    <div class="card collapsible" id="howto-gex" data-default-collapsed>
+      <div class="card-hdr">▶ GEX / FLOW TAB</div>
+      <div class="card-body" style="font-size:13px;color:var(--wht);">
+        <p><b>Purpose:</b> Gamma exposure (dealer positioning) and 30DTE call vs put OI flow for the top-200 ranked scan tickers. Drives the GEX Call Heavy scoring rule.</p>
+        <ul style="padding-left:20px;">
+          <li><b>↻ RUN GEX</b> — fetches 30-day options chain for top-200 tickers (~4 min, paced by Tradier rate limit). Auto-fires 20s after every scan.</li>
+          <li><b>AUTO schedule</b> — Off / 1x at open (9:35 ET) / 3x daily (9:35, 12:00, 15:00 ET). Recommended: 3x.</li>
+          <li><b>Table</b> — only bullish (call-heavy, ≥50% call OI) tickers shown, sorted most-bullish first by Call OI %, with |NET GEX| as tiebreaker. PUT HEAVY tickers are kept in the data (rule scorecard still uses them) but suppressed from this view.</li>
+          <li><b>NET GEX</b> — call OI − put OI, normalized by price (millions). Positive = dealers net long gamma → suppresses volatility above flip strike. Negative = amplifies moves.</li>
+          <li><b>GAMMA FLIP</b> — strike with max combined OI within ±10% of spot. Dealer hedging often reverses through this strike.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card collapsible" id="howto-watchlist" data-default-collapsed>
+      <div class="card-hdr">▶ WATCHLIST TAB</div>
+      <div class="card-body" style="font-size:13px;color:var(--wht);">
+        <p><b>Purpose:</b> Tickers you want to track outside the daily scan. Click any star ☆ on a scanner row to add the underlying.</p>
+        <ul style="padding-left:20px;">
+          <li><b>Columns:</b> SYMBOL · COMPANY · CHG % · SIGNAL · BUY · ✕ (remove).</li>
+          <li><b>ADD ticker</b> — type a symbol, ENTER. <b>COPY TICKERS</b> — comma-separated to clipboard. <b>CLEAR ALL</b> — remove every ticker.</li>
+          <li><b>Click a row</b> to open the candlestick chart on the right (laptop) or below (phone). EMA10/20/50 overlays + S/R bands.</li>
+          <li><b>DAILY / 1 MIN</b> — chart timeframe.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card collapsible" id="howto-alerts" data-default-collapsed>
+      <div class="card-hdr">▶ ALERTS TAB</div>
+      <div class="card-body" style="font-size:13px;color:var(--wht);">
+        <p><b>Purpose:</b> High-conviction signal notifications + auto-trader configuration + system event log.</p>
+        <ul style="padding-left:20px;">
+          <li><b>★ HIGH-CONVICTION ALERT SETTINGS</b> (collapsed by default) — browser notifications, email via EmailJS (free 200/mo), min score threshold, cooldown, auto-fill order ticket, auto-submit countdown. Notifications fire after the bulk pass + stragglers cleanup completes (so no false signals on partial data).</li>
+          <li><b>⚡ AUTO-TRADER</b> (collapsed by default) — fully automated execution. Master toggle, position size, daily loss limit, min score threshold, market-hours gate, max-open cap, market-order fallback. Designed for unattended scanning.</li>
+          <li><b>▲ STRATEGY MODE</b> — same presets as the FULL SCANNER tab, accessible here for one-click filter switching.</li>
+          <li><b>SYSTEM ALERTS LOG</b> — running log of every notable event (scan complete, signal fired, order submitted, fills, errors). Click CLEAR to reset.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card collapsible" id="howto-glossary" data-default-collapsed>
+      <div class="card-hdr">▶ GLOSSARY — ABBREVIATIONS &amp; INDICATORS</div>
+      <div class="card-body" style="font-size:13px;color:var(--wht);">
+        <ul style="padding-left:20px;">
+          <li><b>ATR(14)</b> — Average True Range over 14 days. Measures volatility; used for stop placement.</li>
+          <li><b>DTE</b> — Days To Expiration.</li>
+          <li><b>EMA10 / EMA20 / EMA50 / EMA200</b> — Exponential Moving Averages of close price. EMA10 &gt; EMA20 &gt; EMA50 &gt; EMA200 = strong stacked uptrend.</li>
+          <li><b>GEX (Gamma Exposure)</b> — net dealer gamma positioning derived from call OI − put OI normalized by price.</li>
+          <li><b>MACD +</b> — MACD histogram positive (12-EMA above 26-EMA).</li>
+          <li><b>OI (Open Interest)</b> — total open contracts at a strike. Higher OI = more liquid.</li>
+          <li><b>PROVEN ticker</b> — on the curated whitelist of names that have historically responded well to this scoring system. Built into the universe.</li>
+          <li><b>RS 5D</b> — 5-day relative strength vs SPY (your stock's % change minus SPY's % change). Positive = outperforming.</li>
+          <li><b>RTH / PRE / POST / CLOSED</b> — Regular Trading Hours (9:30am–4:00pm ET) / Pre-market (4:00–9:30am) / Post-market (4:00–8:00pm) / outside both.</li>
+          <li><b>TF Aligned 2/3</b> — Time-Frame Aligned. Counts how many of three trend timeframes (daily / hourly / 15-min) point the same direction. ≥2/3 passes.</li>
+          <li><b>U/D Volume</b> — Up-volume / down-volume ratio. &gt;1.5 = institutional accumulation.</li>
+          <li><b>VCP</b> — Volatility Contraction Pattern (Minervini). Tightening price ranges before breakout.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card collapsible" id="howto-keys" data-default-collapsed>
+      <div class="card-hdr">▶ DATA SOURCES &amp; CACHING</div>
+      <div class="card-body" style="font-size:13px;color:var(--wht);">
+        <p>Every external data source has a localStorage cache to minimize API calls. TTLs:</p>
+        <ul style="padding-left:20px;">
+          <li><b>Scan results</b> — 30 minutes. Restored on tab switch and page reload.</li>
+          <li><b>GEX/Flow</b> — 24 hours. Persists overnight; OI moves daily.</li>
+          <li><b>Positions</b> — 5 minutes. Click REFRESH on the Positions tab for live.</li>
+          <li><b>Tradier expirations</b> — 6 hours (intraday-stable).</li>
+          <li><b>Tradier history</b> — 24 hours (daily bars don't change intraday).</li>
+          <li><b>FMP fundamentals</b> — 24 hours per ticker.</li>
+          <li><b>Earnings calendar</b> — 12 hours.</li>
+          <li><b>Theme overlay (theme_scores.json)</b> — 6 hours.</li>
+          <li><b>Header indices quotes</b> — 60s refresh during 4:00am–8:00pm ET (extended hours window).</li>
+        </ul>
+        <p>Tradier rate limit: <b>95/min</b> (kept under the proxy's 100/min/IP gate). The fetch wrapper queues calls and respects 429 Retry-After headers automatically.</p>
+      </div>
+    </div>
+
+    <div class="card collapsible" id="howto-trouble" data-default-collapsed>
+      <div class="card-hdr">▶ TROUBLESHOOTING</div>
+      <div class="card-body" style="font-size:13px;color:var(--wht);">
+        <ul style="padding-left:20px;">
+          <li><b>"%'s not showing for indices"</b> — header indices auto-refresh every 60s during 4am–8pm ET. Outside that window, last cached values display. If still empty, hit VERIFY in the STRATEGY row to confirm Tradier is responding.</li>
+          <li><b>"Scanner shows random tickers"</b> — fixed 2026-05-02. If you see them, hard-reload (Cmd+Shift+R / Ctrl+Shift+R) to bust browser cache.</li>
+          <li><b>"⚠ data gaps after scan"</b> — informational. Top 60 tickers always fully enrich; ranks 61–200 fill in via background pass over the next ~2 minutes. Tradier history takes longer than FMP because indicator-history fetches are paced harder to avoid 429s.</li>
+          <li><b>"Buy notification fired before scan finished"</b> — fixed 2026-05-03. Notifications now fire only after the stragglers cleanup pass completes (~3–5s after scan-complete), not on partial data.</li>
+          <li><b>"GEX not caching"</b> — TTL bumped to 24h on 2026-05-03. If you reload within 24h of a successful runGex, the data hydrates immediately. Older cache may need one fresh runGex to populate the new format.</li>
+          <li><b>"Indices wrap to multiple rows on small windows"</b> — they horizontal-scroll on laptop now. iPhone shows them in a single horizontal-scroll strip below the wordmark.</li>
+          <li><b>"Sectors / Themes dropdown hidden behind table"</b> — fixed 2026-05-03 via position:fixed. Hard-reload if still occurring.</li>
+          <li><b>"STEX score 79 ranks above TEAM score 100"</b> — you have the PRE/POST MARKET preset active, which sorts by absolute gap % instead of score. Click ✕ CLEAR in the STRATEGY row to restore score-based ranking.</li>
+          <li><b>Order Ticket SUBMIT not visible on iPhone</b> — bottom action bar pinned to viewport bottom; should always be tappable. Form scrolls above it.</li>
+          <li><b>Positions table doesn't show ATR-anchored exit prices</b> — opens before this feature shipped have no underlyingAtOpen snapshot. Manually set via console: <code>G.posOpenData['SYM_OCC'].underlyingAtOpen = 195.50</code>; will recompute on next render.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="margin-top:20px;padding:14px;text-align:center;color:var(--gry);font-size:11px;font-family:var(--ff-mono);border-top:1px solid var(--bg3);">
+      Build issues? See <a href="https://github.com/alexreed122287/scanner" target="_blank" rel="noopener noreferrer" style="color:var(--blub);">github.com/alexreed122287/scanner</a> · This tab is a static reference, no API calls.
     </div>
 
   </div>
