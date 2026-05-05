@@ -1403,26 +1403,36 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
      covers content while scrolling. */
   #ord-dtc{display:none !important;}
   #ord-submit-btn{display:none !important;}
-  /* Replacement: a fixed slide-to-submit bar that sits ABOVE the
-     bottom nav. Stays out of the way while user scrolls the form. */
+  /* Replacement: a fixed swipe-up-to-submit bar that sits ABOVE the
+     bottom nav. Stays out of the way while user scrolls the form.
+     2026-05-05 (rev 2): rotated to vertical so the user swipes UPWARD
+     from the bottom of the bar to confirm — Robinhood-style. The bar
+     itself is 130px tall + ~10px breathing space, centered above the
+     bot-nav. Overrides the desktop .dtc-track (max-width:280px;height:
+     160px;margin:8px auto) so it correctly fills a fixed mobile slot. */
   #ord-dtc-fixed{
-    display:flex;
+    display:flex !important;
     position:fixed !important;
-    left:8px;right:8px;
-    bottom:calc(82px + env(safe-area-inset-bottom, 0));
+    left:14px !important;right:14px !important;
+    bottom:calc(72px + env(safe-area-inset-bottom, 0)) !important;
     z-index:9450;
-    background:rgba(8,15,22,0.96);
+    width:auto !important;max-width:none !important;
+    height:130px !important;
+    margin:0 !important;
+    background:rgba(8,15,22,0.96) !important;
     backdrop-filter:blur(20px);
     -webkit-backdrop-filter:blur(20px);
-    border-radius:30px;
-    padding:3px;
+    border-radius:18px !important;
+    padding:0 !important;
     box-shadow:0 4px 20px rgba(0,0,0,0.5);
   }
   /* Hide the original action panel on iPhone — Preview/Clear/etc move
      inline into the form, the fixed slide-to-submit handles SUBMIT. */
   .ord-actions-panel{display:none !important;}
-  /* Order ticket form: bottom padding clears the fixed DTC bar + nav */
-  #tab-order .page-wrap{padding-bottom:calc(170px + env(safe-area-inset-bottom, 0)) !important;}
+  /* Order ticket form: bottom padding clears the fixed DTC bar + nav.
+     With the vertical swipe-up bar (130px tall + 72px gap above nav)
+     we need ~210px clearance so the form's last input isn't hidden. */
+  #tab-order .page-wrap{padding-bottom:calc(220px + env(safe-area-inset-bottom, 0)) !important;}
   /* Show inline iPhone action row inside the form */
   .iphone-only-actions{display:flex !important;}
 
@@ -1433,43 +1443,48 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
      where needed.) */
 }
 
-/* ── DRAG-TO-CONFIRM (Robinhood-style swipe-to-submit) ──
-   Promoted out of the mobile-only @media block 2026-05-05 so the
-   swipe widget is the primary submit affordance on EVERY platform.
-   User report: "Change the slide to submit button to a swipe to submit
-   option just like you submit orders on Robinhood mobile."
+/* ── SWIPE-UP-TO-SUBMIT (Robinhood-style vertical swipe) ──
+   2026-05-05 (rev 2): rotated 90° from the prior horizontal slide.
+   User report: "I wanted it to be swipe from the bottom up like in
+   Robinhood mobile."
 
-   Visual changes from the prior panda-thumb version:
-     - Chevron arrow (›››) inside the thumb instead of the panda mascot
-       — Robinhood's signature look + immediate "swipe right" affordance.
-     - Tracking shimmer animation on idle so the user notices the
+   Geometry: tall narrow track centered in its container. Thumb starts
+   at the BOTTOM and the user drags it UP. The fill animates upward as
+   they drag, mirroring Robinhood's submit gesture exactly.
+
+   Visual notes:
+     - Chevron arrow (▲▲▲) stacked vertically on the thumb to telegraph
+       "drag UP" — replaces the prior right-pointing chevrons.
+     - Soft vertical sweep (bottom→top) on idle so the user notices the
        widget instead of trying to tap it.
-     - Thumb stays cleanly grabable without scaling on hover (Robinhood
-       behavior — no hover state mutates the geometry).
-     - Label progresses through three states: SLIDE → KEEP GOING →
-       RELEASE TO SUBMIT (driven from JS via the .armed / dragging classes
-       and a data-progress attribute on the track). */
+     - Label shows "SWIPE UP" with up-arrow at idle, transitions through
+       "KEEP GOING ↑" → "RELEASE TO SUBMIT" as drag progress increases.
+     - Confirmation animates the thumb to the top with a green check.
+   Same class names + DOM structure as before so existing call sites
+   (#ord-dtc, #ord-dtc-fixed) keep working — only orientation changed. */
 .dtc-track{
   position:relative;
   width:100%;
-  height:54px;
-  background:linear-gradient(90deg, rgba(0,212,255,0.06), rgba(0,212,255,0.18));
+  max-width:280px;
+  height:160px;
+  margin:8px auto;
+  background:linear-gradient(0deg, rgba(0,212,255,0.06), rgba(0,212,255,0.18));
   border:1px solid var(--amb);
-  border-radius:27px;
+  border-radius:18px;
   overflow:hidden;
   user-select:none;
   -webkit-user-select:none;
   touch-action:none;
   box-shadow:inset 0 0 12px rgba(0,212,255,0.15);
 }
-/* Soft sweep that nudges the user to swipe — pauses while dragging /
+/* Soft sweep that nudges the user to swipe UP. Pauses while dragging /
    confirmed so it doesn't fight the drag visuals. */
 .dtc-track::after{
   content:'';
   position:absolute;inset:0;
-  background:linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.10) 50%, transparent 100%);
-  transform:translateX(-100%);
-  animation:dtc-sweep 2.4s ease-in-out infinite;
+  background:linear-gradient(0deg, transparent 0%, rgba(255,255,255,0.10) 50%, transparent 100%);
+  transform:translateY(100%);
+  animation:dtc-sweep-up 2.4s ease-in-out infinite;
   pointer-events:none;
   z-index:1;
 }
@@ -1477,20 +1492,20 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
 .dtc-track.armed::after,
 .dtc-track.confirmed::after,
 .dtc-track.disabled::after{ animation:none; opacity:0; }
-@keyframes dtc-sweep{
-  0%{transform:translateX(-100%);}
-  60%{transform:translateX(120%);}
-  100%{transform:translateX(120%);}
+@keyframes dtc-sweep-up{
+  0%{transform:translateY(100%);}
+  60%{transform:translateY(-120%);}
+  100%{transform:translateY(-120%);}
 }
 .dtc-track-fill{
-  position:absolute;left:0;top:0;bottom:0;width:0;
-  background:linear-gradient(90deg, var(--amb), var(--ambb));
-  transition:width .15s ease;
-  will-change:width;
+  position:absolute;left:0;right:0;bottom:0;height:0;
+  background:linear-gradient(0deg, var(--amb), var(--ambb));
+  transition:height .15s ease;
+  will-change:height;
   z-index:1;
 }
 .dtc-track-label{
-  position:absolute;inset:0;
+  position:absolute;left:0;right:0;top:0;bottom:64px;
   display:flex;align-items:center;justify-content:center;gap:6px;
   color:var(--amb);
   font-family:var(--ff);font-size:13px;font-weight:700;letter-spacing:1.5px;
@@ -1501,32 +1516,37 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
 }
 .dtc-track.armed .dtc-track-label{color:var(--bg0);text-shadow:none;}
 .dtc-thumb{
-  position:absolute;left:4px;top:4px;
-  width:46px;height:46px;
+  position:absolute;
+  left:50%;
+  bottom:6px;
+  margin-left:-30px;     /* center horizontally — width is 60px */
+  width:60px;height:52px;
   background:var(--bg1);
   border:2px solid var(--amb);
-  border-radius:50%;
+  border-radius:14px;
   display:flex;align-items:center;justify-content:center;
   cursor:grab;
   z-index:3;
-  transition:left .15s ease, transform .12s ease, box-shadow .12s ease, background .15s ease;
-  will-change:left;
+  transition:bottom .15s ease, transform .12s ease, box-shadow .12s ease, background .15s ease;
+  will-change:bottom;
   box-shadow:0 0 12px rgba(0,212,255,0.6);
-  /* Robinhood-style chevron via pseudo-element below. */
   font-size:0;
   color:var(--amb);
 }
+/* Stacked up-chevrons inside the thumb. Triple "^" character stacked
+   vertically — unmistakable "swipe upward" affordance. */
 .dtc-thumb::before{
-  content:'\203A\203A\203A';   /* three single-right chevrons */
+  content:'\005E\A\005E\A\005E';   /* ^\n^\n^ — three caret arrows stacked */
+  white-space:pre;
   display:block;
   font-family:var(--ff-mono);
   font-size:18px;
   font-weight:900;
-  line-height:1;
-  letter-spacing:-2px;
+  line-height:0.7;
   color:var(--amb);
   text-shadow:0 0 6px rgba(0,212,255,0.55);
   transition:color .15s ease, text-shadow .15s ease;
+  text-align:center;
 }
 .dtc-track.armed .dtc-thumb::before{
   color:var(--bg0);
@@ -1537,18 +1557,19 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
 .dtc-track.dragging .dtc-track-fill{transition:none;}
 .dtc-track.disabled{opacity:.5;pointer-events:none;}
 .dtc-track.confirmed{
-  background:linear-gradient(90deg, var(--amb), var(--ambb)) !important;
+  background:linear-gradient(0deg, var(--amb), var(--ambb)) !important;
 }
 .dtc-track.confirmed .dtc-track-label{color:var(--bg0);}
 .dtc-track.confirmed .dtc-thumb{
-  left:calc(100% - 50px) !important;
+  bottom:calc(100% - 58px) !important;
   background:var(--bg0);
 }
 .dtc-track.confirmed .dtc-thumb::before{
   content:'\2713';            /* check mark on confirmed */
   color:var(--grn);
   text-shadow:0 0 8px rgba(0,230,118,0.6);
-  font-size:22px;
+  font-size:24px;
+  line-height:1;
   letter-spacing:0;
 }
 
@@ -3421,7 +3442,7 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
            keyboard users + assistive tech) but visually de-emphasized. -->
       <div id="ord-dtc" class="dtc-track" style="margin:8px 0;">
         <div class="dtc-track-fill"></div>
-        <div class="dtc-track-label">SWIPE TO SUBMIT</div>
+        <div class="dtc-track-label">SWIPE UP TO SUBMIT</div>
         <div class="dtc-thumb" aria-hidden="true"></div>
       </div>
       <!-- Fallback click submit (kept for accessibility / desktop power-users
@@ -4701,7 +4722,7 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
      Sits above the bottom nav so it's always reachable while scrolling. -->
 <div id="ord-dtc-fixed" class="dtc-track" style="display:none;">
   <div class="dtc-track-fill"></div>
-  <div class="dtc-track-label">SWIPE TO SUBMIT</div>
+  <div class="dtc-track-label">SWIPE UP TO SUBMIT</div>
   <div class="dtc-thumb" aria-hidden="true"></div>
 </div>
 
@@ -26104,18 +26125,28 @@ window.addEventListener('DOMContentLoaded',init);
     var fill = track.querySelector('.dtc-track-fill');
     var label = track.querySelector('.dtc-track-label');
     if (!thumb) return;
-    // Robinhood-style label progression. Driven by the current drag pct
-    // so the user gets immediate feedback that they're "almost there".
-    // We also stash the original idle text so cancelling a partial drag
-    // restores it cleanly. Threshold for confirm is 88% — a hair lower
-    // than the prior 92% so the gesture finishes before the user has to
-    // visibly run the thumb into the right edge (Robinhood feel).
-    var IDLE_TEXT = (label && label.textContent) || 'SWIPE TO SUBMIT';
-    var KEEP_GOING = 'KEEP GOING →';
+    // Robinhood-style VERTICAL swipe-up. Driven by upward Y travel —
+    // the user drags the thumb from the bottom of the track toward the
+    // top. Progress = 0 at the bottom, 1 at the top. Threshold for
+    // confirm is 88% (same as prior horizontal version).
+    //
+    // We track the thumb's "bottom" inset rather than "top": positive
+    // bottom = closer to the top of the track. This keeps the math
+    // symmetric with the CSS (.dtc-thumb { bottom:6px } at idle).
+    var IDLE_TEXT = (label && label.textContent) || 'SWIPE UP TO SUBMIT';
+    var KEEP_GOING = 'KEEP GOING ↑';
     var RELEASE_TEXT = 'RELEASE TO SUBMIT';
     var THRESHOLD = 0.88;
-    var startX = 0, dragging = false, confirmed = false;
+    var BASE_BOTTOM = 6;     // matches .dtc-thumb { bottom:6px } in CSS
+    var startY = 0, startBottom = BASE_BOTTOM;
+    var dragging = false, confirmed = false;
     var armedHapticFired = false;
+    function maxTravel(){
+      // Distance the thumb's bottom inset can grow from idle to "armed":
+      // top of thumb at top of track. = track height − thumb height −
+      // base bottom inset − 4px breathing room at top.
+      return Math.max(1, track.offsetHeight - thumb.offsetHeight - BASE_BOTTOM - 4);
+    }
     function setLabel(pct){
       if (!label) return;
       if (confirmed) return;
@@ -26123,68 +26154,76 @@ window.addEventListener('DOMContentLoaded',init);
       else if (pct >= 0.30)        label.textContent = KEEP_GOING;
       else                         label.textContent = IDLE_TEXT;
     }
-    function setProgress(px){
-      var max = track.offsetWidth - thumb.offsetWidth - 8;
-      px = Math.max(0, Math.min(px, max));
-      thumb.style.left = (4 + px) + 'px';
-      if (fill) fill.style.width = (px + thumb.offsetWidth/2) + 'px';
-      var pct = max > 0 ? (px / max) : 0;
+    function setProgress(travel){
+      var max = maxTravel();
+      travel = Math.max(0, Math.min(travel, max));
+      thumb.style.bottom = (BASE_BOTTOM + travel) + 'px';
+      // Fill grows upward. Anchor it to the thumb's center so it visually
+      // chases the thumb without jitter at idle / threshold.
+      if (fill) fill.style.height = (travel + thumb.offsetHeight/2) + 'px';
+      var pct = max > 0 ? (travel / max) : 0;
       if (pct >= THRESHOLD){
         if (!track.classList.contains('armed')){
           track.classList.add('armed');
-          // Light haptic the moment the user crosses the threshold so
-          // they know they can release. Only fire once per drag.
-          if (!armedHapticFired){ try { hap(20); } catch(_){}
-            armedHapticFired = true; }
+          if (!armedHapticFired){
+            try { hap(20); } catch(_){}
+            armedHapticFired = true;
+          }
         }
       } else {
         track.classList.remove('armed');
         armedHapticFired = false;
       }
       setLabel(pct);
-      return { px:px, pct:pct, max:max };
+      return { travel:travel, pct:pct, max:max };
     }
-    function onStart(clientX){
+    function onStart(clientY){
       if (confirmed) return;
       dragging = true;
       track.classList.add('dragging');
-      var rect = thumb.getBoundingClientRect();
-      startX = clientX - rect.left;
+      startY = clientY;
+      // Capture the thumb's current bottom inset so partial-drag-then-
+      // continue still tracks correctly.
+      var cur = parseFloat(thumb.style.bottom || String(BASE_BOTTOM));
+      startBottom = isNaN(cur) ? BASE_BOTTOM : cur;
     }
-    function onMove(clientX){
+    function onMove(clientY){
       if (!dragging) return;
-      var rect = track.getBoundingClientRect();
-      var px = clientX - rect.left - startX;
-      setProgress(px);
+      // Upward gesture = clientY decreases. Travel = (startY - clientY)
+      // plus whatever travel was already in place when the drag began.
+      var dy = startY - clientY;
+      var travel = (startBottom - BASE_BOTTOM) + dy;
+      setProgress(travel);
     }
     function onEnd(){
       if (!dragging) return;
       dragging = false;
       track.classList.remove('dragging');
-      var max = track.offsetWidth - thumb.offsetWidth - 8;
-      var cur = parseFloat(thumb.style.left || '4') - 4;
+      var max = maxTravel();
+      var cur = parseFloat(thumb.style.bottom || String(BASE_BOTTOM)) - BASE_BOTTOM;
       if (cur >= max * THRESHOLD){
         confirmed = true;
         track.classList.add('confirmed');
-        thumb.style.left = (max + 4) + 'px';
-        if (fill) fill.style.width = '100%';
+        // Snap to top.
+        thumb.style.bottom = (max + BASE_BOTTOM) + 'px';
+        if (fill) fill.style.height = '100%';
         if (label) label.textContent = 'SUBMITTING…';
         hap([15, 50, 15, 50, 25]);
         try { onConfirm && onConfirm(); } catch(e){ console.error(e); }
       } else {
-        // Snap back. Restore idle label after the spring animation.
-        thumb.style.left = '4px';
-        if (fill) fill.style.width = '0';
+        // Snap back to idle. Restore label.
+        thumb.style.bottom = BASE_BOTTOM + 'px';
+        if (fill) fill.style.height = '0';
         track.classList.remove('armed');
         armedHapticFired = false;
         if (label) label.textContent = IDLE_TEXT;
       }
     }
-    thumb.addEventListener('touchstart', function(e){ onStart(e.touches[0].clientX); }, {passive:true});
-    track.addEventListener('touchmove',  function(e){ onMove(e.touches[0].clientX); }, {passive:true});
+    thumb.addEventListener('touchstart', function(e){ onStart(e.touches[0].clientY); }, {passive:true});
+    track.addEventListener('touchmove',  function(e){ onMove(e.touches[0].clientY); }, {passive:true});
     track.addEventListener('touchend',   onEnd);
-    thumb.addEventListener('mousedown', function(e){ onStart(e.clientX); });
-    document.addEventListener('mousemove', function(e){ onMove(e.clientX); });
+    thumb.addEventListener('mousedown', function(e){ onStart(e.clientY); });
+    document.addEventListener('mousemove', function(e){ onMove(e.clientY); });
     document.addEventListener('mouseup', onEnd);
   }
   function dtcReset(track){
@@ -26194,9 +26233,18 @@ window.addEventListener('DOMContentLoaded',init);
     var thumb = track.querySelector('.dtc-thumb');
     var fill = track.querySelector('.dtc-track-fill');
     var label = track.querySelector('.dtc-track-label');
-    if (thumb) thumb.style.left = '4px';
-    if (fill) fill.style.width = '0';
-    if (label) label.textContent = 'SWIPE TO SUBMIT';
+    // Vertical swipe-up: reset thumb to bottom, fill to 0 height.
+    // Also clear horizontal styles in case an older build cached them.
+    if (thumb) {
+      thumb.style.bottom = '6px';
+      thumb.style.left = '';
+      thumb.style.top = '';
+    }
+    if (fill) {
+      fill.style.height = '0';
+      fill.style.width = '';
+    }
+    if (label) label.textContent = 'SWIPE UP TO SUBMIT';
   }
   window.dtcArm = dtcArm;
   window.dtcReset = dtcReset;
