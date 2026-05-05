@@ -758,9 +758,12 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
    them on the scanner page — user report 2026-05-03 'drop down
    list for sector and themes is not visible because it is hiding
    behind the scanner results'). JS positions them under the
-   trigger button on open via getBoundingClientRect. z-index 9999
-   floats above stat strips, scanner table, and detail panel. */
-.sect-dd{position:fixed;z-index:9999;background:var(--bg1);border:1px solid var(--amb3);border-radius:3px;padding:6px;max-height:420px;overflow-y:auto;min-width:260px;box-shadow:0 4px 16px rgba(0,0,0,0.7);}
+   trigger button on open via getBoundingClientRect. z-index 99999
+   floats above stat strips, scanner table, detail panel, AND the
+   bot-nav (z-index 9500). Re-bumped 2026-05-05 + JS now reparents
+   the dropdown to <body> on open so any ancestor stacking context
+   (e.g. backdrop-filter/transform on a parent) cannot trap it. */
+.sect-dd{position:fixed;z-index:99999;background:var(--bg1);border:1px solid var(--amb3);border-radius:3px;padding:6px;max-height:420px;overflow-y:auto;min-width:260px;box-shadow:0 4px 16px rgba(0,0,0,0.7);}
 .sect-dd-hdr{display:flex;gap:6px;padding:2px 4px 6px;border-bottom:1px solid var(--bg3);margin-bottom:4px;flex-wrap:wrap;}
 .sect-dd-hdr .btn{font-size:10px;padding:2px 8px;}
 .sect-dd-search{background:var(--bg2);border:var(--bdr);border-radius:3px;color:var(--wht);font-family:var(--ff);font-size:11px;padding:3px 6px;width:100%;margin-bottom:4px;}
@@ -1136,15 +1139,17 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
      model. */
   #sc-bar-strategy:not(.collapsed) .btn{flex:1 1 100% !important;
     min-height:42px !important;text-align:center !important;}
-  /* MUST PASS chips: keep horizontal-scroll but pad the row so the last
-     chip isn't clipped behind the search input on the right edge. */
-  #sc-bar-mustpass{padding-right:170px !important;}
-  /* Search input docked at the right edge of MUST PASS row — on iPhone
-     it should be full-width on its own line below the chips for clarity. */
-  #sc-bar-mustpass:not(.collapsed){flex-wrap:wrap !important;
-    overflow-x:visible !important;padding-right:10px !important;}
-  #sc-bar-mustpass #sc-search{margin-left:0 !important;
-    width:100% !important;flex:1 1 100% !important;}
+  /* MUST PASS chips: search input was moved out 2026-05-05; row is back
+     to its natural horizontal-scroll layout with no reserved slot. */
+  #sc-bar-mustpass:not(.collapsed){flex-wrap:nowrap !important;
+    overflow-x:auto !important;padding-right:10px !important;}
+  /* Search input lives in #sc-action-row now. On iPhone we let it take
+     a full row of its own below SCAN + EXPORT GOs so the placeholder
+     text isn't clipped at 14px font-size. */
+  #sc-action-row #sc-search{flex:1 1 100% !important;
+    width:100% !important;font-size:14px !important;
+    min-height:42px !important;padding:8px 12px !important;
+    order:99 !important;}
 
   /* API tab: the test-result panel can grow long; cap and scroll within. */
   #api-test-result{max-height:240px !important;overflow:auto !important;}
@@ -1799,17 +1804,29 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
   }
 
   /* ── ROLL MODAL on iPhone — fully constrained to viewport with
-     internal scroll. The shell div uses height:100vh-padding so the
+     internal scroll. The shell div uses height:100dvh so the
      EXECUTE ROLL action row at the bottom stays reachable; everything
-     above scrolls inside. Plus padding-bottom for safe-area + bottom-nav. */
+     above scrolls inside. Plus padding-bottom for safe-area + bottom-nav.
+     2026-05-05 user report: "the new contract pane (or leg 2) opens
+     in a pane that far exceeds the existing width of the page", "QTY
+     open text box for the current contract is too small to see a
+     single digit", "cannot fully scroll to the bottom to see and use
+     the execute roll or cancel buttons." Fixes: (a) stack the leg-1 /
+     leg-2 grid into a single column on mobile; (b) widen the qty
+     inputs; (c) bump z-index above bot-nav (9500) so the action row
+     isn't hidden behind it; (d) use 100dvh for iOS Safari URL-bar
+     correctness; (e) reserve enough bottom padding inside the body
+     scroller for the action row to clear the home indicator. */
   #roll-modal{
     padding:0 !important;
     align-items:stretch !important;
     overflow:hidden !important;
+    z-index:9700 !important;
   }
   #roll-modal > div{
     width:100vw !important;max-width:100vw !important;
     height:100vh !important;max-height:100vh !important;
+    height:100dvh !important;max-height:100dvh !important;
     margin:0 !important;border-radius:0 !important;
     display:flex !important;flex-direction:column !important;
     overflow:hidden !important;
@@ -1821,20 +1838,41 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
   #roll-modal > div > div:nth-child(2){
     flex:1 1 auto !important;
     overflow-y:auto !important;
+    overflow-x:hidden !important;
     -webkit-overflow-scrolling:touch !important;
-    padding-bottom:calc(20px + env(safe-area-inset-bottom, 0)) !important;
+    padding-bottom:calc(40px + env(safe-area-inset-bottom, 0)) !important;
   }
-  /* Roll modal inner panels: stack vertically, each panel full-width */
+  /* Roll modal inner panels: stack vertically, each panel full-width.
+     The 2-column grid wrapping leg-1 / leg-2 was the main reason leg-2
+     overflowed horizontally on a 375-414px phone — collapse it to one
+     column so each leg gets the full viewport width. */
   #roll-modal > div > div > div[style*="flex:1"],
   #roll-modal > div > div > div[style*="min-width"]{
     flex:1 1 100% !important;min-width:0 !important;width:100% !important;
   }
+  #roll-modal > div > div > div[style*="grid-template-columns:1fr 1fr"]{
+    grid-template-columns:1fr !important;
+  }
+  /* Per-leg panel: never exceed the viewport width */
+  #roll-modal > div > div > div > div{
+    max-width:100% !important;box-sizing:border-box;
+  }
   #roll-modal #roll-compare{font-size:10px !important;}
   #roll-modal #roll-compare > div{font-size:10px !important;
     grid-template-columns:auto 1fr 1fr !important;gap:3px 8px !important;}
-  /* New contract picker — full-width inputs */
+  /* New contract picker — full-width inputs (qty inputs are intentional
+     exceptions, see below) */
   #roll-modal input, #roll-modal select{width:100% !important;
     font-size:14px !important;}
+  /* QTY inputs: keep a fixed comfortable width so two digits are
+     readable AND the row stays compact alongside Bid/Ask. width:100%
+     from the rule above would stretch them across the panel. */
+  #roll-modal #roll-leg1-qty,
+  #roll-modal #roll-leg2-qty{
+    width:72px !important;min-width:72px !important;
+    flex:0 0 72px !important;text-align:center !important;
+    padding:6px 8px !important;
+  }
   /* Contracts table inside roll modal — horizontal scroll if too wide */
   #roll-modal table{
     width:100% !important;table-layout:auto !important;font-size:10px !important;
@@ -1843,8 +1881,10 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
     padding:4px 5px !important;white-space:nowrap !important;
   }
   /* Wrap any contract table in a scrollable container by default */
+  #roll-modal #roll-chain-wrap,
   #roll-modal .roll-chain-wrap, #roll-modal [id^="roll-chain"], #roll-modal [id*="contracts"]{
     overflow-x:auto !important;-webkit-overflow-scrolling:touch !important;
+    max-width:100% !important;
   }
 
   /* ── DROPDOWNS (sector multi-select, theme, etc.): full-width, scroll ── */
@@ -2006,21 +2046,29 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
 
   /* ── PORTFOLIO TAB: full vertical scroll so the bottom Summary &
      Allocations panel + total balance is reachable. The tab-pane gets
-     its own scroll surface; columns scroll horizontally within it. ── */
+     its own scroll surface; columns scroll horizontally within it.
+     2026-05-05: dropped max-height:40vh on #pf-cols-wrap so the
+     positions list uses the FULL available vertical space on phone.
+     The Summary & Allocations panel was already DOM-ordered last;
+     now that columns aren't capped to 40vh, summary naturally falls
+     to the very bottom of the scroll and only appears after the user
+     scrolls past their entire holdings list. User report 2026-05-05:
+     "move the summary & allocations section to the very bottom of
+     the page to make full use of space on the phone." */
   #tab-pf{overflow-y:auto !important;-webkit-overflow-scrolling:touch !important;
     height:auto !important;
     padding-bottom:calc(120px + env(safe-area-inset-bottom, 0)) !important;}
   #pf-cols-wrap{flex-wrap:nowrap !important;overflow-x:auto !important;
     overflow-y:visible !important;
-    max-height:40vh !important;}
+    max-height:none !important;}
   #tab-pf .pf-col{min-width:280px;max-width:90vw;flex-shrink:0;}
   .pf-col-rows{overflow-y:visible !important;}
-  /* Summary & Allocations: ensure visible + scrollable below the columns.
-     When the body opens, force column layout so two charts stack and
-     are reachable by scrolling. The flex container display:flex from
-     the toggle JS combined with row direction was leaving the second
-     chart off-screen. */
-  #pf-summary-details{margin-top:10px !important;}
+  /* Summary & Allocations: anchored at the very bottom of #tab-pf.
+     margin-top:auto would only work in a flex layout; since #tab-pf
+     is overflow:auto (block), we instead leave a generous top margin
+     so the summary clearly reads as a "below-the-fold" panel rather
+     than crowding the positions columns. */
+  #pf-summary-details{margin-top:24px !important;}
   #pf-summary-body{
     flex-direction:column !important;
     gap:12px !important;
@@ -2605,9 +2653,19 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
     <button type="button" class="sec-seg" data-target="sc-bar-mustpass" onclick="toggleSecSeg('sc-bar-mustpass')" title="Click to expand / collapse the MUST PASS chips row"><span class="sec-seg-arr">▶</span>MUST PASS</button>
     <button type="button" class="sec-seg" data-target="sc-bar-screener" onclick="toggleSecSeg('sc-bar-screener')" title="Click to expand / collapse the SCREENER inputs"><span class="sec-seg-arr">▶</span>SCREENER</button>
     <!-- SCAN + status: scroll-locked to right (item 5) — buttons keep
-         their full width, dyn-w spans truncate first -->
-    <button class="btn blu" id="sc-run-btn-top" onclick="runScan()" style="margin-left:auto;font-size:11px;padding:6px 14px;flex:0 0 auto;white-space:nowrap;">↻ SCAN</button>
+         their full width, dyn-w spans truncate first.
+         SCAN gets a solid filled cyan background + glow (instead of the
+         outlined .btn.blu look) so it pops against the row of identical
+         outline buttons. User report 2026-05-05: "Make the scan button
+         a different higher contrast, easier to notice color or highlight
+         within the same existing color scheme." -->
+    <button class="btn blu" id="sc-run-btn-top" onclick="runScan()" style="margin-left:auto;font-size:11px;padding:6px 16px;flex:0 0 auto;white-space:nowrap;background:var(--blu);color:var(--bg0);border-color:var(--blu);font-weight:800;letter-spacing:1px;box-shadow:0 0 14px rgba(0,212,255,0.55);">↻ SCAN</button>
     <button class="btn grn" id="sc-export-go-top" onclick="exportGoTickers('sc')" style="font-size:11px;padding:6px 12px;flex:0 0 auto;white-space:nowrap;" title="Copy a comma-separated list of all GO-signal tickers from current filtered results">▲ EXPORT GOs</button>
+    <!-- Search ticker box (relocated 2026-05-05): used to live in the
+         MUST-PASS row but the user wanted it parked alongside SCAN +
+         EXPORT GOs so it's reachable even when those filter rows are
+         collapsed. Same id (#sc-search) + same handler. -->
+    <input type="text" id="sc-search" placeholder="Search ticker..." oninput="onScSearch()" style="font-family:var(--ff-mono);font-size:11px;padding:5px 10px;background:var(--bg1);border:1px solid var(--bg3);border-radius:3px;color:var(--amb);width:160px;flex:0 0 auto;">
     <span id="sc-last-scan" class="dyn-w" style="color:var(--gry);font-size:10px;font-family:var(--ff-mono);width:160px;flex:0 1 160px;min-width:60px;text-align:left;" title="Timestamp of the most recent SCAN completion. Persists across page reloads from localStorage.">Last scan: never</span>
     <span id="sc-data-status" class="dyn-w" style="display:none;font-size:10px;font-family:var(--ff-mono);width:140px;flex:0 1 140px;min-width:0;text-align:left;cursor:pointer;" title="Click for data-coverage details from the last scan."></span>
   </div>
@@ -2697,8 +2755,10 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
     <label class="ind-filter-lbl" title="O'Neil/Morales-Kacher pocket pivot — first up-day with volume &gt; max down-volume of prior 10 days, while above 50DMA. Institutional accumulation signature. Worth +15."><input type="checkbox" class="ind-filter" id="filt-pocket" onchange="applyFilters()"> <span>Pocket Pivot</span></label>
     <label class="ind-filter-lbl" title="VCP — Volatility Contraction Pattern (Minervini). Successive ATR-based price ranges contracting before breakout. Tight pre-breakout coil. Worth +12."><input type="checkbox" class="ind-filter" id="filt-vcp" onchange="applyFilters()"> <span>VCP</span></label>
     <label class="ind-filter-lbl" title="20-day Donchian channel breakout with confirming volume — close at or above 20-day high. Classic Turtle/channel breakout. Worth +12."><input type="checkbox" class="ind-filter" id="filt-donchian" onchange="applyFilters()"> <span>Donchian 20d</span></label>
-    <input type="text" id="sc-search" placeholder="Search ticker..." oninput="onScSearch()" style="margin-left:auto;font-family:var(--ff-mono);font-size:11px;padding:3px 8px;background:var(--bg1);border:1px solid var(--bg3);border-radius:3px;color:var(--amb);width:160px;">
-    <span id="sc-filter-count" style="font-family:var(--ff-mono);font-size:10px;color:var(--gry);"></span>
+    <!-- Search ticker box was here; moved 2026-05-05 to #sc-action-row
+         (next to SCAN + EXPORT GOs) so it's visible without expanding
+         the MUST PASS row. -->
+    <span id="sc-filter-count" style="font-family:var(--ff-mono);font-size:10px;color:var(--gry);margin-left:auto;"></span>
   </div>
   <div class="flt-bar collapsible" id="sc-bar-screener" data-default-collapsed style="flex-wrap:wrap;gap:6px;">
     <button type="button" class="sec-toggle" title="Collapse / expand the SCREENER inputs">SCREENER</button>
@@ -4614,7 +4674,7 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
           <div style="font-size:10px;color:var(--gry);margin-bottom:6px;">Current contract (auto-filled)</div>
           <div id="roll-leg1-info" style="font-size:11px;color:var(--wht);margin-bottom:6px;"></div>
           <div style="display:flex;gap:6px;align-items:center;font-size:10px;color:var(--gry);">
-            <span>Qty:</span><input type="number" id="roll-leg1-qty" min="1" step="1" value="1" oninput="rollUpdateNet()" style="width:50px;background:var(--bg0);border:var(--bdr);color:var(--wht);padding:2px 5px;font-size:11px;">
+            <span>Qty:</span><input type="number" id="roll-leg1-qty" min="1" step="1" value="1" oninput="rollUpdateNet()" style="width:72px;min-width:72px;flex:0 0 72px;background:var(--bg0);border:var(--bdr);color:var(--wht);padding:3px 6px;font-size:12px;text-align:center;">
             <button type="button" onclick="rollFetchLeg1Quote()" title="Re-fetch LEG 1 bid/ask from Tradier" style="margin-left:6px;background:rgba(255,0,230,0.12);border:1px solid var(--ngo);border-radius:3px;color:var(--ngo);padding:2px 7px;font-size:10px;font-family:var(--ff-mono);cursor:pointer;">&#8635; REFRESH QUOTE</button>
             <span>Bid: <b id="roll-leg1-bid" style="color:var(--wrn)">--</b></span>
             <span>Ask: <b id="roll-leg1-ask" style="color:var(--amb)">--</b></span>
@@ -4656,7 +4716,7 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
           </div>
           <div id="roll-leg2-info" style="font-size:11px;color:var(--wht);margin-bottom:6px;">-- select expiry and pick a contract --</div>
           <div style="display:flex;gap:6px;align-items:center;font-size:10px;color:var(--gry);">
-            <span>Qty:</span><input type="number" id="roll-leg2-qty" min="1" step="1" value="1" oninput="rollUpdateNet()" style="width:50px;background:var(--bg0);border:var(--bdr);color:var(--wht);padding:2px 5px;font-size:11px;">
+            <span>Qty:</span><input type="number" id="roll-leg2-qty" min="1" step="1" value="1" oninput="rollUpdateNet()" style="width:72px;min-width:72px;flex:0 0 72px;background:var(--bg0);border:var(--bdr);color:var(--wht);padding:3px 6px;font-size:12px;text-align:center;">
             <span>Bid: <b id="roll-leg2-bid" style="color:var(--wrn)">--</b></span>
             <span>Ask: <b id="roll-leg2-ask" style="color:var(--amb)">--</b></span>
           </div>
@@ -6830,8 +6890,23 @@ function updateSectorLabel(){
 // (via _ddOpenedFor tracking — outside-click closes, so resize during
 // an open sweep is rare enough that re-positioning on resize isn't
 // worth the listener cost).
+//
+// 2026-05-05: also REPARENT the dropdown to <body> on open. This is
+// belt+suspenders against any ancestor that establishes a stacking
+// context (e.g. an element with backdrop-filter, transform, filter,
+// or will-change anywhere up the tree) — those would trap z-index
+// 9999/99999 below sibling layers regardless of the value. With the
+// dropdown attached directly to <body>, only top-level fixed layers
+// (modals, bot-nav) compete for stack order, and our z-index:99999
+// beats them all. We stash the original parent on the node so close()
+// can restore it. The hidden #sc-sect / #sc-theme legacy <select>
+// stays in place; only the visible custom dropdown moves.
 function _positionFixedDD(dd, btn){
   if (!dd || !btn) return;
+  if (dd.parentElement && dd.parentElement !== document.body){
+    if (!dd._origParent) dd._origParent = dd.parentElement;
+    document.body.appendChild(dd);
+  }
   var r = btn.getBoundingClientRect();
   var ddW = dd.offsetWidth || 280;
   // Right-align if the dropdown would spill past the viewport right edge.
@@ -6839,6 +6914,15 @@ function _positionFixedDD(dd, btn){
   if (left + ddW > window.innerWidth - 8) left = Math.max(8, window.innerWidth - ddW - 8);
   dd.style.top = (r.bottom + 4) + 'px';
   dd.style.left = left + 'px';
+}
+// Restore a reparented dropdown to its original DOM location when the
+// user closes it. Keeps form-association + querySelector-from-tab paths
+// stable when the menu isn't open.
+function _restoreFixedDD(dd){
+  if (!dd) return;
+  if (dd._origParent && dd.parentElement !== dd._origParent){
+    try { dd._origParent.appendChild(dd); } catch(_){}
+  }
 }
 function toggleSectorDropdown(ev){
   if(ev){ ev.stopPropagation(); }
@@ -6848,6 +6932,7 @@ function toggleSectorDropdown(ev){
   var open = dd.style.display !== 'none';
   if(open){
     dd.style.display = 'none';
+    _restoreFixedDD(dd);
   } else {
     populateSectorCheckboxes();
     dd.style.display = 'block';
@@ -6873,7 +6958,7 @@ function _sectDDOutsideClick(e){
 }
 function closeSectorDropdown(){
   var dd = eid('sc-sect-dd');
-  if(dd) dd.style.display = 'none';
+  if(dd){ dd.style.display = 'none'; _restoreFixedDD(dd); }
   applyFilters();
   // Auto re-scan with the newly-selected universe scope. The pre-scan
   // sector filter restricts which tickers Tradier even sees in the bulk
@@ -7008,7 +7093,7 @@ function toggleThemeDropdown(ev){
   var btn = eid('sc-theme-btn');
   if(!dd) return;
   var open = dd.style.display !== 'none';
-  if(open){ dd.style.display = 'none'; }
+  if(open){ dd.style.display = 'none'; _restoreFixedDD(dd); }
   else {
     populateThemeCheckboxes();
     dd.style.display = 'block';
@@ -7029,7 +7114,7 @@ function _themeDDOutsideClick(e){
 }
 function closeThemeDropdown(){
   var dd = eid('sc-theme-dd');
-  if(dd) dd.style.display = 'none';
+  if(dd){ dd.style.display = 'none'; _restoreFixedDD(dd); }
   applyFilters();
   if (typeof _scheduleFilterRescan === 'function') _scheduleFilterRescan();
 }
