@@ -1426,73 +1426,130 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
   /* Show inline iPhone action row inside the form */
   .iphone-only-actions{display:flex !important;}
 
-  /* DRAG-TO-CONFIRM — Option Panda branded. Amber/cyan gradient track,
-     panda image inside the thumb (same panda used by the header logo). */
-  .dtc-track{
-    position:relative;
-    width:100%;
-    height:54px;
-    background:linear-gradient(90deg, rgba(0,212,255,0.06), rgba(0,212,255,0.18));
-    border:1px solid var(--amb);
-    border-radius:27px;
-    overflow:hidden;
-    user-select:none;
-    -webkit-user-select:none;
-    touch-action:none;
-    box-shadow:inset 0 0 12px rgba(0,212,255,0.15);
-  }
-  .dtc-track-fill{
-    position:absolute;left:0;top:0;bottom:0;width:0;
-    background:linear-gradient(90deg, var(--amb), var(--ambb));
-    transition:width .15s ease;
-    will-change:width;
-  }
-  .dtc-track-label{
-    position:absolute;inset:0;
-    display:flex;align-items:center;justify-content:center;
-    color:var(--amb);
-    font-family:var(--ff);font-size:13px;font-weight:700;letter-spacing:1.5px;
-    pointer-events:none;
-    z-index:2;
-    text-shadow:0 0 8px rgba(0,212,255,0.4);
-  }
-  .dtc-track.armed .dtc-track-label{color:var(--bg0);text-shadow:none;}
-  .dtc-thumb{
-    position:absolute;left:4px;top:4px;
-    width:46px;height:46px;
-    background:var(--bg1);
-    border:2px solid var(--amb);
-    border-radius:50%;
-    display:flex;align-items:center;justify-content:center;
-    cursor:grab;
-    z-index:3;
-    transition:left .15s ease, transform .15s ease, box-shadow .15s ease;
-    will-change:left;
-    box-shadow:0 0 12px rgba(0,212,255,0.6);
-    overflow:hidden;
-    padding:2px;
-    /* Hide the text content (▶ glyph) inside the thumb — replaced by the
-       background panda image. font-size:0 collapses any text node. */
-    font-size:0;
-  }
-  .dtc-thumb::before{
-    content:'';
-    display:block;
-    width:100%;height:100%;
-    background:url('assets/pandas2.png') center/contain no-repeat;
-    filter:drop-shadow(0 0 4px rgba(0,212,255,0.5));
-  }
-  .dtc-thumb:active{cursor:grabbing;transform:scale(1.08);box-shadow:0 0 18px rgba(0,212,255,0.9);}
-  .dtc-track.dragging .dtc-thumb, .dtc-track.dragging .dtc-track-fill{transition:none;}
-  .dtc-track.disabled{opacity:.5;pointer-events:none;}
-  .dtc-track.confirmed{
-    background:linear-gradient(90deg, var(--amb), var(--ambb)) !important;
-  }
-  .dtc-track.confirmed .dtc-track-label{color:var(--bg0);}
-  .dtc-track.confirmed .dtc-thumb{
-    left:calc(100% - 50px) !important;
-    background:var(--bg0);
-  }
+  /* (DTC styles moved out of the @media(max-width:768px) block 2026-05-05
+     — see the global block immediately below this @media closer. The user
+     wanted the swipe-to-submit on every platform, Robinhood-style. The
+     mobile-only overrides for sizing live in this block as separate rules
+     where needed.) */
+}
+
+/* ── DRAG-TO-CONFIRM (Robinhood-style swipe-to-submit) ──
+   Promoted out of the mobile-only @media block 2026-05-05 so the
+   swipe widget is the primary submit affordance on EVERY platform.
+   User report: "Change the slide to submit button to a swipe to submit
+   option just like you submit orders on Robinhood mobile."
+
+   Visual changes from the prior panda-thumb version:
+     - Chevron arrow (›››) inside the thumb instead of the panda mascot
+       — Robinhood's signature look + immediate "swipe right" affordance.
+     - Tracking shimmer animation on idle so the user notices the
+       widget instead of trying to tap it.
+     - Thumb stays cleanly grabable without scaling on hover (Robinhood
+       behavior — no hover state mutates the geometry).
+     - Label progresses through three states: SLIDE → KEEP GOING →
+       RELEASE TO SUBMIT (driven from JS via the .armed / dragging classes
+       and a data-progress attribute on the track). */
+.dtc-track{
+  position:relative;
+  width:100%;
+  height:54px;
+  background:linear-gradient(90deg, rgba(0,212,255,0.06), rgba(0,212,255,0.18));
+  border:1px solid var(--amb);
+  border-radius:27px;
+  overflow:hidden;
+  user-select:none;
+  -webkit-user-select:none;
+  touch-action:none;
+  box-shadow:inset 0 0 12px rgba(0,212,255,0.15);
+}
+/* Soft sweep that nudges the user to swipe — pauses while dragging /
+   confirmed so it doesn't fight the drag visuals. */
+.dtc-track::after{
+  content:'';
+  position:absolute;inset:0;
+  background:linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.10) 50%, transparent 100%);
+  transform:translateX(-100%);
+  animation:dtc-sweep 2.4s ease-in-out infinite;
+  pointer-events:none;
+  z-index:1;
+}
+.dtc-track.dragging::after,
+.dtc-track.armed::after,
+.dtc-track.confirmed::after,
+.dtc-track.disabled::after{ animation:none; opacity:0; }
+@keyframes dtc-sweep{
+  0%{transform:translateX(-100%);}
+  60%{transform:translateX(120%);}
+  100%{transform:translateX(120%);}
+}
+.dtc-track-fill{
+  position:absolute;left:0;top:0;bottom:0;width:0;
+  background:linear-gradient(90deg, var(--amb), var(--ambb));
+  transition:width .15s ease;
+  will-change:width;
+  z-index:1;
+}
+.dtc-track-label{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  color:var(--amb);
+  font-family:var(--ff);font-size:13px;font-weight:700;letter-spacing:1.5px;
+  pointer-events:none;
+  z-index:2;
+  text-shadow:0 0 8px rgba(0,212,255,0.4);
+  white-space:nowrap;
+}
+.dtc-track.armed .dtc-track-label{color:var(--bg0);text-shadow:none;}
+.dtc-thumb{
+  position:absolute;left:4px;top:4px;
+  width:46px;height:46px;
+  background:var(--bg1);
+  border:2px solid var(--amb);
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  cursor:grab;
+  z-index:3;
+  transition:left .15s ease, transform .12s ease, box-shadow .12s ease, background .15s ease;
+  will-change:left;
+  box-shadow:0 0 12px rgba(0,212,255,0.6);
+  /* Robinhood-style chevron via pseudo-element below. */
+  font-size:0;
+  color:var(--amb);
+}
+.dtc-thumb::before{
+  content:'\203A\203A\203A';   /* three single-right chevrons */
+  display:block;
+  font-family:var(--ff-mono);
+  font-size:18px;
+  font-weight:900;
+  line-height:1;
+  letter-spacing:-2px;
+  color:var(--amb);
+  text-shadow:0 0 6px rgba(0,212,255,0.55);
+  transition:color .15s ease, text-shadow .15s ease;
+}
+.dtc-track.armed .dtc-thumb::before{
+  color:var(--bg0);
+  text-shadow:none;
+}
+.dtc-thumb:active{cursor:grabbing;box-shadow:0 0 18px rgba(0,212,255,0.9);}
+.dtc-track.dragging .dtc-thumb,
+.dtc-track.dragging .dtc-track-fill{transition:none;}
+.dtc-track.disabled{opacity:.5;pointer-events:none;}
+.dtc-track.confirmed{
+  background:linear-gradient(90deg, var(--amb), var(--ambb)) !important;
+}
+.dtc-track.confirmed .dtc-track-label{color:var(--bg0);}
+.dtc-track.confirmed .dtc-thumb{
+  left:calc(100% - 50px) !important;
+  background:var(--bg0);
+}
+.dtc-track.confirmed .dtc-thumb::before{
+  content:'\2713';            /* check mark on confirmed */
+  color:var(--grn);
+  text-shadow:0 0 8px rgba(0,230,118,0.6);
+  font-size:22px;
+  letter-spacing:0;
 }
 
 /* Tablet / desktop: bottom-nav hidden, original top nav visible */
@@ -2851,6 +2908,11 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
     </button>
     <button class="btn blu" style="font-size:11px;padding:6px 10px;white-space:nowrap;min-height:36px;" onclick="fetchPositions()">&#8635; REFRESH</button>
     <button class="btn wrn" style="font-size:11px;padding:6px 10px;white-space:nowrap;min-height:36px;" onclick="clearPositions()">&#10005; CLEAR</button>
+    <!-- Persistent buying-power badge (2026-05-05). Always visible on the
+         positions tab — taps fetchBalances to refresh. The previous pattern
+         hid BP behind the SUMMARY toggle which the user reported was
+         frustrating: "always have buying power displayed". -->
+    <span id="pos-bp-badge" onclick="fetchBalances()" title="Option buying power (Tradier) — tap to refresh" style="font-family:var(--ff-mono);font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--grn);background:rgba(0,230,118,0.08);border:1px solid rgba(0,230,118,0.30);border-radius:4px;padding:6px 10px;cursor:pointer;white-space:nowrap;min-height:36px;display:inline-flex;align-items:center;">BP: --</span>
     <span class="pos-src" id="pos-src" style="font-size:10px;color:var(--gry);font-family:var(--ff-mono);margin-left:auto;"></span>
   </div>
   <!-- Stats bar collapsed by default. Click SUMMARY to expand.
@@ -2866,7 +2928,40 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
     <div class="stat-box"><div class="stat-label">CASH</div><div class="stat-val amb" id="pos-cash" title="Total cash available (from Tradier balances)">--</div></div>
     <div class="stat-box"><div class="stat-label">ACCOUNT VALUE</div><div class="stat-val amb" id="pos-acctval" title="Total equity = positions market value + cash">--</div></div>
   </div>
+
+  <!-- ── PENDING ORDERS PANEL (2026-05-05) ──
+       Lists open / pending / partially-filled orders pulled from Tradier.
+       Refreshes alongside fetchPositions(). Each row exposes CANCEL +
+       EDIT (price / qty / duration) so the user can manage working orders
+       without bouncing to tradier.com. Collapses by default once the
+       panel is empty — the toggle stays visible so the user can confirm
+       there are no working orders. -->
+  <div id="pos-pending-orders-wrap" style="border-bottom:var(--bdr);background:var(--bg1);">
+    <div id="pos-pending-orders-hdr" onclick="posTogglePending()" style="cursor:pointer;display:flex;align-items:center;gap:10px;padding:8px 12px;font-family:var(--ff-mono);font-size:10px;letter-spacing:1.5px;color:var(--ambb);user-select:none;-webkit-tap-highlight-color:rgba(0,212,255,0.15);min-height:36px;">
+      <span id="pos-pending-arrow" style="display:inline-block;transition:transform .15s;color:var(--amb);font-size:13px;">&#9656;</span>
+      <span style="font-weight:700;">PENDING ORDERS</span>
+      <span id="pos-pending-count" style="background:rgba(255,193,7,0.10);border:1px solid rgba(255,193,7,0.45);border-radius:10px;color:var(--ambb);padding:1px 8px;font-size:9px;font-weight:700;letter-spacing:.5px;">0</span>
+      <span id="pos-pending-status" style="color:var(--gry);font-size:10px;letter-spacing:.5px;">--</span>
+      <span style="margin-left:auto;display:flex;gap:6px;">
+        <button class="btn blu" onclick="event.stopPropagation();fetchPendingOrders();" style="font-size:10px;padding:4px 8px;min-height:30px;">&#8635;</button>
+      </span>
+    </div>
+    <div id="pos-pending-orders-body" style="display:none;padding:0;border-top:1px solid var(--bg3);"></div>
+  </div>
   <script>
+    function posTogglePending(){
+      var body = document.getElementById('pos-pending-orders-body');
+      var arrow = document.getElementById('pos-pending-arrow');
+      if (!body) return;
+      var open = body.style.display !== 'none' && body.style.display !== '';
+      body.style.display = open ? 'none' : 'block';
+      if (arrow) arrow.style.transform = open ? 'rotate(0deg)' : 'rotate(90deg)';
+      try { if (typeof hap === 'function') hap(8); } catch(_){}
+      if (!open) {
+        // Auto-refresh on expand so the list is always fresh
+        try { if (typeof fetchPendingOrders === 'function') fetchPendingOrders(); } catch(_){}
+      }
+    }
     function posToggleSummary(){
       var bar = document.getElementById('pos-header-row');
       var arrow = document.getElementById('pos-summary-arrow');
@@ -3089,6 +3184,10 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
         <span class="qp-ts" id="qp-ts"></span>
         <span id="qp-stream-status" title="WebSocket stream state — green = receiving live ticks, blank = HTTP-only" style="font-size:10px;font-weight:700;letter-spacing:.5px;margin-left:8px;"></span>
         <span id="intraday-badge" title="Intraday reversal signal — VWAP reclaim or ORB reclaim. Blank during bootstrap." style="font-size:10px;font-weight:700;letter-spacing:.5px;margin-left:10px;"></span>
+        <!-- Persistent buying-power badge on the order ticket (2026-05-05).
+             Mirrors the one on the positions toolbar; both feed from
+             G.lastBalances via _setBpBadges() inside fetchBalances(). -->
+        <span id="ord-bp-badge" onclick="fetchBalances()" title="Option buying power — tap to refresh" style="margin-left:auto;font-family:var(--ff-mono);font-size:10px;font-weight:700;letter-spacing:.5px;color:var(--grn);background:rgba(0,230,118,0.08);border:1px solid rgba(0,230,118,0.30);border-radius:4px;padding:3px 8px;cursor:pointer;white-space:nowrap;">BP: --</span>
       </div>
       <div class="quote-panel" id="quote-panel">
         <div class="qp-cell">
@@ -3316,15 +3415,19 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
     <div class="ord-actions-panel" style="flex:0 0 240px;padding:16px 14px;border-left:1px solid var(--bg3);align-self:stretch;display:flex;flex-direction:column;gap:10px;position:sticky;top:8px;">
       <div style="font-family:var(--ff-mono);font-size:10px;color:var(--amb);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">ACTIONS</div>
       <button class="btn blu" style="width:100%;padding:10px;font-weight:700;" onclick="previewOrder()">PREVIEW ORDER</button>
-      <!-- Original drag-to-confirm — kept here for desktop/tablet only.
-           iPhone hides this entire panel via @media and uses the fixed
-           bar below the form instead. -->
-      <div id="ord-dtc" class="dtc-track" style="display:none;margin:4px 0;">
+      <!-- Swipe-to-submit (Robinhood-style). Promoted from mobile-only to
+           every platform 2026-05-05 per user request. The legacy click
+           SUBMIT button below is kept as an accessibility fallback (some
+           keyboard users + assistive tech) but visually de-emphasized. -->
+      <div id="ord-dtc" class="dtc-track" style="margin:8px 0;">
         <div class="dtc-track-fill"></div>
-        <div class="dtc-track-label">→ SLIDE TO SUBMIT</div>
+        <div class="dtc-track-label">SWIPE TO SUBMIT</div>
         <div class="dtc-thumb" aria-hidden="true"></div>
       </div>
-      <button id="ord-submit-btn" class="btn grn" style="width:100%;padding:10px;font-weight:700;font-size:13px;" onclick="submitOrder()">&#9650; SUBMIT ORDER</button>
+      <!-- Fallback click submit (kept for accessibility / desktop power-users
+           who'd rather just click). Smaller + grey so the swipe widget is
+           the primary affordance. -->
+      <button id="ord-submit-btn" class="btn" style="width:100%;padding:6px;font-weight:600;font-size:11px;border-color:var(--gry2);color:var(--gry);opacity:.85;" onclick="submitOrder()" title="Click submit (alternative to swipe)">submit (click)</button>
       <button class="btn" style="width:100%;padding:8px;" onclick="clearOrder()">CLEAR</button>
       <div class="ord-result" id="ord-result" style="margin-top:8px;font-size:11px;"></div>
     </div>
@@ -4598,7 +4701,7 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
      Sits above the bottom nav so it's always reachable while scrolling. -->
 <div id="ord-dtc-fixed" class="dtc-track" style="display:none;">
   <div class="dtc-track-fill"></div>
-  <div class="dtc-track-label">→ SLIDE TO SUBMIT</div>
+  <div class="dtc-track-label">SWIPE TO SUBMIT</div>
   <div class="dtc-thumb" aria-hidden="true"></div>
 </div>
 
@@ -8877,6 +8980,245 @@ async function cancelOrderVerbose(creds,acct,orderId){
     return {ok:false, msg:'#'+orderId+' network: '+(e&&e.message||'unknown')};
   }
 }
+
+// ═══════════════════════════════════════════════════════════════════════
+//  PENDING ORDERS (2026-05-05) — fetch + render + cancel + edit
+//
+//  Pulls orders in non-terminal statuses ("open", "partially_filled",
+//  "pending", "submitted", "received", "queued") from Tradier and
+//  renders them as a table on the positions tab. Each row exposes:
+//    • CANCEL — uses cancelOrderVerbose so the user sees the broker's
+//      acknowledgement message in a toast.
+//    • EDIT   — opens an inline modal that lets the user adjust qty,
+//      type (limit / market / stop), price, stop, or duration. A PUT
+//      to /v1/accounts/:id/orders/:id submits the change. Tradier's
+//      change-order API only allows changes while the order is still
+//      in a workable state — it returns a clear error if the order
+//      already filled, which we surface back to the user.
+// ═══════════════════════════════════════════════════════════════════════
+var TRADIER_PENDING_STATUSES = ['open','pending','submitted','received','queued','partially_filled','accepted','calculated'];
+function _isPendingStatus(s){
+  if (!s) return false;
+  s = String(s).toLowerCase();
+  return TRADIER_PENDING_STATUSES.indexOf(s) !== -1;
+}
+function fetchPendingOrders(){
+  var creds = (typeof getTradierCreds === 'function') ? getTradierCreds() : null;
+  var acct = G.acctId || (function(){try{return localStorage.getItem('rrjcar_acct')||'';}catch(_){return '';}})();
+  var statusEl = eid('pos-pending-status');
+  var body = eid('pos-pending-orders-body');
+  var countEl = eid('pos-pending-count');
+  if (!creds || !acct){
+    if (statusEl) statusEl.textContent = 'no API key / account';
+    if (body) body.innerHTML = '<div style="padding:10px 12px;color:var(--gry);font-size:11px;">Configure Tradier API key + account in the API tab to see pending orders.</div>';
+    if (countEl) countEl.textContent = '0';
+    return;
+  }
+  if (statusEl) statusEl.textContent = 'loading...';
+  // includeTags=true preserves any step-fill / roll tag metadata so we can
+  // surface "(step 3/10)" style annotations later if useful.
+  return fetch(creds.host+'/v1/accounts/'+acct+'/orders?includeTags=true',{
+    headers:{Authorization:'Bearer '+creds.key,Accept:'application/json'}
+  }).then(function(r){return r.json();}).then(function(data){
+    var orders = [];
+    try {
+      var raw = data && data.orders;
+      if (raw && raw.order){
+        orders = Array.isArray(raw.order) ? raw.order : [raw.order];
+      }
+    } catch(_){}
+    var pending = orders.filter(function(o){ return _isPendingStatus(o && o.status); });
+    G.pendingOrders = pending;
+    if (countEl) countEl.textContent = String(pending.length);
+    if (statusEl) statusEl.textContent = pending.length
+      ? ('refreshed ' + new Date().toLocaleTimeString())
+      : 'no pending orders';
+    renderPendingOrders(pending);
+    return pending;
+  }).catch(function(e){
+    if (statusEl) statusEl.textContent = 'error: ' + (e && e.message || 'fetch failed');
+    if (body) body.innerHTML = '<div style="padding:10px 12px;color:var(--wrn);font-size:11px;">Error fetching orders: ' + _esc(e && e.message || 'unknown') + '</div>';
+    if (countEl) countEl.textContent = '0';
+  });
+}
+function renderPendingOrders(orders){
+  var body = eid('pos-pending-orders-body');
+  if (!body) return;
+  if (!orders || !orders.length){
+    body.innerHTML = '<div style="padding:14px 12px;color:var(--gry);font-size:11px;text-align:center;">No working orders. Anything you place will appear here.</div>';
+    return;
+  }
+  var rows = orders.map(function(o){
+    var sym = o.option_symbol || o.symbol || '';
+    var side = (o.side || '').toUpperCase();
+    var type = (o.type || '').toUpperCase();
+    var qty = o.quantity != null ? o.quantity : (o.executed_quantity || 0);
+    var filled = o.executed_quantity || 0;
+    var price = o.price != null ? o.price : (o.avg_fill_price || 0);
+    var stop = o.stop || '';
+    var dur = (o.duration || '').toUpperCase();
+    var status = (o.status || '').toUpperCase();
+    var cls = (o.class || '').toLowerCase();
+    var when = o.create_date || o.transaction_date || '';
+    var statusColor = (status==='PARTIALLY_FILLED') ? 'var(--ambb)' : 'var(--blub)';
+    var sideColor = (side.indexOf('SELL') >= 0) ? 'var(--ngo)' : 'var(--grn)';
+    var priceTxt = (type === 'MARKET') ? 'MKT' : ('$' + (typeof fmt2 === 'function' ? fmt2(+price||0) : (+price||0).toFixed(2)));
+    var fillTxt = (filled > 0) ? (' • ' + filled + '/' + qty + ' filled') : '';
+    var subtitle = type + ' ' + priceTxt + (stop ? (' stop $'+stop) : '') + ' • ' + dur + fillTxt;
+    return '<div class="pending-order-row" data-oid="' + _esc(String(o.id)) + '" style="border-bottom:1px solid var(--bg3);padding:8px 12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">'
+      + '<div style="flex:1 1 200px;min-width:0;">'
+      +   '<div style="font-family:var(--ff-mono);font-size:12px;font-weight:700;color:var(--wht);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'
+      +     '<span style="color:'+sideColor+';">'+_esc(side)+'</span> '
+      +     '<span>'+_esc(sym)+'</span> '
+      +     '<span style="color:var(--gry);">x'+_esc(String(qty))+'</span>'
+      +   '</div>'
+      +   '<div style="font-family:var(--ff-mono);font-size:10px;color:var(--gry);margin-top:2px;">'+_esc(subtitle)+'</div>'
+      + '</div>'
+      + '<span style="font-family:var(--ff-mono);font-size:9px;font-weight:700;letter-spacing:.5px;color:'+statusColor+';background:rgba(0,212,255,0.06);border:1px solid rgba(0,212,255,0.30);border-radius:3px;padding:2px 6px;white-space:nowrap;">'+_esc(status)+'</span>'
+      + '<button class="btn blu" onclick="openEditOrderModal(\''+_esc(String(o.id))+'\')" style="font-size:10px;padding:5px 10px;min-height:32px;">EDIT</button>'
+      + '<button class="btn wrn" onclick="cancelPendingOrder(\''+_esc(String(o.id))+'\')" style="font-size:10px;padding:5px 10px;min-height:32px;">CANCEL</button>'
+      + '</div>';
+  }).join('');
+  body.innerHTML = rows;
+}
+function cancelPendingOrder(orderId){
+  if (!orderId) return;
+  if (!confirm('Cancel order #'+orderId+'?\n\nThis pulls it from Tradier — cannot be undone.')) return;
+  var creds = (typeof getTradierCreds === 'function') ? getTradierCreds() : null;
+  var acct = G.acctId || (function(){try{return localStorage.getItem('rrjcar_acct')||'';}catch(_){return '';}})();
+  if (!creds || !acct){ toast('No Tradier creds — check API tab'); return; }
+  toast('Cancelling order #'+orderId+'...');
+  cancelOrderVerbose(creds, acct, orderId).then(function(res){
+    toast(res && res.ok ? ('Cancelled '+res.msg) : ('Cancel failed: '+(res&&res.msg||'unknown')));
+    setTimeout(fetchPendingOrders, 600);
+  });
+}
+function openEditOrderModal(orderId){
+  if (!orderId) return;
+  var orders = G.pendingOrders || [];
+  var o = null;
+  for (var i=0;i<orders.length;i++){ if (String(orders[i].id) === String(orderId)){ o = orders[i]; break; } }
+  if (!o){ toast('Order #'+orderId+' not found in cache — refreshing'); fetchPendingOrders(); return; }
+  var existing = document.getElementById('edit-order-modal');
+  if (existing) existing.remove();
+  var modal = document.createElement('div');
+  modal.id = 'edit-order-modal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:9700;background:rgba(0,0,0,0.78);backdrop-filter:blur(4px);display:flex;align-items:flex-start;justify-content:center;padding-top:60px;overflow-y:auto;';
+  modal.onclick = function(e){ if (e.target === modal) modal.remove(); };
+  var sym = o.option_symbol || o.symbol || '';
+  var qty = o.quantity != null ? o.quantity : '';
+  var type = (o.type || 'limit').toLowerCase();
+  var price = o.price != null ? o.price : '';
+  var stop = o.stop != null ? o.stop : '';
+  var dur = (o.duration || 'day').toLowerCase();
+  var side = (o.side || '').toUpperCase();
+  modal.innerHTML =
+      '<div style="background:var(--bg1);border:1px solid var(--amb);border-radius:8px;width:420px;max-width:94vw;padding:0;">'
+    +   '<div style="background:var(--bg2);border-bottom:var(--bdr);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;">'
+    +     '<span style="font-family:var(--ff-brand);font-size:12px;color:var(--amb);letter-spacing:2px;">EDIT ORDER #'+_esc(String(o.id))+'</span>'
+    +     '<button class="btn" style="font-size:10px;padding:2px 8px;" onclick="document.getElementById(\'edit-order-modal\').remove()">&#10005;</button>'
+    +   '</div>'
+    +   '<div style="padding:14px;display:flex;flex-direction:column;gap:10px;">'
+    +     '<div style="font-family:var(--ff-mono);font-size:11px;color:var(--gry);">'+_esc(side)+' '+_esc(sym)+'</div>'
+    +     '<label style="font-size:10px;color:var(--gry);letter-spacing:.5px;">QTY <input id="eo-qty" type="number" min="1" step="1" value="'+_esc(String(qty))+'" style="width:100%;background:var(--bg0);border:var(--bdr);color:var(--wht);font-family:var(--ff-mono);font-size:13px;padding:6px 8px;margin-top:3px;border-radius:3px;"></label>'
+    +     '<label style="font-size:10px;color:var(--gry);letter-spacing:.5px;">TYPE <select id="eo-type" style="width:100%;background:var(--bg0);border:var(--bdr);color:var(--wht);font-size:13px;padding:6px 8px;margin-top:3px;border-radius:3px;" onchange="onEditOrderTypeChange()">'
+    +       '<option value="limit"'+(type==='limit'?' selected':'')+'>LIMIT</option>'
+    +       '<option value="market"'+(type==='market'?' selected':'')+'>MARKET</option>'
+    +       '<option value="stop"'+(type==='stop'?' selected':'')+'>STOP</option>'
+    +       '<option value="stop_limit"'+(type==='stop_limit'?' selected':'')+'>STOP LIMIT</option>'
+    +     '</select></label>'
+    +     '<label id="eo-price-row" style="font-size:10px;color:var(--gry);letter-spacing:.5px;">PRICE <input id="eo-price" type="number" min="0" step="0.01" value="'+_esc(String(price))+'" style="width:100%;background:var(--bg0);border:var(--bdr);color:var(--wht);font-family:var(--ff-mono);font-size:13px;padding:6px 8px;margin-top:3px;border-radius:3px;"></label>'
+    +     '<label id="eo-stop-row" style="font-size:10px;color:var(--gry);letter-spacing:.5px;display:none;">STOP <input id="eo-stop" type="number" min="0" step="0.01" value="'+_esc(String(stop))+'" style="width:100%;background:var(--bg0);border:var(--bdr);color:var(--wht);font-family:var(--ff-mono);font-size:13px;padding:6px 8px;margin-top:3px;border-radius:3px;"></label>'
+    +     '<label style="font-size:10px;color:var(--gry);letter-spacing:.5px;">DURATION <select id="eo-dur" style="width:100%;background:var(--bg0);border:var(--bdr);color:var(--wht);font-size:13px;padding:6px 8px;margin-top:3px;border-radius:3px;">'
+    +       '<option value="day"'+(dur==='day'?' selected':'')+'>DAY</option>'
+    +       '<option value="gtc"'+(dur==='gtc'?' selected':'')+'>GTC</option>'
+    +       '<option value="pre"'+(dur==='pre'?' selected':'')+'>PRE-MARKET</option>'
+    +       '<option value="post"'+(dur==='post'?' selected':'')+'>POST-MARKET</option>'
+    +     '</select></label>'
+    +     '<div id="eo-result" style="font-family:var(--ff-mono);font-size:10px;color:var(--gry);min-height:12px;"></div>'
+    +     '<div style="display:flex;gap:8px;margin-top:4px;">'
+    +       '<button class="btn blu" onclick="submitEditOrder(\''+_esc(String(o.id))+'\')" style="flex:1;font-size:12px;padding:8px;font-weight:700;">SAVE CHANGES</button>'
+    +       '<button class="btn" onclick="document.getElementById(\'edit-order-modal\').remove()" style="font-size:12px;padding:8px;border-color:var(--gry2);color:var(--gry);">CANCEL</button>'
+    +     '</div>'
+    +   '</div>'
+    + '</div>';
+  document.body.appendChild(modal);
+  onEditOrderTypeChange();
+}
+function onEditOrderTypeChange(){
+  var t = (eid('eo-type') && eid('eo-type').value) || 'limit';
+  var priceRow = eid('eo-price-row');
+  var stopRow = eid('eo-stop-row');
+  if (priceRow) priceRow.style.display = (t === 'market') ? 'none' : '';
+  if (stopRow)  stopRow.style.display  = (t === 'stop' || t === 'stop_limit') ? '' : 'none';
+}
+function submitEditOrder(orderId){
+  var creds = (typeof getTradierCreds === 'function') ? getTradierCreds() : null;
+  var acct = G.acctId || (function(){try{return localStorage.getItem('rrjcar_acct')||'';}catch(_){return '';}})();
+  var resEl = eid('eo-result');
+  if (!creds || !acct){ if (resEl) resEl.textContent = 'No API key / account'; return; }
+  var qty = parseInt((eid('eo-qty')||{}).value || '0', 10);
+  var type = (eid('eo-type')||{}).value || 'limit';
+  var price = parseFloat((eid('eo-price')||{}).value || '0');
+  var stop = parseFloat((eid('eo-stop')||{}).value || '0');
+  var dur = (eid('eo-dur')||{}).value || 'day';
+  if (!qty || qty < 1){ if (resEl) resEl.textContent = 'QTY must be a positive integer'; return; }
+  // Tradier change-order endpoint accepts a subset of fields; only send the
+  // ones that apply for the chosen type so we don't accidentally clear a
+  // field with an empty/zero value.
+  var parts = ['type='+encodeURIComponent(type), 'duration='+encodeURIComponent(dur), 'quantity='+qty];
+  if (type === 'limit' || type === 'stop_limit'){
+    if (!(price > 0)){ if (resEl) resEl.textContent = 'PRICE required for limit / stop-limit'; return; }
+    parts.push('price='+price.toFixed(2));
+  }
+  if (type === 'stop' || type === 'stop_limit'){
+    if (!(stop > 0)){ if (resEl) resEl.textContent = 'STOP required for stop / stop-limit'; return; }
+    parts.push('stop='+stop.toFixed(2));
+  }
+  var headers = {
+    Authorization: 'Bearer '+creds.key,
+    Accept: 'application/json',
+    'Content-Type': 'application/x-www-form-urlencoded'
+  };
+  try {
+    var proxyForHdr = localStorage.getItem('rrjcar_tradier_proxy') || '';
+    if (proxyForHdr && window._tradeToken) headers['X-Trade-Token'] = window._tradeToken;
+  } catch(_){}
+  if (resEl) resEl.textContent = 'submitting...';
+  fetch(creds.host+'/v1/accounts/'+acct+'/orders/'+orderId, {
+    method: 'PUT',
+    headers: headers,
+    body: parts.join('&')
+  }).then(function(r){ return r.text().then(function(t){ return {status:r.status, ok:r.ok, text:t}; }); })
+  .then(function(resp){
+    var d = null; try { d = JSON.parse(resp.text); } catch(_){}
+    if (resp.ok && d && d.order && (d.order.status === 'ok' || d.order.id)){
+      toast('Order #'+orderId+' updated');
+      var modal = document.getElementById('edit-order-modal');
+      if (modal) modal.remove();
+      setTimeout(fetchPendingOrders, 600);
+      return;
+    }
+    var errMsg = '';
+    if (d && d.errors){
+      var e1 = d.errors.error || d.errors;
+      if (Array.isArray(e1)) errMsg = e1.join(' | ');
+      else errMsg = (typeof e1 === 'string') ? e1 : JSON.stringify(e1);
+    } else if (d && d.fault) {
+      errMsg = d.fault.faultstring || JSON.stringify(d.fault);
+    } else {
+      errMsg = 'HTTP '+resp.status+' — '+(resp.text||'').slice(0,160);
+    }
+    if (resEl) resEl.innerHTML = '<span style="color:var(--wrn);">'+_esc(errMsg)+'</span>';
+  }).catch(function(e){
+    if (resEl) resEl.innerHTML = '<span style="color:var(--wrn);">'+_esc(e && e.message || 'network error')+'</span>';
+  });
+}
+window.fetchPendingOrders   = fetchPendingOrders;
+window.cancelPendingOrder   = cancelPendingOrder;
+window.openEditOrderModal   = openEditOrderModal;
+window.submitEditOrder      = submitEditOrder;
+window.onEditOrderTypeChange = onEditOrderTypeChange;
 
 function sleep(ms){return new Promise(function(r){setTimeout(r,ms);});}
 
@@ -17253,7 +17595,7 @@ function fetchPositionsDirect(key,mode,host,acct){
           p.underlyingAtOpen = od.underlyingAtOpen||0;
           p.underlyingNow = uQuotes[p.underlying]||0;
         });
-        G.positions=pos;renderPositionsTable(pos,mode==='live'?'[TRADIER LIVE]':' [TRADIER SANDBOX]');fetchBalances();
+        G.positions=pos;renderPositionsTable(pos,mode==='live'?'[TRADIER LIVE]':' [TRADIER SANDBOX]');fetchBalances();try{fetchPendingOrders();}catch(_){}
         // Restore trail stop poller if it was active before page reload
         if(G._tsRestoreActive && pos.length > 0 && !G.tsActive){
           G._tsRestoreActive = false;
@@ -17274,7 +17616,7 @@ function fetchPositionsDirect(key,mode,host,acct){
           }
         }
       });
-    }).catch(function(){G.positions=pos;renderPositionsTable(pos,mode==='live'?'[TRADIER LIVE]':' [TRADIER SANDBOX]');fetchBalances();});
+    }).catch(function(){G.positions=pos;renderPositionsTable(pos,mode==='live'?'[TRADIER LIVE]':' [TRADIER SANDBOX]');fetchBalances();try{fetchPendingOrders();}catch(_){}});
   }).catch(function(e){showPosError('Tradier API error: '+e.message);});
 }
 function showPosError(msg){eid('pos-src').textContent='[ERROR]';eid('pos-tbl-wrap').innerHTML='<div class="empty-det" style="min-height:200px;"><div class="ei">\u25a0</div><p style="color:var(--wrn);">'+msg+'</p><p style="color:var(--gry);margin-top:8px;">Check API key in the API tab.</p></div>';}
@@ -18735,6 +19077,7 @@ function fetchBalances(){
   if(!key||!G.acctId){
     if(eid('pos-acctval')) eid('pos-acctval').textContent='--';
     if(bpEl) bpEl.textContent='OPT BP: --';
+    if(typeof _setBpBadges === 'function') _setBpBadges(null);
     return;
   }
   var mode='sandbox';try{mode=localStorage.getItem('rrjcar_mode')||'sandbox';}catch(e){}
@@ -18755,12 +19098,30 @@ function fetchBalances(){
       else if(b.pdt && typeof b.pdt.option_buying_power === 'number')  obp = b.pdt.option_buying_power;
       else if(b.cash && typeof b.cash.cash_available === 'number')     obp = b.cash.cash_available;
       else if(typeof b.total_cash === 'number')                         obp = b.total_cash;
+      // Stock buying power (margin accts can be 2x option BP). Fall back to
+      // option BP when not exposed (cash + sandbox accounts often omit it).
+      var sbp = null;
+      if(b.margin && typeof b.margin.stock_buying_power === 'number') sbp = b.margin.stock_buying_power;
+      else if(b.pdt && typeof b.pdt.stock_buying_power === 'number')  sbp = b.pdt.stock_buying_power;
+      else sbp = obp;
+      G.lastBP = { option:obp, stock:sbp, ts:Date.now() };
       if(bpEl){
         bpEl.textContent = 'OPT BP: ' + (obp != null ? fmtD(obp) : '--');
         bpEl.title = 'Option buying power (Tradier ' + mode + ') \u2014 click to refresh';
       }
-    }catch(e){ if(bpEl) bpEl.textContent='OPT BP: err'; }
-  }).catch(function(){ if(bpEl) bpEl.textContent='OPT BP: offline'; });
+      _setBpBadges(obp);
+    }catch(e){ if(bpEl) bpEl.textContent='OPT BP: err'; _setBpBadges(null); }
+  }).catch(function(){ if(bpEl) bpEl.textContent='OPT BP: offline'; _setBpBadges(null); });
+}
+// Update the persistent BP pill on the positions toolbar + the order ticket
+// header. Called from fetchBalances() on success/fail. Separate from the
+// header pill (#hdr-opt-bp) which is hidden by default per existing UX.
+function _setBpBadges(value){
+  var label = 'BP: ' + (value != null ? fmtD(value) : '--');
+  var posEl = eid('pos-bp-badge');
+  var ordEl = eid('ord-bp-badge');
+  if (posEl) posEl.textContent = label;
+  if (ordEl) ordEl.textContent = label;
 }
 
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
@@ -25743,14 +26104,44 @@ window.addEventListener('DOMContentLoaded',init);
     var fill = track.querySelector('.dtc-track-fill');
     var label = track.querySelector('.dtc-track-label');
     if (!thumb) return;
+    // Robinhood-style label progression. Driven by the current drag pct
+    // so the user gets immediate feedback that they're "almost there".
+    // We also stash the original idle text so cancelling a partial drag
+    // restores it cleanly. Threshold for confirm is 88% — a hair lower
+    // than the prior 92% so the gesture finishes before the user has to
+    // visibly run the thumb into the right edge (Robinhood feel).
+    var IDLE_TEXT = (label && label.textContent) || 'SWIPE TO SUBMIT';
+    var KEEP_GOING = 'KEEP GOING →';
+    var RELEASE_TEXT = 'RELEASE TO SUBMIT';
+    var THRESHOLD = 0.88;
     var startX = 0, dragging = false, confirmed = false;
+    var armedHapticFired = false;
+    function setLabel(pct){
+      if (!label) return;
+      if (confirmed) return;
+      if (pct >= THRESHOLD)        label.textContent = RELEASE_TEXT;
+      else if (pct >= 0.30)        label.textContent = KEEP_GOING;
+      else                         label.textContent = IDLE_TEXT;
+    }
     function setProgress(px){
       var max = track.offsetWidth - thumb.offsetWidth - 8;
       px = Math.max(0, Math.min(px, max));
       thumb.style.left = (4 + px) + 'px';
       if (fill) fill.style.width = (px + thumb.offsetWidth/2) + 'px';
-      var pct = px / max;
-      if (pct > 0.5) track.classList.add('armed'); else track.classList.remove('armed');
+      var pct = max > 0 ? (px / max) : 0;
+      if (pct >= THRESHOLD){
+        if (!track.classList.contains('armed')){
+          track.classList.add('armed');
+          // Light haptic the moment the user crosses the threshold so
+          // they know they can release. Only fire once per drag.
+          if (!armedHapticFired){ try { hap(20); } catch(_){}
+            armedHapticFired = true; }
+        }
+      } else {
+        track.classList.remove('armed');
+        armedHapticFired = false;
+      }
+      setLabel(pct);
       return { px:px, pct:pct, max:max };
     }
     function onStart(clientX){
@@ -25772,17 +26163,21 @@ window.addEventListener('DOMContentLoaded',init);
       track.classList.remove('dragging');
       var max = track.offsetWidth - thumb.offsetWidth - 8;
       var cur = parseFloat(thumb.style.left || '4') - 4;
-      if (cur >= max * 0.92){
+      if (cur >= max * THRESHOLD){
         confirmed = true;
         track.classList.add('confirmed');
         thumb.style.left = (max + 4) + 'px';
         if (fill) fill.style.width = '100%';
+        if (label) label.textContent = 'SUBMITTING…';
         hap([15, 50, 15, 50, 25]);
         try { onConfirm && onConfirm(); } catch(e){ console.error(e); }
       } else {
+        // Snap back. Restore idle label after the spring animation.
         thumb.style.left = '4px';
         if (fill) fill.style.width = '0';
         track.classList.remove('armed');
+        armedHapticFired = false;
+        if (label) label.textContent = IDLE_TEXT;
       }
     }
     thumb.addEventListener('touchstart', function(e){ onStart(e.touches[0].clientX); }, {passive:true});
@@ -25798,8 +26193,10 @@ window.addEventListener('DOMContentLoaded',init);
     track.classList.remove('confirmed', 'armed', 'dragging');
     var thumb = track.querySelector('.dtc-thumb');
     var fill = track.querySelector('.dtc-track-fill');
+    var label = track.querySelector('.dtc-track-label');
     if (thumb) thumb.style.left = '4px';
     if (fill) fill.style.width = '0';
+    if (label) label.textContent = 'SWIPE TO SUBMIT';
   }
   window.dtcArm = dtcArm;
   window.dtcReset = dtcReset;
