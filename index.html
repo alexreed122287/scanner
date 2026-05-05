@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-04T18:00-news-multi-panda">
+<meta name="op-build" content="2026-05-05T09:00-pos-collapse-test-push">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -630,7 +630,30 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
    positions JS path). The id="pos-bottom-panels" wrapper exists explicitly
    so we can target it with order:99 here. */
 #tab-pos.tab-pane.active{display:flex;flex-direction:column;}
-#tab-pos #pos-bottom-panels{order:99;display:block !important;}
+#tab-pos #pos-bottom-panels{order:99;}
+/* Inside pos-bottom-panels — TRAILING STOP and SMART EXITS configs render
+   side-by-side per user spec 2026-05-05. Each takes 50% with internal
+   wrap for narrow viewports. */
+#tab-pos #pos-bottom-panels.expanded{display:block !important;}
+#tab-pos #pos-bottom-panels:not(.expanded) > .ts-panel{display:none !important;}
+#pos-exit-toggle{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(0,212,255,0.06);border:1px solid var(--bg3);
+  border-radius:4px;color:var(--amb);
+  font-family:var(--ff-mono);font-size:10px;font-weight:700;letter-spacing:.5px;
+  padding:8px 12px;cursor:pointer;
+  margin:8px 10px;min-height:36px;width:auto;
+  -webkit-tap-highlight-color:rgba(0,212,255,0.15);
+}
+#pos-exit-toggle .arr{display:inline-block;transition:transform .15s;}
+#pos-bottom-panels.expanded ~ #pos-exit-toggle .arr,
+#pos-exit-toggle.open .arr{transform:rotate(90deg);}
+/* Side-by-side TS + SE config when expanded on wide screens */
+@media(min-width:600px){
+  #pos-bottom-panels.expanded{display:flex !important;flex-wrap:wrap;gap:8px;
+    padding:0 10px 10px;}
+  #pos-bottom-panels.expanded > .ts-panel{flex:1 1 calc(50% - 4px);min-width:280px;}
+}
 #tab-pos #pos-header-row{order:1;}
 #tab-pos #pos-tbl-wrap{order:2;}
 .flt-bar label{color:var(--gry);font-size:10px;display:inline-flex;align-items:center;gap:6px;letter-spacing:.5px;}
@@ -2754,45 +2777,67 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
   </div>
 </div>
 <div class="tab-pane" id="tab-pos">
-  <!-- Combined header — Total P&L, Day P&L, key counters, and the Refresh +
-       Clear buttons all live on one row. Was previously split across a
-       toolbar (buttons) and a stats-bar (P&L) which forced the user to
-       scan two horizontal regions. -->
-  <div class="stats-bar" id="pos-header-row" style="border-top:none;align-items:stretch;">
+  <!-- Compact header row 2026-05-05 per user spec. Shows REFRESH + CLEAR
+       always; the Total P&L / Day P&L / Open Positions / Opened Today /
+       Cash / Account Value cards are hidden behind a SUMMARY toggle so
+       more vertical space goes to the position list. -->
+  <div style="display:flex;align-items:center;gap:6px;padding:6px 10px;border-bottom:var(--bdr);background:var(--bg1);flex-wrap:wrap;">
+    <button id="pos-summary-toggle" onclick="posToggleSummary()" style="background:rgba(0,212,255,0.06);border:1px solid var(--bg3);border-radius:4px;color:var(--amb);font-family:var(--ff-mono);font-size:10px;font-weight:700;letter-spacing:.5px;padding:6px 10px;cursor:pointer;min-height:36px;-webkit-tap-highlight-color:rgba(0,212,255,0.15);">
+      <span id="pos-summary-arrow" style="display:inline-block;transition:transform .15s;">&#9656;</span> SUMMARY
+    </button>
+    <button class="btn blu" style="font-size:11px;padding:6px 10px;white-space:nowrap;min-height:36px;" onclick="fetchPositions()">&#8635; REFRESH</button>
+    <button class="btn wrn" style="font-size:11px;padding:6px 10px;white-space:nowrap;min-height:36px;" onclick="clearPositions()">&#10005; CLEAR</button>
+    <span class="pos-src" id="pos-src" style="font-size:10px;color:var(--gry);font-family:var(--ff-mono);margin-left:auto;"></span>
+  </div>
+  <!-- Stats bar collapsed by default. Click SUMMARY to expand. -->
+  <div class="stats-bar" id="pos-header-row" style="display:none;border-top:none;align-items:stretch;">
     <div class="stat-box"><div class="stat-label">TOTAL P&amp;L <span onclick="resetTotalPnl()" title="Reset Total P&amp;L counter to $0. Clears the local closed-trades history and snapshots the current broker realized P&amp;L as the new baseline. Open-position unrealized P&amp;L is not affected." style="cursor:pointer;font-size:9px;color:var(--gry);margin-left:6px;text-decoration:underline;letter-spacing:.5px;">RESET</span></div><div class="stat-val" id="pos-pnl" title="Lifetime: realized (closed trades) + unrealized (open positions)">$0.00</div></div>
     <div class="stat-box"><div class="stat-label">DAY P&amp;L</div><div class="stat-val" id="pos-daypnl" title="Today's change in total account equity">$0.00</div></div>
     <div class="stat-box"><div class="stat-label">OPEN POSITIONS</div><div class="stat-val amb" id="pos-count">0</div></div>
     <div class="stat-box" title="Positions opened or rolled today (NY calendar date). Closing one of these intraday counts toward your PDT day-trade tally — be careful before clicking CLOSE."><div class="stat-label">OPENED TODAY</div><div class="stat-val" id="pos-today-count" style="color:var(--ambb);">0</div></div>
     <div class="stat-box"><div class="stat-label">CASH</div><div class="stat-val amb" id="pos-cash" title="Total cash available (from Tradier balances)">--</div></div>
     <div class="stat-box"><div class="stat-label">ACCOUNT VALUE</div><div class="stat-val amb" id="pos-acctval" title="Total equity = positions market value + cash">--</div></div>
-    <!-- Action buttons docked at the right end of the same row -->
-    <div class="stat-box" style="flex:0 0 auto;display:flex;align-items:center;gap:6px;padding:6px 12px;border-left:1px solid var(--bg3);">
-      <button class="btn blu" style="font-size:11px;padding:6px 10px;white-space:nowrap;" onclick="fetchPositions()">&#8635; REFRESH</button>
-      <button class="btn wrn" style="font-size:11px;padding:6px 10px;white-space:nowrap;" onclick="clearPositions()">&#10005; CLEAR</button>
-      <span class="pos-src dyn-w" id="pos-src" style="font-size:10px;color:var(--gry);font-family:var(--ff-mono);width:140px;text-align:left;"></span>
-    </div>
   </div>
+  <script>
+    function posToggleSummary(){
+      var bar = document.getElementById('pos-header-row');
+      var arrow = document.getElementById('pos-summary-arrow');
+      if (!bar) return;
+      var open = bar.style.display && bar.style.display !== 'none';
+      bar.style.display = open ? 'none' : '';
+      if (arrow) arrow.style.transform = open ? 'rotate(0deg)' : 'rotate(90deg)';
+      try { if (typeof hap === 'function') hap(8); } catch(_){}
+    }
+  </script>
 
-  <!-- TRAILING STOP + SMART EXITS panels live BELOW the table — they're
-       configuration surfaces the user touches once per session, not data
-       they're scanning constantly. Wrapping them in this container lets us
-       move them as a single block. -->
-  <div id="pos-bottom-panels" style="display:none;">
-  <!-- ── TRAILING STOP + SMART EXITS combined header row ──
-       User spec 2026-05-04: same row for both checkboxes, no
-       explanations. Each checkbox toggles its own config panel below. -->
+  <!-- EXIT RULES toggle — collapsed by default. Tap to reveal the
+       Trailing Stop + Smart Exits panels side-by-side. -->
+  <button id="pos-exit-toggle" onclick="posToggleExitRules()" type="button">
+    <span class="arr">&#9656;</span> EXIT RULES (TRAIL + SMART EXITS)
+  </button>
+  <script>
+    function posToggleExitRules(){
+      var panel = document.getElementById('pos-bottom-panels');
+      var btn = document.getElementById('pos-exit-toggle');
+      if (!panel) return;
+      var open = panel.classList.toggle('expanded');
+      if (btn) btn.classList.toggle('open', open);
+      try { if (typeof hap === 'function') hap(8); } catch(_){}
+    }
+  </script>
+  <!-- TRAILING STOP + SMART EXITS panels — collapsed by default per user
+       spec 2026-05-05. The .expanded class on pos-bottom-panels reveals
+       both at once, side-by-side on wide screens, stacked on narrow. -->
+  <div id="pos-bottom-panels">
+  <!-- TRAILING STOP panel — own checkbox header. Side-by-side with SMART
+       EXITS panel below when EXIT RULES is expanded. -->
   <div class="ts-panel" style="padding:6px 10px;">
-    <div class="ts-panel-hdr" style="display:flex;flex-wrap:wrap;align-items:center;gap:14px;">
+    <div class="ts-panel-hdr" style="display:flex;align-items:center;gap:8px;">
       <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
         <input type="checkbox" id="ts-toggle" onchange="toggleTrailingStop()">
         <span style="font-weight:700;letter-spacing:.5px;">TRAILING STOP</span>
       </label>
-      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
-        <input type="checkbox" id="se-toggle" onchange="toggleSmartExits()">
-        <span style="font-weight:700;letter-spacing:.5px;color:var(--ngo);">SMART EXITS</span>
-      </label>
-      <span id="ts-poll-status" style="color:var(--gry2);font-size:10px;"></span>
-      <span id="se-status" style="color:var(--gry2);font-size:10px;margin-left:auto;">OFF</span>
+      <span id="ts-poll-status" style="color:var(--gry2);font-size:10px;margin-left:auto;"></span>
     </div>
     <div id="ts-cfg" style="display:none;">
       <div class="ts-cfg">
@@ -2853,9 +2898,16 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
     </div>
   </div>
 
-  <!-- SMART EXITS PANEL — header merged into the unified ts-panel above
-       2026-05-04 per user spec; this wrapper just holds the config body. -->
+  <!-- SMART EXITS panel — own checkbox header. Side-by-side with
+       TRAILING STOP when EXIT RULES is expanded. -->
   <div class="ts-panel" style="border-color:rgba(255,0,230,0.30);padding:6px 10px;">
+    <div class="ts-panel-hdr" style="display:flex;align-items:center;gap:8px;">
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+        <input type="checkbox" id="se-toggle" onchange="toggleSmartExits()">
+        <span style="font-weight:700;letter-spacing:.5px;color:var(--ngo);">SMART EXITS</span>
+      </label>
+      <span id="se-status" style="color:var(--gry2);font-size:10px;margin-left:auto;">OFF</span>
+    </div>
     <div id="se-cfg" style="display:none;">
       <div class="ts-cfg" style="border-bottom:1px solid var(--bg3);padding-bottom:10px;margin-bottom:10px;">
         <span style="color:var(--ngo);font-size:10px;font-weight:700;letter-spacing:.5px;align-self:center;">RULE 1 &mdash; INTRADAY EMERGENCY</span>
@@ -3248,7 +3300,7 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
   <div class="page-wrap">
 
     <!-- ── iOS PUSH NOTIFICATIONS (server-side, works when app is closed) ── -->
-    <div class="card collapsible" id="push-setup-card"><div class="card-hdr">&#128241; iOS PUSH NOTIFICATIONS (PWA)</div>
+    <div class="card collapsible" id="push-setup-card"><div class="card-hdr">iOS PUSH NOTIFICATIONS (PWA)</div>
     <div class="card-body" style="padding:14px 16px;">
       <div style="font-family:var(--ff-mono);font-size:11px;color:var(--gry);line-height:1.7;margin-bottom:14px;">
         <b style="color:var(--ambb);">Receive alerts even when Option Panda is closed</b> via Apple's Web Push gateway. Requires a free <a href="https://onesignal.com" target="_blank" rel="noopener" style="color:var(--blub);">OneSignal</a> account (10,000 subscribers free) and a one-time setup. Real-time pushes work when the iPhone is locked or the app is backgrounded.<br>
@@ -3281,7 +3333,7 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
 
       <!-- Step 3: Subscribe -->
       <div class="api-row" style="align-items:center;flex-wrap:wrap;gap:8px;">
-        <button class="btn grn" style="font-size:11px;padding:8px 14px;" onclick="pushSubscribe()" title="Prompt the user for notification permission and register this device with OneSignal">&#128276; ENABLE PUSH ON THIS DEVICE</button>
+        <button class="btn grn" style="font-size:11px;padding:8px 14px;" onclick="pushSubscribe()" title="Prompt the user for notification permission and register this device with OneSignal">ENABLE PUSH ON THIS DEVICE</button>
         <button class="btn" style="font-size:11px;padding:8px 14px;border-color:var(--ambb);color:var(--ambb);" onclick="pushSendTest()" title="Trigger a test push to verify everything works">SEND TEST PUSH</button>
         <button class="btn" style="font-size:11px;padding:8px 14px;border-color:var(--wrn);color:var(--wrn);" onclick="pushUnsubscribe()" title="Disable push on this device — your subscription is removed from OneSignal">&#10005; UNSUBSCRIBE</button>
       </div>
@@ -3305,7 +3357,7 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
     </div></div>
 
     <!-- ── NOTIFICATION SETTINGS ── -->
-    <div class="card collapsible" id="hc-alerts-card" data-default-collapsed><div class="card-hdr">&#9650; HIGH-CONVICTION ALERT SETTINGS</div>
+    <div class="card collapsible" id="hc-alerts-card" data-default-collapsed><div class="card-hdr">HIGH-CONVICTION ALERT SETTINGS</div>
     <div class="card-body api-form">
       <div style="font-family:var(--ff-mono);font-size:10px;color:var(--gry);margin-bottom:14px;line-height:1.7;">
         Fires when a ticker matches: <span style="color:var(--grn);">PROVEN + Score &ge;90 + Analyst Revisions &uarr; + GEX Call Heavy</span><br>
@@ -13481,28 +13533,93 @@ function pushSubscribe(){
     });
   });
 }
+// SEND TEST PUSH 2026-05-05 rewrite: doesn't depend on OneSignal SDK
+// being loaded or the user being subscribed. Fires a LOCAL notification
+// directly through the registered service worker. If the SDK is loaded
+// AND user is subscribed, also reports the OneSignal Player ID so the
+// user can verify their backend push wiring.
+//
+// Old version was getting stuck on "Sending test push…" because the
+// OneSignalDeferred.push callback either:
+//  (a) never fired (SDK script blocked / failed to load)
+//  (b) threw inside (User.PushSubscription path differs across SDK versions)
+//  (c) fired but the user wasn't subscribed and the early return didn't
+//      update status visibly
+// The new path always provides feedback within 200ms and surfaces the
+// real failure cause (permission denied, SW not registered, etc).
 function pushSendTest(){
-  if (!window.OP_ONESIGNAL_APP_ID){
-    _pushStatus('✗ Save a OneSignal App ID first', 'var(--wrn)');
-    return;
-  }
-  if (typeof OneSignalDeferred === 'undefined'){
-    _pushStatus('✗ SDK not loaded — reload page', 'var(--wrn)');
-    return;
-  }
   _pushStatus('Sending test push…', 'var(--gry)');
-  OneSignalDeferred.push(function(OneSignal){
-    var pid = OneSignal.User.PushSubscription.id;
-    if (!pid){
-      _pushStatus('✗ Not subscribed yet — click ENABLE PUSH first', 'var(--wrn)');
-      return;
+  // Quick fire-and-update path. Non-blocking. We don't gate on the
+  // OneSignal SDK at all — local pushes work via the SW we registered
+  // in init(), regardless of SDK state.
+  setTimeout(function(){
+    try {
+      // 1. Check Notification API support
+      if (!('Notification' in window)){
+        _pushStatus('✗ This browser does not support Notifications.', 'var(--wrn)');
+        return;
+      }
+      // 2. Check permission
+      if (Notification.permission !== 'granted'){
+        if (Notification.permission === 'denied'){
+          _pushStatus('✗ Notifications are blocked. Open iOS Settings → Notifications → Option Panda and re-enable. (Permission state: denied)', 'var(--wrn)');
+        } else {
+          _pushStatus('✗ Permission not granted. Click ENABLE PUSH ON THIS DEVICE first to request permission. (Permission state: '+Notification.permission+')', 'var(--wrn)');
+        }
+        return;
+      }
+      // 3. Verify service worker is registered (required on iOS 16.4+)
+      if (!('serviceWorker' in navigator)){
+        _pushStatus('✗ Service workers not supported by this browser.', 'var(--wrn)');
+        return;
+      }
+      navigator.serviceWorker.ready.then(function(reg){
+        try {
+          reg.showNotification('Option Panda — Test Push', {
+            body: 'If you see this, your iPhone is correctly wired for push notifications. Server-side pushes (alerts when the app is closed) require the OneSignal REST API per Step 4.',
+            icon: './assets/icon-192.png',
+            badge: './assets/icon-192.png',
+            tag: 'test-push-' + Date.now(),
+            silent: false,
+            vibrate: [120, 60, 120],
+            data: { url: './index.html' }
+          });
+          // Try to also surface OneSignal Player ID if available — purely
+          // informational so the user knows their REST-API target.
+          var pidNote = '';
+          try {
+            if (typeof OneSignalDeferred !== 'undefined' && window.OP_ONESIGNAL_APP_ID){
+              OneSignalDeferred.push(function(OneSignal){
+                try {
+                  var pid = (OneSignal && OneSignal.User && OneSignal.User.PushSubscription)
+                    ? OneSignal.User.PushSubscription.id : '';
+                  if (pid){
+                    var el = document.getElementById('push-status');
+                    if (el) el.innerHTML += '<br><span style="color:var(--gry);font-size:10px;">Player ID: <code style="color:var(--ambb);">'+pid+'</code></span>';
+                  }
+                } catch(_){}
+              });
+            }
+          } catch(_){}
+          _pushStatus('✓ Local push fired. If you don\'t see it, check iOS Settings → Notifications → Option Panda. For pushes when the app is CLOSED, wire the REST API per Step 4.', 'var(--grn)');
+        } catch(e){
+          _pushStatus('✗ showNotification threw: '+(e&&e.message||'unknown')+'. Try unregistering the service worker (double-tap panda icon to force-reload) and re-enabling push.', 'var(--wrn)');
+        }
+      }).catch(function(e){
+        _pushStatus('✗ Service worker not ready: '+(e&&e.message||'unknown')+'. Reload the page; if it persists, the sw.js file may not be deployed.', 'var(--wrn)');
+      });
+    } catch(e){
+      _pushStatus('✗ Test push failed: '+(e&&e.message||'unknown error'), 'var(--wrn)');
     }
-    // Use the local pushNotify path as a fallback test — fires immediately
-    // through the registered service worker. Gives the user instant
-    // feedback that the SW path is wired before they configure REST.
-    pushNotify('Option Panda — Test Push', 'If you see this, your iPhone is correctly registered for notifications. Server-side pushes will fire even when the app is closed once you wire the REST API (see Step 4).', 'test-push');
-    _pushStatus('✓ Local push fired via service worker. For server-side pushes (when the app is closed), wire the REST API per Step 4.', 'var(--grn)');
-  });
+  }, 50);
+  // Watchdog: if status hasn't updated within 5 seconds, surface a generic error
+  var initialStatus = (document.getElementById('push-status') || {}).textContent || '';
+  setTimeout(function(){
+    var el = document.getElementById('push-status');
+    if (el && el.textContent === initialStatus){
+      _pushStatus('✗ Test timed out (5s). Possible causes: notification permission revoked, service worker not registered, browser blocked the call. Check the browser console for errors.', 'var(--wrn)');
+    }
+  }, 5000);
 }
 function pushUnsubscribe(){
   if (typeof OneSignalDeferred === 'undefined'){
@@ -21539,7 +21656,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.2.0-news-multi-panda';
+var APP_VERSION = '2.2.1-pos-collapse-test-push';
 // Page-source fallback constants removed. Each visitor now provides their own
 // API credentials via the API tab (or, for Tradier, sets up the worker proxy
 // at worker/tradier-proxy/ \u2014 keys never reach the browser at all).
