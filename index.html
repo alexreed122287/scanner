@@ -8681,7 +8681,13 @@ function _assertOrderInvariants(body, ctx){
 // `tag` is optional Tradier order metadata (≤32 alphanumeric+_-+. chars). Used
 // to mark step-fill / roll legs so closed-trade reconciliation can attribute
 // slippage per leg + per attempt without depending on order-id correlation.
-function submitLimitAtPrice(creds,acct,occSym,sym,side,qty,otype,price,tag){
+//
+// `duration` is optional and defaults to 'day'. Pass 'pre' or 'post' from the
+// equity step-fill path so AFTER-HOURS stock orders actually rest in the
+// extended-hours session instead of waiting for next open. Tradier's stock
+// API accepts day | gtc | pre | post; options accept only day | gtc.
+function submitLimitAtPrice(creds,acct,occSym,sym,side,qty,otype,price,tag,duration){
+  duration = duration || 'day';
   var tagStr = '';
   if (tag) {
     // Tradier silently rejects orders with invalid tag chars. Sanitize: keep
@@ -8695,7 +8701,7 @@ function submitLimitAtPrice(creds,acct,occSym,sym,side,qty,otype,price,tag){
     +'&side='+encodeURIComponent(side)
     +'&quantity='+qty
     +'&type=limit'
-    +'&duration=day'
+    +'&duration='+encodeURIComponent(duration)
     +'&price='+price.toFixed(2)
     +tagStr;
   if(otype==='stock'){
@@ -8704,7 +8710,7 @@ function submitLimitAtPrice(creds,acct,occSym,sym,side,qty,otype,price,tag){
       +'&side='+encodeURIComponent(side)
       +'&quantity='+qty
       +'&type=limit'
-      +'&duration=day'
+      +'&duration='+encodeURIComponent(duration)
       +'&price='+price.toFixed(2)
       +tagStr;
   }
@@ -8874,8 +8880,22 @@ async function cancelOrderVerbose(creds,acct,orderId){
 
 function sleep(ms){return new Promise(function(r){setTimeout(r,ms);});}
 
-async function runStepFill(creds,acct,occSym,sym,side,qty,startPrice,limitPrice,stepSize,maxAttempts,delaySec,direction){
+async function runStepFill(creds,acct,occSym,sym,side,qty,startPrice,limitPrice,stepSize,maxAttempts,delaySec,direction,assetClass,duration){
   // direction: 'up' = open (bid\u2192ask), 'down' = close (ask\u2192bid)
+  // assetClass: 'option' (default, back-compat for every existing caller) or
+  //   'stock' (equity step-fill \u2014 required so submitLimitAtPrice builds a
+  //   class=equity body instead of class=option, which would fail the OCC
+  //   invariant against a plain ticker like "OSS"). Bug surfaced 2026-05-05
+  //   when an after-hours STOCK BUY tripped "[invariant submitLimitAtPrice]
+  //   malformed OCC OSS".
+  // duration: 'day' (default), 'gtc', 'pre', or 'post'. Stock-only durations
+  //   ('pre'/'post') are coerced to 'day' if the caller still passes them
+  //   for an option (Tradier rejects pre/post on options).
+  assetClass = assetClass || 'option';
+  duration   = duration   || 'day';
+  if (assetClass !== 'stock' && (duration === 'pre' || duration === 'post')){
+    duration = 'day';
+  }
   var goingUp=(direction!=='down');
   G.stepFillActive=true;
   G.stepFillCancel=false;
@@ -8937,7 +8957,10 @@ async function runStepFill(creds,acct,occSym,sym,side,qty,startPrice,limitPrice,
 
     var orderId=null;
     try{
-      var res=await submitLimitAtPrice(creds,acct,occSym,sym,side,qty,'limit',currentPrice);
+      // assetClass selects equity vs option body in submitLimitAtPrice.
+      // duration is plumbed through so after-hours stock step-fills can
+      // route to the pre/post extended-hours session.
+      var res=await submitLimitAtPrice(creds,acct,occSym,sym,side,qty,assetClass,currentPrice,null,duration);
       orderId=res.orderId;
       sfLog('Order #'+orderId+' placed (status: '+res.status+')','sent');
     }catch(e){
@@ -9306,6 +9329,18 @@ function submitOrder(){
     var maxAtt=parseInt(eid('sf-max').value)||10;
     var delaySec=parseInt(eid('sf-delay').value)||5;
     var startFrom=eid('sf-start').value;
+    // 2026-05-05 fix: capture asset class + duration so the step-fill loop
+    // builds the correct Tradier order body. Without this, an after-hours
+    // STOCK BUY tripped "[invariant submitLimitAtPrice] malformed OCC OSS"
+    // because runStepFill was hardcoding the asset-class arg to 'limit'
+    // (which fell through to the option path and validated the plain
+    // ticker against the OCC regex). Coerce option durations to day/gtc
+    // since Tradier rejects pre/post on options.
+    var sfAssetClass = (type === 'STOCK') ? 'stock' : 'option';
+    var sfDuration   = (eid('ord-duration') && eid('ord-duration').value) || 'day';
+    if (sfAssetClass !== 'stock' && (sfDuration === 'pre' || sfDuration === 'post')){
+      sfDuration = 'day';
+    }
     var bid=G.liveQuote?G.liveQuote.bid:0;
     var ask=G.liveQuote?G.liveQuote.ask:0;
     var mid=G.liveQuote?G.liveQuote.mid:0;
@@ -9358,11 +9393,11 @@ function submitOrder(){
           toast('\u26a0 No ask price available \u2014 refresh quote before closing');
           return;
         }
-        runStepFill(creds,acct,occSym,sym,side,qty,sp,lp,stepSize,maxAtt,delaySec,closing2?'down':'up');
+        runStepFill(creds,acct,occSym,sym,side,qty,sp,lp,stepSize,maxAtt,delaySec,closing2?'down':'up',sfAssetClass,sfDuration);
       },1500);
       return;
     }
-    runStepFill(creds,acct,occSym,sym,side,qty,startPrice,limitPrice,stepSize,maxAtt,delaySec,direction);
+    runStepFill(creds,acct,occSym,sym,side,qty,startPrice,limitPrice,stepSize,maxAtt,delaySec,direction,sfAssetClass,sfDuration);
     return;
   }
 
