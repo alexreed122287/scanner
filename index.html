@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-05T09:00-pos-collapse-test-push">
+<meta name="op-build" content="2026-05-05T10:00-indices-zero-fix">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -2430,7 +2430,7 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
 <body>
 <div id="hdr">
   <div id="hdr-logo"><img src="assets/pandas2.png" alt="" class="panda-icon" ondblclick="forceReloadFresh()" title="Double-tap to force-reload (clears stale cache)"><span ondblclick="forceReloadFresh()" title="Double-tap to force-reload">OPTION PANDA</span><span id="clk-logo" style="margin-left:14px;font-family:var(--ff-mono);font-size:12px;color:var(--amb);letter-spacing:.5px;font-weight:400;">--:--:--</span><!-- Version chip removed 2026-05-04 per user spec; double-tap the panda icon to force-reload if cache gets stuck --><span id="hdr-version" onclick="forceReloadFresh()" style="display:none;">v—</span></div>
-  <div id="hdr-tickers">
+  <div id="hdr-tickers" onclick="if(typeof updateHeaderQuotes==='function'){try{updateHeaderQuotes();if(typeof toast==='function')toast('Indices refreshed');if(typeof hap==='function')hap(8);}catch(_){}}" title="Tap to force-refresh indices">
     <span class="htick"><span class="ts">SPY </span><span class="tv" id="h-spy">--</span> <span class="tc" id="h-spy-c">(--)</span></span>
     <span class="htick"><span class="ts">QQQ </span><span class="tv" id="h-qqq">--</span> <span class="tc" id="h-qqq-c">(--)</span></span>
     <span class="htick"><span class="ts">DIA </span><span class="tv" id="h-dia">--</span> <span class="tc" id="h-dia-c">(--)</span></span>
@@ -21598,28 +21598,39 @@ function updateHeaderQuotes(){
       }
       if(container) container.style.display = '';
       var price=parseFloat(q.last||q.prevclose)||0;
-      // Daily % change — try every available signal in order:
-      //   1) Tradier's pre-computed change_percentage
-      //   2) (last - prevclose) / prevclose * 100 (recompute from raw)
-      //   3) (last - close) / close * 100 (close = today's official close
-      //      during AH; recovers AH delta when change_percentage stale)
-      //   4) ahDelta() — AH-specific helper that accounts for AH session
-      //   5) 0 (always render '(0.00%)' instead of '(--)' when we have a quote)
-      // User report 2026-05-03: '%'s still not showing for indicies'.
-      var chgPct = parseFloat(q.change_percentage);
-      if (!chgPct) {
+      // Daily % change — distinguishes "literally 0" from "missing".
+      // 2026-05-05 fix: previous logic used `if (!chgPct)` which treats
+      // a legitimate 0.00% as missing and overwrites with recomputed
+      // values. When Tradier returns "0" AND last === prevclose (pre-
+      // market with no trades yet) we'd loop through all fallbacks and
+      // still get 0, but if Tradier had an off moment and returned a
+      // truncated payload, we'd silently lose a real -0.37% reading.
+      // Fix: only fall back when `change_percentage` is explicitly
+      // missing (undefined / null / empty string / NaN), not when it's
+      // exactly zero. Recompute paths only fire when the API didn't
+      // provide a reading at all.
+      var chgPct;
+      var raw = q.change_percentage;
+      var hasApiPct = (raw !== undefined && raw !== null && raw !== '' && !isNaN(parseFloat(raw)));
+      if (hasApiPct){
+        chgPct = parseFloat(raw);
+      } else {
+        // Recompute from prevclose
         var prevC = parseFloat(q.prevclose);
-        if (prevC > 0) chgPct = ((price - prevC) / prevC) * 100;
+        if (prevC > 0 && price > 0) chgPct = ((price - prevC) / prevC) * 100;
+        // Recompute from today's close (used during AH when prevclose is
+        // yesterday's and close is today's RTH close)
+        if ((chgPct === undefined || isNaN(chgPct)) ){
+          var todayC = parseFloat(q.close);
+          if (todayC > 0 && todayC !== price) chgPct = ((price - todayC) / todayC) * 100;
+        }
+        // AH-specific delta as last resort
+        if ((chgPct === undefined || isNaN(chgPct)) && typeof ahDelta === 'function'){
+          var ahd = ahDelta(q);
+          if (ahd && ahd.pct) chgPct = ahd.pct;
+        }
+        if (chgPct === undefined || isNaN(chgPct)) chgPct = 0;
       }
-      if (!chgPct) {
-        var todayC = parseFloat(q.close);
-        if (todayC > 0 && todayC !== price) chgPct = ((price - todayC) / todayC) * 100;
-      }
-      if (!chgPct && typeof ahDelta === 'function') {
-        var ahd = ahDelta(q);
-        if (ahd && ahd.pct) chgPct = ahd.pct;
-      }
-      chgPct = chgPct || 0;
       if(span) span.textContent='$'+fmt2(price);
       // Cache both price AND chgPct so the on-reload hydrate can restore
       // the last-known % change instead of leaving '(--)' until the next
@@ -21656,7 +21667,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.2.1-pos-collapse-test-push';
+var APP_VERSION = '2.2.2-indices-zero-fix';
 // Page-source fallback constants removed. Each visitor now provides their own
 // API credentials via the API tab (or, for Tradier, sets up the worker proxy
 // at worker/tradier-proxy/ \u2014 keys never reach the browser at all).
