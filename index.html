@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-05T13:00-pos-redesign-eod-log">
+<meta name="op-build" content="2026-05-05T14:00-history-multiplier-cash-csv">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -4467,8 +4467,8 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
       <span id="pf-more-actions" style="display:none;gap:8px;align-items:center;flex-wrap:wrap;">
         <button class="btn" style="font-size:10px;padding:3px 10px;border-color:var(--amb);color:var(--amb);" onclick="pfCopyAllTickers()" title="Copy comma-separated unique tickers from all columns">COPY ALL TICKERS</button>
         <button class="btn" style="font-size:10px;padding:3px 10px;border-color:var(--grn);color:var(--grn);" onclick="pfAddColumn()">+ ADD COLUMN</button>
-        <button class="btn" style="font-size:10px;padding:3px 10px;border-color:var(--wrn);color:var(--wrn);" onclick="pfExportCSV()" title="Long-form CSV — one row per position">&#10515; EXPORT CSV</button>
-        <button class="btn" style="font-size:10px;padding:3px 10px;border-color:var(--ambb);color:var(--ambb);" onclick="pfExportMatrix()" title="Wide-form CSV — Ticker, Kind, Type, Strike, Expiry are separate columns; each account = its own column for quantity. Copies CSV to clipboard + downloads .csv (Excel-compatible UTF-8 with BOM).">&#10515; EXPORT MATRIX</button>
+        <!-- EXPORT CSV / EXPORT MATRIX buttons removed 2026-05-05 per user spec. -->
+
         <button class="btn" style="font-size:10px;padding:3px 10px;border-color:var(--ngo);color:var(--ngo);" onclick="pfResetAll()">RESET</button>
       </span>
     </div>
@@ -16324,14 +16324,17 @@ function renderScan(){
   // → theme score → volume) and was the only one not visible — making it
   // impossible to see WHY one ticker outranked another when score+tech+fund
   // were all equal.
+  // Column order updated 2026-05-05 per user spec — PRICE moved from
+  // position 7 to position 4 (immediately after SYMBOL, before SCORE)
+  // so the user's eye flows TICKER → current price → score → signal.
   var cols=[
     {k:'_star',l:''},
     {k:'_rank',l:'#'},
     {k:'ticker',l:'SYMBOL'},
+    {k:'price',l:'PRICE'},
     {k:'score',l:'SCORE'},
     {k:'isGo',l:'SIGNAL'},
     {k:'sector',l:'SECTOR'},
-    {k:'price',l:'PRICE'},
     {k:'changePct',l:_chgColLabel()},
     {k:'volume',l:'VOLUME'},
     {k:'techScore',l:'TECH'},
@@ -17934,10 +17937,10 @@ function renderPositionsTable(pos,srcLabel){
   // columns sort the data-sort-* numeric attribute on each <td>.
   var html='<table id="pos-table"><thead><tr>'
     +'<th data-sort="ticker" style="cursor:pointer;">TICKER</th>'
+    +'<th data-sort="ulpx" style="cursor:pointer;" title="Current underlying stock price">STOCK PRICE</th>'
     +'<th class="col-opened" data-sort="opened" style="cursor:pointer;">OPENED</th>'
     +'<th>CLOSE</th>'
     +'<th>ROLL</th>'
-    +'<th data-sort="ulpx" style="cursor:pointer;" title="Current underlying stock price">STOCK PRICE</th>'
     +'<th data-sort="delta" style="cursor:pointer;" title="Current contract delta — sensitivity of contract price per $1 underlying move (0.50 = mid; 1.00 = deep ITM)">DELTA</th>'
     +'<th data-sort="qty" style="cursor:pointer;">QTY</th>'
     +'<th data-sort="mid" style="cursor:pointer;" title="Current contract mid price (bid+ask)/2 — what one contract is worth right now">PRICE</th>'
@@ -18236,11 +18239,11 @@ function renderPositionsTable(pos,srcLabel){
       + (openedToday ? ' class="pos-row-today" title="Opened or rolled today — closing intraday triggers a PDT day-trade"' : '')
       + '>'
       +'<td><b>'+tk+'</b>'+(isStock?' <span style="color:var(--gry);font-size:10px;">EQ</span>':'')+'</td>'  // TICKER
+      +stockPxCellHL                                                                                          // STOCK PRICE (between TICKER and OPENED)
       +formatOpenedDateTime(p, openedToday)                                                                  // OPENED
       +'<td style="white-space:nowrap;"><button class="cbtn" onclick="doClose(this)">CLOSE</button></td>'    // CLOSE
       +rollCell                                                                                               // ROLL
-      +stockPxCellHL                                                                                          // STOCK PRICE (now right of ROLL)
-      +deltaCell                                                                                              // DELTA (new)
+      +deltaCell                                                                                              // DELTA
       +'<td>'+qty+(isStock?' <span style="color:var(--gry2);font-size:9px;">sh</span>':'')+'</td>'           // QTY
       +priceCell                                                                                              // PRICE (contract/share mid)
       +equityCellHL                                                                                           // EQUITY (highlighted)
@@ -18421,8 +18424,23 @@ function updatePosStats(){
       : 'Awaiting balance data — refresh positions to populate';
   }
   // ── CASH ───────────────────────────────────────────────────────────────
-  var cash = (G.lastBalances && typeof G.lastBalances.total_cash === 'number')
-           ? G.lastBalances.total_cash : null;
+  // Tradier sometimes returns balance fields as strings ("68.75") rather
+  // than numbers, especially through the proxy. parseFloat handles both.
+  // Fallback chain: total_cash → cash.cash_available → cash sub-object →
+  // null. User report 2026-05-05: cash showing $68.75 even when the
+  // account had more available — root cause was typeof check rejecting
+  // string-typed balance fields.
+  var cash = null;
+  if (G.lastBalances){
+    var b = G.lastBalances;
+    var raw = b.total_cash;
+    if (raw == null && b.cash && b.cash.cash_available != null) raw = b.cash.cash_available;
+    if (raw == null && b.cash && b.cash.total_cash != null)     raw = b.cash.total_cash;
+    if (raw != null){
+      var n = parseFloat(raw);
+      if (!isNaN(n)) cash = n;
+    }
+  }
   var cashEl = eid('pos-cash');
   if(cashEl) cashEl.textContent = (cash != null) ? fmtD(cash) : '--';
 }
@@ -19225,18 +19243,23 @@ function fetchBalances(){
       G.lastBalances = b;
       if(eid('pos-acctval')) eid('pos-acctval').textContent = fmtD(b.total_equity);
       if(typeof updatePosStats === 'function') updatePosStats();
-      // Option buying power: margin accts use margin.option_buying_power; cash uses cash_available; pdt uses pdt.option_buying_power
+      // Option buying power: margin accts use margin.option_buying_power;
+      // cash uses cash_available; pdt uses pdt.option_buying_power. Tradier
+      // returns these as either numbers or strings depending on endpoint
+      // version + proxy — parseFloat handles both. _num() coerces and
+      // rejects NaN. User report 2026-05-05: BP stuck at $68.75 because
+      // typeof===number was rejecting string-typed fields.
+      function _num(v){ if (v == null) return null; var n = parseFloat(v); return isNaN(n) ? null : n; }
       var obp = null;
-      if(b.margin && typeof b.margin.option_buying_power === 'number') obp = b.margin.option_buying_power;
-      else if(b.pdt && typeof b.pdt.option_buying_power === 'number')  obp = b.pdt.option_buying_power;
-      else if(b.cash && typeof b.cash.cash_available === 'number')     obp = b.cash.cash_available;
-      else if(typeof b.total_cash === 'number')                         obp = b.total_cash;
-      // Stock buying power (margin accts can be 2x option BP). Fall back to
-      // option BP when not exposed (cash + sandbox accounts often omit it).
+      if(b.margin) obp = obp != null ? obp : _num(b.margin.option_buying_power);
+      if(obp == null && b.pdt)  obp = _num(b.pdt.option_buying_power);
+      if(obp == null && b.cash) obp = _num(b.cash.cash_available);
+      if(obp == null)           obp = _num(b.total_cash);
+      // Stock buying power
       var sbp = null;
-      if(b.margin && typeof b.margin.stock_buying_power === 'number') sbp = b.margin.stock_buying_power;
-      else if(b.pdt && typeof b.pdt.stock_buying_power === 'number')  sbp = b.pdt.stock_buying_power;
-      else sbp = obp;
+      if(b.margin) sbp = _num(b.margin.stock_buying_power);
+      if(sbp == null && b.pdt) sbp = _num(b.pdt.stock_buying_power);
+      if(sbp == null) sbp = obp;
       G.lastBP = { option:obp, stock:sbp, ts:Date.now() };
       if(bpEl){
         bpEl.textContent = 'OPT BP: ' + (obp != null ? fmtD(obp) : '--');
@@ -20251,16 +20274,20 @@ function matchTrades(orders){
       }
       if(!openDate) openDate = o.create_date; // last resort: use close date
 
-      // P&L: for long (BTO->STC): (close-open)*100*qty
-      //       for short (STO->BTC): (open-close)*100*qty
-      // When no open lot found in history (sandbox truncation), default to LONG
-      // since the terminal only trades buy_to_open long calls
+      // P&L: per-share spread × multiplier × qty.
+      //   Options use a 100x multiplier (1 contract = 100 shares).
+      //   Shares use a 1x multiplier (1 share = 1 share).
+      // 2026-05-05 fix: was hard-coded * 100 across all instruments,
+      // which inflated equity P&L by 100x and produced absurd % when
+      // combined with the recovery-branch's same * 100 in the open-price
+      // path. User report: OSS shares sell showed >15000% gain.
+      var mult = parsed.isOption ? 100 : 1;
       var isLong=(openLots.length>0)
         ? (openLots[0].side==='buy_to_open'||openLots[0].side==='buy')
         : true;
       var pnl = isLong
-        ? (closePx - openPx)*100*closeQty
-        : (openPx - closePx)*100*closeQty;
+        ? (closePx - openPx)*mult*closeQty
+        : (openPx - closePx)*mult*closeQty;
       var pnlPct = openPx>0 ? ((closePx-openPx)/openPx*100*(isLong?1:-1)) : 0;
       var holdDays=openDate?Math.round((new Date(o.create_date)-new Date(openDate))/(864e5)):0;
 
@@ -20271,8 +20298,8 @@ function matchTrades(orders){
       var openLimit = openLot ? (openLot.limitPx||0) : 0;
       var openSlipPerShare = (openLot && openLimit>0) ? (openLot.price - openLimit) : null; // long: fill-limit
       var closeSlipPerShare = (limitPx>0 && closePx>0) ? (limitPx - closePx) : null;        // long: limit-fill
-      // Total slippage (per-contract, ×100 multiplier, × qty)
-      var totalSlipDollars = ((openSlipPerShare||0) + (closeSlipPerShare||0)) * 100 * closeQty;
+      // Total slippage (× multiplier × qty — same shares-vs-options handling)
+      var totalSlipDollars = ((openSlipPerShare||0) + (closeSlipPerShare||0)) * mult * closeQty;
       var slipPct = (openPx > 0) ? ((openSlipPerShare||0) + (closeSlipPerShare||0)) / openPx * 100 : null;
 
       trades.push({
@@ -20390,9 +20417,14 @@ function fetchClosedPositions(){
         t.underlyingAtOpen = pod.underlyingAtOpen;
       }
       if(t.openPrice > 0) return;
-      // Recover openPrice from posOpenData cost basis (existing logic)
+      // Recover openPrice from posOpenData cost basis (existing logic).
+      // Multiplier-aware: shares = costBasis / qty; options = costBasis / qty / 100.
+      // 2026-05-05 fix: was always /100 which gave a per-share-cents value
+      // for shares (e.g. OSS bought at $9.85 came out as $0.0985), which
+      // then made the % return calculation report ~10,000%+ gains.
+      var multR = (t.isOption === false) ? 1 : 100;
       if(pod && pod.costBasis && pod.qty){
-        t.openPrice = pod.costBasis / pod.qty / 100;
+        t.openPrice = pod.costBasis / pod.qty / multR;
       }
       // Also recover openDate from posOpenData.openTs if still showing close date
       if(pod && pod.openTs && (t.openDate === t.closeDate || t.openDate === '--')){
@@ -20402,12 +20434,12 @@ function fetchClosedPositions(){
           t.holdDays = Math.round((new Date(t.closeDate) - new Date(openDt)) / 864e5);
         }
       }
-      // Recalculate P&L with recovered open price
+      // Recalculate P&L with recovered open price (same multiplier)
       if(t.openPrice > 0){
         var isLong = t.side === 'LONG';
         t.pnl = isLong
-          ? (t.closePrice - t.openPrice) * 100 * t.qty
-          : (t.openPrice - t.closePrice) * 100 * t.qty;
+          ? (t.closePrice - t.openPrice) * multR * t.qty
+          : (t.openPrice - t.closePrice) * multR * t.qty;
         t.pnlPct = (t.closePrice - t.openPrice) / t.openPrice * 100 * (isLong ? 1 : -1);
       }
     });
@@ -22288,7 +22320,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.4.0-pos-redesign-eod-log';
+var APP_VERSION = '2.4.1-history-multiplier-cash-csv';
 // Page-source fallback constants removed. Each visitor now provides their own
 // API credentials via the API tab (or, for Tradier, sets up the worker proxy
 // at worker/tradier-proxy/ \u2014 keys never reach the browser at all).
@@ -26958,6 +26990,13 @@ window.addEventListener('DOMContentLoaded',init);
     setTimeout(function(){ try { _hookSortHeaders(); } catch(_){} }, 800);
   });
 
+  console.log('[positions-sort] ready');
+})();
+/* EOD EQUITY LOG removed 2026-05-05 per user spec — module deleted in
+   v2.4.1. localStorage key `rrjcar_eod_equity_log_v1` will simply
+   stop being written; existing data lingers harmlessly. */
+(function(){ /* placeholder to keep the trailing IIFE balanced — */
+  return;
   // ── END-OF-DAY EQUITY LOG ────────────────────────────────────────────────
   // Snapshots {date, equity, cash, positionsValue} once per ET trading day,
   // shortly after market close (~16:05 ET on weekdays). Persists to
