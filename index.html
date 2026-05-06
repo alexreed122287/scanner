@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-05T11:30-trail-shares-industry-score">
+<meta name="op-build" content="2026-05-05T12:00-industry-score-spacing">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -2442,7 +2442,11 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
 #tab-ind .ind-expand:hover{background:var(--bg0)!important;}
 #tab-ind .ind-expand td{padding:12px 18px;border-bottom:2px solid var(--bdr);}
 #tab-ind .ind-mhead{margin-bottom:8px;color:var(--gry);font-family:var(--ff-mono);font-size:11px;}
-#tab-ind .ind-mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:5px;}
+/* Bumped minmax from 110px to 150px on 2026-05-05 so the new
+   scanner-score chip (10px mono, 3 digits + border) fits cleanly
+   alongside the symbol and percent change without truncating. Gap
+   between tags also widened from 5 to 8 for clearer separation. */
+#tab-ind .ind-mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;}
 #tab-ind .ind-mtag{font-family:var(--ff-mono);font-size:11px;padding:4px 8px;border-radius:3px;background:var(--bg2);border:var(--bdr);color:var(--wht);text-align:center;letter-spacing:.03em;}
 #tab-ind .ind-copy{margin-top:10px;font-family:var(--ff-mono);font-size:10px;color:var(--gry2);}
 #tab-ind .ind-copy span{color:var(--ambb);user-select:all;word-break:break-all;}
@@ -2469,7 +2473,10 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
 #tab-ind .ind-copy-btn{background:var(--bg2);border:var(--bdr);color:var(--ambb);font-family:var(--ff-mono);font-size:10px;padding:3px 8px;border-radius:3px;cursor:pointer;letter-spacing:.05em;transition:all .15s;}
 #tab-ind .ind-copy-btn:hover{background:var(--amb3);border-color:var(--amb);color:var(--amb);}
 #tab-ind .ind-copy-btn.copied{background:rgba(0,230,118,.18);color:var(--grn);border-color:var(--grn);}
-#tab-ind .ind-mtag{display:flex;justify-content:space-between;align-items:center;gap:6px;padding:4px 8px;}
+#tab-ind .ind-mtag{display:flex;justify-content:flex-start;align-items:center;gap:6px;padding:5px 9px;flex-wrap:wrap;}
+#tab-ind .ind-mtag .sym{flex:0 0 auto;}
+#tab-ind .ind-mtag .perf{margin-left:auto;flex:0 0 auto;white-space:nowrap;}
+#tab-ind .ind-mtag .ind-mscore{flex:0 0 auto;white-space:nowrap;padding:1px 5px !important;}
 #tab-ind .ind-mtag .sym{font-weight:600;}
 #tab-ind .ind-mtag .perf{font-size:10px;font-weight:600;font-family:var(--ff-mono);padding:1px 5px;border-radius:2px;}
 #tab-ind .ind-mtag .perf.up{background:rgba(0,230,118,.18);color:var(--grn);}
@@ -22177,7 +22184,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.3.0-trail-shares-industry-score';
+var APP_VERSION = '2.3.1-industry-score-spacing';
 // Page-source fallback constants removed. Each visitor now provides their own
 // API credentials via the API tab (or, for Tradier, sets up the worker proxy
 // at worker/tradier-proxy/ \u2014 keys never reach the browser at all).
@@ -25543,7 +25550,7 @@ function indDraw(){
         if (sc){
           var scClr = sc.isGo ? 'var(--grn)' : (sc.score >= 100 ? 'var(--ambb)' : 'var(--gry2)');
           var scLabel = Math.round(sc.score);
-          scoreHTML = '<span class="ind-mscore" style="color:'+scClr+';font-family:var(--ff-mono);font-size:9px;font-weight:700;letter-spacing:.5px;margin-left:5px;padding:1px 4px;border:1px solid '+scClr+';border-radius:2px;" title="Scanner composite score (latest scan)">'+scLabel+'</span>';
+          scoreHTML = '<span class="ind-mscore" style="color:'+scClr+';font-family:var(--ff-mono);font-size:9px;font-weight:700;letter-spacing:.4px;border:1px solid '+scClr+';border-radius:2px;" title="Scanner composite score (latest scan)">'+scLabel+'</span>';
         }
         var cls = 'ind-mtag' + (isAuto ? ' auto' : '');
         var title = isAuto ? 'Auto-assigned via industry tag — not in curated basket' : 'Curated theme member';
