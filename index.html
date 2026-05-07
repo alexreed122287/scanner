@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-05T14:00-history-multiplier-cash-csv">
+<meta name="op-build" content="2026-05-05T14:30-roll-tracker-csv">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -4467,8 +4467,7 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
       <span id="pf-more-actions" style="display:none;gap:8px;align-items:center;flex-wrap:wrap;">
         <button class="btn" style="font-size:10px;padding:3px 10px;border-color:var(--amb);color:var(--amb);" onclick="pfCopyAllTickers()" title="Copy comma-separated unique tickers from all columns">COPY ALL TICKERS</button>
         <button class="btn" style="font-size:10px;padding:3px 10px;border-color:var(--grn);color:var(--grn);" onclick="pfAddColumn()">+ ADD COLUMN</button>
-        <!-- EXPORT CSV / EXPORT MATRIX buttons removed 2026-05-05 per user spec. -->
-
+        <button class="btn" style="font-size:10px;padding:3px 10px;border-color:var(--ambb);color:var(--ambb);" onclick="pfExportRollTracker()" title="Roll tracker CSV — rows are tickers, columns are accounts. Each cell shows all positions (qty × strike type expDate) with a [ ] checkbox you can flip to [x] in your spreadsheet to mark rolled/closed. 3 blank rows at the bottom for new intraday positions.">ROLL TRACKER CSV</button>
         <button class="btn" style="font-size:10px;padding:3px 10px;border-color:var(--ngo);color:var(--ngo);" onclick="pfResetAll()">RESET</button>
       </span>
     </div>
@@ -22320,7 +22319,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.4.1-history-multiplier-cash-csv';
+var APP_VERSION = '2.5.0-roll-tracker-csv';
 // Page-source fallback constants removed. Each visitor now provides their own
 // API credentials via the API tab (or, for Tradier, sets up the worker proxy
 // at worker/tradier-proxy/ \u2014 keys never reach the browser at all).
@@ -25064,6 +25063,105 @@ function pfExportMatrix(){
 }
 
 function loadPortfolio(){ /* no-op loader — data loaded on demand in renderPortfolio */ }
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  ROLL TRACKER CSV EXPORT — User spec 2026-05-05
+//  One row per unique ticker. One column per account. Each cell lists every
+//  position for that ticker in that account, one per line, with a [ ]
+//  checkbox the user can flip to [x] in Excel/Sheets to mark rolled/closed.
+//  Three blank rows appended at the bottom for adding new positions
+//  intra-day.
+//
+//  Cell format example:
+//    "2× $185C 2026-06-12 [ ]
+//     1× $190C 2026-07-19 [ ]"
+//  (multi-line cells are CSV-legal when wrapped in double quotes; Excel
+//   and Google Sheets both render the embedded newlines correctly.)
+// ═══════════════════════════════════════════════════════════════════════════
+function pfExportRollTracker(){
+  var data = pfLoad();
+  if(!data || !data.columns || !data.columns.length){
+    toast('Portfolio empty — add positions first');
+    return;
+  }
+  var cols = data.columns;
+  // Collect all unique tickers across every account.
+  var tickerSet = {};
+  cols.forEach(function(col){
+    (col.rows || []).forEach(function(r){
+      if(r && r.ticker) tickerSet[r.ticker.toUpperCase()] = true;
+    });
+  });
+  var tickers = Object.keys(tickerSet).sort();
+  if(!tickers.length){
+    toast('No positions in portfolio yet');
+    return;
+  }
+  // Build cell content for (ticker × account). Multiple positions for the
+  // same ticker in the same account stack as separate lines in one cell.
+  // Sort lines within a cell by expiration (closest first), then strike.
+  function fmtPosLine(r){
+    var qty = parseInt(r.qty)||1;
+    var kind = r.kind || 'option';
+    if(kind === 'shares'){
+      var avg = (r.avgPrice != null) ? ' @ $'+(+r.avgPrice).toFixed(2) : '';
+      return qty + ' shares' + avg + ' [ ]';
+    }
+    var typeChar = (r.type === 'PUT') ? 'P' : 'C';
+    var strikeStr = (r.strike != null) ? '$' + (+r.strike).toFixed(2) + typeChar : '';
+    var expStr = r.exp || '';
+    return qty + '× ' + strikeStr + (expStr ? ' ' + expStr : '') + ' [ ]';
+  }
+  function buildCell(tk, col){
+    var lines = (col.rows || [])
+      .filter(function(r){ return r && r.ticker && r.ticker.toUpperCase() === tk; })
+      .sort(function(a, b){
+        var ka = a.kind || 'option', kb = b.kind || 'option';
+        if(ka !== kb) return ka === 'shares' ? 1 : -1;  // options first
+        if(ka === 'option'){
+          var ae = a.exp || '', be = b.exp || '';
+          if(ae !== be) return ae < be ? -1 : 1;
+          return (parseFloat(a.strike)||0) - (parseFloat(b.strike)||0);
+        }
+        return 0;
+      })
+      .map(fmtPosLine);
+    return lines.join('\n');
+  }
+  // CSV escape with newline support.
+  function csvCell(v){
+    if(v == null) return '';
+    var s = String(v);
+    if(s === '') return '';
+    if(/[",\n\r]/.test(s)){
+      return '"' + s.replace(/"/g, '""') + '"';
+    }
+    return s;
+  }
+  // Header: TICKER + one column per account
+  var hdr = ['TICKER'].concat(cols.map(function(c){ return c.name; }));
+  var lines = [ hdr.map(csvCell).join(',') ];
+  tickers.forEach(function(tk){
+    var row = [tk];
+    cols.forEach(function(col){ row.push(buildCell(tk, col)); });
+    lines.push(row.map(csvCell).join(','));
+  });
+  // Three blank rows at the bottom — TICKER cell empty, all account cells
+  // empty. User can fill in new intraday positions directly in the spreadsheet.
+  for(var i = 0; i < 3; i++){
+    var blankRow = ['']; for(var j = 0; j < cols.length; j++) blankRow.push('');
+    lines.push(blankRow.map(csvCell).join(','));
+  }
+  var csv = lines.join('\n');
+  // BOM prefix so Excel auto-detects UTF-8
+  var blob = new Blob(['﻿' + csv], {type:'text/csv;charset=utf-8'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'roll_tracker_'+new Date().toISOString().slice(0,10)+'.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+  toast(tickers.length + ' tickers × ' + cols.length + ' accounts — opens in Excel / Google Sheets');
+}
 
 // ─── END PORTFOLIO BUILDER ENGINE ──────────────────────────────────────
 
