@@ -16872,6 +16872,62 @@ function runGex(){
   }
 
   _gexPaced(gexTickers, GEX_DISPATCH_MS, _fetchOneExpiry, _onExpiryProgress, 'expiries').then(function(expiries){
+    // Step 1.5 (added 2026-05-07): bulk-fetch underlying spot quotes for
+    // every ticker in the GEX batch. The flip-strike computation requires
+    // a non-zero spot to apply the \u00b110% near-money filter, and the
+    // STOCK PRICE column on the GEX table reads from the per-row price.
+    // Previously we relied on G.results[t].price \u2014 which is empty when
+    // the user runs GEX without a fresh scan, or when the scanner result
+    // for a given ticker landed without a price (Tradier quote miss).
+    // User report 2026-05-07: "Not displaying stock price or gamma flip
+    // on gex/flow tab" \u2014 every row showed "--" for spot and "$0.00" for
+    // flip. Fetching our own quotes here makes GEX self-sufficient.
+    //
+    // Tradier's /v1/markets/quotes endpoint accepts a comma-separated
+    // symbols list. Tradier publicly documents 100 symbols per request
+    // as the safe ceiling (some accounts are larger). Batch in 50s to
+    // stay well under the URL-length limit AND the rate limit (each
+    // batch counts as one tradierFetch).
+    var BULK_BATCH = 50;
+    var spotPrices = {};
+    var batchTickers = expiries
+      .map(function(e){ return e && e.ticker; })
+      .filter(function(t){ return !!t; });
+    var bulkBatches = [];
+    for (var i=0; i<batchTickers.length; i+=BULK_BATCH){
+      bulkBatches.push(batchTickers.slice(i, i+BULK_BATCH));
+    }
+    var bulkChain = bulkBatches.reduce(function(p, batch){
+      return p.then(function(){
+        return tradierFetch(host+'/v1/markets/quotes?symbols='+encodeURIComponent(batch.join(',')), {
+          headers:{Authorization:'Bearer '+key, Accept:'application/json'}
+        }, 60*1000)
+        .then(function(r){return r.json();})
+        .then(function(d){
+          var qs = [];
+          try { qs = d.quotes && d.quotes.quote; if (!Array.isArray(qs)) qs = qs ? [qs] : []; } catch(_){ qs = []; }
+          qs.forEach(function(q){
+            if (!q || !q.symbol) return;
+            // Prefer last trade; fall back to close, mid (bid+ask)/2, or 0.
+            var px = +q.last;
+            if (!(px > 0)) px = +q.close;
+            if (!(px > 0) && q.bid && q.ask) px = (+q.bid + +q.ask) / 2;
+            if (!(px > 0)) px = 0;
+            spotPrices[q.symbol] = px;
+          });
+        })
+        .catch(function(e){
+          // Don't fail the whole GEX run if one batch errors \u2014 leave any
+          // missing tickers without a spot and let the row render '--'.
+          console.warn('[gex] quotes batch failed:', e && e.message);
+        });
+      });
+    }, Promise.resolve());
+
+    return bulkChain.then(function(){ return { expiries:expiries, spotPrices:spotPrices }; });
+  }).then(function(state){
+    var expiries = state.expiries;
+    var spotPrices = state.spotPrices;
     // Step 2: fetch options chains for tickers that have a valid expiry \u2014 also paced
     function _fetchOneChain(e){
       if(!e || !e.expiry) return Promise.resolve({ticker:(e&&e.ticker)||'', chain:[], expiry:null});
@@ -16891,7 +16947,11 @@ function runGex(){
       // Step 3: compute net flow from call OI vs put OI
       G.gexData = chains.map(function(c){
         var result = G.results.filter(function(r){ return r.t===c.ticker||r.ticker===c.ticker; })[0];
-        var price = result ? result.price : 0;
+        // Prefer the bulk-fetched spot quote (always fresh), fall back to
+        // whatever the scanner had cached. Either way `price` ends up >0
+        // for any ticker Tradier had a quote for, which fixes both the
+        // STOCK PRICE column AND the flip-strike computation below.
+        var price = (spotPrices && spotPrices[c.ticker]) || (result ? result.price : 0) || 0;
         var score = result ? result.score : 50;
 
         var callOI = 0, putOI = 0, callVol = 0, putVol = 0;
@@ -17058,7 +17118,9 @@ function renderGex(){
     if ((r.gex||0) <= 0) return false;
     if ((r.call||0) < 90) return false;
     if ((r.callOI||0) <= 1000) return false;
-    var sp = spotByTk[r.t] || 0;
+    // Prefer the spot stored on the gexData row (now reliably populated
+    // by the bulk-quote step); fall back to the scanner cache.
+    var sp = (r.price && r.price > 0) ? r.price : (spotByTk[r.t] || 0);
     if (!sp || !r.flip || sp <= r.flip) return false;
     var dte = r.dte || 0;
     if (dte < 30 || dte > 45) return false;
@@ -17075,9 +17137,17 @@ function renderGex(){
     var primeBadge=prime?'<span style="font-size:9px;color:var(--grn);margin-left:4px;font-weight:700;letter-spacing:.5px;" title="Prime bullish entry - meets ALL criteria: net gex >0, call% >=90, callOI >1K, spot > flip, DTE 30-45.">&#9733; PRIME</span>':'';
     var expCell = r.exp ? r.exp.split('-').slice(1).join('/') : '--';
     var flipNum = parseFloat(r.flip);
-    var strikeCell = (isFinite(flipNum) && flipNum > 0) ? ('$' + fmt2(flipNum)) : '--';
-    var spot = spotByTk[r.t] || 0;
-    var spotAboveFlip = spot && r.flip && spot > r.flip;
+    var hasFlip  = isFinite(flipNum) && flipNum > 0;
+    var strikeCell = hasFlip ? ('$' + fmt2(flipNum)) : '--';
+    // Flip cell mirrors STRIKE: '--' when missing instead of "$0.00".
+    var flipCell = hasFlip
+      ? '<td>$' + fmt2(flipNum) + '</td>'
+      : '<td style="color:var(--gry2);">--</td>';
+    // Prefer spot stored on the gexData row (set from the new bulk-quote
+    // step in runGex). Fall back to scanner G.results lookup if the
+    // gexData entry pre-dates the quote fetch (e.g. cached payload).
+    var spot = (r.price && r.price > 0) ? r.price : (spotByTk[r.t] || 0);
+    var spotAboveFlip = spot && hasFlip && spot > flipNum;
     var spotCell = spot
       ? '<td style="font-family:var(--ff-mono);font-size:11px;color:'+(spotAboveFlip?'var(--grn)':'var(--gry2)')+';font-weight:600;" title="'+(spotAboveFlip?'Above gamma flip - bullish dealer-long zone':'Below gamma flip - bearish dealer-short zone')+'">$'+fmt2(spot)+'</td>'
       : '<td style="color:var(--gry2);">--</td>';
@@ -17093,7 +17163,7 @@ function renderGex(){
       +'<td class="'+gexCls+'">'+(r.gex>0?'+':'')+r.gex+'M</td>'
       +'<td style="font-family:var(--ff-mono);font-size:11px;color:var(--grn);">'+(r.callOI ? fmtK(r.callOI) : '--')+'</td>'
       +'<td style="font-family:var(--ff-mono);font-size:11px;color:var(--ngo);">'+(r.putOI ? fmtK(r.putOI) : '--')+'</td>'
-      +'<td>$'+fmt2(r.flip)+'</td>'
+      +flipCell
       +'<td class="pnl-pos">'+r.call+'%</td>'
       +'<td class="pnl-neg">'+r.put+'%</td>'
       +'<td style="font-size:11px;'+dteStyle+'">'+(r.dte||'--')+'d</td>'
