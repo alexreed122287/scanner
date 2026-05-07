@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-05T15:00-gex-bullish-pos-reorder-atr">
+<meta name="op-build" content="2026-05-05T15:30-pos-reorder-atr-cst">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -3045,7 +3045,7 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
           <input type="date" id="atr-lk-date" style="background:var(--bg2);border:var(--bdr);border-radius:3px;color:var(--wht);font-family:var(--ff-mono);font-size:14px;padding:8px 10px;">
         </div>
         <div style="flex:1;min-width:110px;display:flex;flex-direction:column;gap:3px;">
-          <label style="font-family:var(--ff-mono);font-size:9px;letter-spacing:.5px;color:var(--gry);">TIME (ET)</label>
+          <label style="font-family:var(--ff-mono);font-size:9px;letter-spacing:.5px;color:var(--gry);">TIME (CST)</label>
           <input type="time" id="atr-lk-time" step="60" style="background:var(--bg2);border:var(--bdr);border-radius:3px;color:var(--wht);font-family:var(--ff-mono);font-size:14px;padding:8px 10px;">
         </div>
         <button class="btn blu" style="font-size:12px;padding:9px 18px;" onclick="atrLookup()">&#9654; LOOKUP</button>
@@ -18044,30 +18044,30 @@ function renderPositionsTable(pos,srcLabel){
   // by that field. Sort direction toggles on repeat clicks. TICKER /
   // STRIKE / EXP keys sort the data attribute on each <tr>; numeric
   // columns sort the data-sort-* numeric attribute on each <td>.
-  // Column order updated 2026-05-05 per user spec:
-  //   OPENED · CLOSE · ROLL · TICKER · STOCK PRICE · QTY · EXP · STRIKE ·
-  //   DELTA · PRICE · EQUITY · P/L $ · P/L % · DTE · ENTRY · B/E ·
-  //   1/2 ATR · 1 ATR · EMERGENCY · TRAIL
+  // Column order updated 2026-05-05 (rev 2) per user spec:
+  //   OPENED · EQUITY · P/L $ · TICKER · EXP · STRIKE · STOCK PRICE ·
+  //   B/E · QTY · DELTA · PRICE · P/L % · DTE · ENTRY PRICE · 1/2 ATR ·
+  //   1 ATR · EMERGENCY EXIT · CLOSE · ROLL · TRAIL
   var html='<table id="pos-table"><thead><tr>'
     +'<th class="col-opened" data-sort="opened" style="cursor:pointer;">OPENED</th>'
-    +'<th>CLOSE</th>'
-    +'<th>ROLL</th>'
-    +'<th data-sort="ticker" style="cursor:pointer;">TICKER</th>'
-    +'<th data-sort="ulpx" style="cursor:pointer;" title="Current underlying stock price">STOCK PRICE</th>'
-    +'<th data-sort="qty" style="cursor:pointer;">QTY</th>'
-    +'<th data-sort="exp" style="cursor:pointer;">EXP</th>'
-    +'<th data-sort="strike" style="cursor:pointer;">STRIKE</th>'
-    +'<th data-sort="delta" style="cursor:pointer;" title="Current contract delta — sensitivity of contract price per $1 underlying move (0.50 = mid; 1.00 = deep ITM)">DELTA</th>'
-    +'<th data-sort="mid" style="cursor:pointer;" title="Current contract mid price (bid+ask)/2 — what one contract is worth right now">PRICE</th>'
     +'<th data-sort="equity" class="col-equity" style="cursor:pointer;" title="Current value of your position (mark x qty x multiplier)">EQUITY</th>'
     +'<th data-sort="pnl" style="cursor:pointer;">P/L $</th>'
+    +'<th data-sort="ticker" style="cursor:pointer;">TICKER</th>'
+    +'<th data-sort="exp" style="cursor:pointer;">EXP</th>'
+    +'<th data-sort="strike" style="cursor:pointer;">STRIKE</th>'
+    +'<th data-sort="ulpx" style="cursor:pointer;" title="Current underlying stock price">STOCK PRICE</th>'
+    +'<th data-sort="be" style="cursor:pointer;" title="Underlying price needed for the contract to break even at expiration">B/E</th>'
+    +'<th data-sort="qty" style="cursor:pointer;">QTY</th>'
+    +'<th data-sort="delta" style="cursor:pointer;" title="Current contract delta — sensitivity of contract price per $1 underlying move (0.50 = mid; 1.00 = deep ITM)">DELTA</th>'
+    +'<th data-sort="mid" style="cursor:pointer;" title="Current contract mid price (bid+ask)/2 — what one contract is worth right now">PRICE</th>'
     +'<th data-sort="pnlPct" style="cursor:pointer;">P/L %</th>'
     +'<th data-sort="dte" style="cursor:pointer;">DTE</th>'
     +'<th data-sort="entry" style="cursor:pointer;" title="Underlying stock price at the time you bought this position">ENTRY PRICE</th>'
-    +'<th data-sort="be" style="cursor:pointer;" title="Underlying price needed for the contract to break even at expiration">B/E</th>'
     +'<th title="Stock price after a 0.5 × ATR(14) drop from current — soft exit signal">1/2 ATR</th>'
     +'<th title="Stock price after a 1 × ATR(14) drop from current — typical stop">1 ATR</th>'
     +'<th title="Stock price after a 2 × ATR(14) drop from current — emergency exit. If price reaches this, close immediately regardless of P&L.">EMERGENCY EXIT</th>'
+    +'<th>CLOSE</th>'
+    +'<th>ROLL</th>'
     +'<th title="Trailing-stop status + per-position config. Click to expand.">TRAIL</th>'
     +'</tr></thead><tbody>';
   colCount = 20; // total columns (used by inline config row)
@@ -18351,27 +18351,27 @@ function renderPositionsTable(pos,srcLabel){
       + ' data-sort-opened="'+(p.openTs||p.dateAcquired||'')+'"'
       + (openedToday ? ' class="pos-row-today" title="Opened or rolled today — closing intraday triggers a PDT day-trade"' : '')
       + '>'
-      // Cell order updated 2026-05-05 per user spec:
-      // OPENED · CLOSE · ROLL · TICKER · STOCK PRICE · QTY · EXP · STRIKE ·
-      // DELTA · PRICE · EQUITY · P/L $ · P/L % · DTE · ENTRY · B/E ·
-      // 1/2 ATR · 1 ATR · EMERGENCY · TRAIL
+      // Cell order updated 2026-05-05 (rev 2) per user spec:
+      // OPENED · EQUITY · P/L $ · TICKER · EXP · STRIKE · STOCK PRICE ·
+      // B/E · QTY · DELTA · PRICE · P/L % · DTE · ENTRY PRICE · 1/2 ATR ·
+      // 1 ATR · EMERGENCY EXIT · CLOSE · ROLL · TRAIL
       +formatOpenedDateTime(p, openedToday)                                                                  // OPENED
-      +'<td style="white-space:nowrap;"><button class="cbtn" onclick="doClose(this)">CLOSE</button></td>'    // CLOSE
-      +rollCell                                                                                               // ROLL
-      +'<td><b>'+tk+'</b>'+(isStock?' <span style="color:var(--gry);font-size:10px;">EQ</span>':'')+'</td>'  // TICKER
-      +stockPxCellHL                                                                                          // STOCK PRICE
-      +'<td>'+qty+(isStock?' <span style="color:var(--gry2);font-size:9px;">sh</span>':'')+'</td>'           // QTY
-      +expCell                                                                                                // EXP (MM/DD/YY)
-      +strikeCell                                                                                             // STRIKE
-      +deltaCell                                                                                              // DELTA
-      +priceCell                                                                                              // PRICE (contract/share mid)
-      +equityCellHL                                                                                           // EQUITY (highlighted)
+      +equityCellHL                                                                                           // EQUITY
       +'<td class="'+pnlCls+'">'+(p.pnl>=0?'+':'')+fmtD(p.pnl)+'</td>'                                       // P/L $
+      +'<td><b>'+tk+'</b>'+(isStock?' <span style="color:var(--gry);font-size:10px;">EQ</span>':'')+'</td>'  // TICKER
+      +expCell                                                                                                // EXP
+      +strikeCell                                                                                             // STRIKE
+      +stockPxCellHL                                                                                          // STOCK PRICE
+      +beCell                                                                                                 // B/E
+      +'<td>'+qty+(isStock?' <span style="color:var(--gry2);font-size:9px;">sh</span>':'')+'</td>'           // QTY
+      +deltaCell                                                                                              // DELTA
+      +priceCell                                                                                              // PRICE
       +'<td class="'+pnlCls+'">'+(p.pnlPct>=0?'+':'')+fmtP(p.pnlPct)+'</td>'                                 // P/L %
       +dteCell                                                                                                // DTE
       +ulEntryCell                                                                                            // ENTRY PRICE
-      +beCell                                                                                                 // B/E
       +atrCells                                                                                               // 1/2 ATR | 1 ATR | EMERGENCY EXIT
+      +'<td style="white-space:nowrap;"><button class="cbtn" onclick="doClose(this)">CLOSE</button></td>'    // CLOSE
+      +rollCell                                                                                               // ROLL
       +trailCell                                                                                              // TRAIL
       +'</tr>';
 
@@ -22437,7 +22437,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.6.0-gex-bullish-pos-reorder-atr-lookup';
+var APP_VERSION = '2.6.1-pos-reorder-atr-cst';
 // Page-source fallback constants removed. Each visitor now provides their own
 // API credentials via the API tab (or, for Tradier, sets up the worker proxy
 // at worker/tradier-proxy/ \u2014 keys never reach the browser at all).
@@ -25187,15 +25187,40 @@ function pfExportMatrix(){
 //  daily bars ending the day BEFORE the lookup date so the band reflects
 //  pre-event volatility (cleaner reference for entry analysis).
 // ═══════════════════════════════════════════════════════════════════════════
+// Default the ATR lookup date input to today's date (in CT/CST so the
+// rollover happens at midnight Central, matching the user's timezone).
+// Fires on DOMContentLoaded + when the details element is opened.
+(function(){
+  function _todayCt(){
+    var s = new Date().toLocaleString('en-US', {timeZone:'America/Chicago', year:'numeric', month:'2-digit', day:'2-digit'});
+    var m = s.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+    return m ? (m[3] + '-' + m[1] + '-' + m[2]) : new Date().toISOString().slice(0,10);
+  }
+  function _setDefault(){
+    var d = document.getElementById('atr-lk-date');
+    if (d && !d.value) d.value = _todayCt();
+  }
+  document.addEventListener('DOMContentLoaded', _setDefault);
+  // Also fire whenever the details summary is clicked/opened, in case
+  // localStorage cleared after init.
+  window.addEventListener('load', function(){
+    setTimeout(function(){
+      _setDefault();
+      var card = document.getElementById('atr-lookup-card');
+      if (card) card.addEventListener('toggle', function(){ if (card.open) _setDefault(); });
+    }, 1000);
+  });
+})();
+
 async function atrLookup(){
   var tk = ((eid('atr-lk-tk')||{}).value || '').trim().toUpperCase();
   var date = ((eid('atr-lk-date')||{}).value || '').trim();
-  var time = ((eid('atr-lk-time')||{}).value || '').trim();
+  var timeCst = ((eid('atr-lk-time')||{}).value || '').trim();
   var resEl = eid('atr-lk-result');
   if (!resEl) return;
   function setR(html, color){ resEl.innerHTML = html; if (color) resEl.style.color = color; }
-  if (!tk || !date || !time){
-    setR('Enter ticker + date + time (ET) to look up.', 'var(--wrn)');
+  if (!tk || !date || !timeCst){
+    setR('Enter ticker + date + time (CST) to look up.', 'var(--wrn)');
     return;
   }
   var creds = (typeof getTradierCreds === 'function') ? getTradierCreds() : null;
@@ -25203,12 +25228,13 @@ async function atrLookup(){
     setR('Tradier API key not configured — set one in the API tab.', 'var(--wrn)');
     return;
   }
-  setR('Fetching '+tk+' at '+date+' '+time+' ET...', 'var(--gry)');
+  setR('Fetching '+tk+' at '+date+' '+timeCst+' CST...', 'var(--gry)');
   try {
-    // 1-minute timesales for the requested 5-minute window so we definitely
-    // get a bar even if the exact minute is missing (illiquid pre/post).
-    var [hh, mm] = time.split(':').map(Number);
-    var targetMin = hh * 60 + (mm||0);
+    // User input is CST; Tradier /timesales expects ET wall-clock.
+    // CST is ET-1 hour, so add 60 minutes to convert.
+    var [hh, mm] = timeCst.split(':').map(Number);
+    var cstMin = hh * 60 + (mm||0);
+    var targetMin = cstMin + 60;  // CST → ET
     var startMin = Math.max(0, targetMin - 2);
     var endMin = Math.min(24*60, targetMin + 3);
     function _hhmm(m){ var h = Math.floor(m/60), mi = m%60; return (h<10?'0':'')+h+':'+(mi<10?'0':'')+mi; }
@@ -25270,12 +25296,13 @@ async function atrLookup(){
     if (days.length >= 15 && typeof computeATR === 'function'){
       atr = computeATR(days, 14) || 0;
     }
-    // Render result
-    var et = new Date(best.time || best.timestamp);
-    var clockStr = et.toLocaleString('en-US', {timeZone:'America/New_York', month:'short', day:'numeric', hour:'numeric', minute:'2-digit', hour12:true});
+    // Render result — display in CST (user-input timezone) so the user
+    // can match against their CST input.
+    var dt = new Date(best.time || best.timestamp);
+    var clockStr = dt.toLocaleString('en-US', {timeZone:'America/Chicago', month:'short', day:'numeric', hour:'numeric', minute:'2-digit', hour12:true});
     var html =
       '<div style="background:var(--bg2);border:1px solid var(--bg3);border-radius:5px;padding:12px 14px;line-height:1.8;">'
-      + '<div style="font-size:13px;color:var(--ambb);font-weight:700;margin-bottom:6px;">'+_esc(tk)+' &middot; '+clockStr+' ET</div>'
+      + '<div style="font-size:13px;color:var(--ambb);font-weight:700;margin-bottom:6px;">'+_esc(tk)+' &middot; '+clockStr+' CST</div>'
       + '<div style="font-size:18px;color:var(--wht);font-weight:700;margin-bottom:10px;">Price at that time: <span style="color:var(--ambb);">$'+fmt2(price)+'</span></div>';
     if (atr > 0){
       var p05u = price + 0.5*atr, p05d = price - 0.5*atr;
