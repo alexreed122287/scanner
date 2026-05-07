@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-05T14:30-roll-tracker-csv">
+<meta name="op-build" content="2026-05-05T15:00-gex-bullish-pos-reorder-atr">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -2665,18 +2665,19 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
        still exist so the high-conviction code paths + auto-trader detail
        rendering keep working. -->
   <button class="ntab" style="display:none;" onclick="switchTab('bs')">BUY SIGNALS</button>
+  <!-- Tab order updated 2026-05-05 per user spec -->
   <button class="ntab active" onclick="switchTab('sc')">FULL SCANNER</button>
-  <button class="ntab" onclick="switchTab('pos')">POSITIONS</button>
   <button class="ntab" onclick="switchTab('order')">ORDER TICKET</button>
-  <button class="ntab" onclick="switchTab('api')">API</button>
-  <button class="ntab" onclick="switchTab('pf')">PORTFOLIO</button>
-  <button class="ntab" onclick="switchTab('ind')">INDUSTRY</button>
   <button class="ntab" onclick="switchTab('gex')" title="Gamma exposure / 30DTE options-flow (call vs put OI) for the top 200 enriched tickers. Drives the GEX Call Heavy rule.">GEX / FLOW</button>
-  <button class="ntab" onclick="switchTab('wl')">WATCHLIST</button>
-  <button class="ntab" onclick="switchTab('al')">ALERTS</button>
+  <button class="ntab" onclick="switchTab('ind')">INDUSTRY</button>
+  <button class="ntab" onclick="switchTab('pos')">POSITIONS</button>
   <button class="ntab" onclick="switchTab('news')" title="Market news — general + per-ticker headlines from Financial Modeling Prep (uses your FMP key).">NEWS</button>
   <button class="ntab" onclick="switchTab('closed')" title="Trading history — open + close + P&L per round-trip on a single row, plus win-rate / profit-factor / Sortino stats.">HISTORY</button>
+  <button class="ntab" onclick="switchTab('pf')">PORTFOLIO</button>
+  <button class="ntab" onclick="switchTab('al')">ALERTS</button>
+  <button class="ntab" onclick="switchTab('wl')">WATCHLIST</button>
   <button class="ntab" onclick="switchTab('howto')" title="First-time walkthrough — what every tab does, how to set up API keys, how to read the scanner, how to place + manage trades.">HOW TO</button>
+  <button class="ntab" onclick="switchTab('api')">API</button>
   <!-- OPTIONS WATCHLIST button hidden per user request — underlying tab pane
        (id="tab-cw") + cwRenderTable code path retained in case of re-enable. -->
   <button class="ntab" style="display:none;" onclick="switchTab('cw')">&#9734; OPTIONS WATCHLIST</button>
@@ -3020,6 +3021,39 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
   <!-- TRAILING STOP + SMART EXITS panels — collapsed by default per user
        spec 2026-05-05. The .expanded class on pos-bottom-panels reveals
        both at once, side-by-side on wide screens, stacked on narrow. -->
+  <!-- ATR PRICE LOOKUP — quick reference for figuring out where the
+       underlying was at the moment a contract was opened, plus its
+       ±0.5/1.0 ATR bands. User spec 2026-05-05: "select the date and
+       key in the time to the minute that i bought contracts on a
+       ticker to where it will return the price at that time as well
+       as what its positive and negative 1/2 and 1 ATRs from that
+       price are". Collapsed by default — click header to expand. -->
+  <details id="atr-lookup-card" style="margin:8px 8px 0;background:var(--bg1);border:1px solid var(--bg3);border-radius:6px;">
+    <summary style="cursor:pointer;padding:9px 14px;font-family:var(--ff-mono);font-size:11px;color:var(--amb);letter-spacing:1px;user-select:none;list-style:none;display:flex;align-items:center;gap:10px;">
+      <span style="font-size:13px;">&#9662;</span>
+      ATR PRICE LOOKUP
+      <span style="color:var(--gry);font-weight:400;font-size:10px;">— historical price at a date/time + ±0.5 / ±1.0 ATR bands</span>
+    </summary>
+    <div style="padding:8px 14px 14px;font-family:var(--ff);font-size:12px;color:var(--wht);line-height:1.5;">
+      <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;margin-bottom:10px;">
+        <div style="flex:1;min-width:90px;display:flex;flex-direction:column;gap:3px;">
+          <label style="font-family:var(--ff-mono);font-size:9px;letter-spacing:.5px;color:var(--gry);">TICKER</label>
+          <input type="text" id="atr-lk-tk" placeholder="NVDA" style="background:var(--bg2);border:var(--bdr);border-radius:3px;color:var(--wht);font-family:var(--ff-mono);font-size:14px;padding:8px 10px;text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()">
+        </div>
+        <div style="flex:1;min-width:130px;display:flex;flex-direction:column;gap:3px;">
+          <label style="font-family:var(--ff-mono);font-size:9px;letter-spacing:.5px;color:var(--gry);">DATE</label>
+          <input type="date" id="atr-lk-date" style="background:var(--bg2);border:var(--bdr);border-radius:3px;color:var(--wht);font-family:var(--ff-mono);font-size:14px;padding:8px 10px;">
+        </div>
+        <div style="flex:1;min-width:110px;display:flex;flex-direction:column;gap:3px;">
+          <label style="font-family:var(--ff-mono);font-size:9px;letter-spacing:.5px;color:var(--gry);">TIME (ET)</label>
+          <input type="time" id="atr-lk-time" step="60" style="background:var(--bg2);border:var(--bdr);border-radius:3px;color:var(--wht);font-family:var(--ff-mono);font-size:14px;padding:8px 10px;">
+        </div>
+        <button class="btn blu" style="font-size:12px;padding:9px 18px;" onclick="atrLookup()">&#9654; LOOKUP</button>
+      </div>
+      <div id="atr-lk-result" style="font-family:var(--ff-mono);font-size:11px;color:var(--gry);"></div>
+    </div>
+  </details>
+
   <div id="pos-bottom-panels">
   <!-- TRAILING STOP panel — own checkbox header. Side-by-side with SMART
        EXITS panel below when EXIT RULES is expanded. -->
@@ -4410,6 +4444,45 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
       <button class="btn blu" style="font-size:11px;padding:5px 14px;" onclick="runGex()" title="Fetch 30DTE options chain for the top 200 ranked tickers (~4 min, paced by Tradier rate limit). Auto-fires 20s after every scan + on the schedule selected to the left.">&#8635; RUN GEX</button>
     </div>
   </div>
+
+  <!-- Collapsible bullish-entry quick reference. User spec 2026-05-05:
+       ranking criteria + per-column quick-ref. Closed by default; tap
+       header to expand. -->
+  <details id="gex-ref-card" style="margin:6px 10px;background:var(--bg1);border:1px solid var(--bg3);border-radius:6px;">
+    <summary style="cursor:pointer;padding:9px 14px;font-family:var(--ff-mono);font-size:11px;color:var(--amb);letter-spacing:1px;user-select:none;list-style:none;">
+      &#9662; BULLISH ENTRY REFERENCE — what to look for
+    </summary>
+    <div style="padding:8px 14px 14px;font-family:var(--ff-mono);font-size:11px;color:var(--gry);line-height:1.7;">
+      <div style="color:var(--ambb);font-weight:700;margin-bottom:4px;">RANKING ORDER (top of list = best long-call entry)</div>
+      <ol style="margin:0 0 10px 18px;padding:0;">
+        <li><b>FLOW = CALL HEAVY</b> only (put-heavy + balanced filtered out)</li>
+        <li><b>NET GEX</b> highest to lowest</li>
+        <li><b>CALL OI %</b> highest to lowest (90%+ floats to top)</li>
+        <li><b>CALL OI</b> highest to lowest (liquidity filter)</li>
+        <li><b>STOCK PRICE</b> above GAMMA FLIP only (dealer-long zone)</li>
+        <li><b>DTE</b> 30-45d sweet spot</li>
+        <li><b>STRIKE</b> within delta 0.70-0.80 range that fits your budget</li>
+      </ol>
+      <div style="color:var(--ambb);font-weight:700;margin-bottom:4px;">COLUMN QUICK REFERENCE</div>
+      <table style="width:100%;border-collapse:collapse;font-size:10px;">
+        <tr><td style="padding:2px 8px;color:var(--amb);width:120px;">SYMBOL</td><td style="padding:2px 8px;">underlying ticker</td></tr>
+        <tr><td style="padding:2px 8px;color:var(--amb);">STOCK PRICE</td><td style="padding:2px 8px;">current spot — must be ABOVE gamma flip for bullish setups</td></tr>
+        <tr><td style="padding:2px 8px;color:var(--amb);">NET GEX &uarr;</td><td style="padding:2px 8px;">higher = better (positive = dealers long gamma, suppress vol)</td></tr>
+        <tr><td style="padding:2px 8px;color:var(--amb);">CALL OI &uarr;</td><td style="padding:2px 8px;">want &gt;1K (liquidity)</td></tr>
+        <tr><td style="padding:2px 8px;color:var(--amb);">PUT OI</td><td style="padding:2px 8px;">ignore for long-call setups</td></tr>
+        <tr><td style="padding:2px 8px;color:var(--amb);">GAMMA FLIP</td><td style="padding:2px 8px;">stock price needs to be above this</td></tr>
+        <tr><td style="padding:2px 8px;color:var(--amb);">CALL OI % &uarr;</td><td style="padding:2px 8px;">want 90%+ (extreme call dominance)</td></tr>
+        <tr><td style="padding:2px 8px;color:var(--amb);">PUT OI %</td><td style="padding:2px 8px;">lower better</td></tr>
+        <tr><td style="padding:2px 8px;color:var(--amb);">DTE</td><td style="padding:2px 8px;">want 30-45d sweet spot</td></tr>
+        <tr><td style="padding:2px 8px;color:var(--amb);">EXP</td><td style="padding:2px 8px;">expiration date of the chain</td></tr>
+        <tr><td style="padding:2px 8px;color:var(--amb);">STRIKE</td><td style="padding:2px 8px;">gamma flip strike — pick a contract above this</td></tr>
+        <tr><td style="padding:2px 8px;color:var(--amb);">FLOW</td><td style="padding:2px 8px;">call heavy only</td></tr>
+      </table>
+      <div style="margin-top:10px;padding:6px 10px;background:rgba(0,212,255,0.06);border-left:3px solid var(--amb);font-size:10px;line-height:1.5;">
+        Rows highlighted in <span style="color:var(--grn);font-weight:700;">CYAN GLOW</span> meet ALL bullish criteria simultaneously: NET GEX positive, CALL OI % &ge; 90, CALL OI &gt; 1K, stock price above gamma flip, DTE 30-45.
+      </div>
+    </div>
+  </details>
   <div class="split" style="display:flex;flex:1;overflow:hidden;">
     <!-- GEX table gets a 1fr slice so it actually fills the available space.
          The detail/empty panes are auto-sized: zero width when both are hidden,
@@ -16944,12 +17017,18 @@ function renderGex(){
     'STRIKE': 'Gamma-flip strike \u2014 the strike (within \u00b110% of spot) with the highest combined open interest. The contract specs the rest of this row\u2019s metrics reference.',
     'FLOW': 'Aggregate directional bias from call/put OI. CALL HEAVY = bullish setup. PUT HEAVY = bearish setup.'
   };
+  defs['STOCK PRICE'] = 'Current spot price for the underlying. Bullish setups require spot > gamma flip strike (dealer-long zone — rallies get sold into, dips get bought).';
   function th(label){ return '<th title="'+_esc(defs[label]||'')+'" style="cursor:default;">'+label+'</th>'; }
   var html='<table><thead><tr>'
     + '<th>SYMBOL</th>'
+    + th('STOCK PRICE')
     + th('NET GEX') + th('CALL OI') + th('PUT OI') + th('GAMMA FLIP')
     + th('CALL OI %') + th('PUT OI %') + th('DTE') + th('EXP') + th('STRIKE') + th('FLOW')
     + '</tr></thead><tbody>';
+  // Build a price lookup from G.results so the new STOCK PRICE column +
+  // the "above flip" bullish-prime filter both have access to current spot.
+  var spotByTk = {};
+  try { if (G.results) G.results.forEach(function(rr){ if (rr && rr.ticker) spotByTk[rr.ticker] = rr.price || 0; }); } catch(_){}
   // Bullish-only ranking 2026-05-03 per user spec: filter to CALL HEAVY
   // (call% >= 50) AND drop NO DATA / sim placeholders, then sort
   // most-bullish first by Call OI %, with |NET GEX| magnitude as the
@@ -16963,30 +17042,61 @@ function renderGex(){
       return (r.call || 0) >= 50;
     })
     .slice()
+    // 2026-05-05 multi-key sort:
+    //   1. NET GEX desc
+    //   2. CALL OI % desc (90%+ floats to top)
+    //   3. CALL OI desc (liquidity tiebreaker)
     .sort(function(a,b){
+      if ((b.gex||0) !== (a.gex||0)) return (b.gex||0) - (a.gex||0);
       if ((b.call||0) !== (a.call||0)) return (b.call||0) - (a.call||0);
-      return Math.abs(b.gex||0) - Math.abs(a.gex||0);
+      return (b.callOI||0) - (a.callOI||0);
     });
+  // Prime bullish criteria — ALL of: net gex > 0, call% >= 90, callOI > 1k,
+  // spot > gamma flip, DTE in 30-45 sweet spot.
+  function isPrimeBullish(r){
+    if (!r) return false;
+    if ((r.gex||0) <= 0) return false;
+    if ((r.call||0) < 90) return false;
+    if ((r.callOI||0) <= 1000) return false;
+    var sp = spotByTk[r.t] || 0;
+    if (!sp || !r.flip || sp <= r.flip) return false;
+    var dte = r.dte || 0;
+    if (dte < 30 || dte > 45) return false;
+    return true;
+  }
+  var primeCount = 0;
   bullishSorted.forEach(function(r){
     var gexCls=r.gex>0?'pnl-pos':'pnl-neg';
-    // Tag rows that came back empty (Tradier returned no chain — out-of-hours,
-    // illiquid ticker, expired chain) so they don't look like a bug. Without
-    // this they render as "+0M, 0c/0p, PUT HEAVY" which is misleading.
     var isEmpty = !r.sim && !r.callOI && !r.putOI;
+    var prime = isPrimeBullish(r);
+    if (prime) primeCount++;
     var simBadge=r.sim?'<span style="font-size:9px;color:var(--gry);margin-left:4px;">[SIM]</span>':'';
-    var emptyBadge=isEmpty?'<span style="font-size:9px;color:var(--ngo);margin-left:4px;" title="Tradier returned no options chain for this ticker — illiquid, expired, or out-of-hours data gap.">[NO DATA]</span>':'';
+    var emptyBadge=isEmpty?'<span style="font-size:9px;color:var(--ngo);margin-left:4px;" title="Tradier returned no options chain for this ticker - illiquid, expired, or out-of-hours.">[NO DATA]</span>':'';
+    var primeBadge=prime?'<span style="font-size:9px;color:var(--grn);margin-left:4px;font-weight:700;letter-spacing:.5px;" title="Prime bullish entry - meets ALL criteria: net gex >0, call% >=90, callOI >1K, spot > flip, DTE 30-45.">&#9733; PRIME</span>':'';
     var expCell = r.exp ? r.exp.split('-').slice(1).join('/') : '--';
     var flipNum = parseFloat(r.flip);
     var strikeCell = (isFinite(flipNum) && flipNum > 0) ? ('$' + fmt2(flipNum)) : '--';
-    html+='<tr data-ticker="'+_esc(r.t)+'" onclick="viewDetail(this.dataset.ticker,\'gx-detail\',\'gx-det-empty\')"'+(isEmpty?' style="opacity:0.5;"':'')+'>'
-      +'<td><b>'+_esc(r.t)+'</b>'+simBadge+emptyBadge+'</td>'
+    var spot = spotByTk[r.t] || 0;
+    var spotAboveFlip = spot && r.flip && spot > r.flip;
+    var spotCell = spot
+      ? '<td style="font-family:var(--ff-mono);font-size:11px;color:'+(spotAboveFlip?'var(--grn)':'var(--gry2)')+';font-weight:600;" title="'+(spotAboveFlip?'Above gamma flip - bullish dealer-long zone':'Below gamma flip - bearish dealer-short zone')+'">$'+fmt2(spot)+'</td>'
+      : '<td style="color:var(--gry2);">--</td>';
+    var rowAttrs = isEmpty
+      ? ' style="opacity:0.5;"'
+      : prime
+        ? ' class="gex-prime-row" style="background:rgba(0,230,118,0.07);box-shadow:inset 4px 0 0 var(--grn), 0 0 18px rgba(0,230,118,0.12) inset;"'
+        : '';
+    var dteStyle = (r.dte >= 30 && r.dte <= 45) ? 'color:var(--grn);font-weight:700;' : 'color:var(--gry);';
+    html+='<tr data-ticker="'+_esc(r.t)+'" onclick="viewDetail(this.dataset.ticker,\'gx-detail\',\'gx-det-empty\')"'+rowAttrs+'>'
+      +'<td><b>'+_esc(r.t)+'</b>'+simBadge+emptyBadge+primeBadge+'</td>'
+      +spotCell
       +'<td class="'+gexCls+'">'+(r.gex>0?'+':'')+r.gex+'M</td>'
       +'<td style="font-family:var(--ff-mono);font-size:11px;color:var(--grn);">'+(r.callOI ? fmtK(r.callOI) : '--')+'</td>'
       +'<td style="font-family:var(--ff-mono);font-size:11px;color:var(--ngo);">'+(r.putOI ? fmtK(r.putOI) : '--')+'</td>'
       +'<td>$'+fmt2(r.flip)+'</td>'
       +'<td class="pnl-pos">'+r.call+'%</td>'
       +'<td class="pnl-neg">'+r.put+'%</td>'
-      +'<td style="color:var(--gry);font-size:11px;">'+(r.dte||'--')+'d</td>'
+      +'<td style="font-size:11px;'+dteStyle+'">'+(r.dte||'--')+'d</td>'
       +'<td style="font-family:var(--ff-mono);font-size:11px;color:var(--gry);white-space:nowrap;">'+expCell+'</td>'
       +'<td style="font-family:var(--ff-mono);font-size:11px;color:var(--ambb);font-weight:700;white-space:nowrap;">'+strikeCell+'</td>'
       +'<td><span class="badge '+r.flowCls+'">'+r.flow+'</span></td>'
@@ -16995,7 +17105,7 @@ function renderGex(){
   html+='</tbody></table>';
   wrap.innerHTML=html;
   var _gt3=eid('gex-ts'); if(_gt3) _gt3.textContent='Updated: '+new Date().toLocaleTimeString()
-    +' \u2014 '+bullishSorted.length+' bullish of '+(G.gexData||[]).length+' (call-heavy ranked top \u2192 bottom)';
+    +' \u2014 '+bullishSorted.length+' bullish \u00b7 '+primeCount+' \u2605 prime entries';
 }
 
 // Single-ticker GEX fetch — used by the scanner's amber RUN GEX pill so
@@ -17934,20 +18044,24 @@ function renderPositionsTable(pos,srcLabel){
   // by that field. Sort direction toggles on repeat clicks. TICKER /
   // STRIKE / EXP keys sort the data attribute on each <tr>; numeric
   // columns sort the data-sort-* numeric attribute on each <td>.
+  // Column order updated 2026-05-05 per user spec:
+  //   OPENED · CLOSE · ROLL · TICKER · STOCK PRICE · QTY · EXP · STRIKE ·
+  //   DELTA · PRICE · EQUITY · P/L $ · P/L % · DTE · ENTRY · B/E ·
+  //   1/2 ATR · 1 ATR · EMERGENCY · TRAIL
   var html='<table id="pos-table"><thead><tr>'
-    +'<th data-sort="ticker" style="cursor:pointer;">TICKER</th>'
-    +'<th data-sort="ulpx" style="cursor:pointer;" title="Current underlying stock price">STOCK PRICE</th>'
     +'<th class="col-opened" data-sort="opened" style="cursor:pointer;">OPENED</th>'
     +'<th>CLOSE</th>'
     +'<th>ROLL</th>'
-    +'<th data-sort="delta" style="cursor:pointer;" title="Current contract delta — sensitivity of contract price per $1 underlying move (0.50 = mid; 1.00 = deep ITM)">DELTA</th>'
+    +'<th data-sort="ticker" style="cursor:pointer;">TICKER</th>'
+    +'<th data-sort="ulpx" style="cursor:pointer;" title="Current underlying stock price">STOCK PRICE</th>'
     +'<th data-sort="qty" style="cursor:pointer;">QTY</th>'
+    +'<th data-sort="exp" style="cursor:pointer;">EXP</th>'
+    +'<th data-sort="strike" style="cursor:pointer;">STRIKE</th>'
+    +'<th data-sort="delta" style="cursor:pointer;" title="Current contract delta — sensitivity of contract price per $1 underlying move (0.50 = mid; 1.00 = deep ITM)">DELTA</th>'
     +'<th data-sort="mid" style="cursor:pointer;" title="Current contract mid price (bid+ask)/2 — what one contract is worth right now">PRICE</th>'
     +'<th data-sort="equity" class="col-equity" style="cursor:pointer;" title="Current value of your position (mark x qty x multiplier)">EQUITY</th>'
     +'<th data-sort="pnl" style="cursor:pointer;">P/L $</th>'
     +'<th data-sort="pnlPct" style="cursor:pointer;">P/L %</th>'
-    +'<th data-sort="strike" style="cursor:pointer;">STRIKE</th>'
-    +'<th data-sort="exp" style="cursor:pointer;">EXP</th>'
     +'<th data-sort="dte" style="cursor:pointer;">DTE</th>'
     +'<th data-sort="entry" style="cursor:pointer;" title="Underlying stock price at the time you bought this position">ENTRY PRICE</th>'
     +'<th data-sort="be" style="cursor:pointer;" title="Underlying price needed for the contract to break even at expiration">B/E</th>'
@@ -18237,24 +18351,28 @@ function renderPositionsTable(pos,srcLabel){
       + ' data-sort-opened="'+(p.openTs||p.dateAcquired||'')+'"'
       + (openedToday ? ' class="pos-row-today" title="Opened or rolled today — closing intraday triggers a PDT day-trade"' : '')
       + '>'
-      +'<td><b>'+tk+'</b>'+(isStock?' <span style="color:var(--gry);font-size:10px;">EQ</span>':'')+'</td>'  // TICKER
-      +stockPxCellHL                                                                                          // STOCK PRICE (between TICKER and OPENED)
+      // Cell order updated 2026-05-05 per user spec:
+      // OPENED · CLOSE · ROLL · TICKER · STOCK PRICE · QTY · EXP · STRIKE ·
+      // DELTA · PRICE · EQUITY · P/L $ · P/L % · DTE · ENTRY · B/E ·
+      // 1/2 ATR · 1 ATR · EMERGENCY · TRAIL
       +formatOpenedDateTime(p, openedToday)                                                                  // OPENED
       +'<td style="white-space:nowrap;"><button class="cbtn" onclick="doClose(this)">CLOSE</button></td>'    // CLOSE
       +rollCell                                                                                               // ROLL
-      +deltaCell                                                                                              // DELTA
+      +'<td><b>'+tk+'</b>'+(isStock?' <span style="color:var(--gry);font-size:10px;">EQ</span>':'')+'</td>'  // TICKER
+      +stockPxCellHL                                                                                          // STOCK PRICE
       +'<td>'+qty+(isStock?' <span style="color:var(--gry2);font-size:9px;">sh</span>':'')+'</td>'           // QTY
+      +expCell                                                                                                // EXP (MM/DD/YY)
+      +strikeCell                                                                                             // STRIKE
+      +deltaCell                                                                                              // DELTA
       +priceCell                                                                                              // PRICE (contract/share mid)
       +equityCellHL                                                                                           // EQUITY (highlighted)
       +'<td class="'+pnlCls+'">'+(p.pnl>=0?'+':'')+fmtD(p.pnl)+'</td>'                                       // P/L $
       +'<td class="'+pnlCls+'">'+(p.pnlPct>=0?'+':'')+fmtP(p.pnlPct)+'</td>'                                 // P/L %
-      +strikeCell                                                                                             // STRIKE
-      +expCell                                                                                                // EXP (MM/DD/YY)
       +dteCell                                                                                                // DTE
-      +ulEntryCell                                                                                            // ENTRY PRICE (UL when opened)
+      +ulEntryCell                                                                                            // ENTRY PRICE
       +beCell                                                                                                 // B/E
       +atrCells                                                                                               // 1/2 ATR | 1 ATR | EMERGENCY EXIT
-      +trailCell                                                                                              // TRAIL (far right)
+      +trailCell                                                                                              // TRAIL
       +'</tr>';
 
     // Inline trailing stop config row
@@ -22319,7 +22437,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.5.0-roll-tracker-csv';
+var APP_VERSION = '2.6.0-gex-bullish-pos-reorder-atr-lookup';
 // Page-source fallback constants removed. Each visitor now provides their own
 // API credentials via the API tab (or, for Tradier, sets up the worker proxy
 // at worker/tradier-proxy/ \u2014 keys never reach the browser at all).
@@ -25060,6 +25178,130 @@ function pfExportMatrix(){
   a.download = 'portfolio_matrix_'+new Date().toISOString().slice(0,10)+'.csv';
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   toast(rows.length + ' rows exported' + (copied ? ' — CSV copied to clipboard' : ''));
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  ATR PRICE LOOKUP — historical-time price + ATR bands
+//  Tradier `/v1/markets/timesales` returns 1-min bars; we pick the bar that
+//  starts at the requested ET time. ATR(14) is computed from /markets/history
+//  daily bars ending the day BEFORE the lookup date so the band reflects
+//  pre-event volatility (cleaner reference for entry analysis).
+// ═══════════════════════════════════════════════════════════════════════════
+async function atrLookup(){
+  var tk = ((eid('atr-lk-tk')||{}).value || '').trim().toUpperCase();
+  var date = ((eid('atr-lk-date')||{}).value || '').trim();
+  var time = ((eid('atr-lk-time')||{}).value || '').trim();
+  var resEl = eid('atr-lk-result');
+  if (!resEl) return;
+  function setR(html, color){ resEl.innerHTML = html; if (color) resEl.style.color = color; }
+  if (!tk || !date || !time){
+    setR('Enter ticker + date + time (ET) to look up.', 'var(--wrn)');
+    return;
+  }
+  var creds = (typeof getTradierCreds === 'function') ? getTradierCreds() : null;
+  if (!creds || !creds.host || !creds.key){
+    setR('Tradier API key not configured — set one in the API tab.', 'var(--wrn)');
+    return;
+  }
+  setR('Fetching '+tk+' at '+date+' '+time+' ET...', 'var(--gry)');
+  try {
+    // 1-minute timesales for the requested 5-minute window so we definitely
+    // get a bar even if the exact minute is missing (illiquid pre/post).
+    var [hh, mm] = time.split(':').map(Number);
+    var targetMin = hh * 60 + (mm||0);
+    var startMin = Math.max(0, targetMin - 2);
+    var endMin = Math.min(24*60, targetMin + 3);
+    function _hhmm(m){ var h = Math.floor(m/60), mi = m%60; return (h<10?'0':'')+h+':'+(mi<10?'0':'')+mi; }
+    var startStr = date + ' ' + _hhmm(startMin);
+    var endStr   = date + ' ' + _hhmm(endMin);
+    var tsUrl = creds.host + '/v1/markets/timesales?symbol=' + encodeURIComponent(tk) +
+      '&interval=1min&start=' + encodeURIComponent(startStr) + '&end=' + encodeURIComponent(endStr) +
+      '&session_filter=all';
+    var tsRes = await fetch(tsUrl, { headers:{Authorization:'Bearer '+creds.key, Accept:'application/json'} });
+    var tsJson = await tsRes.json();
+    var bars = (tsJson && tsJson.series && tsJson.series.data) || [];
+    if (!Array.isArray(bars)) bars = [bars];
+    if (!bars.length){
+      setR('No price data for '+tk+' at '+date+' '+time+' ET. Tradier may not have intraday history that far back, or the symbol/time is invalid.', 'var(--wrn)');
+      return;
+    }
+    // Pick the bar closest to the target time (compare wall-clock minutes)
+    function _barMin(b){
+      var t = b.time || b.timestamp;
+      if (!t) return -1;
+      var d = new Date(t);
+      // Tradier timesales timestamps are ET. Compute wall-clock minute-of-day.
+      var et = new Date(d.toLocaleString('en-US', {timeZone:'America/New_York'}));
+      return et.getHours() * 60 + et.getMinutes();
+    }
+    var best = null, bestDiff = 1e9;
+    bars.forEach(function(b){
+      var m = _barMin(b);
+      if (m < 0) return;
+      var diff = Math.abs(m - targetMin);
+      if (diff < bestDiff){ bestDiff = diff; best = b; }
+    });
+    if (!best){
+      setR('No matching bar found in the timesales window.', 'var(--wrn)');
+      return;
+    }
+    var price = parseFloat(best.close || best.last || best.open) || 0;
+    if (!price){
+      setR('Bar found but price field empty — Tradier may have returned a partial response.', 'var(--wrn)');
+      return;
+    }
+    // 2. Compute ATR(14) from daily history ending the day BEFORE the
+    // lookup date, so we don't include the lookup-day bar itself.
+    var lookupDate = new Date(date + 'T00:00:00');
+    var endHist = new Date(lookupDate.getTime() - 86400000);
+    var startHist = new Date(endHist.getTime() - 60*86400000);
+    function _ymd(d){ return d.toISOString().slice(0,10); }
+    var histUrl = creds.host + '/v1/markets/history?symbol=' + encodeURIComponent(tk) +
+      '&interval=daily&start=' + _ymd(startHist) + '&end=' + _ymd(endHist);
+    var histRes = await fetch(histUrl, { headers:{Authorization:'Bearer '+creds.key, Accept:'application/json'} });
+    var histJson = await histRes.json();
+    var days = [];
+    var arr = histJson && histJson.history && histJson.history.day;
+    if (arr) {
+      arr = Array.isArray(arr) ? arr : [arr];
+      days = arr.map(function(x){ return { high:+x.high, low:+x.low, close:+x.close, open:+x.open }; });
+    }
+    var atr = 0;
+    if (days.length >= 15 && typeof computeATR === 'function'){
+      atr = computeATR(days, 14) || 0;
+    }
+    // Render result
+    var et = new Date(best.time || best.timestamp);
+    var clockStr = et.toLocaleString('en-US', {timeZone:'America/New_York', month:'short', day:'numeric', hour:'numeric', minute:'2-digit', hour12:true});
+    var html =
+      '<div style="background:var(--bg2);border:1px solid var(--bg3);border-radius:5px;padding:12px 14px;line-height:1.8;">'
+      + '<div style="font-size:13px;color:var(--ambb);font-weight:700;margin-bottom:6px;">'+_esc(tk)+' &middot; '+clockStr+' ET</div>'
+      + '<div style="font-size:18px;color:var(--wht);font-weight:700;margin-bottom:10px;">Price at that time: <span style="color:var(--ambb);">$'+fmt2(price)+'</span></div>';
+    if (atr > 0){
+      var p05u = price + 0.5*atr, p05d = price - 0.5*atr;
+      var p10u = price + 1.0*atr, p10d = price - 1.0*atr;
+      html +=
+        '<div style="font-size:11px;color:var(--gry);margin-bottom:4px;">ATR(14) entering this date: <b style="color:var(--wht);">$'+fmt2(atr)+'</b></div>'
+        + '<table style="width:100%;border-collapse:collapse;margin-top:6px;">'
+        +   '<tr><th style="text-align:left;padding:5px 10px;color:var(--gry);font-size:10px;font-weight:600;letter-spacing:.5px;">BAND</th>'
+        +     '<th style="text-align:right;padding:5px 10px;color:var(--grn);font-size:10px;font-weight:600;letter-spacing:.5px;">UPSIDE</th>'
+        +     '<th style="text-align:right;padding:5px 10px;color:var(--ngo);font-size:10px;font-weight:600;letter-spacing:.5px;">DOWNSIDE</th></tr>'
+        +   '<tr><td style="padding:5px 10px;color:var(--ambb);">+/- 1/2 ATR</td>'
+        +     '<td style="padding:5px 10px;text-align:right;color:var(--grn);font-family:var(--ff-mono);font-weight:700;">$'+fmt2(p05u)+'</td>'
+        +     '<td style="padding:5px 10px;text-align:right;color:var(--ngo);font-family:var(--ff-mono);font-weight:700;">$'+fmt2(p05d)+'</td></tr>'
+        +   '<tr><td style="padding:5px 10px;color:var(--ambb);">+/- 1 ATR</td>'
+        +     '<td style="padding:5px 10px;text-align:right;color:var(--grn);font-family:var(--ff-mono);font-weight:700;">$'+fmt2(p10u)+'</td>'
+        +     '<td style="padding:5px 10px;text-align:right;color:var(--ngo);font-family:var(--ff-mono);font-weight:700;">$'+fmt2(p10d)+'</td></tr>'
+        + '</table>';
+    } else {
+      html += '<div style="font-size:11px;color:var(--wrn);">ATR(14) unavailable - need >=15 days of daily history before the lookup date.</div>';
+    }
+    html += '</div>';
+    resEl.innerHTML = html;
+    resEl.style.color = '';
+  } catch(e){
+    setR('Lookup failed: '+(e && e.message || 'unknown error'), 'var(--wrn)');
+  }
 }
 
 function loadPortfolio(){ /* no-op loader — data loaded on demand in renderPortfolio */ }
