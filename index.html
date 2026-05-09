@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-09T20:30-tier-a-polish">
+<meta name="op-build" content="2026-05-09T21:00-tier-b-features">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -1101,6 +1101,32 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
      iPhone. Defaults visible until the user collapses (state persists
      via localStorage 'rrjcar_hdr_tickers_collapsed'). */
   #hdr-tickers-toggle{display:inline-block !important;}
+  /* RH-6 fix 2026-05-09: bottom-sheet modals on iPhone. Pulls major
+     confirm modals (HC alert, trade-token, edit-order, roll, OSM) to
+     the bottom edge so the user's thumb has a shorter trip. Animates
+     up from the safe-area inset. Only touches the OUTER overlay
+     positioning — inner panel layouts remain unchanged. */
+  @keyframes osm-sheet-up{from{transform:translateY(100%);}to{transform:translateY(0);}}
+  #hc-modal,
+  #trade-token-modal,
+  #ord-status-modal,
+  #pos-alert-sheet,
+  #pos-thesis-sheet{
+    align-items:flex-end !important;
+    padding:0 !important;
+  }
+  #hc-modal > *:first-child,
+  #trade-token-modal > *:first-child,
+  #ord-status-modal > *:first-child:not(button),
+  #pos-alert-sheet > *:first-child,
+  #pos-thesis-sheet > *:first-child{
+    width:100% !important;
+    max-width:560px !important;
+    border-radius:14px 14px 0 0 !important;
+    border-top-width:2px !important;
+    animation:osm-sheet-up .25s ease-out;
+    padding-bottom:max(env(safe-area-inset-bottom, 16px), 16px) !important;
+  }
   /* iGAP-12 fix 2026-05-09: soft right-edge gradient on filter bars to
      hint at horizontal scroll. Pseudo-element wraps each .flt-bar. */
   .flt-bar{position:relative;}
@@ -24038,7 +24064,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.11.1-tier-a-polish';
+var APP_VERSION = '2.11.2-tier-b-features';
 // Page-source fallback constants removed. Each visitor now provides their own
 // API credentials via the API tab (or, for Tradier, sets up the worker proxy
 // at worker/tradier-proxy/ \u2014 keys never reach the browser at all).
@@ -29472,6 +29498,411 @@ window.addEventListener('DOMContentLoaded',init);
   }, 30 * 1000);
 
   console.log('[pos-alerts] ready');
+})();
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  FEAT-4 — PER-POSITION THESIS NOTES
+//  User spec 2026-05-09: trader sometimes opens positions for specific
+//  reasons (earnings play, gamma squeeze, technical breakout). Useful to
+//  remember why when re-evaluating later. Tap-to-edit textarea sheet on
+//  each position row. Persists in localStorage by OCC symbol.
+// ═══════════════════════════════════════════════════════════════════════════
+(function(){
+  var THESIS_KEY = 'rrjcar_pos_thesis';
+
+  function _loadThesis(){
+    try { return JSON.parse(localStorage.getItem(THESIS_KEY) || '{}'); } catch(_){ return {}; }
+  }
+  function _saveThesis(map){
+    try { localStorage.setItem(THESIS_KEY, JSON.stringify(map)); } catch(_){}
+  }
+
+  function openPosThesisSheet(tr){
+    if (!tr) return;
+    var occSym = tr.dataset.sym;
+    var tk = tr.dataset.tk || '';
+    if (!occSym) return;
+    var notes = _loadThesis();
+    var existing = notes[occSym] || '';
+
+    var prior = document.getElementById('pos-thesis-sheet');
+    if (prior) prior.remove();
+    var sheet = document.createElement('div');
+    sheet.id = 'pos-thesis-sheet';
+    sheet.style.cssText = 'position:fixed;inset:0;z-index:9300;background:rgba(0,0,0,0.7);backdrop-filter:blur(3px);display:flex;align-items:flex-end;justify-content:center;';
+    sheet.onclick = function(e){ if (e.target === sheet) sheet.remove(); };
+
+    var inner = document.createElement('div');
+    inner.style.cssText = 'background:var(--bg1);border-top:2px solid var(--amb);border-radius:12px 12px 0 0;width:100%;max-width:560px;padding:16px 16px calc(max(env(safe-area-inset-bottom,16px),16px)) 16px;display:flex;flex-direction:column;gap:10px;animation:osm-banner-in .25s ease-out;';
+    inner.innerHTML =
+        '<div style="display:flex;justify-content:space-between;align-items:center;">'
+      +   '<div style="font-family:var(--ff-brand);font-size:14px;color:var(--amb);letter-spacing:2px;font-weight:700;">THESIS — '+_esc(tk)+'</div>'
+      +   '<button class="btn" style="font-size:14px;padding:6px 12px;min-width:36px;min-height:36px;" onclick="document.getElementById(\'pos-thesis-sheet\').remove()" title="Close">&#10005;</button>'
+      + '</div>'
+      + '<div style="font-family:var(--ff-mono);font-size:10px;color:var(--gry);">Why did you open this trade? Notes appear under the position row.</div>'
+      + '<textarea id="pt-text" rows="6" placeholder="e.g. earnings play 5/15, expecting +5% on call+10pp guide…" style="font-size:16px;padding:10px 12px;background:var(--bg0);border:var(--bdr);border-radius:6px;color:var(--wht);font-family:var(--ff);line-height:1.4;resize:vertical;"></textarea>'
+      + '<div style="display:flex;gap:8px;margin-top:6px;">'
+      +   '<button class="btn wrn" style="flex:1;padding:11px;font-weight:700;font-size:12px;" onclick="_thesisClear(\''+_jsq(occSym)+'\')">CLEAR</button>'
+      +   '<button class="btn blu" style="flex:2;padding:11px;font-weight:700;font-size:12px;" onclick="_thesisSave(\''+_jsq(occSym)+'\')">SAVE</button>'
+      + '</div>';
+    sheet.appendChild(inner);
+    document.body.appendChild(sheet);
+    setTimeout(function(){
+      var ta = document.getElementById('pt-text');
+      if (ta){ ta.value = existing; ta.focus(); }
+    }, 0);
+  }
+  window.openPosThesisSheet = openPosThesisSheet;
+
+  window._thesisSave = function(occSym){
+    var notes = _loadThesis();
+    var ta = document.getElementById('pt-text');
+    var v = (ta && ta.value || '').trim();
+    if (!v){ delete notes[occSym]; }
+    else { notes[occSym] = v; }
+    _saveThesis(notes);
+    var sheet = document.getElementById('pos-thesis-sheet'); if (sheet) sheet.remove();
+    try { toast(v ? 'Thesis saved' : 'Thesis cleared'); } catch(_){}
+    try { _renderThesisBadges(); } catch(_){}
+  };
+  window._thesisClear = function(occSym){
+    var notes = _loadThesis();
+    delete notes[occSym];
+    _saveThesis(notes);
+    var sheet = document.getElementById('pos-thesis-sheet'); if (sheet) sheet.remove();
+    try { toast('Thesis cleared'); } catch(_){}
+    try { _renderThesisBadges(); } catch(_){}
+  };
+
+  // Render a 📝 icon on EVERY position row's ticker cell. Active (with
+  // saved thesis) shows in cyan + tooltip preview; empty shows in muted
+  // gray as a hint that the user can tap to add notes.
+  function _renderThesisBadges(){
+    var notes = _loadThesis();
+    document.querySelectorAll('#pos-tbl-wrap tr[data-sym]').forEach(function(tr){
+      var existing = tr.querySelector('.pos-thesis-note');
+      if (existing) existing.remove();
+      var tickerTd = tr.querySelector('td.col-ticker');
+      if (!tickerTd) return;
+      var note = notes[tr.dataset.sym] || '';
+      var icon = document.createElement('span');
+      icon.className = 'pos-thesis-note';
+      if (note){
+        icon.title = 'Thesis: '+note.slice(0,140);
+        icon.style.cssText = 'color:var(--ambb);font-size:10px;margin-left:4px;cursor:pointer;opacity:.95;';
+      } else {
+        icon.title = 'Add thesis / notes for this position';
+        icon.style.cssText = 'color:var(--gry2);font-size:10px;margin-left:4px;cursor:pointer;opacity:.4;';
+      }
+      icon.textContent = '📝';
+      icon.onclick = function(e){ e.stopPropagation(); openPosThesisSheet(tr); };
+      tickerTd.appendChild(icon);
+    });
+  }
+  window._renderThesisBadges = _renderThesisBadges;
+
+  // Hook into renderPositionsTable.
+  if (typeof renderPositionsTable === 'function' && !renderPositionsTable._thesisHooked){
+    var _origRPT = window.renderPositionsTable;
+    window.renderPositionsTable = function(){
+      var r = _origRPT.apply(this, arguments);
+      try { _renderThesisBadges(); } catch(_){}
+      return r;
+    };
+    window.renderPositionsTable._thesisHooked = true;
+  }
+
+  console.log('[pos-thesis] ready');
+})();
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  FEAT-5 — WATCHLIST SPARKLINES (5-day mini-charts per row)
+//  Background-fetches Tradier markets/history daily for each watched
+//  ticker. Caches to localStorage 'rrjcar_spark_<tk>' with ts+closes.
+//  TTL 1 hour. Renders inline SVG sparkline in the watchlist row.
+//  Lightweight: no Chart.js, just SVG path math.
+// ═══════════════════════════════════════════════════════════════════════════
+(function(){
+  var SPARK_TTL_MS = 60 * 60 * 1000;
+  var SPARK_BARS_DAYS = 5;
+
+  function _loadSparkCache(tk){
+    try {
+      var raw = localStorage.getItem('rrjcar_spark_' + tk);
+      if (!raw) return null;
+      var obj = JSON.parse(raw);
+      if (!obj || !obj.ts || !Array.isArray(obj.closes)) return null;
+      if (Date.now() - obj.ts > SPARK_TTL_MS) return null;
+      return obj;
+    } catch(_){ return null; }
+  }
+  function _saveSparkCache(tk, closes){
+    try { localStorage.setItem('rrjcar_spark_' + tk, JSON.stringify({ ts: Date.now(), closes: closes })); } catch(_){}
+  }
+
+  function _buildSparkSvg(closes, width, height){
+    if (!Array.isArray(closes) || closes.length < 2) return '';
+    width = width || 64;
+    height = height || 20;
+    var min = Infinity, max = -Infinity;
+    closes.forEach(function(c){ if (c < min) min = c; if (c > max) max = c; });
+    if (!isFinite(min) || !isFinite(max) || min === max){ min = max - 1; max = max + 1; }
+    var range = max - min;
+    var dx = width / (closes.length - 1);
+    var pts = closes.map(function(c, i){
+      var x = +(i * dx).toFixed(1);
+      var y = +((height - 2) - ((c - min) / range) * (height - 4) + 1).toFixed(1);
+      return x + ',' + y;
+    }).join(' ');
+    var trend = closes[closes.length - 1] >= closes[0];
+    var stroke = trend ? '#22c55e' : '#ef5350';
+    return '<svg width="'+width+'" height="'+height+'" viewBox="0 0 '+width+' '+height+'" style="display:inline-block;vertical-align:middle;">' +
+           '<polyline points="'+pts+'" fill="none" stroke="'+stroke+'" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>' +
+           '</svg>';
+  }
+
+  // Fetch closes for a single ticker. Resolves to closes array or null.
+  async function _fetchCloses(tk){
+    var cached = _loadSparkCache(tk);
+    if (cached) return cached.closes;
+    var creds = (typeof getTradierCreds === 'function') ? getTradierCreds() : null;
+    if (!creds || !creds.key) return null;
+    try {
+      var url = creds.host + '/v1/markets/history?symbol=' + encodeURIComponent(tk) +
+                '&interval=daily';
+      var data = await (typeof tradierFetch === 'function'
+        ? tradierFetch(url, { headers:{Authorization:'Bearer '+creds.key, Accept:'application/json'} }, SPARK_TTL_MS)
+        : fetch(url, { headers:{Authorization:'Bearer '+creds.key, Accept:'application/json'} }).then(function(r){return r.json();}));
+      var days = data && data.history && data.history.day;
+      if (!Array.isArray(days)) days = days ? [days] : [];
+      var closes = days.slice(-SPARK_BARS_DAYS - 5).slice(-SPARK_BARS_DAYS).map(function(d){ return +d.close; }).filter(isFinite);
+      if (closes.length >= 2) {
+        _saveSparkCache(tk, closes);
+        return closes;
+      }
+    } catch(e){ console.warn('[spark]', tk, e.message); }
+    return null;
+  }
+
+  // Render sparklines into existing watchlist rows. Looks up the company
+  // name cell (3rd or 4th td based on the table) and prepends the SVG.
+  // Idempotent — replaces any existing .wl-spark element.
+  async function _decorateWatchlistSparklines(){
+    var wrap = document.getElementById('wl-tbl-wrap');
+    if (!wrap) return;
+    var rows = wrap.querySelectorAll('tr[data-tk]');
+    if (!rows.length) return;
+    // Cap to 30 rows to avoid slamming Tradier. The watchlist is rarely
+    // bigger than 50; first-30-visible is the most important slice.
+    var max = Math.min(30, rows.length);
+    for (var i = 0; i < max; i++){
+      var tr = rows[i];
+      var tk = tr.dataset.tk;
+      if (!tk) continue;
+      // Skip if already has sparkline rendered + not stale.
+      if (tr.querySelector('.wl-spark[data-fresh]')) continue;
+      var closes = await _fetchCloses(tk);
+      if (!closes) continue;
+      var spark = tr.querySelector('.wl-spark') || document.createElement('span');
+      spark.className = 'wl-spark';
+      spark.dataset.fresh = '1';
+      spark.style.cssText = 'display:inline-block;margin-left:6px;';
+      spark.innerHTML = _buildSparkSvg(closes, 64, 18);
+      // Append to the SYMBOL cell (first td with [data-tk] is usually
+      // the row, so target the first td child).
+      var firstTd = tr.querySelector('td');
+      if (firstTd && !firstTd.querySelector('.wl-spark')) firstTd.appendChild(spark);
+    }
+  }
+  window.decorateWatchlistSparklines = _decorateWatchlistSparklines;
+
+  // Hook into the watchlist render path. refreshWL is the canonical
+  // refresh — wrap it so sparklines render after each refresh.
+  function _wireHook(){
+    if (typeof refreshWL === 'function' && !refreshWL._sparkHooked){
+      var _orig = window.refreshWL;
+      window.refreshWL = function(){
+        var r = _orig.apply(this, arguments);
+        // refreshWL is async — schedule the decorator to run after a tick.
+        setTimeout(function(){ try { _decorateWatchlistSparklines(); } catch(_){} }, 800);
+        return r;
+      };
+      window.refreshWL._sparkHooked = true;
+    }
+  }
+  setTimeout(_wireHook, 200);
+
+  console.log('[wl-spark] ready');
+})();
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  FEAT-8 — LIVE-STREAMING P&L SCREEN (full-screen big-number overlay)
+//  Long-press the POSITIONS bot-tab → open. 96px big number, refreshes
+//  every 5s. Tap anywhere to dismiss.
+// ═══════════════════════════════════════════════════════════════════════════
+(function(){
+  var ticker = null;
+
+  function openLivePnlView(){
+    var existing = document.getElementById('live-pnl-overlay');
+    if (existing) existing.remove();
+    var overlay = document.createElement('div');
+    overlay.id = 'live-pnl-overlay';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:9700;background:var(--bg0);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;padding:env(safe-area-inset-top,40px) 20px env(safe-area-inset-bottom,20px);';
+    overlay.innerHTML =
+        '<div style="font-family:var(--ff-brand);font-size:11px;color:var(--gry);letter-spacing:3px;margin-bottom:24px;">DAY P&amp;L</div>'
+      + '<div id="lpv-day" style="font-family:var(--ff-brand);font-size:96px;font-weight:900;color:var(--wht);letter-spacing:1px;line-height:1;">--</div>'
+      + '<div id="lpv-day-pct" style="font-family:var(--ff-mono);font-size:18px;color:var(--gry);margin-top:14px;">--%</div>'
+      + '<div style="margin-top:48px;font-family:var(--ff-brand);font-size:10px;color:var(--gry);letter-spacing:2px;">EQUITY</div>'
+      + '<div id="lpv-eq" style="font-family:var(--ff-mono);font-size:32px;color:var(--ambb);margin-top:6px;">--</div>'
+      + '<div style="margin-top:40px;font-family:var(--ff-mono);font-size:10px;color:var(--gry2);">tap anywhere to dismiss</div>';
+    overlay.onclick = function(){
+      if (ticker){ clearInterval(ticker); ticker = null; }
+      overlay.remove();
+    };
+    document.body.appendChild(overlay);
+    _refreshLpv();
+    if (ticker) clearInterval(ticker);
+    ticker = setInterval(_refreshLpv, 5000);
+  }
+  window.openLivePnlView = openLivePnlView;
+
+  function _refreshLpv(){
+    var heroDay = document.getElementById('pos-hero-day');
+    var heroEq  = document.getElementById('pos-hero-equity');
+    var pnlDay  = document.getElementById('pos-daypnl');
+    var pnlEq   = document.getElementById('pos-acctval');
+    var dayTxt = (heroDay && heroDay.textContent) || (pnlDay && pnlDay.textContent) || '--';
+    var eqTxt  = (heroEq  && heroEq.textContent)  || (pnlEq  && pnlEq.textContent)  || '--';
+    var lpvDay = document.getElementById('lpv-day');
+    var lpvEq  = document.getElementById('lpv-eq');
+    var lpvPct = document.getElementById('lpv-day-pct');
+    if (lpvDay) lpvDay.textContent = dayTxt.replace(/today\s*$/i,'').replace(/^\+\$/,'$+').trim();
+    if (lpvEq)  lpvEq.textContent  = eqTxt;
+    // Color code by sign.
+    var positive = (dayTxt || '').indexOf('+') >= 0 || (dayTxt || '').match(/\$[1-9]/);
+    var negative = (dayTxt || '').match(/^-/);
+    if (lpvDay){
+      lpvDay.style.color = negative ? 'var(--ngo)' : (positive ? 'var(--grn)' : 'var(--wht)');
+    }
+    // Day % from positions if available.
+    if (lpvPct && Array.isArray(G.positions)){
+      var totalDay = 0, totalEq = 0;
+      G.positions.forEach(function(p){
+        if (typeof p.dayPnl === 'number') totalDay += p.dayPnl;
+        if (typeof p.last === 'number' && typeof p.qty === 'number'){
+          var mult = (p.type === 'STOCK') ? 1 : 100;
+          totalEq += p.last * Math.abs(p.qty) * mult;
+        }
+      });
+      var pct = totalEq > 0 ? (totalDay / totalEq) * 100 : 0;
+      lpvPct.textContent = (pct >= 0 ? '+' : '') + pct.toFixed(2) + '% on positions';
+      lpvPct.style.color = pct >= 0 ? 'var(--grn)' : 'var(--ngo)';
+    }
+  }
+
+  // Long-press detector on the POSITIONS bot-tab. Same touchstart-timer
+  // pattern as the share long-press — 700ms hold, <8px movement.
+  function _wireLongPress(){
+    var btn = document.querySelector('.bot-tab[onclick*="bnGo(\'pos\')"], .bot-tab[onclick*="switchTab(\'pos\')"]');
+    if (!btn) return setTimeout(_wireLongPress, 600);
+    var pressTimer = null;
+    var sx = 0, sy = 0;
+    btn.addEventListener('touchstart', function(e){
+      sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+      pressTimer = setTimeout(function(){
+        try { if (typeof hap === 'function') hap([20, 40, 20]); } catch(_){}
+        openLivePnlView();
+        pressTimer = null;
+      }, 700);
+    }, {passive:true});
+    btn.addEventListener('touchmove', function(e){
+      if (!pressTimer) return;
+      var dx = Math.abs(e.touches[0].clientX - sx);
+      var dy = Math.abs(e.touches[0].clientY - sy);
+      if (dx > 8 || dy > 8){ clearTimeout(pressTimer); pressTimer = null; }
+    }, {passive:true});
+    btn.addEventListener('touchend', function(){ if (pressTimer) clearTimeout(pressTimer); pressTimer = null; }, {passive:true});
+    btn.addEventListener('touchcancel', function(){ if (pressTimer) clearTimeout(pressTimer); pressTimer = null; }, {passive:true});
+    // Desktop right-click fallback.
+    btn.addEventListener('contextmenu', function(e){ e.preventDefault(); openLivePnlView(); });
+  }
+  setTimeout(_wireLongPress, 1500);
+
+  console.log('[live-pnl] ready');
+})();
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  FEAT-11 — LONG-PRESS TRADE BOT-TAB → QUICK-BUY TOP-RANKED GO
+//  Same long-press pattern as FEAT-8. Bottom sheet shows the #1 GO
+//  ticker from the latest scan results with strike/exp pre-derived
+//  via autoSelectContract logic + a SWIPE TO BUY at bottom.
+// ═══════════════════════════════════════════════════════════════════════════
+(function(){
+  function openQuickBuySheet(){
+    // Find the top-ranked GO from current scan results.
+    var top = null;
+    if (Array.isArray(G.results)){
+      for (var i = 0; i < G.results.length; i++){
+        if (G.results[i].isGo){ top = G.results[i]; break; }
+      }
+    }
+    if (!top){
+      try { toast('No GO tickers in current scan — run scan first'); } catch(_){}
+      return;
+    }
+    var existing = document.getElementById('quick-buy-sheet');
+    if (existing) existing.remove();
+    var sheet = document.createElement('div');
+    sheet.id = 'quick-buy-sheet';
+    sheet.style.cssText = 'position:fixed;inset:0;z-index:9320;background:rgba(0,0,0,0.78);backdrop-filter:blur(3px);display:flex;align-items:flex-end;justify-content:center;';
+    sheet.onclick = function(e){ if (e.target === sheet) sheet.remove(); };
+    var inner = document.createElement('div');
+    inner.style.cssText = 'background:var(--bg1);border-top:2px solid var(--grn);border-radius:14px 14px 0 0;width:100%;max-width:560px;padding:18px 16px calc(max(env(safe-area-inset-bottom,18px),18px)) 16px;display:flex;flex-direction:column;gap:14px;animation:osm-sheet-up .25s ease-out;';
+    inner.innerHTML =
+        '<div style="display:flex;justify-content:space-between;align-items:center;">'
+      +   '<div style="font-family:var(--ff-brand);font-size:13px;color:var(--grn);letter-spacing:2px;font-weight:700;">QUICK BUY — TOP GO</div>'
+      +   '<button class="btn" style="font-size:14px;padding:6px 12px;min-width:36px;min-height:36px;" onclick="document.getElementById(\'quick-buy-sheet\').remove()">&#10005;</button>'
+      + '</div>'
+      + '<div style="text-align:center;padding:14px 0;">'
+      +   '<div style="font-family:var(--ff-brand);font-size:36px;font-weight:900;color:var(--wht);letter-spacing:1px;">'+_esc(top.ticker)+'</div>'
+      +   '<div style="font-family:var(--ff-mono);font-size:12px;color:var(--gry);margin-top:6px;">$'+fmt2(top.price)+' · score '+Math.round(top.score)+' · '+_esc(top.sector || '')+'</div>'
+      + '</div>'
+      + '<div style="display:flex;gap:8px;">'
+      +   '<button class="btn blu" style="flex:1;padding:14px;font-weight:700;font-size:13px;" onclick="(function(){try{var s=document.getElementById(\'quick-buy-sheet\');if(s)s.remove();switchTab(\'order\');var sx=document.getElementById(\'ord-sym\');if(sx){sx.value='+_jsq(top.ticker)+';if(typeof onSymbolChange===\'function\')onSymbolChange();}var ot=document.getElementById(\'ord-type\');if(ot){ot.value=\'CALL\';if(typeof onOrderTypeChange===\'function\')onOrderTypeChange();}var act=document.getElementById(\'ord-action\');if(act)act.value=\'BUY_TO_OPEN\';if(typeof autoSelectContract===\'function\')setTimeout(autoSelectContract,300);}catch(e){console.error(e);}})()">▲ OPEN ORDER TICKET</button>'
+      + '</div>'
+      + '<div style="font-family:var(--ff-mono);font-size:10px;color:var(--gry2);text-align:center;">tap OUTSIDE to dismiss</div>';
+    sheet.appendChild(inner);
+    document.body.appendChild(sheet);
+  }
+  window.openQuickBuySheet = openQuickBuySheet;
+
+  function _wireLongPress(){
+    var btn = document.querySelector('.bot-tab[onclick*="trade"], .bot-tab[onclick*="order"]');
+    if (!btn) return setTimeout(_wireLongPress, 600);
+    var pressTimer = null;
+    var sx = 0, sy = 0;
+    btn.addEventListener('touchstart', function(e){
+      sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+      pressTimer = setTimeout(function(){
+        try { if (typeof hap === 'function') hap([30, 60, 30]); } catch(_){}
+        openQuickBuySheet();
+        pressTimer = null;
+      }, 700);
+    }, {passive:true});
+    btn.addEventListener('touchmove', function(e){
+      if (!pressTimer) return;
+      var dx = Math.abs(e.touches[0].clientX - sx);
+      var dy = Math.abs(e.touches[0].clientY - sy);
+      if (dx > 8 || dy > 8){ clearTimeout(pressTimer); pressTimer = null; }
+    }, {passive:true});
+    btn.addEventListener('touchend', function(){ if (pressTimer) clearTimeout(pressTimer); pressTimer = null; }, {passive:true});
+    btn.addEventListener('touchcancel', function(){ if (pressTimer) clearTimeout(pressTimer); pressTimer = null; }, {passive:true});
+    btn.addEventListener('contextmenu', function(e){ e.preventDefault(); openQuickBuySheet(); });
+  }
+  setTimeout(_wireLongPress, 1500);
+
+  console.log('[quick-buy] ready');
 })();
 
 /* EOD EQUITY LOG removed 2026-05-05 per user spec — module deleted in
