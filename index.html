@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-09T15:00-rescan-tier2-high-fixes">
+<meta name="op-build" content="2026-05-09T16:00-rescan-tier3-low-and-enhancements">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -7058,6 +7058,74 @@ function _purgeStaleDailyKeys(){
   } catch(_){ /* localStorage unavailable — no-op */ }
 }
 try { _purgeStaleDailyKeys(); } catch(_){}
+// CONF-4 fix 2026-05-09: shared ET-anchored helpers. Replaces ad-hoc
+// new Date().getDay() / toISOString().slice(0,10) calls scattered through
+// the codebase. All weekday + day-key checks should route through these
+// so that boundary midnight/timezone bugs have one place to be fixed.
+function _etDateKey(date){
+  var d = date || new Date();
+  try {
+    var p = d.toLocaleDateString('en-US', { timeZone:'America/New_York', year:'numeric', month:'2-digit', day:'2-digit' }).split('/');
+    return p[2] + '-' + p[0] + '-' + p[1];
+  } catch(_){ return d.toISOString().slice(0,10); }
+}
+function _etDayOfWeek(date){
+  var d = date || new Date();
+  try { return new Date(d.toLocaleString('en-US', { timeZone:'America/New_York' })).getDay(); }
+  catch(_){ return d.getDay(); }
+}
+function _isWeekendET(date){
+  var dow = _etDayOfWeek(date);
+  return dow === 0 || dow === 6;
+}
+// E-13 fix 2026-05-09: init-time assertion that scanner rule-name strings
+// referenced by applyFilters / _matchesPreset actually exist in scoreIt's
+// emitted rule names. Catches drift like the v2.9.4 bug where 'GEX Call
+// Heavy' was checked but the rule emitted 'GEX Call Flow'. Pure dev-mode
+// — only logs warnings, doesn't block anything.
+function _assertScanRuleNames(){
+  var EXPECTED = [
+    'PROVEN ticker',
+    'AVOID ticker',
+    'Analyst Revisions ↑',
+    '52Wk Hi Prox <15%',
+    'GEX Call Flow',
+    'MACD Hist +',
+    'TF Aligned 2/3',
+    'Price > EMA200',
+    'U/D Volume Ratio (50d)',
+    'JT 12-1 Momentum',
+    'Minervini Trend Template',
+    'Pocket Pivot',
+    'VCP — ATR Contraction',
+    '20d Donchian Breakout'
+  ];
+  // Synthetic ticker payload — minimal but enough to exercise scoreIt.
+  if (typeof scoreIt !== 'function') return;   // scanner not yet loaded
+  try {
+    var probe = scoreIt('SPY', { rsi:55, macd:0.1, adx:22, ema20:400, ema50:395, ema200:380, tf:2, week52hi:420, price:410, sma50:395, sma200:380, relStr21d:1.5 }, {});
+    if (!probe || !Array.isArray(probe.rules)){
+      console.warn('[scan-rule-assert] scoreIt did not return rules array');
+      return;
+    }
+    var emitted = probe.rules.map(function(r){ return r.n; });
+    var missing = EXPECTED.filter(function(name){
+      // Allow RS rule with either 5d or 21d label
+      if (name === 'RS > SPY') return !emitted.some(function(e){ return /^RS > SPY/.test(e); });
+      return emitted.indexOf(name) < 0;
+    });
+    if (missing.length){
+      console.warn('[scan-rule-assert] expected rule names missing from scoreIt output: ' + JSON.stringify(missing));
+    } else if (_OP_DEBUG){
+      console.log('[scan-rule-assert] OK — all '+EXPECTED.length+' expected rules emitted by scoreIt');
+    }
+  } catch(e){
+    console.warn('[scan-rule-assert] probe failed:', e.message);
+  }
+}
+// Run after scoreIt is defined. Initial probe via setTimeout so the
+// definition is hoisted by the time we run.
+setTimeout(function(){ try { _assertScanRuleNames(); } catch(_){} }, 0);
 // Debug-only console logger. Enable via localStorage.setItem('rrjcar_debug','1')
 // in DevTools then reload — turns on verbose [bg-enrich], [eq-trail], [smart-exit]
 // logs. Default off to keep production console quiet. (CODE-7 fix 2026-05-09.)
@@ -9329,10 +9397,13 @@ function resubmitFromModal(){
   if (srtEl && srtEl.value && eid('sf-start')) eid('sf-start').value = srtEl.value;
   // Step size — sf-step is readonly (auto from coverage). To override, set
   // sf-coverage so the calc reflects the requested step. Skip if user left blank.
+  // BUG-18 fix 2026-05-09: restore readOnly after writing so the field
+  // doesn't stay editable forever. Without this, the user could type into
+  // it and have their value silently overwritten by the next coverage tick.
   if (stEl && stEl.value && eid('sf-step')){
-    // Direct write — temporarily make writable.
     eid('sf-step').readOnly = false;
     eid('sf-step').value = Number(stEl.value).toFixed(2);
+    eid('sf-step').readOnly = true;
   }
 
   // Make sure step-fill is on.
@@ -11171,8 +11242,44 @@ async function replaceEquityTrailingStop(creds, trailState, newStop, newLimit){
   try{
     addAlert(trailState.symbol, 'TRAIL UNCOVERED — old stop canceled, all 5 replacement attempts failed. PLACE STOP MANUALLY.', 'nogo');
     if (typeof toast === 'function') toast('⚠⚠ '+trailState.symbol+' has NO STOP — Tradier rejected 5 placement attempts. Open Tradier and place a stop manually.');
+    // E-12 fix 2026-05-09 (iPhone-priority): toast may be missed if user
+    // is on another tab. Show a persistent across-tabs banner that
+    // requires explicit dismissal and plays the fill-sound at uncomfortable
+    // volume so the user notices on iPhone PWA. Includes a "Place Stop"
+    // shortcut that pre-fills the order ticket.
+    showUncoveredTrailBanner(trailState);
   }catch(e){}
   return null;
+}
+
+// Persistent banner for the catastrophic case where the position is
+// uncovered (no broker-side stop). Mirrors showOrderTerminalBanner but
+// REQUIRES dismissal — does NOT auto-dismiss like the order banner.
+// User spec 2026-05-09: this is a financial-risk event, not a status
+// update; should never silently disappear.
+function showUncoveredTrailBanner(trailState){
+  try {
+    var existing = document.getElementById('uncovered-trail-banner-' + trailState.symbol);
+    if (existing) existing.remove();
+    var banner = document.createElement('div');
+    banner.id = 'uncovered-trail-banner-' + trailState.symbol;
+    banner.style.cssText = 'position:fixed;top:calc(max(env(safe-area-inset-top,24px),24px) + 8px);left:50%;transform:translateX(-50%);z-index:9780;background:var(--bg1);border:3px solid var(--ngo);border-radius:10px;padding:14px 18px;display:flex;align-items:center;gap:12px;box-shadow:0 8px 40px rgba(0,0,0,.7),0 0 36px rgba(255,0,230,.4);font-family:var(--ff-brand);min-width:280px;max-width:96vw;animation:osm-banner-in .3s ease-out;';
+    banner.innerHTML =
+        '<div style="font-size:38px;line-height:1;color:var(--ngo);">&#9888;</div>'
+      + '<div style="flex:1;display:flex;flex-direction:column;gap:3px;">'
+      +   '<div style="font-size:13px;color:var(--ngo);letter-spacing:1.5px;font-weight:800;">UNCOVERED POSITION</div>'
+      +   '<div style="font-size:14px;color:var(--wht);font-weight:700;font-family:var(--ff-mono);">'+_esc(trailState.symbol)+' has NO broker-side stop</div>'
+      +   '<div style="font-size:11px;color:var(--gry);font-family:var(--ff-mono);">5 replacement attempts failed · place stop manually NOW</div>'
+      + '</div>'
+      + '<div style="display:flex;flex-direction:column;gap:6px;">'
+      +   '<button class="btn blu" style="font-size:11px;padding:6px 10px;font-weight:700;" onclick="(function(){try{switchTab(\'order\');var sx=document.getElementById(\'ord-sym\');if(sx)sx.value='+_jsq(trailState.symbol)+';var ot=document.getElementById(\'ord-type\');if(ot)ot.value=\'STOCK\';if(typeof onOrderTypeChange===\'function\')onOrderTypeChange();}catch(_){};var b=document.getElementById(\'uncovered-trail-banner-'+_jsq(trailState.symbol)+'\');if(b)b.remove();})()">PLACE STOP</button>'
+      +   '<button class="btn" style="font-size:10px;padding:5px 10px;border-color:var(--gry2);color:var(--gry);" onclick="document.getElementById(\'uncovered-trail-banner-'+_jsq(trailState.symbol)+'\').remove()">DISMISS</button>'
+      + '</div>';
+    document.body.appendChild(banner);
+    // Play fill sound (loud, hard to miss). Vibrate insistently.
+    try { if (typeof playFillSound === 'function') playFillSound(); } catch(_){}
+    try { if (typeof hap === 'function') hap([60,80,60,80,60,80,60]); } catch(_){}
+  } catch(e) { console.error('[uncovered-trail-banner]', e); }
 }
 
 // Manual "cancel this trailing stop" helper (useful for UI / debugging)
@@ -14720,12 +14827,14 @@ async function loadOrdChain(forcedSym){
     //    of ET 16:00 keeps the math stable: 16:00 EDT = 20:00 UTC,
     //    16:00 EST = 21:00 UTC. We use 20:30 UTC as a year-round safe
     //    midpoint that keeps DTE rounding consistent within ±0.02 days.
+    // BUG-20 fix 2026-05-09: nowMs declared BEFORE _dteFor so readers
+    // don't have to rely on var-hoisting to verify correctness.
+    var nowMs = Date.now();
     function _dteFor(d){
       return Math.round((new Date(d+'T20:30:00Z').getTime() - nowMs) / (24*3600*1000));
     }
     // Pre-select the user-typed expiry if it's in the list, else nearest 30-45 DTE.
     var formExp = (eid('ord-exp') && eid('ord-exp').value) || '';
-    var nowMs = Date.now();
     var picked = formExp && dates.indexOf(formExp) >= 0 ? formExp : null;
     if (!picked){
       // Nearest 30-45 DTE among future expirations.
@@ -15297,7 +15406,7 @@ function quickBuyShares(ticker){
       var oid = data.order.id || '?';
       var status = data.order.status || 'submitted';
       toast('\u2713 '+ticker+' buy '+status+' (order '+oid+')', 5000);
-      if(typeof addAlert === 'function') addAlert('BUY', ticker+' market buy '+qty+' sh \u2014 order '+oid+' ('+status+')', 'ok');
+      if(typeof addAlert === 'function') addAlert('BUY', ticker+' market buy '+qty+' sh \u2014 order '+oid+' ('+status+')', 'go');
       pushNotify('Share buy submitted', ticker+' \u2014 '+qty+' share'+(qty>1?'s':'')+' at market ('+status+', order #'+oid+')', 'buy-'+oid);
       try{ fetchBalances(); }catch(e){}
     } else {
@@ -17105,7 +17214,7 @@ function onOBFilterChange(){
       }
     },
     function(total){
-      addAlert('OB', 'OB scan complete ('+total+' tickers)', 'ok');
+      addAlert('OB', 'OB scan complete ('+total+' tickers)', 'go');
       if(getIndFilter('filt-obclear') || getIndFilter('filt-obsupport')) applyFilters();
     }
   );
@@ -18293,14 +18402,17 @@ function runGexForTicker(t){
   // Flip the on-row pill to a 'busy' state so the user sees feedback
   var pill = document.querySelector('.gex-pill.mis[data-tk="'+t+'"]');
   if (pill) { pill.className = 'gex-pill busy'; pill.textContent = '…'; }
-  var today = new Date();
+  // BUG-21 fix 2026-05-09: anchor DTE math to ET 16:00 (= 20:30 UTC mid-
+  // point year-round) instead of comparing against `new Date()` local now
+  // and `new Date(dt)` UTC midnight. Mirrors loadOrdChain's _dteFor.
+  var nowMs = Date.now();
   tradierFetch(host+'/v1/markets/options/expirations?symbol='+encodeURIComponent(t)+'&includeAllRoots=true', {
     headers: { Authorization: 'Bearer ' + key, Accept: 'application/json' }
   }, 6*60*60*1000).then(function(r){return r.json();}).then(function(d){
     var dates = []; try { dates = d.expirations.date; if(!Array.isArray(dates)) dates=[dates]; } catch(_){}
     var best = null, bestDiff = 999;
     dates.forEach(function(dt){
-      var dte = Math.round((new Date(dt) - today) / 864e5);
+      var dte = Math.round((new Date(dt+'T20:30:00Z').getTime() - nowMs) / 864e5);
       var diff = Math.abs(dte - 35);
       if (dte >= 20 && dte <= 70 && diff < bestDiff) { bestDiff = diff; best = {date:dt, dte:dte}; }
     });
@@ -21539,11 +21651,10 @@ scheduleMidnightRefresh();
 var G_closed = { raw:[], trades:[], openFilled:[] };
 
 function parseOccSymbolFull(sym){
-  var m=sym.match(/^([A-Z1-9]+)(\d{6})([CP])(\d{8})$/);
-  if(!m)return{underlying:sym,type:'STOCK',strike:0,exp:'',isOption:false};
-  var yr='20'+m[2].slice(0,2),mo=m[2].slice(2,4),dy=m[2].slice(4,6);
-  return{underlying:m[1],type:m[3]==='C'?'CALL':'PUT',
-    strike:parseInt(m[4])/1000,exp:yr+'-'+mo+'-'+dy,isOption:true};
+  // N-8 fix 2026-05-09: delegate to parseOccSymbol so the two parsers stay
+  // in sync. Extends the result with an isOption flag callers expect.
+  var base = parseOccSymbol(sym);
+  return Object.assign({}, base, { isOption: base.type !== 'STOCK' });
 }
 
 function matchTrades(orders){
@@ -23644,7 +23755,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.9.5-rescan-tier2-high-fixes';
+var APP_VERSION = '2.9.6-rescan-tier3-low-and-enhancements';
 // Page-source fallback constants removed. Each visitor now provides their own
 // API credentials via the API tab (or, for Tradier, sets up the worker proxy
 // at worker/tradier-proxy/ \u2014 keys never reach the browser at all).
@@ -24223,6 +24334,16 @@ function cwAutoAddFromPositions(positions){
   }
 }
 
+// E-2/3 fix 2026-05-09: HELD vs WATCHING filter persistence.
+// Default 'all' so existing users see no behavior change.
+function cwGetFilter(){
+  try { return localStorage.getItem('rrjcar_cw_filter') || 'all'; } catch(_){ return 'all'; }
+}
+function cwSetFilter(v){
+  try { localStorage.setItem('rrjcar_cw_filter', v || 'all'); } catch(_){}
+  try { cwRenderTable(); } catch(_){}
+}
+
 function cwRenderTable(){
   var wrap = eid('cw-tbl-wrap');
   var data = cwGetAll();
@@ -24238,14 +24359,47 @@ function cwRenderTable(){
   });
   cwSaveAll(data);
 
+  // E-2/3 filter chips header — distinguishes auto-added (HELD) from
+  // manual (WATCHING) entries. Renders even on empty state so the user
+  // can click to switch filters before adding anything. Mobile-friendly:
+  // chips inline-wrap on narrow viewports. Persists choice via cwSetFilter.
+  var filter = cwGetFilter();
+  var totalAll = keys.length;
+  var totalHeld = keys.filter(function(k){ return (data[k]||{}).source === 'position-auto'; }).length;
+  var totalManual = totalAll - totalHeld;
+  function _chip(val, label, count){
+    var active = filter === val;
+    return '<button class="btn '+(active?'blu':'')+'" style="font-size:10px;padding:4px 10px;'+(active?'':'border-color:var(--gry2);color:var(--gry);')+'" onclick="cwSetFilter('+_jsq(val)+'==='+_jsq(val)+'?'+_jsq(val)+':\''+_jsq(val)+'\');cwSetFilter(\''+_jsq(val)+'\')">'+label+' <span style="font-weight:400;opacity:.75;">'+count+'</span></button>';
+  }
+  // Cleaner inline: single onclick per chip.
+  function _chipSimple(val, label, count){
+    var active = filter === val;
+    var st = 'font-size:10px;padding:4px 10px;'+(active?'':'border-color:var(--gry2);color:var(--gry);');
+    return '<button class="btn '+(active?'blu':'')+'" style="'+st+'" onclick="cwSetFilter(\''+val+'\')">'+label+' <span style="font-weight:400;opacity:.75;">'+count+'</span></button>';
+  }
+  var chipsHtml =
+      '<div style="display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;border-bottom:var(--bdr);background:var(--bg2);align-items:center;">'
+    +   '<span style="font-family:var(--ff-mono);font-size:10px;color:var(--gry);letter-spacing:1px;margin-right:4px;">VIEW</span>'
+    +   _chipSimple('all', 'ALL', totalAll)
+    +   _chipSimple('held', 'HELD', totalHeld)
+    +   _chipSimple('manual', 'WATCHING', totalManual)
+    + '</div>';
+
+  // Apply the active filter to keys.
+  if (filter === 'held'){
+    keys = keys.filter(function(k){ return (data[k]||{}).source === 'position-auto'; });
+  } else if (filter === 'manual'){
+    keys = keys.filter(function(k){ return (data[k]||{}).source !== 'position-auto'; });
+  }
+
   if(!keys.length){
-    wrap.innerHTML = '<div class="empty-det" style="min-height:200px;"><div class="ei">&#9734;</div><p>No contracts watched yet</p></div>';
+    wrap.innerHTML = chipsHtml + '<div class="empty-det" style="min-height:160px;"><div class="ei">&#9734;</div><p>No contracts in this view</p></div>';
     return;
   }
 
   var DS = String.fromCharCode(36);
-  var html = '<table><thead><tr>'+
-    '<th>TICKER</th><th>TYPE</th><th>STRIKE</th><th>EXPIRY</th><th>DTE</th>'+
+  var html = chipsHtml + '<table><thead><tr>'+
+    '<th>SRC</th><th>TICKER</th><th>TYPE</th><th>STRIKE</th><th>EXPIRY</th><th>DTE</th>'+
     '<th>ADDED AT</th><th>CURRENT PREMIUM</th><th>CHANGE</th><th>DELTA</th>'+
     '<th>SCORE</th><th>BEST?</th><th>ACTIONS</th>'+
     '</tr></thead><tbody>';
@@ -24266,13 +24420,25 @@ function cwRenderTable(){
       : '<span class="badge" style="font-size:9px;background:rgba(255,0,230,.12);color:var(--ngo);border:1px solid var(--ngo);">&#9888; NOT BEST</span>';
     var rowStyle = c.isBestForExpiry ? '' : 'background:rgba(255,0,230,.04);';
 
+    var srcBadge = c.source === 'position-auto'
+      ? '<span title="Auto-added from your open positions" style="font-size:9px;color:var(--ambb);font-weight:700;letter-spacing:.5px;">HELD</span>'
+      : '<span title="Manually added to watchlist" style="font-size:9px;color:var(--gry);font-weight:600;letter-spacing:.5px;">WATCH</span>';
     html += '<tr style="border-bottom:var(--bdr);'+rowStyle+'">'+
+      '<td>'+srcBadge+'</td>'+
       '<td><b style="color:var(--amb);">'+c.ticker+'</b></td>'+
       '<td>'+c.type+'</td>'+
       '<td>'+DS+fmt2(c.strike)+'</td>'+
       '<td style="'+dteCls+'">'+fmtDateUS(c.expDate)+'</td>'+
       '<td style="'+dteCls+'">'+dte+'d</td>'+
-      '<td style="color:var(--gry);font-size:10px;">'+fmtDateUS(new Date(c.addedAt).toISOString().slice(0,10))+'</td>'+
+      '<td style="color:var(--gry);font-size:10px;">'+fmtDateUS((function(){
+        // BUG-14 fix 2026-05-09: use ET-anchored date instead of UTC. A
+        // contract added at 9pm ET previously showed as the next day's
+        // date because toISOString() rolled to UTC midnight.
+        try {
+          var p = new Date(c.addedAt).toLocaleDateString('en-US', { timeZone:'America/New_York', year:'numeric', month:'2-digit', day:'2-digit' }).split('/');
+          return p[2] + '-' + p[0] + '-' + p[1];
+        } catch(_){ return new Date(c.addedAt).toISOString().slice(0,10); }
+      })())+'</td>'+
       '<td style="color:var(--ambb);font-weight:700;" id="cw-mid-'+k+'">'+DS+fmt2(c.currentMid)+'</td>'+
       '<td style="'+changeCls+';">'+(midChange>=0?'+':'')+DS+fmt2(midChange)+' ('+(midChange>=0?'+':'')+midChangePct+'%)</td>'+
       '<td>'+fmt2(c.delta)+'</td>'+
@@ -28574,22 +28740,42 @@ window.addEventListener('DOMContentLoaded',init);
   // value from data-sort-<key> attributes (set by renderPositionsTable),
   // sort the rows, and put them back. Direction toggles on repeat clicks
   // of the same header.
-  var posSort = { key: null, dir: 1 };
+  // E-15 fix 2026-05-09: hydrate posSort from localStorage so the user's
+  // last-chosen sort survives reload. Persisted on every header click.
+  var posSort = (function(){
+    try {
+      var raw = localStorage.getItem('rrjcar_pos_sort');
+      if (raw){
+        var obj = JSON.parse(raw);
+        if (obj && typeof obj.key === 'string' && (obj.dir === 1 || obj.dir === -1)){
+          return { key: obj.key, dir: obj.dir };
+        }
+      }
+    } catch(_){}
+    return { key: null, dir: 1 };
+  })();
 
+  // BUG-17 helper 2026-05-09: parseFloat(0) || -Infinity falsely buckets 0
+  // values into the "missing" sort tier because 0 is falsy. Use isNaN to
+  // distinguish "missing" (NaN) from "zero" (legitimate value).
+  function _numOrMin(s){
+    var n = parseFloat(s);
+    return isNaN(n) ? -Infinity : n;
+  }
   function _val(tr, key){
     if (key === 'ticker') return (tr.dataset.tk || '').toLowerCase();
     if (key === 'opened') return tr.dataset.sortOpened || '';
     if (key === 'ulpx'){
       var c = tr.querySelector('td[data-sort-ulpx]');
-      return parseFloat(c && c.dataset.sortUlpx) || -Infinity;
+      return _numOrMin(c && c.dataset.sortUlpx);
     }
     if (key === 'delta'){
       var c = tr.querySelector('td[data-sort-delta]');
-      return parseFloat(c && c.dataset.sortDelta) || -Infinity;
+      return _numOrMin(c && c.dataset.sortDelta);
     }
     if (key === 'equity'){
       var c = tr.querySelector('td[data-sort-equity]');
-      return parseFloat(c && c.dataset.sortEquity) || -Infinity;
+      return _numOrMin(c && c.dataset.sortEquity);
     }
     if (key === 'qty')    return Math.abs(parseFloat(tr.dataset.qty)||0);
     if (key === 'mid')    return parseFloat(tr.dataset.sortMid)||0;
@@ -28695,6 +28881,8 @@ window.addEventListener('DOMContentLoaded',init);
         posSort.dir = numericKeys[k] ? -1 : 1;
       }
       applyPosSort();
+      // E-15: persist the user's choice across reloads.
+      try { localStorage.setItem('rrjcar_pos_sort', JSON.stringify({key:posSort.key, dir:posSort.dir})); } catch(_){}
       try { if (typeof hap === 'function') hap(5); } catch(_){}
     });
   }
