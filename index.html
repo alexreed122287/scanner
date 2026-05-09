@@ -11,12 +11,12 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-09T16:00-rescan-tier3-low-and-enhancements">
+<meta name="op-build" content="2026-05-09T17:00-iphone-ux-quickwins">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
 <!-- Mobile viewport: allow pinch-zoom (accessibility) + cover safe areas on notched iPhones -->
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <!-- iOS home-screen / PWA -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -229,8 +229,24 @@ a{color:var(--blu);text-decoration:none;}
 /* Floating per-tab HELP button — pinned top-right of the visible tab.
    Click opens a modal with the relevant HOW TO section. Pure-text label
    per user spec 'no icons in dashboard requests'. */
-.help-fab{position:fixed;top:auto;right:14px;z-index:7000;background:rgba(0,212,255,.10);border:1px solid var(--amb);color:var(--amb);font-family:var(--ff-mono);font-size:11px;letter-spacing:1px;padding:5px 10px;border-radius:3px;cursor:pointer;text-transform:uppercase;backdrop-filter:blur(2px);}
+.help-fab{position:fixed;top:auto;bottom:20px;right:14px;z-index:7000;background:rgba(0,212,255,.10);border:1px solid var(--amb);color:var(--amb);font-family:var(--ff-mono);font-size:11px;letter-spacing:1px;padding:5px 10px;border-radius:3px;cursor:pointer;text-transform:uppercase;backdrop-filter:blur(2px);}
 .help-fab:hover{background:rgba(0,212,255,.18);}
+/* Mobile: bottom-nav (≈70px) covers bottom:20px, so bump the help-fab
+   above it. User spec 2026-05-09: HELP button must be visible on iPhone
+   on every screen that has a HOW TO section. */
+@media (max-width: 768px){
+  .help-fab{
+    bottom: calc(max(env(safe-area-inset-bottom, 0px), 0px) + 78px) !important;
+    right: 12px;
+  }
+  /* iBUG-2 fix 2026-05-09: on the order tab, the swipe-to-submit fixed
+     bar sits at bottom:82px, overlapping the help-fab at bottom:78px.
+     Lift the FAB above the swipe track when order tab is active. */
+  #tab-order.active ~ .help-fab,
+  body:has(#tab-order.active) .help-fab{
+    bottom: calc(max(env(safe-area-inset-bottom, 0px), 0px) + 150px) !important;
+  }
+}
 /* Help modal overlay */
 #help-modal{display:none;position:fixed;inset:0;z-index:8500;background:rgba(0,0,0,.75);backdrop-filter:blur(3px);align-items:flex-start;justify-content:center;padding:40px 16px 16px;overflow-y:auto;}
 #help-modal.open{display:flex;}
@@ -2001,6 +2017,16 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
   /* ── BUTTONS: enforce 38px min-height as a floor across the app, but
      allow inline mini-buttons inside table cells to stay compact. ── */
   .btn:not(.cbtn):not(.lnk-btn):not(.bs-buy-btn){min-height:38px !important;}
+  /* iBUG-6 fix 2026-05-09: position CLOSE button is the most destructive
+     action in the app — must be a comfortable iPhone tap target. The
+     .cbtn exclusion above was leaving it at ~22px on mobile. Override
+     specifically for the positions table. */
+  #pos-tbl-wrap .cbtn{
+    min-height:38px !important;
+    padding:8px 12px !important;
+    font-size:11px !important;
+    font-weight:700;
+  }
 
   /* ── CHARTS: lock canvas to viewport width, prevent horizontal overflow */
   canvas{max-width:100% !important;height:auto;}
@@ -3302,7 +3328,7 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
 
       <!-- STRIKE + EXPIRY (options only) -->
       <div class="ord-row ord-opt-only">
-        <div class="ord-field"><label>STRIKE</label><input id="ord-strike" type="number" placeholder="150.00" onchange="updateOrdChart();fetchLiveQuote()" oninput="updateOrdChart()"></div>
+        <div class="ord-field"><label>STRIKE</label><input id="ord-strike" type="number" inputmode="decimal" placeholder="150.00" onchange="updateOrdChart();fetchLiveQuote()" oninput="updateOrdChart()"></div>
         <div class="ord-field"><label>EXPIRATION DATE</label><input id="ord-exp" type="date" onchange="updateOrdChart();fetchLiveQuote();(function(){var c=document.getElementById('ord-chain-card');if(c&&c.open&&typeof loadOrdChain==='function')loadOrdChain();})()"></div>
       </div>
 
@@ -3343,10 +3369,10 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
             <option value="SELL">SELL</option>
           </select>
         </div>
-        <div class="ord-field"><label id="ord-qty-lbl">QTY (CONTRACTS)</label><input id="ord-qty" type="number" value="1" min="1" onchange="updateOrdChart();clearBudget()" oninput="updateOrdChart();clearBudget()"></div>
+        <div class="ord-field"><label id="ord-qty-lbl">QTY (CONTRACTS)</label><input id="ord-qty" type="number" inputmode="numeric" value="1" min="1" onchange="updateOrdChart();clearBudget()" oninput="updateOrdChart();clearBudget()"></div>
         <div class="ord-field">
           <label>UP TO $ <span style="color:var(--gry);font-size:9px;" id="ord-budget-hint"></span></label>
-          <input id="ord-budget" type="number" placeholder="e.g. 500" min="0" step="50"
+          <input id="ord-budget" type="number" inputmode="numeric" placeholder="e.g. 500" min="0" step="50"
             title="Set a max spend — QTY auto-calculates from budget / (limit price x 100)"
             oninput="calcQtyFromBudget()" onchange="calcQtyFromBudget()">
         </div>
@@ -3366,11 +3392,11 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
         </div>
         <div class="ord-field">
           <label>LIMIT PRICE <span id="lmt-hint" style="color:var(--grn);font-size:9px;"></span></label>
-          <input id="ord-lmt" type="number" placeholder="0.00" step="0.01" onchange="updateOrdChart();calcQtyFromBudget()" oninput="this.dataset.userEdited='1';updateOrdChart();calcQtyFromBudget()">
+          <input id="ord-lmt" type="number" inputmode="decimal" placeholder="0.00" step="0.01" onchange="updateOrdChart();calcQtyFromBudget()" oninput="this.dataset.userEdited='1';updateOrdChart();calcQtyFromBudget()">
         </div>
         <div class="ord-field" id="ord-stop-wrap" style="display:none;">
           <label>STOP PRICE</label>
-          <input id="ord-stop" type="number" placeholder="0.00" step="0.01">
+          <input id="ord-stop" type="number" inputmode="decimal" placeholder="0.00" step="0.01">
         </div>
         <div class="ord-field" style="flex:0.5;display:flex;align-items:flex-end;">
           <button class="btn" style="font-size:10px;padding:3px 8px;width:100%;" onclick="setLimitToBid()" title="Set limit price to current bid">SET BID</button>
@@ -3397,7 +3423,7 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
         <div class="ord-field" id="ord-trail-wrap" style="display:none;">
           <label>TRAIL OFFSET <span style="color:var(--gry);font-size:9px;">(from high-water)</span></label>
           <div style="display:flex;gap:6px;">
-            <input id="ord-trail-val" type="number" step="0.01" min="0" placeholder="0.50" style="flex:1 1 auto;min-width:120px;font-size:14px;padding:8px 10px;">
+            <input id="ord-trail-val" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.50" style="flex:1 1 auto;min-width:120px;font-size:14px;padding:8px 10px;">
             <select id="ord-trail-unit" style="flex:0 0 auto;width:80px;font-size:14px;padding:8px 6px;">
               <option value="pct" selected>%</option>
               <option value="dol">$</option>
@@ -3407,7 +3433,7 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
         <div class="ord-field" id="ord-trail-lmt-wrap" style="display:none;">
           <label>LIMIT OFFSET <span style="color:var(--gry);font-size:9px;">(below stop)</span></label>
           <div style="display:flex;gap:6px;">
-            <input id="ord-trail-lmt-val" type="number" step="0.01" min="0" placeholder="0.10" style="flex:1 1 auto;min-width:120px;font-size:14px;padding:8px 10px;">
+            <input id="ord-trail-lmt-val" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.10" style="flex:1 1 auto;min-width:120px;font-size:14px;padding:8px 10px;">
             <select id="ord-trail-lmt-unit" style="width:60px;">
               <option value="pct" selected>%</option>
               <option value="dol">$</option>
@@ -3446,11 +3472,11 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
           </div>
           <div class="step-cfg-field">
             <label>Max Attempts</label>
-            <input type="number" id="sf-max" value="10" min="1" max="50" placeholder="10" oninput="updateStepCalcDisplay();saveAppSettings()">
+            <input type="number" inputmode="numeric" id="sf-max" value="10" min="1" max="50" placeholder="10" oninput="updateStepCalcDisplay();saveAppSettings()">
           </div>
           <div class="step-cfg-field">
             <label>Fill Wait (sec)</label>
-            <input type="number" id="sf-delay" value="3" min="1" max="120" placeholder="3"
+            <input type="number" inputmode="numeric" id="sf-delay" value="3" min="1" max="120" placeholder="3"
               title="How long to wait for each limit order to fill before stepping to next price"
               onchange="saveAppSettings()">
           </div>
@@ -7669,7 +7695,13 @@ function addAlert(tk,msg,type){
 var HELP_TAB_MAP = {
   sc: 'howto-fullscanner', pos: 'howto-positions', order: 'howto-orderticket',
   api: 'howto-api', pf: 'howto-portfolio', ind: 'howto-industry',
-  gex: 'howto-gex', wl: 'howto-watchlist', al: 'howto-alerts'
+  gex: 'howto-gex', wl: 'howto-watchlist', al: 'howto-alerts',
+  // VERIFY-8 follow-up 2026-05-09: News/Closed/CW tabs no longer hide the
+  // FAB. If the matching #howto-news / #howto-closed / #howto-cw card
+  // doesn't exist yet, openHelpFor falls through to the master HOW TO
+  // tab — better than the FAB blinking off mid-navigation.
+  news: 'howto-news', closed: 'howto-closed', cw: 'howto-watchlist',
+  bs: 'howto-fullscanner'
 };
 function _updateHelpFab(tabId){
   var fab = document.getElementById('help-fab-btn');
@@ -7677,7 +7709,9 @@ function _updateHelpFab(tabId){
   var helpId = HELP_TAB_MAP[tabId];
   if (!helpId) { fab.style.display = 'none'; return; }
   fab.style.display = '';
-  fab.style.bottom = '20px';
+  // Bottom positioning is handled by CSS now (mobile shifts above the
+  // bottom-nav via @media query); leave inline `bottom` unset so the
+  // class rule wins.
   fab.dataset.helpId = helpId;
 }
 function openHelpFor(){
@@ -23755,7 +23789,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.9.6-rescan-tier3-low-and-enhancements';
+var APP_VERSION = '2.9.7-iphone-ux-quickwins';
 // Page-source fallback constants removed. Each visitor now provides their own
 // API credentials via the API tab (or, for Tradier, sets up the worker proxy
 // at worker/tradier-proxy/ \u2014 keys never reach the browser at all).
@@ -27131,16 +27165,22 @@ function init(){
   // GEX table here if that's the saved tab — switchTab's GEX branch only
   // calls renderGex when G.gexData is non-empty, which it is by now after
   // loadGexCache() ran above.
+  // User spec 2026-05-09: page should ALWAYS open to FULL SCANNER on
+  // reload/reopen — not the user's last-active tab. The localStorage
+  // 'rrjcar_active_tab' write at line 7715 still happens (so other code
+  // paths that read it still work), but we no longer restore from it on
+  // init. The HTML `class="ntab active"` on the FULL SCANNER button at
+  // line 2687 already establishes the default active tab.
   try {
-    var savedTab = localStorage.getItem('rrjcar_active_tab');
-    if (savedTab && savedTab !== 'sc'){
-      var validTabs = ['sc','wl','pos','order','api','pf','ind','gex','al','howto','closed','cw','bs','news'];
-      if (validTabs.indexOf(savedTab) >= 0){
-        setTimeout(function(){
-          try { switchTab(savedTab); } catch(_){}
-        }, 80);
-      }
-    }
+    // Force scanner active on init regardless of any prior saved state.
+    // Calling switchTab('sc') also fires _updateHelpFab('sc') which
+    // surfaces the floating HELP button (was hidden on first paint
+    // because the initial active class was set in HTML, never via
+    // switchTab). User spec 2026-05-09.
+    setTimeout(function(){
+      try { switchTab('sc'); } catch(_){}
+      try { if (typeof _updateHelpFab === 'function') _updateHelpFab('sc'); } catch(_){}
+    }, 60);
   } catch(_){}
 
   // Surface the build version in the header chip so the user can confirm
@@ -27966,7 +28006,7 @@ window.addEventListener('DOMContentLoaded',init);
     pane._ptrWired = true;
     var indicator = document.createElement('div');
     indicator.className = 'ptr-indicator';
-    indicator.innerHTML = '<span class="ptr-spinner"></span><span class="ptr-text">Pull to refresh</span>';
+    indicator.innerHTML = '<span class="ptr-spinner"></span><span class="ptr-text"></span>';
     pane.style.position = pane.style.position || 'relative';
     pane.insertBefore(indicator, pane.firstChild);
 
@@ -27989,7 +28029,7 @@ window.addEventListener('DOMContentLoaded',init);
         var pct = Math.min(dy / THRESHOLD, 1);
         indicator.classList.add('pulling');
         indicator.style.transform = 'translateY('+(Math.min(dy, THRESHOLD)-50)+'px)';
-        indicator.querySelector('.ptr-text').textContent = pct >= 1 ? 'Release to refresh' : 'Pull to refresh';
+        indicator.querySelector('.ptr-text').textContent = '';
       }
     }, {passive:true});
     pane.addEventListener('touchend', function(){
