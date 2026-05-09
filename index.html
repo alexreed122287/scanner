@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-08T21:30-day-pnl-column-and-eod-popup-removed">
+<meta name="op-build" content="2026-05-08T22:15-headless-gex-cron-and-cst-display">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -2646,7 +2646,7 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
       Score threshold
       <input type="number" id="auto-scan-threshold" value="110" min="0" step="5" onchange="saveAutoScan()" style="background:var(--bg2);border:var(--bdr);color:var(--wht);font-family:var(--ff-mono);font-size:11px;padding:3px 6px;width:60px;" title="Tickers scoring at or above this fire a desktop notification">
     </label>
-    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--gry);" title="Skip auto-scans outside 9:30–4 ET on weekdays — saves API calls overnight & on weekends">
+    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--gry);" title="Skip auto-scans outside 8:30–3 CST on weekdays — saves API calls overnight & on weekends">
       <input type="checkbox" id="auto-scan-mkthrs" checked onchange="saveAutoScan()"> Market hours only
     </label>
     <label style="display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--gry);" title="Skip the scan if the browser tab is hidden (saves calls when minimized or on a different desktop)">
@@ -3754,7 +3754,7 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
         <div class="api-row" style="align-items:center;">
           <label style="flex:0 0 200px;">MARKET HOURS ONLY</label>
           <input type="checkbox" id="at-hours-gate" checked style="width:auto;accent-color:var(--grn);" onchange="saveAutoTraderSettings()">
-          <span style="color:var(--gry);font-size:11px;margin-left:8px;">9:45 AM – 3:45 PM ET only (recommended)</span>
+          <span style="color:var(--gry);font-size:11px;margin-left:8px;">8:45 AM – 2:45 PM CST only (recommended)</span>
         </div>
         <div class="api-row" style="align-items:center;">
           <label style="flex:0 0 200px;">MAX OPEN AUTO-POSITIONS</label>
@@ -3884,7 +3884,7 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
           <li><b>▲ BREAKOUT</b> — Near 52-week high + RS &gt; SPY + MACD + + TF Aligned 2/3.</li>
           <li><b>▶ MOMENTUM</b> — MACD + + Above EMA200 + Vol &gt; Avg + RS &gt; SPY.</li>
           <li><b>◆ BEST ITM CALLS</b> — Score ≥180 + liquid + contract ≤$8. Deep-ITM (δ 0.70–0.90) candidates.</li>
-          <li><b>▲ PRE/POST MARKET</b> — same filters as HIGH CONVICTION but the table re-sorts by absolute % gap so the biggest movers float to the top. Use during 4:00–9:30am ET (pre) or 4:00–8:00pm ET (post).</li>
+          <li><b>▲ PRE/POST MARKET</b> — same filters as HIGH CONVICTION but the table re-sorts by absolute % gap so the biggest movers float to the top. Use during 3:00–8:30am CST (pre) or 3:00–7:00pm CST (post).</li>
           <li><b>VERIFY</b> — diagnostic only. Pings Tradier with 5 sentinel tickers and shows the raw `change_percentage`/`last_volume`/`trade_date` fields so you can confirm extended-hours data is flowing through your proxy.</li>
           <li><b>✕ CLEAR</b> — removes any active preset. Restores score-based ranking.</li>
         </ul>
@@ -3995,7 +3995,7 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
           <li><b>TRADIER PROXY LIVE-MODE TOKEN</b> — shared secret for the worker's LIVE_MODE_TOKEN gate. Defense-in-depth so a leaked workers.dev URL can't drain your live account.</li>
           <li><b>SAVE KEYS / CLEAR KEYS</b> — keys persist to localStorage on this device only.</li>
           <li><b>CROSS-DEVICE SETTINGS SYNC</b> (collapsed below) — encrypts your settings with a master secret you choose, stores in Cloudflare KV, restores on any device with the same secret. Trade token is excluded from sync (security-by-design).</li>
-          <li><b>API COUNTER</b> — Tradier calls today, resets at midnight ET. Click for per-endpoint breakdown.</li>
+          <li><b>API COUNTER</b> — Tradier calls today, resets at 11:00 PM CST. Click for per-endpoint breakdown.</li>
         </ul>
       </div>
     </div>
@@ -4058,7 +4058,7 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
         <p style="color:var(--ambb);font-weight:700;margin-top:14px;">UI controls</p>
         <ul style="padding-left:20px;">
           <li><b>RUN GEX</b> — fetches 30-day options chain for top-200 tickers (~4 min, paced by Tradier rate limit). Auto-fires 20s after every scan.</li>
-          <li><b>AUTO schedule</b> — Off / 1x at open (9:35 ET) / 3x daily (9:35, 12:00, 15:00 ET). Recommended: 3x — captures morning, lunch, and close-positioning shifts.</li>
+          <li><b>AUTO schedule</b> — Off / 1x at open (8:35 CST) / 3x daily (8:35, 11:00, 14:00 CST). Recommended: 3x — captures morning, lunch, and close-positioning shifts. Also runs headless via GitHub Actions cron 3× daily so updates happen even when the dashboard is closed.</li>
           <li><b>Table</b> — only bullish (call-heavy, ≥50% call OI) tickers shown, sorted most-bullish first by Call OI %, with |NET GEX| as tiebreaker (higher |GEX| = more conviction in the directional bias). PUT HEAVY tickers stay in G.gexData (rule scorecard still uses them) but suppressed from this display.</li>
           <li><b>RUN pill on scanner rows</b> — for tickers outside the top-200 batch. Click to fetch single-ticker GEX (~3s) so the GEX Call Heavy rule can score them.</li>
         </ul>
@@ -4181,7 +4181,7 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
 
         <p style="color:var(--ambb);font-weight:700;margin-top:14px;">▲ PRE/POST MARKET</p>
         <p><b>Filters:</b> SAME as HIGH CONVICTION (PROVEN + Score ≥140 + Analyst ↑ + GEX + JT 12-1 + Minervini) + secondary sort by absolute % gap (largest movers first).</p>
-        <p><b>Idea:</b> extended-hours gappers screened with the conviction gate. Tradier's <code>change_percentage</code> reflects extended-hours quotes during 4–9:30am ET (pre) and 4–8pm ET (post); on weekends it shows the most recent extended-hours print. Use this preset to surface big movers <i>that also pass HC criteria</i>, not just any random gapper. The sort flip pushes biggest |gap %| to the top within the HC-passing subset.</p>
+        <p><b>Idea:</b> extended-hours gappers screened with the conviction gate. Tradier's <code>change_percentage</code> reflects extended-hours quotes during 3–8:30am CST (pre) and 3–7pm CST (post); on weekends it shows the most recent extended-hours print. Use this preset to surface big movers <i>that also pass HC criteria</i>, not just any random gapper. The sort flip pushes biggest |gap %| to the top within the HC-passing subset.</p>
 
         <p style="color:var(--ambb);font-weight:700;margin-top:14px;">Recommendations for new strategy presets (not yet built — note for future)</p>
         <ul style="padding-left:22px;">
@@ -4232,7 +4232,7 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
           <li><b>OI (Open Interest)</b> — total open contracts at a strike. Higher OI = more liquid.</li>
           <li><b>PROVEN ticker</b> — on the curated whitelist of names that have historically responded well to this scoring system. Built into the universe.</li>
           <li><b>RS 5D</b> — 5-day relative strength vs SPY (your stock's % change minus SPY's % change). Positive = outperforming.</li>
-          <li><b>RTH / PRE / POST / CLOSED</b> — Regular Trading Hours (9:30am–4:00pm ET) / Pre-market (4:00–9:30am) / Post-market (4:00–8:00pm) / outside both.</li>
+          <li><b>RTH / PRE / POST / CLOSED</b> — Regular Trading Hours (8:30am–3:00pm CST) / Pre-market (3:00–8:30am CST) / Post-market (3:00–7:00pm CST) / outside both.</li>
           <li><b>TF Aligned 2/3</b> — Time-Frame Aligned. Counts how many of three trend timeframes (daily / hourly / 15-min) point the same direction. ≥2/3 passes.</li>
           <li><b>U/D Volume</b> — Up-volume / down-volume ratio. &gt;1.5 = institutional accumulation.</li>
           <li><b>VCP</b> — Volatility Contraction Pattern (Minervini). Tightening price ranges before breakout.</li>
@@ -4253,7 +4253,7 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
           <li><b>FMP fundamentals</b> — 24 hours per ticker.</li>
           <li><b>Earnings calendar</b> — 12 hours.</li>
           <li><b>Theme overlay (theme_scores.json)</b> — 6 hours.</li>
-          <li><b>Header indices quotes</b> — 60s refresh during 4:00am–8:00pm ET (extended hours window).</li>
+          <li><b>Header indices quotes</b> — 60s refresh during 3:00am–7:00pm CST (extended hours window).</li>
         </ul>
         <p>Tradier rate limit: <b>95/min</b> (kept under the proxy's 100/min/IP gate). The fetch wrapper queues calls and respects 429 Retry-After headers automatically.</p>
       </div>
@@ -4263,7 +4263,7 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
       <div class="card-hdr">▶ TROUBLESHOOTING</div>
       <div class="card-body" style="font-size:13px;color:var(--wht);">
         <ul style="padding-left:20px;">
-          <li><b>"%'s not showing for indices"</b> — header indices auto-refresh every 60s during 4am–8pm ET. Outside that window, last cached values display. If still empty, hit VERIFY in the STRATEGY row to confirm Tradier is responding.</li>
+          <li><b>"%'s not showing for indices"</b> — header indices auto-refresh every 60s during 3am–7pm CST. Outside that window, last cached values display. If still empty, hit VERIFY in the STRATEGY row to confirm Tradier is responding.</li>
           <li><b>"Scanner shows random tickers"</b> — fixed 2026-05-02. If you see them, hard-reload (Cmd+Shift+R / Ctrl+Shift+R) to bust browser cache.</li>
           <li><b>"⚠ data gaps after scan"</b> — informational. Top 60 tickers always fully enrich; ranks 61–200 fill in via background pass over the next ~2 minutes. Tradier history takes longer than FMP because indicator-history fetches are paced harder to avoid 429s.</li>
           <li><b>"Buy notification fired before scan finished"</b> — fixed 2026-05-03. Notifications now fire only after the stragglers cleanup pass completes (~3–5s after scan-complete), not on partial data.</li>
@@ -4336,7 +4336,7 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
     <div id="api-counter-tab-wrap" style="display:flex;align-items:center;gap:12px;margin-bottom:14px;padding:10px 14px;background:rgba(0,212,255,0.06);border:1px solid rgba(0,212,255,0.25);border-radius:4px;">
       <span style="font-family:var(--ff-mono);font-size:11px;color:var(--gry);letter-spacing:.5px;">TRADIER API CALLS TODAY:</span>
       <span id="api-counter-tab" onclick="showApiBreakdown()" title="Click to view per-endpoint breakdown" style="cursor:pointer;font-family:var(--ff-mono);font-size:14px;font-weight:700;color:var(--amb);">0</span>
-      <span style="font-family:var(--ff-mono);font-size:10px;color:var(--gry);">(resets at midnight ET)</span>
+      <span style="font-family:var(--ff-mono);font-size:10px;color:var(--gry);">(resets at 11:00 PM CST)</span>
     </div>
     <div class="card collapsible" id="api-card"><div class="card-hdr">API CONFIGURATION</div>
     <div class="card-body api-form">
@@ -4450,12 +4450,12 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
       <span style="color:var(--gry);font-size:10px;">30DTE options-flow (call vs put OI) for top 200 ranked tickers</span>
     </div>
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-      <label style="font-size:10px;color:var(--gry);display:flex;align-items:center;gap:4px;" title="Auto-refresh GEX data on a schedule. ET times. Each fire = ~400 Tradier calls.">
+      <label style="font-size:10px;color:var(--gry);display:flex;align-items:center;gap:4px;" title="Auto-refresh GEX data on a schedule. CST times. Each fire = ~400 Tradier calls. Also runs headless via GitHub Actions cron 3× daily.">
         <span>AUTO:</span>
         <select id="gex-sched-sel" onchange="setGexSchedule(this.value)" style="background:var(--bg2);border:var(--bdr);color:var(--wht);font-family:var(--ff);font-size:11px;padding:3px 6px;border-radius:3px;">
-          <option value="off">Off (manual + post-scan)</option>
-          <option value="open">1x at open (9:35 ET)</option>
-          <option value="3x">3x daily (9:35, 12:00, 15:00 ET)</option>
+          <option value="off">Off (manual + post-scan + cron)</option>
+          <option value="open">1x at open (8:35 CST)</option>
+          <option value="3x">3x daily (8:35, 11:00, 14:00 CST)</option>
         </select>
       </label>
       <span id="gex-progress" class="dyn-w" style="color:var(--amb);font-size:10px;font-family:var(--ff-mono);width:340px;text-align:right;"></span>
@@ -17154,12 +17154,64 @@ function loadGexCache(){
     if (!obj || !obj.ts || (Date.now() - obj.ts) > GEX_CACHE_TTL_MS) return false;
     G.gexData = obj.data || [];
     G._gexLastFetchTs = obj.ts;     // mirror to memory so the cache-age UI works without re-running runGex
+    G._gexSource = obj.source || 'local';
     var ageMin = Math.round((Date.now() - obj.ts) / 60000);
-    console.log('[gex] hydrated from cache: ' + G.gexData.length + ' tickers (' + ageMin + 'm old)');
+    console.log('[gex] hydrated from cache: ' + G.gexData.length + ' tickers (' + ageMin + 'm old, source=' + G._gexSource + ')');
     // Surface the age in the GEX header timestamp on hydrate.
     setTimeout(_renderGexCacheAge, 50);
     return true;
   } catch(e) { return false; }
+}
+
+// ─── HEADLESS GEX CRON HYDRATION ────────────────────────────────────────────
+// The GitHub Actions workflow `.github/workflows/gex_scan.yml` runs Python
+// `gex/run_gex_cron.py` 3× per trading day in CST (8:35 / 11:00 / 14:00),
+// commits a fresh `gex/gex_scores.json` to the repo, and GitHub Pages
+// serves it. This function fetches that file on page load and hydrates
+// G.gexData if the cron's snapshot is newer than what's in localStorage.
+// That way the user gets background-refreshed GEX data without leaving
+// the dashboard open.
+async function hydrateGexFromCron(){
+  try {
+    // Cache-bust with a daily key so GitHub Pages' max-age=600 doesn't
+    // serve stale JSON for an hour after the cron commits.
+    var bust = Math.floor(Date.now() / (5*60*1000));    // 5-min bucket
+    var resp = await fetch('./gex/gex_scores.json?_v=' + bust, { cache:'no-cache' });
+    if (!resp.ok){
+      console.log('[gex] cron snapshot not available (HTTP '+resp.status+')');
+      return false;
+    }
+    var json = await resp.json();
+    if (!json || !json.ts || !Array.isArray(json.data)){
+      console.warn('[gex] cron snapshot malformed');
+      return false;
+    }
+    var localTs = G._gexLastFetchTs || 0;
+    if (json.ts <= localTs){
+      console.log('[gex] cron snapshot ('+new Date(json.ts).toISOString()+') is older than local cache — keeping local');
+      return false;
+    }
+    G.gexData = json.data;
+    G._gexLastFetchTs = json.ts;
+    G._gexSource = json.source || 'github-cron';
+    // Persist to localStorage so the next reload hits cache instead of refetching.
+    try {
+      localStorage.setItem(GEX_CACHE_KEY, JSON.stringify({
+        ts: json.ts,
+        source: G._gexSource,
+        data: json.data
+      }));
+    } catch(_){}
+    var ageMin = Math.round((Date.now() - json.ts) / 60000);
+    console.log('[gex] hydrated from cron snapshot: ' + json.data.length + ' tickers, ' + ageMin + 'm old, ' + (json.skipped||0) + ' skipped');
+    setTimeout(_renderGexCacheAge, 50);
+    // Re-render the GEX tab if the user is looking at it.
+    try { if (typeof renderGex === 'function') renderGex(); } catch(_){}
+    return true;
+  } catch(e){
+    console.warn('[gex] cron hydration failed:', e && e.message);
+    return false;
+  }
 }
 
 // ── GEX cache age display: shows "Cached: 23 min ago · 198 tickers" in the
@@ -17195,12 +17247,19 @@ function _renderGexCacheAge(){
   if (G.gexAutoSchedule && G.gexAutoSchedule !== 'off' && typeof _gexNextFireDescription === 'function'){
     try { schedHint = ' · next: ' + _gexNextFireDescription(); } catch(_){ }
   }
-  el.innerHTML = 'Cached: <span style="color:'+col+';font-weight:700;">' + label + '</span> · ' + G.gexData.length + ' tickers' + schedHint;
+  // Source label: "Cron" (headless GitHub Actions) vs "Cached" (in-page run).
+  // Adds a subtle distinction so the user knows whether the snapshot came
+  // from background server work or their own browser session.
+  var srcLabel = (G._gexSource === 'github-cron') ? 'Cron' : 'Cached';
+  el.innerHTML = srcLabel + ': <span style="color:'+col+';font-weight:700;">' + label + '</span> · ' + G.gexData.length + ' tickers' + schedHint;
   el.style.color = 'var(--gry)';
 }
 
 // Compute the next-fire description for the cache-age UI based on the
-// current schedule mode. Returns "12:00 ET (in 1h 24m)" or similar.
+// current schedule mode. Returns "11:00 CST (in 1h 24m)" or similar.
+// Internal math stays in ET (because the trigger times are ET-anchored
+// to the actual market clock); display converts to CST by subtracting
+// 60 min. CST = ET - 1h year-round (US DST shifts both equally).
 function _gexNextFireDescription(){
   var mode = G.gexAutoSchedule || 'off';
   if (mode === 'off') return '';
@@ -17214,18 +17273,23 @@ function _gexNextFireDescription(){
     next = fireMins[0];
     var deltaMin = (24*60 - nowMin) + next;
     var dh = Math.floor(deltaMin/60), dm = deltaMin%60;
-    return _fmtETClock(next) + ' tomorrow (in ' + dh + 'h ' + dm + 'm)';
+    return _fmtCstClock(next) + ' tomorrow (in ' + dh + 'h ' + dm + 'm)';
   }
   var delta = next - nowMin;
   var h = Math.floor(delta/60), m = delta%60;
-  return _fmtETClock(next) + ' ET (in ' + (h?h+'h ':'') + m + 'm)';
+  return _fmtCstClock(next) + ' CST (in ' + (h?h+'h ':'') + m + 'm)';
 }
-function _fmtETClock(minOfDay){
-  var h = Math.floor(minOfDay/60), m = minOfDay%60;
+// Render an ET-anchored minute-of-day as a CST wall-clock string.
+// CST = ET - 60 min; handles negative wrap (e.g. 00:30 ET → 23:30 CST prior day).
+function _fmtCstClock(etMinOfDay){
+  var cstMin = ((etMinOfDay - 60) % (24*60) + 24*60) % (24*60);
+  var h = Math.floor(cstMin/60), m = cstMin%60;
   var hh = h < 10 ? '0'+h : h;
   var mm = m < 10 ? '0'+m : m;
   return hh + ':' + mm;
 }
+// Legacy alias kept in case any other call site references it.
+function _fmtETClock(minOfDay){ return _fmtCstClock(minOfDay); }
 
 // Tick the cache-age label every minute so it updates in place.
 setInterval(function(){
@@ -17321,7 +17385,7 @@ function setGexSchedule(value){
   else startGexAutoSchedule();
   // Update the UI label
   var sel = eid('gex-sched-sel'); if (sel) sel.value = value;
-  try { toast('GEX auto-schedule: '+(value==='off'?'OFF':value==='open'?'1x at market open':'3x daily (9:35, 12:00, 15:00 ET)')); } catch(e){}
+  try { toast('GEX auto-schedule: '+(value==='off'?'OFF':value==='open'?'1x at market open':'3x daily (8:35, 11:00, 14:00 CST)')); } catch(e){}
 }
 
 function runGex(){
@@ -19251,7 +19315,7 @@ async function runTsCheck(){
   var nowEt = new Date(new Date().toLocaleString('en-US',{timeZone:'America/New_York'}));
   var dayEt = nowEt.getDay();
   if(dayEt === 0 || dayEt === 6 || !isMarketHours()){
-    eid('ts-poll-status').textContent='Market closed — paused (resumes 9:45 ET weekdays)';
+    eid('ts-poll-status').textContent='Market closed — paused (resumes 8:45 CST weekdays)';
     return;
   }
   var defaultCloseMode=eid('ts-close-mode').value||'step';
@@ -22032,7 +22096,7 @@ function loadAutoTraderState(){
 async function runAutoScanCycle(){
   if(!G_AT.enabled) return;
   var s = getAutoTraderSettings();
-  if(s.hoursGate && !isMarketHours()){ atLog('Outside market hours (9:45\u20133:45 ET) \u2014 skipping',''); return; }
+  if(s.hoursGate && !isMarketHours()){ atLog('Outside market hours (8:45\u20132:45 CST) \u2014 skipping',''); return; }
   if(G.scanRunning){ atLog('Scan already running \u2014 skipping cycle',''); return; }
   if(s.dailyLoss>0 && G_AT.dailyPnl <= -Math.abs(s.dailyLoss)){
     if(!G_AT.disarmedByLoss){
@@ -23066,7 +23130,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.7.1-day-pnl-column-and-eod-popup-removed';
+var APP_VERSION = '2.8.0-headless-gex-cron-and-cst-display';
 // Page-source fallback constants removed. Each visitor now provides their own
 // API credentials via the API tab (or, for Tradier, sets up the worker proxy
 // at worker/tradier-proxy/ \u2014 keys never reach the browser at all).
@@ -25888,7 +25952,7 @@ async function atrLookup(){
     var bars = (tsJson && tsJson.series && tsJson.series.data) || [];
     if (!Array.isArray(bars)) bars = [bars];
     if (!bars.length){
-      setR('No price data for '+tk+' at '+date+' '+time+' ET. Tradier may not have intraday history that far back, or the symbol/time is invalid.', 'var(--wrn)');
+      setR('No price data for '+tk+' at '+date+' '+time+' CST. Tradier may not have intraday history that far back, or the symbol/time is invalid.', 'var(--wrn)');
       return;
     }
     // Pick the bar closest to the target time (compare wall-clock minutes)
@@ -26113,7 +26177,7 @@ function init(){
   if (typeof loadBsHideNoGo === 'function') loadBsHideNoGo();
   // Restore screener + filter settings (Save Settings button writes the snapshot)
   if (typeof loadScanSettings === 'function') loadScanSettings();
-  // GEX cache + auto-schedule
+  // GEX cache + auto-schedule + headless cron hydration
   if (typeof loadGexCache === 'function') {
     var hadGex = loadGexCache();
     // If GEX cache hydrated AND the user's last tab was GEX, render now so
@@ -26124,6 +26188,12 @@ function init(){
       setTimeout(function(){
         try { if (typeof renderGex === 'function') renderGex(); } catch(_){}
       }, 200);
+    }
+    // Headless cron snapshot — fetched async, doesn't block paint. Hydrates
+    // G.gexData if the cron's gex_scores.json is newer than localStorage.
+    // Runs whether or not the local cache existed.
+    if (typeof hydrateGexFromCron === 'function'){
+      setTimeout(function(){ hydrateGexFromCron(); }, 600);
     }
   }
   if (typeof loadGexSchedule === 'function') {

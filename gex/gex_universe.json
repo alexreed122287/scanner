@@ -1,0 +1,15 @@
+{
+  "_comment": "Tickers scanned by the headless GEX cron. Edit this list to add/remove names. Keep it ≤300 to stay within Tradier rate limits.",
+  "_generated_at": "2026-05-08",
+  "tickers": [
+    "SPY","QQQ","IWM","DIA","VTI","XLF","XLE","XLK","XLV","XLY","XLI","XLP","XLU","XLB","XLC","XLRE","SMH","SOXL","TQQQ","SQQQ","UVXY","VIX","UPRO","SPXS","UPRO","TLT","HYG","LQD","GLD","SLV","USO","UNG","BITO","ETHE",
+    "AAPL","MSFT","GOOGL","GOOG","AMZN","META","NVDA","TSLA","AVGO","ORCL","NFLX","ADBE","CRM","AMD","INTC","QCOM","CSCO","TXN","IBM","NOW","INTU","MU","AMAT","LRCX","KLAC","ASML","TSM","MRVL","ANET","ARM","DELL","HPQ","HPE","APP",
+    "JPM","BAC","WFC","GS","MS","C","BLK","AXP","SCHW","COIN","V","MA","PYPL","SQ","HOOD","SOFI","UPST","AFRM","BX","KKR","BAM","ICE","CME","NDAQ","SPGI","MCO","TROW","STT",
+    "JNJ","UNH","LLY","PFE","ABBV","MRK","TMO","ABT","DHR","BMY","AMGN","GILD","ISRG","CVS","CI","ELV","HUM","MDT","SYK","BSX","REGN","VRTX","BIIB","MRNA","NVAX","BNTX","ALNY","CRSP",
+    "WMT","COST","HD","TGT","LOW","MCD","SBUX","NKE","DIS","BKNG","CMG","ABNB","UBER","LYFT","DASH","ROKU","SPOT","SHOP","MELI","ETSY","EBAY","RBLX","TTD","SNAP","PINS","DKNG","PENN",
+    "XOM","CVX","COP","SLB","OXY","EOG","MPC","PSX","HAL","DVN","FANG","HES","KMI","WMB","OKE","ENPH","FSLR","RUN","SEDG","NEE","DUK","SO",
+    "BA","CAT","DE","GE","HON","LMT","RTX","NOC","GD","MMM","UPS","FDX","UNP","CSX","NSC","DAL","UAL","AAL","LUV","ALK",
+    "PLTR","SNOW","CRWD","NET","DDOG","ZS","PANW","FTNT","OKTA","MDB","TEAM","ATLS","BILL","HUBS","DOCN","FROG","S","RBRK","ZM","DOCU","TWLO","WDAY","ADP","PAYC",
+    "SMCI","VRT","ETN","PWR","GEV","EME","GNRC","CEG","VST","CRWV","NBIS","PLAB","NTNX","HIMS","SOUN","BBAI","RKLB","ASTS","ACHR","JOBY","LCID","RIVN","NIO","XPEV","LI","BIDU","BABA","JD","PDD","FUTU"
+  ]
+}

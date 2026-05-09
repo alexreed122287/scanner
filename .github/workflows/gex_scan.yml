@@ -1,0 +1,97 @@
+name: GEX Headless Scan
+
+on:
+  schedule:
+    # All times UTC. Cover both winter (CST/EST = UTC-6/-5) and summer
+    # (CDT/EDT = UTC-5/-4) so the same wall-clock CST time always fires
+    # exactly once. The script runs unconditionally — overlap is harmless
+    # because the output file is replaced atomically and tradier OI
+    # changes slowly intraday.
+    #
+    # 8:35 AM CST  = 14:35 UTC  (winter, EST)
+    # 8:35 AM CDT  = 13:35 UTC  (summer, EDT)
+    # 11:00 AM CST = 17:00 UTC  (winter)
+    # 11:00 AM CDT = 16:00 UTC  (summer)
+    # 2:00 PM CST  = 20:00 UTC  (winter)
+    # 2:00 PM CDT  = 19:00 UTC  (summer)
+    - cron: '35 13 * * 1-5'   # 8:35 CDT
+    - cron: '35 14 * * 1-5'   # 8:35 CST
+    - cron:  '0 16 * * 1-5'   # 11:00 CDT
+    - cron:  '0 17 * * 1-5'   # 11:00 CST
+    - cron:  '0 19 * * 1-5'   # 14:00 CDT
+    - cron:  '0 20 * * 1-5'   # 14:00 CST
+  workflow_dispatch:           # allow manual trigger from Actions tab
+
+permissions:
+  contents: write              # needed to commit gex_scores.json
+  issues: write                # for failure-notification step
+
+concurrency:
+  group: gex-scan
+  cancel-in-progress: false    # let an in-flight run finish before the next fires
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install deps
+        run: pip install 'requests>=2.32,<3'
+
+      - name: Run GEX scan
+        env:
+          TRADIER_TOKEN: ${{ secrets.TRADIER_TOKEN }}
+        run: python gex/run_gex_cron.py
+
+      - name: Commit refreshed scores
+        run: |
+          git config user.name "gex-scanner-bot"
+          git config user.email "gex-scanner@users.noreply.github.com"
+          git add gex/gex_scores.json
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "auto: refresh gex scores $(date -u +%Y-%m-%dT%H:%MZ)"
+          # Retry-on-race — same pattern as score_themes.yml. Other crons
+          # (theme-scorer, manual pushes) commit to the same branch and
+          # can land between checkout and push.
+          for attempt in 1 2 3 4 5; do
+            if git push; then
+              echo "Pushed on attempt $attempt"
+              exit 0
+            fi
+            echo "Push rejected on attempt $attempt — fetching + rebasing"
+            git fetch origin main
+            if ! git rebase origin/main; then
+              echo "Rebase failed — aborting"
+              git rebase --abort || true
+              exit 1
+            fi
+            sleep $((attempt * 2))
+          done
+          echo "All 5 push attempts failed"
+          exit 1
+
+      - name: Notify on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          gh label create gex-cron-failure --description "gex_scan workflow failures" --color d73a4a 2>/dev/null || true
+          existing=$(gh issue list --label gex-cron-failure --state open --json number --jq '.[0].number' || echo "")
+          run_url="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          ts=$(date -u +%Y-%m-%dT%H:%MZ)
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "GEX cron failed again on ${ts}. Run: ${run_url}"
+          else
+            body="The gex_scan workflow failed on ${ts}. Run: ${run_url}. Most common cause: TRADIER_TOKEN secret expired or rate-limit. This issue is reused for subsequent failures."
+            gh issue create --title "gex_scan cron failed: $(date -u +%Y-%m-%d)" --label gex-cron-failure --body "$body"
+          fi
