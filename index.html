@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-09T18:30-revert-swipe-keep-inline-alert">
+<meta name="op-build" content="2026-05-09T19:00-input-no-autozoom">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -2148,6 +2148,21 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
      selector with higher specificity, layered with !important, so the
      inline attribute can't keep iOS in 11px territory. */
   select[style*="font-size"]{ font-size:16px !important; }
+
+  /* User spec 2026-05-09: tapping any text/number input was auto-zooming
+     on iPhone. iOS Safari auto-zooms inputs with computed font-size < 16px
+     on focus. Force every input + textarea to ≥16px at iPhone width via
+     two layers (broad rule + attribute-selector defense vs inline overrides).
+     Same trick that already works for <select> above. */
+  input, textarea{ font-size:16px !important; }
+  input[style*="font-size"], textarea[style*="font-size"]{ font-size:16px !important; }
+  /* Also defeat inline font-size set on parent labels/wrappers that cascade
+     down to the input. Specific enough to win without trampling intentional
+     non-input styling elsewhere. */
+  label input, label textarea, .ord-field input, .ord-field textarea,
+  .step-cfg-field input, .ts-field input, .ts-inline-field input{
+    font-size:16px !important;
+  }
   /* Wider for narrow context — Period / Filter dropdowns on the History
      tab were the worst offenders. Apply to any select inside a flt-bar
      label or stat area so values like "Last 7 days" fit comfortably. */
@@ -23866,7 +23881,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.10.1-revert-swipe-keep-inline-alert';
+var APP_VERSION = '2.10.2-input-no-autozoom';
 // Page-source fallback constants removed. Each visitor now provides their own
 // API credentials via the API tab (or, for Tradier, sets up the worker proxy
 // at worker/tradier-proxy/ \u2014 keys never reach the browser at all).
