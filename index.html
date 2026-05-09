@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-09T19:00-input-no-autozoom">
+<meta name="op-build" content="2026-05-09T20:00-cap-mid-and-auto-delay">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -3519,8 +3519,14 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
           <div class="step-cfg-field">
             <label>Fill Wait (sec)</label>
             <input type="number" inputmode="numeric" id="sf-delay" value="3" min="1" max="120" placeholder="3"
-              title="How long to wait for each limit order to fill before stepping to next price"
-              onchange="saveAppSettings()">
+              title="How long to wait for each limit order to fill before stepping to next price. AUTO-TUNES based on spread % when the live quote refreshes — narrower spread = shorter delay, wider spread = longer delay. Manual edit pins the value (won't auto-update) until you tap RESET."
+              oninput="this.dataset.userEdited='1';saveAppSettings()" onchange="saveAppSettings()">
+            <div style="display:flex;align-items:center;gap:4px;margin-top:2px;">
+              <span style="color:var(--gry2);font-size:9px;" id="sf-delay-hint">auto: idle</span>
+              <button class="btn" style="font-size:9px;padding:1px 5px;min-height:0 !important;border-color:var(--gry2);color:var(--gry);"
+                title="Clear manual override and let the AUTO recommendation drive the delay again"
+                onclick="(function(){var d=eid('sf-delay');if(d){delete d.dataset.userEdited;if(typeof _applyAutoStepDelay==='function')_applyAutoStepDelay();saveAppSettings();toast('Auto-tune restored');}})()">AUTO</button>
+            </div>
           </div>
           <div class="step-cfg-field">
             <label>Start From</label>
@@ -3548,6 +3554,19 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
               <option value="none">Give Up</option>
               <option value="market">Market Order</option>
             </select>
+          </div>
+          <!-- User spec 2026-05-09: cap at mid-price. When checked, the
+               step-fill loop refuses to walk past the current quote's mid
+               regardless of bid/ask drift. Default OFF. -->
+          <div class="step-cfg-field" style="border-left:1px solid var(--gry2);padding-left:10px;">
+            <label style="color:var(--ambb);">Price Cap</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--gry);font-family:var(--ff);text-transform:none;letter-spacing:0;cursor:pointer;padding:5px 0;">
+              <input type="checkbox" id="sf-cap-mid" style="width:auto;margin:0;cursor:pointer;"
+                title="When ON, the step-fill loop will NOT walk past the current mid price. For BUY: caps at mid (no chasing toward ask). For SELL: floors at mid (no chasing toward bid). Default OFF — full bid↔ask range allowed."
+                onchange="saveAppSettings()">
+              <span>Cap at mid</span>
+            </label>
+            <div style="color:var(--gry2);font-size:9px;margin-top:2px;">don't exceed mid</div>
           </div>
         </div>
         <div class="step-progress" id="step-progress">
@@ -8821,6 +8840,9 @@ function ahDelta(q){
 
 function renderQuotePanel(q){
   G.liveQuote=q;
+  // User spec 2026-05-09: auto-tune step-fill delay based on spread%.
+  // Runs after G.liveQuote update so the recommender sees fresh bid/ask.
+  try { if (typeof _applyAutoStepDelay === 'function') _applyAutoStepDelay(); } catch(_){}
   // Auto-update the order ticket's limit price + step-fill mode label
   // every time a fresh quote arrives. Per user spec 2026-05-04: "have
   // those default asks and bids refresh based off the refreshed quotes".
@@ -9008,6 +9030,56 @@ function calcEffectiveStepSize(bid, ask, maxAtt){
   if(spread <= 0 || coverage <= 0) return parseFloat(eid('sf-step').value)||0.01;
   var autoStep = (spread * (coverage/100)) / Math.max(maxAtt, 1);
   return Math.max(+(autoStep.toFixed(2)), 0.01);
+}
+
+// User spec 2026-05-09: auto-tune the seconds-between-cancel-and-resubmit
+// based on the contract's bid/ask spread. Narrow spread = liquid name +
+// tight market = short delay (the order has a higher chance of fast fill,
+// so cycle quickly). Wide spread = thin market = longer delay (give the
+// MM time to react before stepping into the spread).
+//
+// Buckets, calibrated to the user's prior conversation:
+//   spread%  ≤ 1.0 (SPY/QQQ/NVDA ATM-class)        → 2s
+//   spread%  ≤ 3.0 (liquid mid-caps)                → 4s
+//   spread%  ≤ 7.0 (illiquid options, OTM)          → 6s
+//   spread%  > 7.0 (very wide / illiquid)           → 8s
+//   no quote / spread invalid                       → 3s default
+function _recommendStepDelay(q){
+  if (!q || !q.bid || !q.ask || !q.mid) return { secs: 3, reason: 'no live quote', spreadPct: null };
+  var bid = +q.bid, ask = +q.ask, mid = +q.mid;
+  var spreadPct = mid > 0 ? ((ask - bid) / mid) * 100 : null;
+  if (spreadPct == null || !isFinite(spreadPct)) return { secs: 3, reason: 'invalid spread', spreadPct: null };
+  if (spreadPct <= 1.0) return { secs: 2, reason: 'tight spread, liquid', spreadPct: spreadPct };
+  if (spreadPct <= 3.0) return { secs: 4, reason: 'liquid mid-cap',       spreadPct: spreadPct };
+  if (spreadPct <= 7.0) return { secs: 6, reason: 'wider spread',          spreadPct: spreadPct };
+  return { secs: 8, reason: 'very wide spread',          spreadPct: spreadPct };
+}
+
+// Apply the recommendation: update the hint label always, write into
+// #sf-delay only if the user hasn't manually edited it (data-userEdited).
+// Called from renderQuotePanel after every G.liveQuote update + on
+// onSymbolChange after fetchLiveQuote.
+function _applyAutoStepDelay(){
+  var hintEl = eid('sf-delay-hint');
+  var delayEl = eid('sf-delay');
+  var rec = _recommendStepDelay(G.liveQuote);
+  var pctTxt = (rec.spreadPct != null) ? rec.spreadPct.toFixed(2)+'%' : '--';
+  var pinned = !!(delayEl && delayEl.dataset.userEdited);
+  if (hintEl){
+    if (pinned){
+      hintEl.textContent = 'manual ' + (delayEl.value || '?') + 's · auto rec ' + rec.secs + 's (' + rec.reason + ', spread ' + pctTxt + ')';
+      hintEl.style.color = 'var(--ambb)';
+    } else {
+      hintEl.textContent = 'auto: ' + rec.secs + 's · ' + rec.reason + ' · spread ' + pctTxt;
+      hintEl.style.color = 'var(--grn)';
+    }
+  }
+  if (delayEl && !pinned){
+    if (String(delayEl.value) !== String(rec.secs)){
+      delayEl.value = rec.secs;
+      try { saveAppSettings(); } catch(_){}
+    }
+  }
 }
 
 function updateStepCalcDisplay(){
@@ -10656,9 +10728,33 @@ function submitOrder(){
           toast('\u26a0 No ask price available \u2014 refresh quote before closing');
           return;
         }
+        // User spec 2026-05-09: cap-at-mid clamp.
+        var capMid2 = eid('sf-cap-mid') && eid('sf-cap-mid').checked;
+        if (capMid2 && m){
+          if (closing2 && lp < m) lp = +m.toFixed(2);   // SELL: don't walk below mid
+          if (!closing2 && lp > m) lp = +m.toFixed(2);  // BUY: don't walk above mid
+        }
         runStepFill(creds,acct,occSym,sym,side,qty,sp,lp,stepSize,maxAtt,delaySec,closing2?'down':'up',sfAssetClass,sfDuration);
       },1500);
       return;
+    }
+    // User spec 2026-05-09: cap-at-mid clamp on the primary path. When
+    // ON, the step-fill loop's far limit is the contract's mid \u2014 for a
+    // BUY that means we never walk past mid toward the ask (no chasing
+    // the spread); for a SELL, we never walk below mid toward the bid.
+    // mid is the live-quote mid captured at submission time. If start
+    // price is already past mid (e.g. user typed a manual limit), the
+    // clamp is a no-op for that single attempt \u2014 the loop continues
+    // until startPrice == limitPrice, then falls through without
+    // walking further. Fail-safe: if mid is missing, the cap is skipped
+    // and the original behavior holds.
+    var capMid = eid('sf-cap-mid') && eid('sf-cap-mid').checked;
+    if (capMid && mid){
+      if (closing && limitPrice < mid){
+        limitPrice = +mid.toFixed(2);
+      } else if (!closing && limitPrice > mid){
+        limitPrice = +mid.toFixed(2);
+      }
     }
     runStepFill(creds,acct,occSym,sym,side,qty,startPrice,limitPrice,stepSize,maxAtt,delaySec,direction,sfAssetClass,sfDuration);
     return;
@@ -23881,7 +23977,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.10.2-input-no-autozoom';
+var APP_VERSION = '2.11.0-cap-mid-and-auto-delay';
 // Page-source fallback constants removed. Each visitor now provides their own
 // API credentials via the API tab (or, for Tradier, sets up the worker proxy
 // at worker/tradier-proxy/ \u2014 keys never reach the browser at all).
@@ -23901,6 +23997,7 @@ function saveAppSettings(){
       delay:    eid('sf-delay')    ? eid('sf-delay').value    : '15',
       startFrom:eid('sf-start')    ? eid('sf-start').value    : 'bid',
       fallback: eid('sf-fallback') ? eid('sf-fallback').value : 'none',
+      capMid:   eid('sf-cap-mid')  ? eid('sf-cap-mid').checked : false,
       enabled:  eid('step-fill-toggle') ? eid('step-fill-toggle').checked : false
     };
     localStorage.setItem('rrjcar_sf', JSON.stringify(sfSettings));
@@ -23951,6 +24048,8 @@ function loadAppSettings(){
       if(eid('sf-delay')    && sf.delay)    eid('sf-delay').value    = sf.delay;
       if(eid('sf-start')    && sf.startFrom)eid('sf-start').value    = sf.startFrom;
       if(eid('sf-fallback') && sf.fallback) eid('sf-fallback').value = sf.fallback;
+      // User spec 2026-05-09: cap-at-mid — default OFF, persisted across reloads.
+      if(eid('sf-cap-mid')) eid('sf-cap-mid').checked = !!sf.capMid;
       // Step fill is ALWAYS ON by default 2026-05-05 per user spec —
       // we ignore the stored "enabled" flag and force ON. The other
       // sub-settings (coverage / max / delay / start / fallback) still
