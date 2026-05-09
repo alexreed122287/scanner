@@ -167,6 +167,7 @@ a{color:var(--blu);text-decoration:none;}
 #hdr-logo .panda-icon{height:clamp(48px, 5vw, 84px);width:auto;object-fit:contain;filter:drop-shadow(0 0 6px rgba(0,212,255,.4)) drop-shadow(0 0 2px rgba(0,212,255,.25));flex-shrink:0;}
 #hdr{border-bottom:none !important;box-shadow:none !important;}
 #hdr-tickers{display:flex;gap:12px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;justify-content:flex-start;flex:1;min-width:0;}
+#hdr-tickers::after{content:'';flex-shrink:0;width:12px;}
 #hdr-tickers::-webkit-scrollbar{height:4px;}
 #hdr-tickers::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:2px;}
 #hdr-tickers > *{flex-shrink:0;}
@@ -311,6 +312,7 @@ a{color:var(--blu);text-decoration:none;}
     gap:14px !important;flex:1 1 100% !important;order:99 !important;
     padding:6px 0 !important;border-top:1px solid rgba(0,212,255,0.12);
     scrollbar-width:none;}
+  #hdr-tickers::after{content:'' !important;flex-shrink:0 !important;width:8px !important;}
   #hdr-tickers::-webkit-scrollbar{display:none;}
   #hdr-right{flex:1 1 auto !important;flex-wrap:wrap !important;gap:6px !important;
     order:2 !important;font-size:10px !important;}
@@ -1781,12 +1783,13 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
    ══════════════════════════════════════════════════════════════════════════ */
 @media(max-width:480px){
   /* ── HEADER: larger logo + wordmark per user spec 2026-05-04 ── */
-  #hdr{padding:6px 8px !important;gap:4px !important;}
-  #hdr-logo{font-size:18px !important;letter-spacing:1.5px !important;gap:10px !important;}
+  #hdr{padding:6px 8px !important;gap:4px !important;overflow:visible !important;}
+  #hdr-logo{font-size:18px !important;letter-spacing:1.5px !important;gap:10px !important;overflow:visible !important;}
   #hdr-logo .panda-icon{height:48px !important;}
-  #clk-logo{font-size:11px !important;margin-left:8px !important;}
-  #hdr-version{font-size:10px !important;}
+  #clk-logo{font-size:11px !important;margin-left:6px !important;}
+  #hdr-version{font-size:10px !important;flex-shrink:0 !important;margin-left:6px !important;}
   #hdr-tickers{padding:4px 0 !important;gap:10px !important;}
+  #hdr-tickers::after{content:'' !important;flex-shrink:0 !important;width:8px !important;}
   .htick{font-size:11px;}
   /* Header right cluster: theme toggle, notify, OPT BP, mode badge — 32px tall */
   #theme-toggle, #push-toggle, #hdr-opt-bp, #mode-badge{
@@ -2350,6 +2353,7 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
   /* iPad indices strip: nowrap + horizontal scroll per user spec
      2026-05-03 (was wrap which spilled SPY/QQQ/etc onto 2-3 rows). */
   #hdr-tickers{flex-wrap:nowrap !important;overflow-x:auto !important;-webkit-overflow-scrolling:touch;justify-content:flex-start !important;flex:1 1 100%;order:3;padding:4px 0;border-top:1px solid rgba(0,212,255,0.1);min-height:32px;gap:14px !important;}
+  #hdr-tickers::after{content:'';flex-shrink:0;width:10px;}
   .htick{font-size:13px;}
   #hdr-logo{font-size:16px !important;letter-spacing:2px !important;flex:0 0 auto;order:1;}
   #hdr-logo .panda-icon{height:36px !important;}
@@ -24670,7 +24674,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.12.2-version-chip-visible';
+var APP_VERSION = '2.14.3-hdr-clip-fix';
 // Page-source fallback constants removed. Each visitor now provides their own
 // API credentials via the API tab (or, for Tradier, sets up the worker proxy
 // at worker/tradier-proxy/ \u2014 keys never reach the browser at all).
