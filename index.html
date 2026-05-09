@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-09T12:00-high-severity-audit-fixes">
+<meta name="op-build" content="2026-05-09T13:00-medium-low-audit-fixes">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -7058,6 +7058,15 @@ function _purgeStaleDailyKeys(){
   } catch(_){ /* localStorage unavailable — no-op */ }
 }
 try { _purgeStaleDailyKeys(); } catch(_){}
+// Debug-only console logger. Enable via localStorage.setItem('rrjcar_debug','1')
+// in DevTools then reload — turns on verbose [bg-enrich], [eq-trail], [smart-exit]
+// logs. Default off to keep production console quiet. (CODE-7 fix 2026-05-09.)
+var _OP_DEBUG = false;
+try { _OP_DEBUG = localStorage.getItem('rrjcar_debug') === '1'; } catch(_){}
+function _dbg(){
+  if (!_OP_DEBUG) return;
+  try { console.log.apply(console, arguments); } catch(_){}
+}
 function fmtP(n){return isNaN(n)?'--':(+n).toFixed(2)+'%';}
 function fmtD(n){if(isNaN(n))return'--';var v=+n;return(v<0?'-$':'$')+Math.abs(v).toFixed(2);}
 function fmtK(n){if(!n||isNaN(n))return'0';if(Math.abs(n)>=1e6)return(n/1e6).toFixed(1)+'M';if(Math.abs(n)>=1e3)return(n/1e3).toFixed(1)+'K';return''+Math.round(n);}
@@ -8906,6 +8915,15 @@ function cancelStepFill(){
 // ═══════════════════════════════════════════════════════════════════════════
 
 // Module-level state for the active modal session.
+// Order Status Modal timing constants. CODE-8/10 fix: extract magic
+// numbers so the auto-close, banner duration, chip grace, and poll
+// cadence can be tuned coherently without grepping. (2026-05-09)
+var OSM_AUTO_CLOSE_FILLED_MS = 6000;     // modal auto-closes 6s after FILLED
+var OSM_BANNER_DISMISS_MS    = 5000;     // terminal banner auto-dismisses
+var OSM_CHIP_GRACE_MS        = 30000;    // chip lingers 30s after terminal
+var OSM_POLL_CADENCE_MS      = 750;      // smart-poll inside delay window
+var OSM_ONESHOT_BUDGET_MS    = 5 * 60 * 1000;  // one-shot poll budget
+var OSM_ONESHOT_POLL_MS      = 2000;     // one-shot poll cadence
 G.orderStatus = G.orderStatus || {
   modalEl: null,
   chipEl: null,         // floating side-chip when modal is minimized
@@ -8927,6 +8945,9 @@ function openOrderStatusModal(ctx){
   // Tear down any prior modal cleanly so reopens don't leak DOM/timers.
   // Use silent close so the saved ctx (used for restore) doesn't get wiped.
   closeOrderStatusModal({silent:true});
+  // t0 default placed FIRST so that a caller-provided ctx.t0 (used by
+  // restoreOrderStatusModal to preserve elapsed time across minimize)
+  // overrides it. If ctx has no t0, the fresh Date.now() is kept.
   G.orderStatus.ctx = Object.assign({ t0: Date.now() }, ctx || {});
   // Fresh open = fresh terminal tracking.
   G.orderStatus.terminalState = null;
@@ -9042,7 +9063,7 @@ function updateOrderStatusModal(patch){
           if (G.orderStatus.isMinimized && G.orderStatus.terminalState){
             closeOrderStatusModal();
           }
-        }, 30000);
+        }, OSM_CHIP_GRACE_MS);
       }
     }
     return;
@@ -9101,11 +9122,11 @@ function updateOrderStatusModal(patch){
       }
       // Stop the elapsed-time tick on terminal — but freeze the value, don't clear.
       if (G.orderStatus.pollHandle){ clearInterval(G.orderStatus.pollHandle); G.orderStatus.pollHandle = null; }
-      // Auto-close on filled after 6s if user doesn't dismiss.
+      // Auto-close on filled after OSM_AUTO_CLOSE_FILLED_MS if user doesn't dismiss.
       if (patch.state === 'filled'){
         setTimeout(function(){
           if (G.orderStatus.modalEl) closeOrderStatusModal();
-        }, 6000);
+        }, OSM_AUTO_CLOSE_FILLED_MS);
       }
     }
   }
@@ -9135,6 +9156,13 @@ function minimizeOrderStatusModal(){
   if (el) el.remove();
   G.orderStatus.modalEl = null;
   G.orderStatus.isMinimized = true;
+  // MEM-2 fix: clear the elapsed-time tick — no DOM target while minimized
+  // means it would just no-op every 500ms wasting CPU. We also re-arm it
+  // inside restoreOrderStatusModal so elapsed time resumes when expanded.
+  if (G.orderStatus.pollHandle){
+    clearInterval(G.orderStatus.pollHandle);
+    G.orderStatus.pollHandle = null;
+  }
   _showOrderStatusChip();
 }
 
@@ -9246,11 +9274,11 @@ function showOrderTerminalBanner(state, ctx){
   // Haptic + fill sound piggyback (already fired by runStepFill but harmless if doubled).
   try { if (state === 'filled' && typeof playFillSound === 'function') playFillSound(); } catch(_){}
   try { if (typeof hap === 'function') hap(state === 'filled' ? [40,80,40] : [80]); } catch(_){}
-  // Auto-dismiss after 5s.
+  // Auto-dismiss after OSM_BANNER_DISMISS_MS.
   setTimeout(function(){
     var b = document.getElementById('ord-status-banner');
     if (b) b.remove();
-  }, 5000);
+  }, OSM_BANNER_DISMISS_MS);
 }
 
 function cancelOrderFromModal(){
@@ -9268,6 +9296,14 @@ function cancelOrderFromModal(){
       updateOrderStatusModal({state:'cancelled', logLine:'Order #' + c.orderId + ' cancel sent.', logKind:'cancelled'});
       toast('Order #' + c.orderId + ' cancelled');
     });
+  } else if (c.mode === 'oneshot' && c.creds && c.acct && !c.orderId){
+    // BUG-16 fix: the user pressed CANCEL between order submit and orderId
+    // arriving from Tradier (~50-500ms window). Queue the cancel intent
+    // so it fires as soon as the orderId lands. The one-shot poller
+    // checks G.orderStatus.ctx.pendingCancel on every tick and triggers
+    // a cancel + status update once orderId is set.
+    G.orderStatus.ctx.pendingCancel = true;
+    updateOrderStatusModal({state:'cancelled', stateText:'CANCEL QUEUED…', logLine:'CANCEL queued — will fire when broker returns order id.', logKind:'cancelled'});
   } else {
     closeOrderStatusModal();
   }
@@ -9310,7 +9346,7 @@ function resubmitFromModal(){
 //    delaySec elapses. Fixes the lag where a sub-second fill wasn't detected
 //    until the full sleep elapsed. Polls at 750ms cadence (8 polls per 6s).
 async function pollUntilTerminalOrTimeout(creds, acct, orderId, delaySec){
-  var POLL_MS = 750;
+  var POLL_MS = OSM_POLL_CADENCE_MS;
   var start = Date.now();
   var cap = Math.max(1, delaySec) * 1000;
   var last = null;
@@ -10648,8 +10684,8 @@ function submitOrder(){
           // within the first poll. Limit orders may sit working — user can
           // CANCEL or just close the popup and check positions later.
           var pollStart = Date.now();
-          var POLL_BUDGET_MS = 5 * 60 * 1000;
-          var POLL_EVERY_MS = 2000;
+          var POLL_BUDGET_MS = OSM_ONESHOT_BUDGET_MS;
+          var POLL_EVERY_MS = OSM_ONESHOT_POLL_MS;
           if (G.orderStatus.oneshotPoller) clearInterval(G.orderStatus.oneshotPoller);
           G.orderStatus.oneshotPoller = setInterval(function(){
             // Keep polling while the order context is alive — even if the
@@ -10657,6 +10693,18 @@ function submitOrder(){
             // Stops only when ctx is cleared (closeOrderStatusModal) or the
             // order reaches a terminal state.
             if (!G.orderStatus.ctx || G.orderStatus.terminalState){ clearInterval(G.orderStatus.oneshotPoller); G.orderStatus.oneshotPoller = null; return; }
+            // BUG-16 fix: if the user pressed CANCEL before orderId arrived,
+            // the cancel intent was queued. Now that we have the id, fire
+            // the broker-side cancel.
+            if (G.orderStatus.ctx.pendingCancel && G.orderStatus.ctx.orderId){
+              G.orderStatus.ctx.pendingCancel = false;
+              try {
+                cancelOrder({host:host,key:key}, acct, G.orderStatus.ctx.orderId).then(function(){
+                  updateOrderStatusModal({state:'cancelled', logLine:'Queued cancel sent for order #'+G.orderStatus.ctx.orderId+'.', logKind:'cancelled'});
+                  toast('Order cancelled');
+                });
+              } catch(_){}
+            }
             if (Date.now() - pollStart > POLL_BUDGET_MS){
               clearInterval(G.orderStatus.oneshotPoller); G.orderStatus.oneshotPoller = null;
               updateOrderStatusModal({state:'not-filled', stateText:'STILL WORKING', logLine:'Stopped polling after 5 min — order may still fill at the broker.', logKind:'rejected'});
@@ -10930,7 +10978,7 @@ async function runEquityTrailCheck(){
       // Couldn't verify — skip this pass
       continue;
     }
-    if(orderStatus === 'filled' || orderStatus === 'canceled' || orderStatus === 'expired' || orderStatus === 'rejected'){
+    if(orderStatus === 'filled' || orderStatus === 'canceled' || orderStatus === 'cancelled' || orderStatus === 'expired' || orderStatus === 'rejected'){
       console.log('[eq-trail] '+t.symbol+' order '+id+' is '+orderStatus+' — deactivating');
       t.status = orderStatus;
       saveEquityTrail();
@@ -14618,24 +14666,39 @@ async function loadOrdChain(forcedSym){
       if (status) status.textContent = '';
       return;
     }
+    // ── DTE math anchored to ET 16:00 (4pm market close), not local time.
+    //    Without the timezone hint, `new Date('2026-06-21T16:00:00')` is
+    //    parsed in the user's local timezone — for a PT user this differs
+    //    from ET by 3 hours, which can flip the rounded DTE by a day at
+    //    the boundary. (BUG-14 fix 2026-05-09.) Using the UTC equivalent
+    //    of ET 16:00 keeps the math stable: 16:00 EDT = 20:00 UTC,
+    //    16:00 EST = 21:00 UTC. We use 20:30 UTC as a year-round safe
+    //    midpoint that keeps DTE rounding consistent within ±0.02 days.
+    function _dteFor(d){
+      return Math.round((new Date(d+'T20:30:00Z').getTime() - nowMs) / (24*3600*1000));
+    }
     // Pre-select the user-typed expiry if it's in the list, else nearest 30-45 DTE.
     var formExp = (eid('ord-exp') && eid('ord-exp').value) || '';
     var nowMs = Date.now();
     var picked = formExp && dates.indexOf(formExp) >= 0 ? formExp : null;
     if (!picked){
-      // Nearest 30-45 DTE
-      var bestDelta = Infinity, bestExp = dates[0];
+      // Nearest 30-45 DTE among future expirations.
+      var bestDelta = Infinity, bestExp = null;
       dates.forEach(function(d){
-        var dte = Math.round((new Date(d+'T16:00:00').getTime() - nowMs) / (24*3600*1000));
+        var dte = _dteFor(d);
         if (dte < 1) return;
         var delta = Math.abs(dte - 37);
         if (delta < bestDelta){ bestDelta = delta; bestExp = d; }
       });
+      // BUG-15 fix: if every expiration is in the past (rare — empty
+      // weekend-after-month-end edge case), fall back to the LATEST date,
+      // not dates[0] which would have been the earliest expired one.
+      if (!bestExp) bestExp = dates[dates.length - 1];
       picked = bestExp;
     }
     var expSel = eid('ord-chain-exp');
     expSel.innerHTML = dates.map(function(d){
-      var dte = Math.round((new Date(d+'T16:00:00').getTime() - nowMs) / (24*3600*1000));
+      var dte = _dteFor(d);
       return '<option value="'+_esc(d)+'"'+(d===picked?' selected':'')+'>'+_esc(fmtDateUS(d))+' ('+dte+'d)</option>';
     }).join('');
     expSel.onchange = function(){ renderOrdChain(sym, this.value); };
@@ -14705,8 +14768,9 @@ async function renderOrdChain(sym, expDate){
     }
     var infoEl = eid('ord-chain-gex-info');
     if (infoEl){
-      if (gexFlip != null){
-        infoEl.innerHTML = 'GEX FLIP: <span style="color:var(--ambb);font-weight:700;">$'+gexFlip.toFixed(2)+'</span>'+(gexNet!=null?' · NET '+(gexNet>=0?'+':'')+gexNet.toFixed(0):'');
+      if (gexFlip != null && isFinite(gexFlip)){
+        var netStr = (gexNet != null && isFinite(gexNet)) ? (' · NET '+(gexNet>=0?'+':'')+Number(gexNet).toFixed(0)) : '';
+        infoEl.innerHTML = 'GEX FLIP: <span style="color:var(--ambb);font-weight:700;">$'+Number(gexFlip).toFixed(2)+'</span>'+netStr;
       } else {
         infoEl.innerHTML = '<span style="color:var(--gry2);">no GEX data — run GEX scan</span>';
       }
@@ -17390,15 +17454,18 @@ function renderScan(){
 // ===========================================================================
 // Without this, every page reload starts with empty G.gexData and the GEX
 // rule shows "Run GEX/Flow tab first" until the next runGex completes
-// (~4 min). 2h TTL — flow data older than that isn't trustworthy enough to
-// drive new entries, but recent enough to bridge a quick reload.
+// (~4 min). User spec 2026-05-03: 24h TTL — GEX should persist across
+// reloads without re-scanning. OI shifts daily so 24h is the natural
+// boundary; next-day scan will replace it. (Earlier 2h TTL note was
+// stale — fixed in audit CODE-11.)
 var GEX_CACHE_KEY = 'rrjcar_gex_data_v1';
-// 24h TTL per user spec 2026-05-03 — GEX should persist across reloads
-// without re-scanning. OI shifts daily so 24h is the natural boundary;
-// next-day scan will replace it.
 var GEX_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 
 function saveGexCache(){
+  // Clear the in-flight token regardless of payload size — runGex paths
+  // that produce no rows (errors, empty universes) still need to release
+  // the lock so the next hydrate/scan can run. (RACE-1 follow-up.)
+  G._gexInflight = false;
   if (!G.gexData || !G.gexData.length) return;
   try {
     localStorage.setItem(GEX_CACHE_KEY, JSON.stringify({
@@ -17451,6 +17518,14 @@ function loadGexCache(){
 // That way the user gets background-refreshed GEX data without leaving
 // the dashboard open.
 async function hydrateGexFromCron(){
+  // RACE-1 fix: skip cron hydration if a runGex is in flight. Without
+  // this, hydrate could overwrite G.gexData mid-scan with the cron
+  // snapshot, then runGex would overwrite again on completion — so
+  // the user briefly sees stale-then-fresh-then-stale-then-fresh.
+  if (G._gexInflight){
+    console.log('[gex] cron hydrate skipped — runGex is in flight');
+    return false;
+  }
   try {
     // Cache-bust with a daily key so GitHub Pages' max-age=600 doesn't
     // serve stale JSON for an hour after the cron commits.
@@ -17546,17 +17621,33 @@ function _gexNextFireDescription(){
   // Compute "now" in ET minute-of-day (DST-aware via toLocaleString trick).
   var nowET = new Date(new Date().toLocaleString('en-US', {timeZone:'America/New_York'}));
   var nowMin = nowET.getHours() * 60 + nowET.getMinutes();
-  var next = fireMins.find(function(m){ return m > nowMin; });
-  if (next == null){
-    // All today's fires are past — next is tomorrow's first.
-    next = fireMins[0];
-    var deltaMin = (24*60 - nowMin) + next;
-    var dh = Math.floor(deltaMin/60), dm = deltaMin%60;
-    return _fmtCstClock(next) + ' tomorrow (in ' + dh + 'h ' + dm + 'm)';
+  var todayDow = nowET.getDay();   // 0=Sun..6=Sat
+  var isWeekday = (todayDow >= 1 && todayDow <= 5);
+  // Today still has a future fire AND today is a weekday — easy case.
+  if (isWeekday){
+    var next = fireMins.find(function(m){ return m > nowMin; });
+    if (next != null){
+      var delta = next - nowMin;
+      var h = Math.floor(delta/60), m = delta%60;
+      return _fmtCstClock(next) + ' CST (in ' + (h?h+'h ':'') + m + 'm)';
+    }
   }
-  var delta = next - nowMin;
-  var h = Math.floor(delta/60), m = delta%60;
-  return _fmtCstClock(next) + ' CST (in ' + (h?h+'h ':'') + m + 'm)';
+  // Today done (or weekend) — advance day-by-day to the next weekday with
+  // a fire window. The cron is gated to Mon-Fri so labelling "tomorrow"
+  // when tomorrow is Saturday was misleading. (BUG-9 fix 2026-05-09.)
+  var dayOffset = 1, dow = (todayDow + 1) % 7;
+  while (dow === 0 || dow === 6){    // skip Sun and Sat
+    dayOffset++;
+    dow = (todayDow + dayOffset) % 7;
+  }
+  var nextFire = fireMins[0];
+  var deltaMin = (24*60 - nowMin) + (dayOffset - 1) * 24*60 + nextFire;
+  var dh = Math.floor(deltaMin/60), dm = deltaMin%60;
+  var dayLbl = dayOffset === 1 ? 'tomorrow'
+             : dayOffset === 2 ? 'in 2 days'
+             : dayOffset === 3 ? 'in 3 days'
+             : 'in ' + dayOffset + ' days';
+  return _fmtCstClock(nextFire) + ' ' + dayLbl + ' (in ' + dh + 'h ' + dm + 'm)';
 }
 // Render an ET-anchored minute-of-day as a CST wall-clock string.
 // CST = ET - 60 min; handles negative wrap (e.g. 00:30 ET → 23:30 CST prior day).
@@ -17567,8 +17658,8 @@ function _fmtCstClock(etMinOfDay){
   var mm = m < 10 ? '0'+m : m;
   return hh + ':' + mm;
 }
-// Legacy alias kept in case any other call site references it.
-function _fmtETClock(minOfDay){ return _fmtCstClock(minOfDay); }
+// (Removed unused _fmtETClock alias — audit CODE-6 / 2026-05-09. No
+//  internal callers remained; _fmtCstClock is the only formatter now.)
 
 // Tick the cache-age label every minute so it updates in place.
 setInterval(function(){
@@ -17591,6 +17682,7 @@ setInterval(function(){
 var GEX_SCHED_KEY = 'rrjcar_gex_schedule_v1';
 G.gexAutoSchedule = 'off';
 G._gexLastFireMin = -1;        // minute-of-day debounce so we don't double-fire
+G._gexLastFireDay = '';        // ET YYYY-MM-DD of last fire (BUG-17 midnight wrap)
 
 function loadGexSchedule(){
   try { G.gexAutoSchedule = localStorage.getItem(GEX_SCHED_KEY) || 'off'; } catch(e){}
@@ -17620,14 +17712,28 @@ function _gexScheduleTick(){
   var times = GEX_SCHED_TIMES[G.gexAutoSchedule] || [];
   var nowMin = _etMinuteOfDay();
   if (nowMin < 0) return;                                     // weekend
-  // F-1: range debounce. The ±1 match window means times {9:35} matches at 9:34, 9:35, 9:36.
-  // An exact-equality debounce (=== lastFire) would still let the function double-fire across
-  // adjacent ticks (e.g. fire at 9:34, then again at 9:35). Suppress any fire whose minute is
-  // within 2 minutes of the previous fire — covers the full match window plus a 1-minute jitter.
+  // ET-anchored day key, used to reset the within-day debounce at midnight
+  // so yesterday's lastFire doesn't suppress today's first fire (BUG-17).
+  var dayKey = (function(){
+    try {
+      var p = new Date().toLocaleDateString('en-US', { timeZone:'America/New_York', year:'numeric', month:'2-digit', day:'2-digit' }).split('/');
+      return p[2] + '-' + p[0] + '-' + p[1];
+    } catch(_){ return new Date().toISOString().slice(0,10); }
+  })();
+  if (G._gexLastFireDay !== dayKey){
+    G._gexLastFireMin = -1;       // new day → reset debounce
+    G._gexLastFireDay = dayKey;
+  }
+  // Range debounce. The ±1 match window means {9:35} matches at 9:34/35/36.
+  // Suppress any fire within 2 minutes of the previous fire so we don't
+  // double-fire across adjacent ticks. Only meaningful within the same day.
   if (G._gexLastFireMin >= 0 && nowMin >= G._gexLastFireMin && (nowMin - G._gexLastFireMin) <= 2) return;
-  // Match within a 1-minute window so a tick that lands at 9:36 catches the 9:35 schedule
+  // ── BUG-13: catch fires that the foreground tab missed because the browser
+  //    throttled setInterval while the tab was backgrounded. Widened match
+  //    window to ±5 minutes so a tick that lands at 9:40 still catches the
+  //    9:35 schedule. The ±1 window above was too tight for backgrounded tabs.
   for (var i = 0; i < times.length; i++) {
-    if (Math.abs(nowMin - times[i]) <= 1) {
+    if (Math.abs(nowMin - times[i]) <= 5 && nowMin >= times[i] - 1) {
       G._gexLastFireMin = nowMin;
       // Guard: skip if no scan results exist yet (page loaded but no scan
       // run). Without this, a scheduled fire at 9:35 ET on a fresh page
@@ -17652,6 +17758,19 @@ function startGexAutoSchedule(){
   if (G._gexSchedTimer) clearInterval(G._gexSchedTimer);
   if (G.gexAutoSchedule === 'off') return;
   G._gexSchedTimer = setInterval(_gexScheduleTick, 60000);   // check every minute
+  // BUG-13 fix: when the tab returns from background, immediately re-tick.
+  // Browsers throttle setInterval in backgrounded tabs (often >1 min) so
+  // foreground polling can miss the ±5-min schedule window. visibilitychange
+  // fires synchronously when the user re-foregrounds, giving us a chance
+  // to catch up before the next interval tick.
+  if (!G._gexVisHooked){
+    document.addEventListener('visibilitychange', function(){
+      if (!document.hidden && G.gexAutoSchedule !== 'off'){
+        try { _gexScheduleTick(); } catch(_){}
+      }
+    });
+    G._gexVisHooked = true;
+  }
   console.log('[gex] auto-schedule started: '+G.gexAutoSchedule);
 }
 function stopGexAutoSchedule(){
@@ -17668,6 +17787,9 @@ function setGexSchedule(value){
 }
 
 function runGex(){
+  // RACE-1 fix: set the inflight token so hydrateGexFromCron skips while
+  // we're scanning. Cleared at all completion paths via _gexClearInflight().
+  G._gexInflight = true;
   // Wrap element + status are OPTIONAL — renderGex() handles missing wrap
   // gracefully (returns early). runGex still computes G.gexData even when
   // there's no UI to render it, so the rule scorecard's GEX rule has data
@@ -17888,7 +18010,7 @@ function runGex(){
         _gexProgEl.textContent = 'done in '+elapsed+'s'+(emptyCount?(' \u2014 '+emptyCount+' empty'):'');
       }
       renderGex();
-      // Persist so reload doesn't lose data within the 2h TTL window
+      // Persist so reload doesn't lose data within the 24h TTL window
       saveGexCache();
       addAlert('GEX','GEX/Flow refreshed \u2014 real 30DTE net flow for '+G.gexData.length+' tickers','warn');
       // Re-score all results now that GEX data is available
@@ -18662,7 +18784,17 @@ function fetchPositionsDirect(key,mode,host,acct){
             // Also expose underlyingNow on p so the moved STOCK PRICE
             // column and delta lookup paths share the same data.
             p.underlyingNow = uQuotes[p.underlying] || p.underlyingNow || 0;
-            // Multiplier: stocks/ETFs settle 1:1 per share; options are 100x per contract
+            // Multiplier: stocks/ETFs settle 1:1 per share; options are 100x per contract.
+            //
+            // BUG-10 note (2026-05-09): contractVal uses Math.abs(p.qty) on the
+            // assumption of a long-only book (per claudeMd: "long calls only").
+            // For short positions Tradier returns negative qty AND negative
+            // cost_basis; the math here would compute (positive notional) -
+            // (negative cost) = inflated P/L. If the strategy ever expands
+            // beyond long-only, replace with sign-aware:
+            //   var qNotional = mid * p.qty * mult;     // sign preserved
+            //   p.pnl = qNotional - p.cost;             // works for both
+            // Tracked in audit BUG-10 as a latent issue.
             var mult = (p.type === 'STOCK') ? 1 : 100;
             var contractVal=mid*Math.abs(p.qty)*mult;
             p.pnl=contractVal-p.cost;
@@ -23419,7 +23551,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.9.2-high-severity-audit-fixes';
+var APP_VERSION = '2.9.3-medium-low-audit-fixes';
 // Page-source fallback constants removed. Each visitor now provides their own
 // API credentials via the API tab (or, for Tradier, sets up the worker proxy
 // at worker/tradier-proxy/ \u2014 keys never reach the browser at all).
@@ -28340,6 +28472,22 @@ window.addEventListener('DOMContentLoaded',init);
     if (!table || !posSort.key) return;
     var tbody = table.tBodies && table.tBodies[0];
     if (!tbody) return;
+    // PERF-2: capture scroll position so re-ordering rows doesn't reset
+    // the user's view to the top.
+    var scrollHost = (function(){
+      var p = tbody.parentElement;
+      while (p && p !== document.body){
+        var s = getComputedStyle(p);
+        if (s.overflowY === 'auto' || s.overflowY === 'scroll') return p;
+        p = p.parentElement;
+      }
+      return null;
+    })();
+    var savedScroll = scrollHost ? scrollHost.scrollTop : 0;
+    // PERF-1: read shared posOpenData snapshot once instead of per-row in
+    // the comparator. Comparator hits the closure-captured object, not
+    // the global G repeatedly.
+    var _podSnap = (window.G && G.posOpenData) ? G.posOpenData : {};
     // Pair each data row with its inline trail-config row that sits
     // immediately after it (id="tscfg-<sym>"); keep them together.
     var rows = Array.prototype.slice.call(tbody.children);
@@ -28367,6 +28515,8 @@ window.addEventListener('DOMContentLoaded',init);
       if (p.cfg) frag.appendChild(p.cfg);
     });
     tbody.appendChild(frag);
+    // PERF-2: restore scroll after fragment swap.
+    if (scrollHost) scrollHost.scrollTop = savedScroll;
     // Update header arrows
     table.querySelectorAll('th[data-sort]').forEach(function(th){
       th.classList.remove('sorted-asc','sorted-desc');
