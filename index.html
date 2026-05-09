@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-09T22:00-rescan-regressions">
+<meta name="op-build" content="2026-05-09T23:00-deploy1-quickwins">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -8952,6 +8952,9 @@ function ahDelta(q){
 
 function renderQuotePanel(q){
   G.liveQuote=q;
+  // IDEA-2 watchdog: stamp every quote with a write timestamp so the
+  // staleness watchdog can flag old quotes on the order ticket.
+  if (q) q.tsWriteMs = Date.now();
   // User spec 2026-05-09: auto-tune step-fill delay based on spread%.
   // Runs after G.liveQuote update so the recommender sees fresh bid/ask.
   try { if (typeof _applyAutoStepDelay === 'function') _applyAutoStepDelay(); } catch(_){}
@@ -18866,6 +18869,20 @@ function loadWL(){try{var s=localStorage.getItem('rrjcar_wl');if(s)G.wlTickers=J
 function saveWL(){localStorage.setItem('rrjcar_wl',JSON.stringify(G.wlTickers));}
 function addWL(){var inp=eid('wl-add'),t=inp.value.trim().toUpperCase();if(!t)return;if(G.wlTickers.indexOf(t)<0){G.wlTickers.unshift(t);saveWL();}inp.value='';refreshWL();}
 function removeWL(t){G.wlTickers=G.wlTickers.filter(function(x){return x!==t;});saveWL();refreshWL();}
+// IDEA-3 fix 2026-05-09: nudge a watchlist ticker up or down one slot.
+// dir = -1 (up) or 1 (down). No-op at boundaries.
+function wlNudge(t, dir){
+  var i = G.wlTickers.indexOf(t);
+  if (i < 0) return;
+  var j = i + dir;
+  if (j < 0 || j >= G.wlTickers.length) return;
+  var tmp = G.wlTickers[j];
+  G.wlTickers[j] = G.wlTickers[i];
+  G.wlTickers[i] = tmp;
+  saveWL();
+  refreshWL();
+  try { if (typeof hap === 'function') hap(5); } catch(_){}
+}
 function refreshWL(){
   var wrap=eid('wl-tbl-wrap');
   if(!G.wlTickers.length){wrap.innerHTML='<div class="empty-det" style="min-height:200px;"><div class="ei">\u25a0</div><p>Add tickers to watchlist</p></div>';return;}
@@ -18880,7 +18897,7 @@ function refreshWL(){
   // already live in the chart panel on the right.
   function renderTable(quoteByTicker, label){
     var html='<table><thead><tr>'
-      + '<th>SYMBOL</th><th>COMPANY</th><th>CHG %</th><th>SIGNAL</th><th>BUY</th><th></th>'
+      + '<th>SYMBOL</th><th>COMPANY</th><th>CHG %</th><th>SIGNAL</th><th>BUY</th><th title="Reorder">↕</th><th></th>'
       + '</tr></thead><tbody>';
     G.wlTickers.forEach(function(t){
       var existingResult = null;
@@ -18915,6 +18932,10 @@ function refreshWL(){
         +'<td class="'+chgCls+'">'+(q.changePct>=0?'+':'')+fmtP(q.changePct)+'</td>'
         +'<td>'+sigBadge+'</td>'
         +'<td><button class="btn" style="font-size:10px;padding:3px 10px;white-space:nowrap;border-color:var(--amb);color:var(--amb);background:var(--amb3);" onclick="event.stopPropagation();openContractPanel(\''+t+'\')" title="View call contracts for '+t+'">\u25b2 BUY</button></td>'
+        +'<td style="white-space:nowrap;">'
+        + '<button class="cbtn" onclick="event.stopPropagation();wlNudge(\''+t+'\',-1)" title="Move up" style="padding:3px 5px;border-color:var(--gry2);color:var(--gry);">\u25b2</button>'
+        + '<button class="cbtn" onclick="event.stopPropagation();wlNudge(\''+t+'\',1)" title="Move down" style="padding:3px 5px;border-color:var(--gry2);color:var(--gry);margin-left:2px;">\u25bc</button>'
+        + '</td>'
         +'<td><button class="cbtn" onclick="event.stopPropagation();removeWL(this.parentNode.parentNode.dataset.ticker)">\u2717</button></td>'
         +'</tr>';
     });
@@ -20992,6 +21013,10 @@ function resetOrderForm(opts){
 }
 
 function closePosition(symbol,type,strike,exp,qty){
+  // GAP-9 fix 2026-05-09: archive any thesis note for this position
+  // before the close fires (don't wait for fill confirmation since the
+  // close form may auto-clear quickly).
+  try { if (typeof _archiveThesis === 'function') _archiveThesis(symbol, 'close-initiated'); } catch(_){}
   var isStock = (type === 'STOCK');
   var action = isStock ? 'SELL' : 'SELL_TO_CLOSE';
   // Coerce qty to positive integer (Tradier returns negative qty for short positions)
@@ -24185,7 +24210,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.11.4-rescan-regressions';
+var APP_VERSION = '2.11.5-deploy1-quickwins';
 // Page-source fallback constants removed. Each visitor now provides their own
 // API credentials via the API tab (or, for Tradier, sets up the worker proxy
 // at worker/tradier-proxy/ \u2014 keys never reach the browser at all).
@@ -29640,13 +29665,17 @@ window.addEventListener('DOMContentLoaded',init);
     try { localStorage.setItem(THESIS_KEY, JSON.stringify(map)); } catch(_){}
   }
 
-  function openPosThesisSheet(tr){
+  // GAP-2 fix: open in PREVIEW mode if a thesis exists, EDIT mode if empty.
+  // Preview shows the saved text plus an EDIT button. Tap EDIT → switches
+  // the same sheet to edit mode (textarea visible).
+  function openPosThesisSheet(tr, forceEdit){
     if (!tr) return;
     var occSym = tr.dataset.sym;
     var tk = tr.dataset.tk || '';
     if (!occSym) return;
     var notes = _loadThesis();
     var existing = notes[occSym] || '';
+    var preview = existing && !forceEdit;
 
     var prior = document.getElementById('pos-thesis-sheet');
     if (prior) prior.remove();
@@ -29657,23 +29686,39 @@ window.addEventListener('DOMContentLoaded',init);
 
     var inner = document.createElement('div');
     inner.style.cssText = 'background:var(--bg1);border-top:2px solid var(--amb);border-radius:12px 12px 0 0;width:100%;max-width:560px;padding:16px 16px calc(max(env(safe-area-inset-bottom,16px),16px)) 16px;display:flex;flex-direction:column;gap:10px;animation:osm-banner-in .25s ease-out;';
-    inner.innerHTML =
-        '<div style="display:flex;justify-content:space-between;align-items:center;">'
-      +   '<div style="font-family:var(--ff-brand);font-size:14px;color:var(--amb);letter-spacing:2px;font-weight:700;">THESIS — '+_esc(tk)+'</div>'
-      +   '<button class="btn" style="font-size:14px;padding:6px 12px;min-width:36px;min-height:36px;" onclick="document.getElementById(\'pos-thesis-sheet\').remove()" title="Close">&#10005;</button>'
-      + '</div>'
-      + '<div style="font-family:var(--ff-mono);font-size:10px;color:var(--gry);">Why did you open this trade? Notes appear under the position row.</div>'
-      + '<textarea id="pt-text" rows="6" placeholder="e.g. earnings play 5/15, expecting +5% on call+10pp guide…" style="font-size:16px;padding:10px 12px;background:var(--bg0);border:var(--bdr);border-radius:6px;color:var(--wht);font-family:var(--ff);line-height:1.4;resize:vertical;"></textarea>'
-      + '<div style="display:flex;gap:8px;margin-top:6px;">'
-      +   '<button class="btn wrn" style="flex:1;padding:11px;font-weight:700;font-size:12px;" onclick="_thesisClear(\''+_jsq(occSym)+'\')">CLEAR</button>'
-      +   '<button class="btn blu" style="flex:2;padding:11px;font-weight:700;font-size:12px;" onclick="_thesisSave(\''+_jsq(occSym)+'\')">SAVE</button>'
-      + '</div>';
+    if (preview){
+      // Preview mode: read-only text + EDIT button.
+      inner.innerHTML =
+          '<div style="display:flex;justify-content:space-between;align-items:center;">'
+        +   '<div style="font-family:var(--ff-brand);font-size:14px;color:var(--amb);letter-spacing:2px;font-weight:700;">THESIS — '+_esc(tk)+'</div>'
+        +   '<button class="btn" style="font-size:14px;padding:6px 12px;min-width:36px;min-height:36px;" onclick="document.getElementById(\'pos-thesis-sheet\').remove()" title="Close">&#10005;</button>'
+        + '</div>'
+        + '<div style="background:var(--bg0);border:var(--bdr);border-radius:6px;padding:14px 16px;font-family:var(--ff);font-size:14px;color:var(--wht);line-height:1.5;white-space:pre-wrap;max-height:50vh;overflow-y:auto;">'+_esc(existing)+'</div>'
+        + '<div style="display:flex;gap:8px;margin-top:6px;">'
+        +   '<button class="btn" style="flex:1;padding:11px;font-weight:700;font-size:12px;border-color:var(--gry2);color:var(--gry);" onclick="document.getElementById(\'pos-thesis-sheet\').remove()">CLOSE</button>'
+        +   '<button class="btn blu" style="flex:2;padding:11px;font-weight:700;font-size:12px;" onclick="(function(){var s=document.getElementById(\'pos-thesis-sheet\');if(s)s.remove();var tr=document.querySelector(\'#pos-tbl-wrap tr[data-sym=\\\''+_jsq(occSym)+'\\\']\');if(tr)openPosThesisSheet(tr,true);})()">EDIT</button>'
+        + '</div>';
+    } else {
+      inner.innerHTML =
+          '<div style="display:flex;justify-content:space-between;align-items:center;">'
+        +   '<div style="font-family:var(--ff-brand);font-size:14px;color:var(--amb);letter-spacing:2px;font-weight:700;">THESIS — '+_esc(tk)+'</div>'
+        +   '<button class="btn" style="font-size:14px;padding:6px 12px;min-width:36px;min-height:36px;" onclick="document.getElementById(\'pos-thesis-sheet\').remove()" title="Close">&#10005;</button>'
+        + '</div>'
+        + '<div style="font-family:var(--ff-mono);font-size:10px;color:var(--gry);">Why did you open this trade? Notes appear under the position row.</div>'
+        + '<textarea id="pt-text" rows="6" placeholder="e.g. earnings play 5/15, expecting +5% on call+10pp guide…" style="font-size:16px;padding:10px 12px;background:var(--bg0);border:var(--bdr);border-radius:6px;color:var(--wht);font-family:var(--ff);line-height:1.4;resize:vertical;"></textarea>'
+        + '<div style="display:flex;gap:8px;margin-top:6px;">'
+        +   '<button class="btn wrn" style="flex:1;padding:11px;font-weight:700;font-size:12px;" onclick="_thesisClear(\''+_jsq(occSym)+'\')">CLEAR</button>'
+        +   '<button class="btn blu" style="flex:2;padding:11px;font-weight:700;font-size:12px;" onclick="_thesisSave(\''+_jsq(occSym)+'\')">SAVE</button>'
+        + '</div>';
+    }
     sheet.appendChild(inner);
     document.body.appendChild(sheet);
-    setTimeout(function(){
-      var ta = document.getElementById('pt-text');
-      if (ta){ ta.value = existing; ta.focus(); }
-    }, 0);
+    if (!preview){
+      setTimeout(function(){
+        var ta = document.getElementById('pt-text');
+        if (ta){ ta.value = existing; ta.focus(); }
+      }, 0);
+    }
   }
   window.openPosThesisSheet = openPosThesisSheet;
 
@@ -29735,6 +29780,37 @@ window.addEventListener('DOMContentLoaded',init);
     };
     window.renderPositionsTable._thesisHooked = true;
   }
+
+  // GAP-9 fix 2026-05-09: archive thesis when a position closes; transfer
+  // when rolled. Archive lives at 'rrjcar_pos_thesis_archive' so the
+  // user can reference past trade rationale. Limited to 200 entries.
+  function _archiveThesis(occSym, reason){
+    try {
+      var notes = _loadThesis();
+      var text = notes[occSym] || '';
+      if (!text) return;
+      var archive = JSON.parse(localStorage.getItem('rrjcar_pos_thesis_archive') || '[]');
+      archive.push({ occ: occSym, text: text, archivedAt: new Date().toISOString(), reason: reason || 'closed' });
+      if (archive.length > 200) archive = archive.slice(-200);
+      localStorage.setItem('rrjcar_pos_thesis_archive', JSON.stringify(archive));
+      delete notes[occSym];
+      _saveThesis(notes);
+    } catch(_){}
+  }
+  window._archiveThesis = _archiveThesis;
+
+  function _transferThesis(oldOcc, newOcc, prefix){
+    try {
+      var notes = _loadThesis();
+      var text = notes[oldOcc] || '';
+      if (!text) return;
+      var pfx = prefix || ('(rolled from '+oldOcc+') ');
+      notes[newOcc] = pfx + text;
+      delete notes[oldOcc];
+      _saveThesis(notes);
+    } catch(_){}
+  }
+  window._transferThesis = _transferThesis;
 
   console.log('[pos-thesis] ready');
 })();
@@ -29886,15 +29962,35 @@ window.addEventListener('DOMContentLoaded',init);
       + '<div id="lpv-day-pct" style="font-family:var(--ff-mono);font-size:18px;color:var(--gry);margin-top:14px;">--%</div>'
       + '<div style="margin-top:48px;font-family:var(--ff-brand);font-size:10px;color:var(--gry);letter-spacing:2px;">EQUITY</div>'
       + '<div id="lpv-eq" style="font-family:var(--ff-mono);font-size:32px;color:var(--ambb);margin-top:6px;">--</div>'
-      + '<div style="margin-top:40px;font-family:var(--ff-mono);font-size:10px;color:var(--gry2);">tap anywhere to dismiss</div>';
+      // GAP-3 fix 2026-05-09: explicit CTA buttons so user can route to
+      // Positions tab without dismissing first. Stop click-anywhere from
+      // bubbling up through these buttons.
+      + '<div style="display:flex;gap:10px;margin-top:48px;">'
+      +   '<button class="btn blu" style="font-size:12px;padding:10px 20px;font-weight:700;" onclick="event.stopPropagation();(function(){var o=document.getElementById(\'live-pnl-overlay\');if(o)o.remove();try{switchTab(\'pos\');}catch(_){}})()">VIEW POSITIONS</button>'
+      +   '<button class="btn" style="font-size:12px;padding:10px 16px;border-color:var(--gry2);color:var(--gry);" onclick="event.stopPropagation();(function(){try{if(typeof fetchPositions===\'function\')fetchPositions();_refreshLpv();}catch(_){}})()">↻ REFRESH</button>'
+      + '</div>'
+      + '<div style="margin-top:24px;font-family:var(--ff-mono);font-size:10px;color:var(--gry2);">tap backdrop to dismiss</div>';
     overlay.onclick = function(){
       if (ticker){ clearInterval(ticker); ticker = null; }
       overlay.remove();
     };
     document.body.appendChild(overlay);
+    // GAP-8 fix 2026-05-09: kick off a fresh positions fetch on open
+    // so the overlay shows live data even if the Positions tab hasn't
+    // refreshed recently. Subsequent ticks below also refresh every 30s.
+    try { if (typeof fetchPositions === 'function') fetchPositions(); } catch(_){}
     _refreshLpv();
     if (ticker) clearInterval(ticker);
-    ticker = setInterval(_refreshLpv, 5000);
+    var lastFetch = Date.now();
+    ticker = setInterval(function(){
+      _refreshLpv();
+      // Refresh underlying positions every 30s (every 6th tick) so the
+      // overlay's data stays fresh even on multi-minute viewing.
+      if (Date.now() - lastFetch > 30000){
+        lastFetch = Date.now();
+        try { if (typeof fetchPositions === 'function') fetchPositions(); } catch(_){}
+      }
+    }, 5000);
   }
   window.openLivePnlView = openLivePnlView;
 
@@ -30042,6 +30138,63 @@ window.addEventListener('DOMContentLoaded',init);
   setTimeout(_wireLongPress, 1500);
 
   console.log('[quick-buy] ready');
+})();
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  IDEA-2 — STALE-QUOTE WATCHDOG (Order Ticket)
+//  Banner appears above the LIMIT field if G.liveQuote is older than
+//  STALE_WARN_MS. Force-refreshes at FORCE_REFRESH_MS. Prevents fat-finger
+//  submissions on a 60-second-old quote.
+// ═══════════════════════════════════════════════════════════════════════════
+(function(){
+  var STALE_WARN_MS = 30 * 1000;
+  var FORCE_REFRESH_MS = 60 * 1000;
+
+  function _renderStaleHint(){
+    var orderPane = document.getElementById('tab-order');
+    if (!orderPane || !orderPane.classList.contains('active')){
+      var existing = document.getElementById('stale-quote-banner');
+      if (existing) existing.remove();
+      return;
+    }
+    if (!G.liveQuote || !G.liveQuote.tsWriteMs) return;
+    var ageMs = Date.now() - G.liveQuote.tsWriteMs;
+    var banner = document.getElementById('stale-quote-banner');
+    if (ageMs >= FORCE_REFRESH_MS){
+      // Force refresh — banner shows briefly then auto-clears when quote arrives.
+      try { if (typeof fetchLiveQuote === 'function') fetchLiveQuote(); } catch(_){}
+      if (!banner){
+        banner = _build('forcing refresh — quote was '+Math.round(ageMs/1000)+'s old');
+      } else {
+        banner.querySelector('.stale-msg').textContent = 'forcing refresh — quote was '+Math.round(ageMs/1000)+'s old';
+      }
+    } else if (ageMs >= STALE_WARN_MS){
+      if (!banner){
+        banner = _build('quote is '+Math.round(ageMs/1000)+'s stale — tap to refresh');
+        banner.onclick = function(){ try { if (typeof fetchLiveQuote === 'function') fetchLiveQuote(); } catch(_){} };
+      } else {
+        banner.querySelector('.stale-msg').textContent = 'quote is '+Math.round(ageMs/1000)+'s stale — tap to refresh';
+      }
+    } else {
+      if (banner) banner.remove();
+    }
+  }
+
+  function _build(msg){
+    var b = document.createElement('div');
+    b.id = 'stale-quote-banner';
+    b.style.cssText = 'background:rgba(255,160,30,0.18);border:1px solid var(--wrn);color:var(--wrn);font-family:var(--ff-mono);font-size:11px;padding:8px 12px;margin:8px 12px;border-radius:5px;cursor:pointer;display:flex;align-items:center;gap:8px;animation:osm-banner-in .25s ease-out;';
+    b.innerHTML = '<span style="font-size:14px;">⚠</span><span class="stale-msg">'+msg+'</span>';
+    var hostCard = document.querySelector('#tab-order .card .quote-panel') || document.querySelector('#tab-order .card-body');
+    if (hostCard){
+      hostCard.parentNode.insertBefore(b, hostCard);
+    }
+    return b;
+  }
+
+  // Tick every 5s while order tab is active.
+  setInterval(_renderStaleHint, 5000);
+  console.log('[stale-quote-watchdog] ready');
 })();
 
 /* EOD EQUITY LOG removed 2026-05-05 per user spec — module deleted in
