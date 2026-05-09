@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-09T11:00-audit-fixes-and-mm-dd-yyyy-display">
+<meta name="op-build" content="2026-05-09T11:30-positions-watchlist-autoadd-and-ticker-prominence">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -648,6 +648,24 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
 }
 #pos-tbl-wrap th.col-equity{
   background:rgba(0,212,255,0.06);
+}
+/* TICKER column — make positions easy to scan at a glance. Larger,
+   brighter, with a soft glow + tint background. User spec 2026-05-09. */
+#pos-tbl-wrap th.col-ticker, #pos-tbl-wrap td.col-ticker{
+  color:#ffd23f !important;
+  font-weight:900 !important;
+  font-size:14px !important;
+  letter-spacing:.5px;
+  text-shadow:0 0 8px rgba(255,210,63,0.35);
+  font-family:var(--ff-mono);
+}
+#pos-tbl-wrap th.col-ticker{
+  background:rgba(255,210,63,0.07);
+  font-size:11px !important;
+}
+#pos-tbl-wrap td.col-ticker b{
+  color:#ffe169 !important;
+  font-weight:900 !important;
 }
 
 /* Positions table sortable headers — chevron + hover affordance */
@@ -18698,6 +18716,7 @@ function fetchPositionsDirect(key,mode,host,acct){
           p.underlyingNow = uQuotes[p.underlying]||0;
         });
         G.positions=pos;renderPositionsTable(pos,mode==='live'?'[TRADIER LIVE]':' [TRADIER SANDBOX]');fetchBalances();try{fetchPendingOrders();}catch(_){}
+        try { if (typeof cwAutoAddFromPositions === 'function') cwAutoAddFromPositions(pos); } catch(_){}
         // Restore trail stop poller if it was active before page reload
         if(G._tsRestoreActive && pos.length > 0 && !G.tsActive){
           G._tsRestoreActive = false;
@@ -18718,7 +18737,7 @@ function fetchPositionsDirect(key,mode,host,acct){
           }
         }
       });
-    }).catch(function(){G.positions=pos;renderPositionsTable(pos,mode==='live'?'[TRADIER LIVE]':' [TRADIER SANDBOX]');fetchBalances();try{fetchPendingOrders();}catch(_){}});
+    }).catch(function(){G.positions=pos;renderPositionsTable(pos,mode==='live'?'[TRADIER LIVE]':' [TRADIER SANDBOX]');fetchBalances();try{fetchPendingOrders();}catch(_){}try { if (typeof cwAutoAddFromPositions === 'function') cwAutoAddFromPositions(pos); } catch(_){}});
   }).catch(function(e){showPosError('Tradier API error: '+e.message);});
 }
 function showPosError(msg){eid('pos-src').textContent='[ERROR]';eid('pos-tbl-wrap').innerHTML='<div class="empty-det" style="min-height:200px;"><div class="ei">\u25a0</div><p style="color:var(--wrn);">'+msg+'</p><p style="color:var(--gry);margin-top:8px;">Check API key in the API tab.</p></div>';}
@@ -18948,7 +18967,7 @@ function renderPositionsTable(pos,srcLabel){
     +'<th data-sort="equity" class="col-equity" style="cursor:pointer;" title="Current value of your position (mark x qty x multiplier)">EQUITY</th>'
     +'<th data-sort="dayPnl" style="cursor:pointer;" title="Today\'s P/L — current mark vs prior close × qty × multiplier">DAY P/L $</th>'
     +'<th data-sort="pnl" style="cursor:pointer;" title="Total P/L since the position was opened">TOTAL P/L $</th>'
-    +'<th data-sort="ticker" style="cursor:pointer;">TICKER</th>'
+    +'<th data-sort="ticker" class="col-ticker" style="cursor:pointer;">TICKER</th>'
     +'<th data-sort="exp" style="cursor:pointer;">EXP</th>'
     +'<th data-sort="strike" style="cursor:pointer;">STRIKE</th>'
     +'<th data-sort="ulpx" style="cursor:pointer;" title="Current underlying stock price">STOCK PRICE</th>'
@@ -19264,7 +19283,7 @@ function renderPositionsTable(pos,srcLabel){
       +equityCellHL                                                                                           // EQUITY
       +'<td class="'+dayPnlCls+'">'+dayPnlTxt+'</td>'                                                        // DAY P/L $
       +'<td class="'+pnlCls+'">'+(p.pnl>=0?'+':'')+fmtD(p.pnl)+'</td>'                                       // TOTAL P/L $
-      +'<td><b>'+tk+'</b>'+(isStock?' <span style="color:var(--gry);font-size:10px;">EQ</span>':'')+'</td>'  // TICKER
+      +'<td class="col-ticker"><b>'+tk+'</b>'+(isStock?' <span style="color:var(--gry);font-size:10px;font-weight:600;">EQ</span>':'')+'</td>'  // TICKER
       +expCell                                                                                                // EXP
       +strikeCell                                                                                             // STRIKE
       +stockPxCellHL                                                                                          // STOCK PRICE
@@ -23359,7 +23378,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.9.0-audit-fixes-and-mm-dd-yyyy-display';
+var APP_VERSION = '2.9.1-positions-watchlist-autoadd-and-ticker-prominence';
 // Page-source fallback constants removed. Each visitor now provides their own
 // API credentials via the API tab (or, for Tradier, sets up the worker proxy
 // at worker/tradier-proxy/ \u2014 keys never reach the browser at all).
@@ -23861,6 +23880,43 @@ function cwToggleWatch(ticker, strike, expDate, mid, delta, score){
       btn.style.background = 'rgba(0,212,255,.2)';
     }
     toast('Added to watchlist: '+ticker+' $'+strike+' CALL '+fmtDateUS(expDate));
+  }
+}
+
+// Auto-add every option position to the contract watchlist after each
+// positions fetch. Idempotent: only writes if the contract isn't already
+// tracked. Silent (no toast). Stock/ETF rows skipped because the watchlist
+// is contract-level. User spec 2026-05-09.
+function cwAutoAddFromPositions(positions){
+  if (!Array.isArray(positions) || !positions.length) return;
+  var data = cwGetAll();
+  var added = 0;
+  positions.forEach(function(p){
+    if (!p || p.type === 'STOCK') return;
+    if (!p.underlying || !p.strike || !p.exp || !p.type) return;
+    var typeChar = p.type === 'PUT' ? 'P' : 'C';
+    var key = p.underlying + '_' + p.strike + '_' + p.exp + '_' + typeChar;
+    if (data[key]) return;   // already tracked
+    var mid = (p.bid && p.ask) ? (p.bid + p.ask) / 2 : (p.last || 0);
+    data[key] = {
+      ticker: p.underlying,
+      strike: p.strike,
+      expDate: p.exp,
+      type: p.type,
+      addedMid: mid,
+      currentMid: mid,
+      delta: (p.delta != null) ? p.delta : null,
+      score: null,
+      addedAt: new Date().toISOString(),
+      isBestForExpiry: false,
+      source: 'position-auto'
+    };
+    added++;
+  });
+  if (added > 0){
+    cwSaveAll(data);
+    // Refresh the watchlist tab if it's currently rendered (no-op otherwise).
+    try { if (typeof cwRenderTable === 'function' && document.getElementById('cw-tbl-wrap')) cwRenderTable(); } catch(_){}
   }
 }
 
