@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-10T01:00-rescan-fixes">
+<meta name="op-build" content="2026-05-10T01:30-version-chip-visible">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -2716,7 +2716,7 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
 </head>
 <body>
 <div id="hdr">
-  <div id="hdr-logo"><img src="assets/pandas2.png" alt="" class="panda-icon" ondblclick="forceReloadFresh()" title="Double-tap to force-reload (clears stale cache)"><span ondblclick="forceReloadFresh()" title="Double-tap to force-reload">OPTION PANDA</span><span id="clk-logo" style="margin-left:14px;font-family:var(--ff-mono);font-size:12px;color:var(--amb);letter-spacing:.5px;font-weight:400;">--:--:--</span><!-- Version chip removed 2026-05-04 per user spec; double-tap the panda icon to force-reload if cache gets stuck --><span id="hdr-version" onclick="forceReloadFresh()" style="display:none;">v—</span></div>
+  <div id="hdr-logo"><img src="assets/pandas2.png" alt="" class="panda-icon" ondblclick="forceReloadFresh()" title="Double-tap to force-reload (clears stale cache)"><span ondblclick="forceReloadFresh()" title="Double-tap to force-reload">OPTION PANDA</span><span id="clk-logo" style="margin-left:14px;font-family:var(--ff-mono);font-size:12px;color:var(--amb);letter-spacing:.5px;font-weight:400;">--:--:--</span><!-- Version chip restored 2026-05-10 per user spec — subtly visible so user + others can confirm latest deploy. Click to force-reload. Strips descriptive suffix (e.g. '2.12.1-rescan-fixes' → 'v2.12.1') — full slug still on APP_VERSION + meta op-build for diagnostics. --><span id="hdr-version" onclick="forceReloadFresh()" title="Click to force-reload (clears cache)" style="margin-left:10px;font-family:var(--ff-mono);font-size:10px;color:var(--gry2);letter-spacing:.5px;font-weight:400;cursor:pointer;opacity:0.65;">v—</span></div>
   <button id="hdr-tickers-toggle" onclick="(function(){var t=document.getElementById('hdr-tickers');if(!t)return;var hidden=t.style.display==='none';t.style.display=hidden?'':'none';try{localStorage.setItem('rrjcar_hdr_tickers_collapsed', hidden?'0':'1');}catch(_){}this.textContent=hidden?'▾':'▸';})(this)" title="Toggle ticker strip" style="display:none;background:transparent;border:1px solid var(--gry2);color:var(--gry);font-family:var(--ff-mono);font-size:11px;padding:4px 8px;border-radius:3px;cursor:pointer;margin-right:6px;">▾</button>
   <div id="hdr-tickers" onclick="if(typeof updateHeaderQuotes==='function'){try{updateHeaderQuotes();if(typeof toast==='function')toast('Indices refreshed');if(typeof hap==='function')hap(8);}catch(_){}}" title="Tap to force-refresh indices">
     <span class="htick"><span class="ts">SPY </span><span class="tv" id="h-spy">--</span> <span class="tc" id="h-spy-c">(--)</span></span>
@@ -24716,7 +24716,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.12.1-rescan-fixes';
+var APP_VERSION = '2.12.2-version-chip-visible';
 // Page-source fallback constants removed. Each visitor now provides their own
 // API credentials via the API tab (or, for Tradier, sets up the worker proxy
 // at worker/tradier-proxy/ \u2014 keys never reach the browser at all).
@@ -28128,7 +28128,13 @@ function init(){
   // it calls forceReloadFresh() to bust the browser cache.
   try {
     var verEl = document.getElementById('hdr-version');
-    if (verEl) verEl.textContent = 'v'+APP_VERSION;
+    // Show short semver only (e.g. v2.12.1 not v2.12.1-rescan-fixes).
+    // Full slug still on APP_VERSION + the meta op-build tag for diag.
+    if (verEl){
+      var shortVer = String(APP_VERSION).split('-')[0];
+      verEl.textContent = 'v'+shortVer;
+      verEl.title = 'Option Panda v'+APP_VERSION+' — click to force-reload (clears cache)';
+    }
   } catch(_){}
 
   addAlert('SYS','Option Panda v'+APP_VERSION+' initialized — cached data loaded, no API calls on startup','go');
