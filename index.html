@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-10T07:30-modal-zindex-tab-close-pos-export">
+<meta name="op-build" content="2026-05-10T08:00-no-earnings-inclusive">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -3129,7 +3129,7 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
     <label class="ind-filter-lbl" title="TF Aligned = Time-Frame Aligned. Counts how many of three trend timeframes (e.g. daily / hourly / 15-min) are pointing the same direction. 2/3 = at least two of three timeframes agree, which filters out stocks that look bullish on one timeframe but are choppy on others."><input type="checkbox" class="ind-filter" id="filt-tf" onchange="applyFilters()"> <span>TF Aligned 2/3</span></label>
     <label class="ind-filter-lbl"><input type="checkbox" class="ind-filter" id="filt-ema200" onchange="applyFilters()"> <span>Above EMA200</span></label>
     <label class="ind-filter-lbl"><input type="checkbox" class="ind-filter" id="filt-vol" onchange="applyFilters()"> <span>Vol &gt; Avg</span></label>
-    <label class="ind-filter-lbl" title="Hide tickers with earnings within N days. Earnings = binary event; even good signals turn into 50/50 coin flips. Default 1 day — bump higher to be more conservative."><input type="checkbox" class="ind-filter" id="filt-no-earn" onchange="applyFilters()"> <span>No Earnings &lt;<input type="number" id="filt-earn-days" value="1" min="1" max="30" style="width:32px;font-size:10px;padding:1px 3px;background:var(--bg2);border:1px solid var(--bg3);color:var(--amb);" onchange="applyFilters()" onclick="event.stopPropagation()">d</span></label>
+    <label class="ind-filter-lbl" title="Hide tickers with earnings today through N trading days into the future (inclusive). 0 = today only. 3 = today + next 3 days. Earnings = binary event; even good signals turn into 50/50 coin flips through earnings."><input type="checkbox" class="ind-filter" id="filt-no-earn" onchange="applyFilters()"> <span>No Earnings (today + <input type="number" id="filt-earn-days" value="0" min="0" max="30" style="width:36px;font-size:10px;padding:1px 3px;background:var(--bg2);border:1px solid var(--bg3);color:var(--amb);" onchange="applyFilters()" onclick="event.stopPropagation()" inputmode="numeric">d)</span></label>
     <label class="ind-filter-lbl" title="Sector rotation overlay — only show tickers in themes with daily composite score >= 75 (top quartile, prevailing institutional flow)"><input type="checkbox" class="ind-filter" id="filt-strong-sector" onchange="applyFilters()"> <span>Strong Sector</span></label>
     <label class="ind-filter-lbl" title="Jegadeesh-Titman 12-1 cross-sectional momentum (1993). 12-month return minus 1-month, top quintile (≥25%). Strongest replicated edge in academic finance. Worth +20 score points — most heavily weighted single rule."><input type="checkbox" class="ind-filter" id="filt-jt12" onchange="applyFilters()"> <span>JT 12-1 Mom</span></label>
     <label class="ind-filter-lbl" title="Mark Minervini's 8-criteria Stage 2 trend template. Price &gt; MA50 &gt; MA150 &gt; MA200, MA200 trending up &gt;1mo, RS rank &gt; 70, near 52wk hi, &gt;25% off 52wk lo. High-specificity swing breakout setup. Worth +15."><input type="checkbox" class="ind-filter" id="filt-minervini" onchange="applyFilters()"> <span>Minervini</span></label>
@@ -18044,8 +18044,12 @@ function applyFilters(){
     // ticker has no entry in G_EARNINGS_CACHE (FMP coverage gap; we don't
     // exclude on missing data — would be too aggressive).
     if (needNoEarn) {
+      // 2026-05-10 v2.16.1: was `dte < earnDays` which is exclusive of
+      // the entered day. User mental model: input N = "block earnings
+      // today + next N days". So input 0 → block today only (dte=0);
+      // input 3 → block dte 0,1,2,3. Switch to `<=` for inclusive.
       var dte = getDaysToEarnings(r.ticker);
-      if (dte !== null && dte < earnDays) return false;
+      if (dte !== null && dte <= earnDays) return false;
     }
 
     // Strong-sector filter — pass-through on missing theme overlay data
@@ -18102,7 +18106,7 @@ var SCAN_SETTING_DEFAULTS = {
   'sc-minscore':     '130',
   'sc-sig':          'GO',
   'sc-theme':        '',
-  'filt-earn-days':  '1'
+  'filt-earn-days':  '0'
 };
 // F-5: include OB / instrument-OB checkboxes so resetScanSettings actually
 // clears them (previously they were missing from this list and resetScanSettings
@@ -24897,7 +24901,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.16.0-modal-zindex-tab-close-pos-export';
+var APP_VERSION = '2.16.1-no-earnings-inclusive';
 // Page-source fallback constants removed. Each visitor now provides their own
 // API credentials via the API tab (or, for Tradier, sets up the worker proxy
 // at worker/tradier-proxy/ \u2014 keys never reach the browser at all).
