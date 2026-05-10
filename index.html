@@ -307,19 +307,19 @@ a{color:var(--blu);text-decoration:none;}
   /* Header: tighter wrap, indices in a single horizontal-scroll row.
      Previous layout used flex-wrap so SPY/QQQ/DIA stacked into 3 rows
      on iPhone — eats vertical space + looks broken. */
-  /* Logo takes full width = own row. Tickers + hamburger share row 2. */
-  #hdr-logo{order:1 !important;flex:1 1 100% !important;font-size:14px !important;
+  /* Row 1: logo + hamburger.  Row 2: indices (full-width scroll). */
+  #hdr-logo{order:1 !important;flex:1 1 auto !important;font-size:14px !important;
     letter-spacing:1.5px !important;gap:8px !important;}
   #hdr-logo .panda-icon{height:36px !important;}
+  #hdr-right{flex:0 0 auto !important;order:1 !important;font-size:10px !important;position:relative !important;}
+  #hdr-right > *{font-size:10px !important;}
   #hdr-tickers{flex-wrap:nowrap !important;overflow-x:auto !important;
     -webkit-overflow-scrolling:touch;justify-content:flex-start !important;
-    gap:14px !important;flex:1 1 0 !important;min-width:0 !important;order:2 !important;
+    gap:14px !important;flex:1 1 100% !important;min-width:0 !important;order:2 !important;
     padding:4px 0 !important;border-top:1px solid rgba(0,212,255,0.12);
-    scrollbar-width:none;}
+    scrollbar-width:none;min-height:24px !important;}
   #hdr-tickers::after{content:'' !important;flex-shrink:0 !important;width:8px !important;}
   #hdr-tickers::-webkit-scrollbar{display:none;}
-  #hdr-right{flex:0 0 auto !important;order:2 !important;font-size:10px !important;position:relative !important;}
-  #hdr-right > *{font-size:10px !important;}
   #hdr-chips{position:absolute !important;top:100% !important;right:0 !important;z-index:200 !important;
     background:var(--bg1) !important;border:1px solid var(--bg3) !important;border-radius:6px !important;
     padding:8px !important;box-shadow:0 4px 16px rgba(0,0,0,.5) !important;min-width:140px !important;}
@@ -1792,13 +1792,13 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
 @media(max-width:480px){
   /* ── HEADER: larger logo + wordmark per user spec 2026-05-04 ── */
   #hdr{padding:6px 8px !important;gap:4px !important;overflow:visible !important;}
-  #hdr-logo{font-size:18px !important;letter-spacing:1.5px !important;gap:10px !important;overflow:visible !important;flex:1 1 100% !important;}
+  #hdr-logo{font-size:18px !important;letter-spacing:1.5px !important;gap:10px !important;overflow:visible !important;flex:1 1 auto !important;}
   #hdr-logo .panda-icon{height:48px !important;}
   #clk-logo{font-size:11px !important;margin-left:6px !important;}
   #hdr-version{font-size:10px !important;flex-shrink:0 !important;margin-left:6px !important;}
-  #hdr-tickers{padding:4px 0 !important;gap:10px !important;flex:1 1 0 !important;min-width:0 !important;order:2 !important;}
+  #hdr-right{flex:0 0 auto !important;order:1 !important;position:relative !important;}
+  #hdr-tickers{padding:4px 0 !important;gap:10px !important;flex:1 1 100% !important;min-width:0 !important;order:2 !important;min-height:24px !important;}
   #hdr-tickers::after{content:'' !important;flex-shrink:0 !important;width:8px !important;}
-  #hdr-right{flex:0 0 auto !important;order:2 !important;position:relative !important;}
   .htick{font-size:11px;}
   /* Header right cluster: theme toggle, notify, OPT BP, mode badge — 32px tall */
   #theme-toggle, #push-toggle, #hdr-opt-bp, #mode-badge{
@@ -24695,7 +24695,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.15.1';
+var APP_VERSION = '2.15.2';
 // Page-source fallback constants removed. Each visitor now provides their own
 // API credentials via the API tab (or, for Tradier, sets up the worker proxy
 // at worker/tradier-proxy/ \u2014 keys never reach the browser at all).
@@ -28091,6 +28091,23 @@ function init(){
       try { switchTab('sc'); } catch(_){}
       try { if (typeof _updateHelpFab === 'function') _updateHelpFab('sc'); } catch(_){}
     }, 60);
+  } catch(_){}
+
+  // Wake Lock — prevent screen from dimming/sleeping while dashboard is visible.
+  try {
+    var _wakeLock = null;
+    function _requestWakeLock(){
+      if('wakeLock' in navigator){
+        navigator.wakeLock.request('screen').then(function(wl){
+          _wakeLock = wl;
+          wl.addEventListener('release', function(){ _wakeLock = null; });
+        }).catch(function(){});
+      }
+    }
+    _requestWakeLock();
+    document.addEventListener('visibilitychange', function(){
+      if(document.visibilityState === 'visible') _requestWakeLock();
+    });
   } catch(_){}
 
   // Surface the build version in the header chip so the user can confirm
