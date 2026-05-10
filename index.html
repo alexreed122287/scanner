@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-10T09:30-balances-nonzero-alert">
+<meta name="op-build" content="2026-05-10T10:00-balances-diag-config">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -21813,13 +21813,20 @@ function fetchBalances(){
   }
   var mode='sandbox';try{mode=localStorage.getItem('rrjcar_mode')||'sandbox';}catch(e){}
   var host=mode==='live'?'https://api.tradier.com':'https://sandbox.tradier.com';
-  fetch(host+'/v1/accounts/'+G.acctId+'/balances',{headers:{Authorization:'Bearer '+key,Accept:'application/json'}})
+  var balUrl = host+'/v1/accounts/'+G.acctId+'/balances';
+  fetch(balUrl,{headers:{Authorization:'Bearer '+key,Accept:'application/json'}})
   .then(function(r){return r.json();})
   .then(function(data){
     try{
       var b = data && data.balances ? data.balances : {};
-      // 2026-05-10 v2.16.3: stash raw response for diagnostic 5-tap dump.
-      try { window._lastBalancesRaw = data; } catch(_){}
+      // 2026-05-10 v2.16.3+: stash raw response + URL + mode for the
+      // 3-tap diagnostic dump. Helps user (and me) verify they're hitting
+      // live vs sandbox without guesswork.
+      try {
+        window._lastBalancesRaw = data;
+        window._lastBalancesUrl = balUrl;
+        window._lastBalancesMode = mode;
+      } catch(_){}
       // Stash for updatePosStats() — feeds CASH, DAY P&L history, and the
       // realized-side fallback for TOTAL P&L when local closed_trades is empty.
       G.lastBalances = b;
@@ -21907,15 +21914,24 @@ function fetchBalances(){
     if (taps.length >= 3){
       taps = [];
       var raw = window._lastBalancesRaw;
+      var savedMode = (function(){ try { return localStorage.getItem('rrjcar_mode') || '(unset → defaults to sandbox)'; } catch(_){ return '?'; } })();
+      var hasLiveKey = (function(){ try { return !!localStorage.getItem('rrjcar_tradier_live'); } catch(_){ return false; } })();
+      var hasSbxKey  = (function(){ try { return !!localStorage.getItem('rrjcar_tradier_sandbox'); } catch(_){ return false; } })();
+      var dropdownVal = (function(){ var s = document.getElementById('api-mode'); return s ? s.value : 'unknown'; })();
+      var header = 'CONFIG\n' +
+                   '  localStorage mode: ' + savedMode + '\n' +
+                   '  Dropdown shows:    ' + dropdownVal + '\n' +
+                   '  G.acctId:          ' + (typeof G !== 'undefined' ? G.acctId : 'undefined') + '\n' +
+                   '  Live key saved:    ' + (hasLiveKey ? 'yes' : 'NO') + '\n' +
+                   '  Sandbox key saved: ' + (hasSbxKey ? 'yes' : 'no') + '\n' +
+                   '  Last fetch URL:    ' + (window._lastBalancesUrl || 'never fetched') + '\n' +
+                   '  Last fetch mode:   ' + (window._lastBalancesMode || 'never fetched') + '\n\n';
       var msg;
       if (!raw){
-        msg = 'No balances response cached yet.\n\nG.acctId = ' + (typeof G !== 'undefined' ? G.acctId : 'undefined') +
-              '\nMode = ' + (function(){ try { return localStorage.getItem('rrjcar_mode') || 'sandbox'; } catch(_){ return '?'; } })() +
-              '\nKey present = ' + (typeof _getTradierKey === 'function' && _getTradierKey() ? 'yes' : 'no') +
-              '\n\nTap REFRESH on Positions, then 3-tap the BP badge again.';
+        msg = header + 'No balances response cached yet. Tap REFRESH on Positions, then 3-tap the BP badge again.';
       } else {
         var b = (raw && raw.balances) || raw || {};
-        msg = 'Tradier balances response:\n\n' + JSON.stringify(b, null, 2).slice(0, 2000);
+        msg = header + 'BALANCES RESPONSE\n' + JSON.stringify(b, null, 2).slice(0, 1500);
       }
       try { alert(msg); }
       catch(_){
@@ -24988,7 +25004,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.16.4-balances-nonzero-prefer-alert-diag';
+var APP_VERSION = '2.16.5-balances-diag-config';
 // Page-source fallback constants removed. Each visitor now provides their own
 // API credentials via the API tab (or, for Tradier, sets up the worker proxy
 // at worker/tradier-proxy/ \u2014 keys never reach the browser at all).
