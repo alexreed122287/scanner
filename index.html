@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-10T08:00-no-earnings-inclusive">
+<meta name="op-build" content="2026-05-10T08:30-ord-chain-json-fix">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -15823,10 +15823,17 @@ async function loadOrdChain(forcedSym){
   }
   try {
     // Reuse tradierFetch's URL cache (6h for expirations).
+    // 2026-05-10 v2.16.2 BUGFIX: tradierFetch returns a Response-like
+    // object (with .json() method), NOT the parsed payload. Previously
+    // this code did `expData.expirations` directly which evaluated to
+    // undefined → dates=[] → "no options" in the EXPIRY dropdown for
+    // every ticker. Same bug in renderOrdChain below. Now we call
+    // .json() on both code paths uniformly.
     var expUrl = creds.host + '/v1/markets/options/expirations?symbol=' + encodeURIComponent(sym) + '&includeAllRoots=true';
-    var expData = await (typeof tradierFetch === 'function'
+    var expResp = await (typeof tradierFetch === 'function'
       ? tradierFetch(expUrl, { headers:{Authorization:'Bearer '+creds.key, Accept:'application/json'} }, 6*60*60*1000)
-      : fetch(expUrl, { headers:{Authorization:'Bearer '+creds.key, Accept:'application/json'} }).then(function(r){return r.json();}));
+      : fetch(expUrl, { headers:{Authorization:'Bearer '+creds.key, Accept:'application/json'} }));
+    var expData = await expResp.json();
     var dates = (expData && expData.expirations && expData.expirations.date) || [];
     if (typeof dates === 'string') dates = [dates];
     if (!Array.isArray(dates) || !dates.length){
@@ -15891,9 +15898,11 @@ async function renderOrdChain(sym, expDate){
   if (!creds || !creds.key){ if (status) status.textContent = ''; return; }
   try {
     var url = creds.host + '/v1/markets/options/chains?symbol=' + encodeURIComponent(sym) + '&expiration=' + encodeURIComponent(expDate) + '&greeks=true';
-    var data = await (typeof tradierFetch === 'function'
+    // v2.16.2: same Response-vs-JSON bugfix as loadOrdChain above.
+    var resp = await (typeof tradierFetch === 'function'
       ? tradierFetch(url, { headers:{Authorization:'Bearer '+creds.key, Accept:'application/json'} }, 5*60*1000)
-      : fetch(url, { headers:{Authorization:'Bearer '+creds.key, Accept:'application/json'} }).then(function(r){return r.json();}));
+      : fetch(url, { headers:{Authorization:'Bearer '+creds.key, Accept:'application/json'} }));
+    var data = await resp.json();
     var opts = (data && data.options && data.options.option) || [];
     if (!Array.isArray(opts)) opts = [opts];
     var calls = {};
@@ -24901,7 +24910,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.16.1-no-earnings-inclusive';
+var APP_VERSION = '2.16.2-ord-chain-json-fix';
 // Page-source fallback constants removed. Each visitor now provides their own
 // API credentials via the API tab (or, for Tradier, sets up the worker proxy
 // at worker/tradier-proxy/ \u2014 keys never reach the browser at all).
