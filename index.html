@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-10T05:30-restore-modal-scroll">
+<meta name="op-build" content="2026-05-10T06:00-touch-scroll-modals">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -364,13 +364,27 @@ a{color:var(--blu);text-decoration:none;}
     border-bottom:1px solid var(--bg3);}
   /* Detail pane on iPhone: bottom sheet covering 80% of viewport,
      slides up over the table. Hidden until viewDetail toggles
-     display:flex; tap outside or the X to close. */
+     display:flex; tap outside or the X to close.
+     2026-05-10 v2.15.9: explicit overflow-y:auto + -webkit-overflow-
+     scrolling:touch are CRITICAL on iOS. Without -webkit-overflow-
+     scrolling, the sheet looks scrollable but the touch gesture falls
+     through to the backdrop's onclick handler — sheet closes the
+     instant the user tries to scroll. User report: "popup shows but
+     disappears before letting me move". touch-action:pan-y also
+     hardens the scroll gesture so iOS won't reinterpret it as a tap.
+     z-index bumped to 7600 (was 7500) so the sheet definitively wins
+     vs the backdrop (z-index 7499) regardless of any stacking-context
+     shenanigans introduced by other position:fixed parents. */
   #sc-detail{position:fixed !important;left:0 !important;right:0 !important;
     bottom:0 !important;top:auto !important;height:80vh !important;
-    width:100% !important;flex:0 0 80vh !important;z-index:7500;
+    width:100% !important;flex:0 0 80vh !important;z-index:7600 !important;
     background:var(--bg1);border-top:2px solid var(--amb);
     border-radius:14px 14px 0 0;
-    box-shadow:0 -8px 28px rgba(0,0,0,0.5);}
+    box-shadow:0 -8px 28px rgba(0,0,0,0.5);
+    overflow-y:auto !important;overflow-x:hidden !important;
+    -webkit-overflow-scrolling:touch !important;
+    overscroll-behavior:contain !important;
+    touch-action:pan-y !important;}
   #sc-det-empty{display:none !important;}
   .det-close-btn{min-width:44px !important;min-height:44px !important;font-size:28px !important;
     display:flex !important;align-items:center !important;justify-content:center !important;}
@@ -2022,10 +2036,30 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
   #tab-howto .card-body li{margin-bottom:4px;}
 
   /* ── BS / DETAIL PANELS: bottom sheets at 80vh need max-height so they
-     don't run under the home indicator. ── */
+     don't run under the home indicator.
+     2026-05-10 v2.15.9: -webkit-overflow-scrolling+touch-action+
+     overscroll-behavior:contain so iOS WKWebView allows touch scrolling
+     inside the sheet (otherwise touch falls through to backdrop click,
+     closing the sheet on swipe). ── */
   #sc-detail, #bs-detail{
     max-height:calc(85vh - env(safe-area-inset-bottom, 0)) !important;
     padding-bottom:env(safe-area-inset-bottom, 0) !important;
+    overflow-y:auto !important;
+    -webkit-overflow-scrolling:touch !important;
+    overscroll-behavior:contain !important;
+    touch-action:pan-y !important;
+    z-index:7600 !important;
+  }
+  /* Generic safety: any .modal or .sheet body should be touch-scrollable
+     on iOS. The pattern is everywhere in this app — symbol detail, GEX
+     info, flow detail, spread confirm, paste-from-RH, etc. */
+  [class*="modal"] [style*="overflow-y:auto"],
+  [class*="sheet"] [style*="overflow-y:auto"],
+  [id*="modal"] [style*="overflow-y:auto"],
+  [id*="sheet"] [style*="overflow-y:auto"]{
+    -webkit-overflow-scrolling:touch !important;
+    overscroll-behavior:contain !important;
+    touch-action:pan-y !important;
   }
 
   /* ── MODALS: contract-panel, order-confirm, paste modals — fit viewport
@@ -24791,7 +24825,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.15.8-restore-modal-scroll';
+var APP_VERSION = '2.15.9-touch-scroll-modals';
 // Page-source fallback constants removed. Each visitor now provides their own
 // API credentials via the API tab (or, for Tradier, sets up the worker proxy
 // at worker/tradier-proxy/ \u2014 keys never reach the browser at all).
