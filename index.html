@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-10T10:30-manual-bp-override">
+<meta name="op-build" content="2026-05-10T11:00-revert-to-safari-pwa">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -1050,18 +1050,17 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
      display-mode media query targets the home-screen install (NOT regular
      Safari, which has the URL bar and doesn't need the extra room). */
   @media (display-mode: standalone), (display-mode: fullscreen){
-    /* 2026-05-10 v2.15.7: Capacitor's WKWebView config has
-       `contentInset: "always"` which auto-insets the webview below the
-       status bar / Dynamic Island. The CSS safe-area-inset-top was
-       therefore being applied TWICE (once by Capacitor, once by CSS),
-       leaving ~120px of empty space above the header. User report:
-       "quite a bit of space between the top of the screen and where
-       the logo and title bar begin". Fix: minimal padding-top only.
-       Trade-off: if installed as PWA from Safari (no Capacitor), the
-       CSS safe-area would have been needed — but that path is not in
-       use. The Capacitor wrapper is the only install path today. */
+    /* 2026-05-10 v2.16.7: reverted v2.15.7's Capacitor-specific minimal
+       padding-top:4px back to the safe-area-aware value. v2.15.7 was a
+       hack for Capacitor WKWebView (contentInset:'always' caused a
+       double inset). User has dropped the Capacitor app and is now
+       installing as a Safari PWA via Add-to-Home-Screen, where the
+       webview spans edge-to-edge under the notch / Dynamic Island and
+       needs the CSS safe-area-inset-top to reserve clearance for the
+       status bar. Fall back to 8px on devices without a notch (older
+       phones / iPad / desktop standalone). */
     body{ padding-top: 0 !important; }
-    #hdr{ padding-top: 4px !important; padding-bottom: 4px !important; }
+    #hdr{ padding-top: max(env(safe-area-inset-top, 0px), 8px) !important; }
   }
 
   /* ── HORIZONTAL-BLEED FIX 2026-04-29 ──
@@ -25097,7 +25096,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.16.6-manual-bp-override';
+var APP_VERSION = '2.16.7-revert-to-safari-pwa';
 // Page-source fallback constants removed. Each visitor now provides their own
 // API credentials via the API tab (or, for Tradier, sets up the worker proxy
 // at worker/tradier-proxy/ \u2014 keys never reach the browser at all).
