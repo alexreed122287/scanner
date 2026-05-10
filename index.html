@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-10T01:30-version-chip-visible">
+<meta name="op-build" content="2026-05-10T03:00-ios-viewport-lock">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -145,8 +145,11 @@ body{
      individually. Without this the page itself was scrollable, which
      caused the scanner detail panel (sticky inside #sc-body) to scroll
      out of view when the user scrolled the table. User spec 2026-05-02:
-     'framed in scroll area where the popup would always appear'. */
-  height:100vh;overflow:hidden;display:flex;flex-direction:column;
+     'framed in scroll area where the popup would always appear'.
+     2026-05-10: 100vh on iOS WKWebView (Capacitor) includes area under
+     the dynamic chrome; 100dvh accounts for it. Listed second so it
+     wins where supported, falls back to 100vh otherwise. */
+  height:100vh;height:100dvh;overflow:hidden;display:flex;flex-direction:column;
   background-image:
     radial-gradient(ellipse at 15% 15%, rgba(0,212,255,.04) 0%, transparent 45%),
     radial-gradient(ellipse at 85% 85%, rgba(255,0,230,.03) 0%, transparent 45%),
@@ -1015,8 +1018,14 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
      display-mode media query targets the home-screen install (NOT regular
      Safari, which has the URL bar and doesn't need the extra room). */
   @media (display-mode: standalone), (display-mode: fullscreen){
-    body{ padding-top: max(env(safe-area-inset-top, 60px), 60px); }
-    #hdr{ padding-top: 4px !important; }
+    /* 2026-05-10 fix: previously added padding-top:60px to body for safe-area
+       under the notch. But body is height:100vh — adding padding made content
+       overflow viewport by 60px, causing the entire page to scroll on iOS
+       (Capacitor WKWebView). User report: header drags down + bot-nav drifts
+       up on scroll. Fix: header itself reserves safe-area notch space; body
+       stays exactly viewport height so #hdr / #app / #bot-nav don't overflow. */
+    body{ padding-top: 0 !important; }
+    #hdr{ padding-top: max(env(safe-area-inset-top, 0px), 8px) !important; }
   }
 
   /* ── HORIZONTAL-BLEED FIX 2026-04-29 ──
@@ -24695,7 +24704,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.15.2';
+var APP_VERSION = '2.15.3-ios-viewport-lock';
 // Page-source fallback constants removed. Each visitor now provides their own
 // API credentials via the API tab (or, for Tradier, sets up the worker proxy
 // at worker/tradier-proxy/ \u2014 keys never reach the browser at all).
