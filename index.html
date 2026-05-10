@@ -3420,7 +3420,7 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
       <!-- STRIKE + EXPIRY (options only) -->
       <div class="ord-row ord-opt-only">
         <div class="ord-field"><label>STRIKE</label><input id="ord-strike" type="number" inputmode="decimal" placeholder="150.00" onchange="updateOrdChart();fetchLiveQuote()" oninput="updateOrdChart()"></div>
-        <div class="ord-field"><label>EXPIRATION DATE</label><input id="ord-exp" type="date" onchange="updateOrdChart();fetchLiveQuote();(function(){var c=document.getElementById('ord-chain-card');if(c&&c.open&&typeof loadOrdChain==='function')loadOrdChain();})()"></div>
+        <div class="ord-field"><label>EXPIRATION DATE</label><input id="ord-exp" type="date" onchange="updateOrdChart();fetchLiveQuote();(function(){var c=document.getElementById('ord-chain-card');if(c&&c.getAttribute('data-open')==='true'&&typeof loadOrdChain==='function')loadOrdChain();})()"></div>
       </div>
 
       <!-- ── AUTO-SELECT CONTRACT — options only ── -->
@@ -3694,24 +3694,55 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
     <div id="ord-result-iphone" class="iphone-only-actions ord-result" style="display:none;font-size:11px;margin:10px 8px;"></div>
     </div><!-- /.ord-body-2col --></div>
 
-    <!-- ── OPTION CHAIN (collapsed by default; lazy-loaded on open / on
-         symbol change). Highlights the highest-GEX strike (gamma-flip)
-         from G.gexData when available. Built 2026-05-08. -->
-    <details class="card" id="ord-chain-card" style="margin-top:8px;">
-      <summary style="cursor:pointer;padding:9px 14px;font-family:var(--ff-mono);font-size:11px;color:var(--amb);letter-spacing:1px;user-select:none;list-style:none;display:flex;align-items:center;justify-content:space-between;background:var(--bg2);border-bottom:var(--bdr);">
-        <span>&#9662; OPTION CHAIN <span id="ord-chain-sym-lbl" style="color:var(--gry);margin-left:6px;">(load a ticker)</span></span>
+    <!-- ── OPTION CHAIN (open by default 2026-05-09; auto-loads on every
+         ticker prefill / symbol change). The previous build wrapped this
+         in a <details> element whose `toggle` event is unreliable on iOS
+         Safari (same root cause as the portfolio summary toggle that was
+         converted to a manual div on 2026-05-04). With <details> the
+         user would tap the header to open it, the load-on-open listener
+         wouldn't fire, the EXPIRY <select> would stay empty, and the
+         chain table would render the placeholder. Now: a plain div with
+         an explicit click handler + open-by-default state, plus an
+         auto-load whenever ord-sym is non-empty and the card is open. -->
+    <div class="card" id="ord-chain-card" data-open="true" style="margin-top:8px;">
+      <div id="ord-chain-toggle" onclick="toggleOrdChainCard()" role="button" tabindex="0" aria-expanded="true"
+           style="cursor:pointer;padding:9px 14px;font-family:var(--ff-mono);font-size:11px;color:var(--amb);letter-spacing:1px;user-select:none;-webkit-tap-highlight-color:rgba(0,212,255,0.15);display:flex;align-items:center;justify-content:space-between;background:var(--bg2);border-bottom:var(--bdr);min-height:38px;">
+        <span><span id="ord-chain-arrow" style="display:inline-block;transition:transform .15s;color:var(--amb);font-size:13px;">&#9662;</span> OPTION CHAIN <span id="ord-chain-sym-lbl" style="color:var(--gry);margin-left:6px;">(load a ticker)</span></span>
         <span id="ord-chain-status" style="color:var(--gry);font-size:10px;font-weight:400;letter-spacing:0;text-transform:none;"></span>
-      </summary>
-      <div style="padding:10px 12px;">
+      </div>
+      <div id="ord-chain-body" style="padding:10px 12px;display:block;">
         <div id="ord-chain-bar" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px;font-family:var(--ff-mono);font-size:11px;color:var(--gry);">
           <label>EXPIRY <select id="ord-chain-exp" style="background:var(--bg2);border:var(--bdr);border-radius:3px;color:var(--wht);font-family:var(--ff-mono);font-size:11px;padding:4px 8px;margin-left:6px;min-width:170px;"></select></label>
           <label>RANGE <select id="ord-chain-range" style="background:var(--bg2);border:var(--bdr);border-radius:3px;color:var(--wht);font-family:var(--ff-mono);font-size:11px;padding:4px 7px;margin-left:6px;"><option value="10">±10 strikes</option><option value="20">±20 strikes</option><option value="all">all strikes</option></select></label>
           <span id="ord-chain-gex-info" style="margin-left:auto;color:var(--ambb);"></span>
           <button class="btn" style="font-size:10px;padding:3px 9px;" onclick="loadOrdChain()">&#8635; REFRESH</button>
         </div>
-        <div id="ord-chain-tbl-wrap" style="overflow-x:auto;"><div style="color:var(--gry);font-size:11px;text-align:center;padding:14px;">Open this card after entering a symbol to load the call chain. Highest-GEX strike (gamma flip) is highlighted in cyan.</div></div>
+        <div id="ord-chain-tbl-wrap" style="overflow-x:auto;"><div style="color:var(--gry);font-size:11px;text-align:center;padding:14px;">Enter a symbol above to load the call chain. Highest-GEX strike (gamma flip) is highlighted in cyan.</div></div>
       </div>
-    </details>
+    </div>
+    <script>
+      // Manual toggle for the OPTION CHAIN card (replaces <details>/<summary>
+      // which fired its `toggle` event unreliably on iOS Safari, leaving
+      // the EXPIRY dropdown empty for users who tapped to open).
+      function toggleOrdChainCard(){
+        var card = document.getElementById('ord-chain-card');
+        var body = document.getElementById('ord-chain-body');
+        var arrow = document.getElementById('ord-chain-arrow');
+        var toggle = document.getElementById('ord-chain-toggle');
+        if (!card || !body) return;
+        var isOpen = card.getAttribute('data-open') === 'true';
+        var nextOpen = !isOpen;
+        card.setAttribute('data-open', nextOpen ? 'true' : 'false');
+        body.style.display = nextOpen ? 'block' : 'none';
+        if (arrow) arrow.style.transform = nextOpen ? 'rotate(0deg)' : 'rotate(-90deg)';
+        if (toggle) toggle.setAttribute('aria-expanded', nextOpen ? 'true' : 'false');
+        try { if (typeof hap === 'function') hap(8); } catch(_){}
+        if (nextOpen){
+          var sym = (document.getElementById('ord-sym') && document.getElementById('ord-sym').value || '').trim();
+          if (sym && typeof loadOrdChain === 'function') loadOrdChain(sym);
+        }
+      }
+    </script>
 
     <!-- ── P&L PAYOFF CHART ── -->
     <div class="card" id="ord-pnl-card" style="display:none;">
@@ -8372,9 +8403,11 @@ function onSymbolChange(){
     if(sym.length>=1) {
       fetchLiveQuote();
       // Refresh the order-ticket option chain too — but only if the card is
-      // currently open (saves an API call when collapsed). Built 2026-05-08.
+      // currently open (saves an API call when collapsed). Built 2026-05-08;
+      // 2026-05-09: switched the open check from <details>.open to the
+      // data-open attribute on the manual toggle card (see HTML).
       var chainCard = eid('ord-chain-card');
-      if (chainCard && chainCard.open && typeof loadOrdChain === 'function'){
+      if (chainCard && chainCard.getAttribute('data-open') === 'true' && typeof loadOrdChain === 'function'){
         loadOrdChain(sym);
       }
     }
@@ -15802,18 +15835,37 @@ function ordChainRowClick(sym, strike, expDate){
   toast('CALL $'+Number(strike).toFixed(2)+' '+fmtDateUS(expDate)+' pre-filled');
 }
 
-// Lazy-load when user opens the card (saves an API call until needed).
-// Also auto-loads when the user changes the symbol while the card is open.
+// Wire the OPTION CHAIN card. Open by default (data-open="true" in
+// the HTML), so on first paint we attempt an auto-load if a ticker is
+// already pre-filled. Subsequent symbol changes are handled inline by
+// onSymbolChange. Subsequent open/close uses toggleOrdChainCard which
+// re-loads on every open. Replaces the prior <details>.toggle listener
+// which iOS Safari fired unreliably (root cause of the user's report
+// "Expiration date under option chain on order ticket is blank and
+// does not populate"). Built 2026-05-09.
 (function _wireOrdChainCard(){
   function bind(){
     var card = document.getElementById('ord-chain-card');
     if (!card) return setTimeout(bind, 800);
-    card.addEventListener('toggle', function(){
-      if (card.open){
-        var sym = (eid('ord-sym') && eid('ord-sym').value || '').trim();
-        if (sym) loadOrdChain(sym);
-      }
-    });
+    function maybeAutoLoad(){
+      if (card.getAttribute('data-open') !== 'true') return;
+      var sym = (eid('ord-sym') && eid('ord-sym').value || '').trim();
+      if (sym && typeof loadOrdChain === 'function') loadOrdChain(sym);
+    }
+    // First paint: if the order tab is already active and a ticker is
+    // pre-filled (e.g. user navigated from the scanner via cpBuyNow),
+    // load the chain right away.
+    setTimeout(maybeAutoLoad, 200);
+    // Re-load whenever the order tab becomes active. switchTab() flips
+    // the .active class on the tab pane; observe that to re-trigger
+    // a load (handles the case where the user prefilled before opening
+    // the order tab and we never had a chance to load).
+    var pane = document.getElementById('tab-order');
+    if (pane && typeof MutationObserver !== 'undefined'){
+      new MutationObserver(function(){
+        if (pane.classList.contains('active')) maybeAutoLoad();
+      }).observe(pane, { attributes:true, attributeFilter:['class'] });
+    }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind);
   else bind();
