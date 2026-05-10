@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-10T12:00-safe-area-shorthand-fix">
+<meta name="op-build" content="2026-05-10T12:30-bot-nav-flush">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -1188,13 +1188,13 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
     overflow-y:auto !important;
     overflow-x:hidden !important;
     -webkit-overflow-scrolling:touch !important;
-    /* 2026-05-10 v2.16.9: tightened from 110px → 68px. Bot-nav itself
-       is ~58px (6px top + 46px button area + 6px bottom). 68px gives a
-       modest 10px breather above the nav so content doesn't crowd
-       directly under it, without leaving the huge dead zone the user
-       reported. safe-area-inset-bottom still added for home-indicator
-       clearance on notched iPhones. */
-    padding-bottom:calc(68px + env(safe-area-inset-bottom, 0)) !important;
+    /* 2026-05-10 v2.16.10: bot-nav padding shrunk to flush-bottom
+       (4px instead of 6+safe-area). Bot-nav is now ~56px tall total.
+       Content clearance set to 60px for a 4px breather between the
+       last visible row and the nav. No safe-area added — the nav
+       itself sits nearly flush, so adding more bottom padding to
+       the scroll container would re-introduce wasted space. */
+    padding-bottom:60px !important;
   }
   /* #app needs to be the bounded flex container the panes scroll inside */
   #app{flex:1 1 auto !important;min-height:0 !important;
@@ -1448,7 +1448,16 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
     background:var(--bg1);
     border-top:1px solid var(--amb);
     box-shadow:0 -4px 20px rgba(0,0,0,0.5);
-    padding:6px 4px calc(6px + env(safe-area-inset-bottom, 0));
+    /* 2026-05-10 v2.16.10: bottom padding shrunk so tabs sit flush at
+       the bottom. Was `6px + env(safe-area-inset-bottom)` which on
+       notched iPhones added ~34px of home-indicator clearance,
+       leaving tabs floating well above the screen edge. User spec:
+       "tabs at the bottom sitting flush at the bottom without wasting
+       a ton of unused space". Capped safe-area contribution at 4px
+       so the tabs can still get a thin sliver of clearance from the
+       home indicator on devices that report a non-zero inset, but
+       never the full ~34px. */
+    padding:6px 4px 4px;
     gap:2px;
     backdrop-filter:blur(20px);
     -webkit-backdrop-filter:blur(20px);
@@ -25107,7 +25116,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.16.9-safe-area-shorthand-fix';
+var APP_VERSION = '2.16.10-bot-nav-flush';
 // Page-source fallback constants removed. Each visitor now provides their own
 // API credentials via the API tab (or, for Tradier, sets up the worker proxy
 // at worker/tradier-proxy/ \u2014 keys never reach the browser at all).
