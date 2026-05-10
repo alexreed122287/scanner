@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-10T09:00-balances-defensive">
+<meta name="op-build" content="2026-05-10T09:30-balances-nonzero-alert">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -21823,18 +21823,30 @@ function fetchBalances(){
       // Stash for updatePosStats() — feeds CASH, DAY P&L history, and the
       // realized-side fallback for TOTAL P&L when local closed_trades is empty.
       G.lastBalances = b;
-      // v2.16.3: defensive total-equity resolver. User report: ACCOUNT VALUE
-      // shows $0 even with LIVE mode + correct account + positions loading.
-      // Tradier balances response varies by account type — walk every known
-      // field path before falling back to derived equity.
+      // v2.16.3/v2.16.4: defensive total-equity resolver. User report:
+      // ACCOUNT VALUE shows $0 even with LIVE mode + correct account +
+      // positions loading. Tradier balances response shape varies by
+      // account type. v2.16.4 fix: treat 0 as 'try alternatives' since
+      // an account with open positions cannot have $0 equity — pick
+      // the largest plausible value across all field paths.
       function _bnum(v){ if (v == null) return null; var n = parseFloat(v); return isNaN(n) ? null : n; }
-      var equity = _bnum(b.total_equity);
-      if (equity == null) equity = _bnum(b.account_value);
-      if (equity == null) equity = _bnum(b.equity);
-      if (equity == null && b.margin)  equity = _bnum(b.margin.account_value) || _bnum(b.margin.equity);
-      if (equity == null && b.cash)    equity = _bnum(b.cash.account_value)   || _bnum(b.cash.equity);
-      if (equity == null && b.pdt)     equity = _bnum(b.pdt.account_value)    || _bnum(b.pdt.equity);
-      if (equity == null){
+      var candidates = [
+        _bnum(b.total_equity),
+        _bnum(b.account_value),
+        _bnum(b.equity),
+        b.margin ? _bnum(b.margin.account_value) : null,
+        b.margin ? _bnum(b.margin.equity)        : null,
+        b.cash   ? _bnum(b.cash.account_value)   : null,
+        b.cash   ? _bnum(b.cash.equity)          : null,
+        b.pdt    ? _bnum(b.pdt.account_value)    : null,
+        b.pdt    ? _bnum(b.pdt.equity)           : null
+      ].filter(function(v){ return v != null; });
+      var equity = null;
+      // Prefer the largest non-zero value — fall back to 0 only if all are 0.
+      var nonZero = candidates.filter(function(v){ return v > 0; });
+      if (nonZero.length) equity = Math.max.apply(null, nonZero);
+      else if (candidates.length) equity = Math.max.apply(null, candidates);
+      if (equity == null || equity === 0){
         var lmv = _bnum(b.long_market_value) || 0;
         var smv = _bnum(b.short_market_value) || 0;
         var tc  = _bnum(b.total_cash) || _bnum(b.cash && b.cash.cash_available) || 0;
@@ -21849,18 +21861,26 @@ function fetchBalances(){
       // rejects NaN. User report 2026-05-05: BP stuck at $68.75 because
       // typeof===number was rejecting string-typed fields.
       function _num(v){ if (v == null) return null; var n = parseFloat(v); return isNaN(n) ? null : n; }
-      var obp = null;
-      if(b.margin) obp = _num(b.margin.option_buying_power);
-      if(obp == null && b.pdt)  obp = _num(b.pdt.option_buying_power);
-      if(obp == null && b.cash) obp = _num(b.cash.cash_available);
-      if(obp == null)           obp = _num(b.option_buying_power);
-      if(obp == null)           obp = _num(b.total_cash);
+      // v2.16.4: same nonzero-prefer pattern as equity above.
+      var obpCands = [
+        b.margin ? _num(b.margin.option_buying_power) : null,
+        b.pdt    ? _num(b.pdt.option_buying_power)    : null,
+        b.cash   ? _num(b.cash.cash_available)        : null,
+        _num(b.option_buying_power),
+        _num(b.total_cash)
+      ].filter(function(v){ return v != null; });
+      var obpNonZero = obpCands.filter(function(v){ return v > 0; });
+      var obp = obpNonZero.length ? Math.max.apply(null, obpNonZero)
+              : (obpCands.length ? Math.max.apply(null, obpCands) : null);
       // Stock buying power
-      var sbp = null;
-      if(b.margin) sbp = _num(b.margin.stock_buying_power);
-      if(sbp == null && b.pdt) sbp = _num(b.pdt.stock_buying_power);
-      if(sbp == null) sbp = _num(b.stock_buying_power);
-      if(sbp == null) sbp = obp;
+      var sbpCands = [
+        b.margin ? _num(b.margin.stock_buying_power) : null,
+        b.pdt    ? _num(b.pdt.stock_buying_power)    : null,
+        _num(b.stock_buying_power)
+      ].filter(function(v){ return v != null; });
+      var sbpNonZero = sbpCands.filter(function(v){ return v > 0; });
+      var sbp = sbpNonZero.length ? Math.max.apply(null, sbpNonZero)
+              : (sbpCands.length ? Math.max.apply(null, sbpCands) : obp);
       G.lastBP = { option:obp, stock:sbp, ts:Date.now() };
       if(bpEl){
         bpEl.textContent = 'OPT BP: ' + (obp != null ? fmtD(obp) : '--');
@@ -21870,10 +21890,12 @@ function fetchBalances(){
     }catch(e){ if(bpEl) bpEl.textContent='OPT BP: err'; _setBpBadges(null); }
   }).catch(function(){ if(bpEl) bpEl.textContent='OPT BP: offline'; _setBpBadges(null); });
 }
-// 2026-05-10 v2.16.3: 5-tap diagnostic on any BP badge. Dumps the raw
-// /v1/accounts/{id}/balances response keys to a toast so the user can
-// share the actual API shape when balances render as $0 despite a
-// successful fetch. On-device debugging without DevTools.
+// 2026-05-10 v2.16.3/v2.16.4: 3-tap diagnostic on any BP badge. Dumps
+// the raw /v1/accounts/{id}/balances response to alert() (always visible
+// even if toast is blocked or the toast container isn't mounted yet).
+// 3 taps within 2s — also lowered from 5 in 3s since the BP badge's
+// own onclick=fetchBalances() makes 5-quick-taps awkward (each tap
+// fires another fetch). 3 taps still avoids accidental triggers.
 (function _wireBalancesDebugTap(){
   var taps = [];
   document.addEventListener('click', function(e){
@@ -21881,25 +21903,28 @@ function fetchBalances(){
     if (!t) return;
     var now = Date.now();
     taps.push(now);
-    taps = taps.filter(function(ts){ return now - ts < 3000; });
-    if (taps.length >= 5){
+    taps = taps.filter(function(ts){ return now - ts < 2000; });
+    if (taps.length >= 3){
       taps = [];
       var raw = window._lastBalancesRaw;
+      var msg;
       if (!raw){
-        try { toast('No balances response cached yet — tap the BP badge once to refresh first'); } catch(_){}
-        return;
+        msg = 'No balances response cached yet.\n\nG.acctId = ' + (typeof G !== 'undefined' ? G.acctId : 'undefined') +
+              '\nMode = ' + (function(){ try { return localStorage.getItem('rrjcar_mode') || 'sandbox'; } catch(_){ return '?'; } })() +
+              '\nKey present = ' + (typeof _getTradierKey === 'function' && _getTradierKey() ? 'yes' : 'no') +
+              '\n\nTap REFRESH on Positions, then 3-tap the BP badge again.';
+      } else {
+        var b = (raw && raw.balances) || raw || {};
+        msg = 'Tradier balances response:\n\n' + JSON.stringify(b, null, 2).slice(0, 2000);
       }
-      var b = (raw && raw.balances) || raw || {};
-      var keys = Object.keys(b);
-      var preview = keys.slice(0, 14).map(function(k){
-        var v = b[k];
-        if (v && typeof v === 'object') return k+'={'+Object.keys(v).slice(0,4).join(',')+'}';
-        return k+'='+v;
-      }).join(' | ');
-      try { toast('BAL: '+preview, {ms:14000}); }
-      catch(_){ alert('Balances response:\n'+JSON.stringify(b, null, 2).slice(0, 1500)); }
+      try { alert(msg); }
+      catch(_){
+        // alert() blocked in some Capacitor configs — fall back to toast.
+        try { toast('Balances diag: see console'); } catch(__){}
+        try { console.log('[BAL DIAG]', raw); } catch(__){}
+      }
     }
-  });
+  }, true /* capture phase so the badge's onclick=fetchBalances doesn't gobble it */);
 })();
 
 // Update the persistent BP pill on the positions toolbar + the order ticket
@@ -24963,7 +24988,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.16.3-balances-defensive';
+var APP_VERSION = '2.16.4-balances-nonzero-prefer-alert-diag';
 // Page-source fallback constants removed. Each visitor now provides their own
 // API credentials via the API tab (or, for Tradier, sets up the worker proxy
 // at worker/tradier-proxy/ \u2014 keys never reach the browser at all).
