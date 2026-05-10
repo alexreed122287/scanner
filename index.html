@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-10T06:30-tab-switch-cleanup">
+<meta name="op-build" content="2026-05-10T07:00-splash-pe-backdrop-shrink">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -2833,6 +2833,12 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
     if(dismissed) return;
     dismissed = true;
     overlay.style.opacity = '0';
+    /* 2026-05-10 v2.15.11: pointer-events:none immediately on dismiss
+       so the still-in-DOM overlay can't capture taps during the 600ms
+       fade-out. User report: first tap on the app after launch does
+       nothing — second tap works. That's the splash eating the first
+       tap during fade. */
+    overlay.style.pointerEvents = 'none';
     setTimeout(function(){ overlay.remove(); }, 600);
   };
   vid.addEventListener('ended', function(){ setTimeout(_dismissSplash, 400); });
@@ -16044,7 +16050,16 @@ function viewDetail(ticker,detId,emptyId){
    if (oldBd) oldBd.remove();
    var bd = document.createElement('div');
    bd.id = 'det-backdrop';
-   bd.style.cssText = 'position:fixed;inset:0;z-index:7499;background:rgba(0,0,0,0.55);';
+   /* 2026-05-10 v2.15.11: backdrop now only covers the area ABOVE the
+      sheet (top:0 to top:20vh) instead of the full viewport. Was
+      inset:0 which put a tap-capturing layer behind the sheet too —
+      iOS WKWebView occasionally let touches inside the sheet "fall
+      through" to the backdrop's onclick=close, making the sheet
+      vanish on swipe. Now: backdrop only exists where the sheet
+      isn't, so any touch in the bottom 80vh sheet area cannot hit
+      the backdrop period. Tap above the sheet still closes (UX
+      preserved). */
+   bd.style.cssText = 'position:fixed;left:0;right:0;top:0;height:20vh;z-index:7499;background:rgba(0,0,0,0.55);';
    bd.onclick = function(){ closeDetailPanel(detId, emptyId); };
    document.body.appendChild(bd);
  }
@@ -24854,7 +24869,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.15.10-tab-switch-cleanup';
+var APP_VERSION = '2.15.11-splash-pe-backdrop-shrink';
 // Page-source fallback constants removed. Each visitor now provides their own
 // API credentials via the API tab (or, for Tradier, sets up the worker proxy
 // at worker/tradier-proxy/ \u2014 keys never reach the browser at all).
