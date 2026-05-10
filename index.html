@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-10T11:30-safe-area-everywhere">
+<meta name="op-build" content="2026-05-10T12:00-safe-area-shorthand-fix">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -1188,7 +1188,13 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
     overflow-y:auto !important;
     overflow-x:hidden !important;
     -webkit-overflow-scrolling:touch !important;
-    padding-bottom:calc(110px + env(safe-area-inset-bottom, 0)) !important;
+    /* 2026-05-10 v2.16.9: tightened from 110px → 68px. Bot-nav itself
+       is ~58px (6px top + 46px button area + 6px bottom). 68px gives a
+       modest 10px breather above the nav so content doesn't crowd
+       directly under it, without leaving the huge dead zone the user
+       reported. safe-area-inset-bottom still added for home-indicator
+       clearance on notched iPhones. */
+    padding-bottom:calc(68px + env(safe-area-inset-bottom, 0)) !important;
   }
   /* #app needs to be the bounded flex container the panes scroll inside */
   #app{flex:1 1 auto !important;min-height:0 !important;
@@ -1890,8 +1896,13 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
    the smallest devices. Covers every tab.
    ══════════════════════════════════════════════════════════════════════════ */
 @media(max-width:480px){
-  /* ── HEADER: larger logo + wordmark per user spec 2026-05-04 ── */
-  #hdr{padding:6px 8px !important;gap:4px !important;overflow:visible !important;}
+  /* ── HEADER: larger logo + wordmark per user spec 2026-05-04 ──
+     2026-05-10 v2.16.9: safe-area-inset-top added to padding-top so the
+     OPTION PANDA logo clears the iPhone notch / Dynamic Island in both
+     Safari and standalone PWA. The padding shorthand below was
+     overriding the v2.16.8 hoisted rule (longhand AFTER shorthand wins
+     when both have !important; previous order had shorthand later). */
+  #hdr{padding:6px 8px !important;padding-top:max(env(safe-area-inset-top, 0px), 8px) !important;gap:4px !important;overflow:visible !important;}
   #hdr-logo{font-size:18px !important;letter-spacing:1.5px !important;gap:10px !important;overflow:visible !important;flex:1 1 auto !important;}
   #hdr-logo .panda-icon{height:48px !important;}
   #clk-logo{font-size:11px !important;margin-left:6px !important;}
@@ -2501,7 +2512,7 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
      mid-scan, increasing the header height and pushing the rest of the page
      down. Reserving a 2-row min-height keeps the layout stable through every
      state of the scan/auth/balance widgets. */
-  #hdr{height:auto !important;min-height:104px !important;padding:6px 10px !important;flex-wrap:wrap !important;gap:6px 8px !important;align-items:center !important;align-content:flex-start !important;}
+  #hdr{height:auto !important;min-height:104px !important;padding:6px 10px !important;padding-top:max(env(safe-area-inset-top, 0px), 8px) !important;flex-wrap:wrap !important;gap:6px 8px !important;align-items:center !important;align-content:flex-start !important;}
   /* iPad indices strip: nowrap + horizontal scroll per user spec
      2026-05-03 (was wrap which spilled SPY/QQQ/etc onto 2-3 rows). */
   #hdr-tickers{flex-wrap:nowrap !important;overflow-x:auto !important;-webkit-overflow-scrolling:touch;justify-content:flex-start !important;flex:1 1 100%;order:3;padding:4px 0;border-top:1px solid rgba(0,212,255,0.1);min-height:32px;gap:14px !important;}
@@ -25096,7 +25107,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.16.8-safe-area-everywhere';
+var APP_VERSION = '2.16.9-safe-area-shorthand-fix';
 // Page-source fallback constants removed. Each visitor now provides their own
 // API credentials via the API tab (or, for Tradier, sets up the worker proxy
 // at worker/tradier-proxy/ \u2014 keys never reach the browser at all).
