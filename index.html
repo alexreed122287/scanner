@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-10T14:30-bot-nav-up-help-icon-back">
+<meta name="op-build" content="2026-05-10T15:00-empty-state-content-sized">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -403,7 +403,12 @@ a{color:var(--blu);text-decoration:none;}
     display:flex !important;align-items:center !important;justify-content:center !important;}
   /* Empty-state panda: take the table area cleanly, not clipped by
      the now-fixed detail sheet (which only renders when active). */
-  #sc-tbl-wrap .empty-det{min-height:60vh;}
+  /* 2026-05-10 v2.16.15: dropped 60vh min-height + height:100% on
+     the empty-state inside #sc-tbl-wrap. Was reserving a huge slab
+     that justify-content:center'd the panda in the middle, leaving
+     wasted space above + below it down to the bot-nav. Now the
+     empty-state sizes to its natural content (~panda + text). */
+  #sc-tbl-wrap .empty-det{min-height:0 !important;height:auto !important;justify-content:flex-start !important;padding:24px 20px !important;}
   .empty-det-panda{width:clamp(180px, 60vw, 320px) !important;}
   /* Permanent SCAN action row: scrunch but keep the SCAN button on
      the right edge — last-scan + data-status truncate first */
@@ -18492,7 +18497,13 @@ function renderScan(){
     } else {
       msg = 'No results \u2014 run a scan first';
     }
-    wrap.innerHTML='<div class="empty-det" style="min-height:400px;"><img src="assets/panda-transparent.png?v=3" alt="" class="empty-det-panda"><p>'+msg+'</p></div>';
+    /* 2026-05-10 v2.16.15: dropped min-height:400px so empty-state
+       sizes to its natural content (~panda + 1 line). Was forcing a
+       400px container that justify-content:center'd the panda in the
+       middle, leaving ~150px of dead space below the text down to the
+       bot-nav. User report: 'beginning of wasted space ... blocking
+       visibility to the rest of the scan results'. */
+    wrap.innerHTML='<div class="empty-det" style="min-height:0;padding:24px 20px;"><img src="assets/panda-transparent.png?v=3" alt="" class="empty-det-panda"><p>'+msg+'</p></div>';
     return;
   }
 
@@ -25191,7 +25202,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.16.14-bot-nav-up-help-icon-back';
+var APP_VERSION = '2.16.15-empty-state-content-sized';
 // Page-source fallback constants removed. Each visitor now provides their own
 // API credentials via the API tab (or, for Tradier, sets up the worker proxy
 // at worker/tradier-proxy/ \u2014 keys never reach the browser at all).
