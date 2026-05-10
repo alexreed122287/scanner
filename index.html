@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-10T04:30-hdr-chips-fixed-viewport">
+<meta name="op-build" content="2026-05-10T05:00-reclaim-top-space">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -1036,14 +1036,18 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
      display-mode media query targets the home-screen install (NOT regular
      Safari, which has the URL bar and doesn't need the extra room). */
   @media (display-mode: standalone), (display-mode: fullscreen){
-    /* 2026-05-10 fix: previously added padding-top:60px to body for safe-area
-       under the notch. But body is height:100vh — adding padding made content
-       overflow viewport by 60px, causing the entire page to scroll on iOS
-       (Capacitor WKWebView). User report: header drags down + bot-nav drifts
-       up on scroll. Fix: header itself reserves safe-area notch space; body
-       stays exactly viewport height so #hdr / #app / #bot-nav don't overflow. */
+    /* 2026-05-10 v2.15.7: Capacitor's WKWebView config has
+       `contentInset: "always"` which auto-insets the webview below the
+       status bar / Dynamic Island. The CSS safe-area-inset-top was
+       therefore being applied TWICE (once by Capacitor, once by CSS),
+       leaving ~120px of empty space above the header. User report:
+       "quite a bit of space between the top of the screen and where
+       the logo and title bar begin". Fix: minimal padding-top only.
+       Trade-off: if installed as PWA from Safari (no Capacitor), the
+       CSS safe-area would have been needed — but that path is not in
+       use. The Capacitor wrapper is the only install path today. */
     body{ padding-top: 0 !important; }
-    #hdr{ padding-top: max(env(safe-area-inset-top, 0px), 8px) !important; }
+    #hdr{ padding-top: 4px !important; padding-bottom: 4px !important; }
   }
 
   /* ── HORIZONTAL-BLEED FIX 2026-04-29 ──
@@ -24786,7 +24790,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.15.6-hdr-chips-fixed-viewport';
+var APP_VERSION = '2.15.7-reclaim-top-space';
 // Page-source fallback constants removed. Each visitor now provides their own
 // API credentials via the API tab (or, for Tradier, sets up the worker proxy
 // at worker/tradier-proxy/ \u2014 keys never reach the browser at all).
