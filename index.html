@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-10T12:30-bot-nav-flush">
+<meta name="op-build" content="2026-05-10T13:00-bot-nav-overlap-home-indicator">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -1439,25 +1439,26 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
 #bot-more-overlay, #bot-more-sheet{display:none;}
 
 @media(max-width:768px){
-  /* Bottom tab-bar — fixed at the bottom of viewport, above home indicator */
+  /* Bottom tab-bar — fixed at the bottom of viewport, overlaps home indicator */
   #bot-nav{
     display:flex !important;
     position:fixed !important;
-    left:0;right:0;bottom:0;
+    left:0;right:0;
+    /* 2026-05-10 v2.16.11: PWA still showed ~1/2 inch of dead space
+       below the tabs. v2.16.10 dropped the safe-area buffer but iOS
+       still reserves the home-indicator gesture zone. Push bot-nav
+       2px BELOW viewport so the visible tab content touches the
+       screen edge — user explicitly asked for this. Combined with
+       reduced padding (3px top/bottom instead of 6/4) and slimmer
+       min-height (40px instead of 48px on .bot-tab below) the visible
+       chrome shrinks by ~14px AND the visible bottom edge moves down
+       to the actual screen bottom. */
+    bottom:-2px;
     z-index:9500;
     background:var(--bg1);
     border-top:1px solid var(--amb);
     box-shadow:0 -4px 20px rgba(0,0,0,0.5);
-    /* 2026-05-10 v2.16.10: bottom padding shrunk so tabs sit flush at
-       the bottom. Was `6px + env(safe-area-inset-bottom)` which on
-       notched iPhones added ~34px of home-indicator clearance,
-       leaving tabs floating well above the screen edge. User spec:
-       "tabs at the bottom sitting flush at the bottom without wasting
-       a ton of unused space". Capped safe-area contribution at 4px
-       so the tabs can still get a thin sliver of clearance from the
-       home indicator on devices that report a non-zero inset, but
-       never the full ~34px. */
-    padding:6px 4px 4px;
+    padding:3px 4px 3px;
     gap:2px;
     backdrop-filter:blur(20px);
     -webkit-backdrop-filter:blur(20px);
@@ -1471,10 +1472,13 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
     background:none;border:none;
     color:var(--gry);
     font-family:var(--ff);font-size:9px;font-weight:600;letter-spacing:.5px;
-    padding:6px 2px 4px;
+    /* 2026-05-10 v2.16.11: tightened from 6/4 to 3/2 + min-height 48 → 40
+       to shrink the visible bot-nav chrome closer to the actual screen
+       edge per user spec ("tabs ... without wasting a ton of unused space"). */
+    padding:3px 2px 2px;
     cursor:pointer;
     display:flex;flex-direction:column;align-items:center;gap:2px;
-    min-height:48px;
+    min-height:40px;
     -webkit-tap-highlight-color:rgba(0,212,255,0.15);
     transition:color .12s, transform .08s;
     border-radius:6px;
@@ -25116,7 +25120,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.16.10-bot-nav-flush';
+var APP_VERSION = '2.16.11-bot-nav-overlap-home-indicator';
 // Page-source fallback constants removed. Each visitor now provides their own
 // API credentials via the API tab (or, for Tradier, sets up the worker proxy
 // at worker/tradier-proxy/ \u2014 keys never reach the browser at all).
