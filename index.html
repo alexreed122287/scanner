@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-11T03:00-resubmit-popup-chain-roll-status">
+<meta name="op-build" content="2026-05-11T04:00-chart-modal-z-fix">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -1225,8 +1225,22 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
   #trade-token-modal,
   #hc-modal,
   #help-modal,
-  #api-breakdown-modal{
+  #api-breakdown-modal,
+  /* 2026-05-11 v2.16.22: chart-modal must clear the iPhone header
+     (z-index 9400) and bot-nav (9500). Without it, the title bar
+     with DAILY / 1 MIN / × buttons was being covered by the themes
+     ribbon + the bot-nav was eating taps that were supposed to hit
+     the backdrop, making the modal impossible to dismiss on phone. */
+  #chart-modal{
     z-index: 9700 !important;
+  }
+  /* Keep the chart-modal centered between header and bot-nav rather
+     than going edge-to-edge with viewport. Padding-bottom honors the
+     home indicator + the bot-nav height so the chart doesn't bleed
+     under the bottom tab bar. */
+  #chart-modal{
+    padding-top: max(env(safe-area-inset-top, 0px), 8px) !important;
+    padding-bottom: max(env(safe-area-inset-bottom, 0px), 64px) !important;
   }
   #bot-nav{
     transform: translate3d(0,0,0);
@@ -5492,7 +5506,7 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
      the scan results or positions table. Same renderer as the
      watchlist chart (EMA10/20/50 overlays, daily S/R clusters, ECharts
      dataZoom). Toggle DAILY / 1 MIN; tap outside or × to close. -->
-<div id="chart-modal" onclick="if(event.target===this)closeChartModal()" style="display:none;position:fixed;inset:0;z-index:8200;background:rgba(0,0,0,.78);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:20px;">
+<div id="chart-modal" onclick="if(event.target===this)closeChartModal()" style="display:none;position:fixed;inset:0;z-index:9700;background:rgba(0,0,0,.78);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:20px;">
   <div style="background:var(--bg1);border:1px solid var(--amb);border-radius:8px;width:min(96vw,1100px);height:min(86vh,720px);display:flex;flex-direction:column;box-shadow:0 12px 48px rgba(0,0,0,.6);overflow:hidden;">
     <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:var(--bdr);background:var(--bg2);flex-wrap:wrap;">
       <span id="chart-modal-title" style="font-family:var(--ff-brand);font-size:14px;font-weight:700;color:var(--amb);letter-spacing:1px;text-shadow:var(--glow-cyan);">--</span>
@@ -8252,6 +8266,15 @@ function switchTab(id){
         m.style.display = 'none';
       }
     });
+    // 2026-05-11 v2.16.22: the chart-modal needs its full close handler
+    // (dispose ECharts instance + ResizeObserver) so it can't be closed
+    // via the generic display:none above. User report: "I cannot close
+    // the chart once open. If i click on a different tab it stays up
+    // regardless." Now tab-switch always closes it cleanly.
+    try {
+      var cm = document.getElementById('chart-modal');
+      if (cm && cm.style.display && cm.style.display !== 'none' && typeof closeChartModal === 'function') closeChartModal();
+    } catch(_){}
     if (typeof G !== 'undefined') G.selTicker = null;
   } catch(_){}
   document.querySelectorAll('.tab-pane').forEach(function(p){p.classList.remove('active');});
@@ -25853,7 +25876,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.16.21-resubmit-popup-chain-roll-status';
+var APP_VERSION = '2.16.22-chart-modal-z-fix';
 // Page-source fallback constants removed. Each visitor now provides their own
 // API credentials via the API tab (or, for Tradier, sets up the worker proxy
 // at worker/tradier-proxy/ \u2014 keys never reach the browser at all).
