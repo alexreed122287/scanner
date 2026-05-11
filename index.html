@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-11T02:00-chart-modal-default-tradier">
+<meta name="op-build" content="2026-05-11T03:00-resubmit-popup-chain-roll-status">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -10079,6 +10079,23 @@ function openOrderStatusModal(ctx){
   // restoreOrderStatusModal to preserve elapsed time across minimize)
   // overrides it. If ctx has no t0, the fresh Date.now() is kept.
   G.orderStatus.ctx = Object.assign({ t0: Date.now() }, ctx || {});
+  // 2026-05-11 v2.16.21: snapshot the full contract context from the
+  // order ticket form into ctx so resubmitFromModal can restore the
+  // ticker/type/strike/exp/action even if the form has since been
+  // cleared (manual CLEAR, navigation, etc.). User report: "I adjusted
+  // the settings in the popup but when i hit resubmit it said no
+  // ticker was present because the ticker had cleared from the order
+  // ticket." Captures non-destructively — caller-provided fields win.
+  try {
+    var _c = G.orderStatus.ctx;
+    if (!_c.ticker) _c.ticker = (eid('ord-sym') && eid('ord-sym').value || '').trim().toUpperCase();
+    if (!_c.type)   _c.type   = (eid('ord-type') && eid('ord-type').value) || 'CALL';
+    if (!_c.strike) _c.strike = (eid('ord-strike') && eid('ord-strike').value) || '';
+    if (!_c.exp)    _c.exp    = (eid('ord-exp') && eid('ord-exp').value) || '';
+    if (!_c.action) _c.action = (eid('ord-action') && eid('ord-action').value) || 'BUY_TO_OPEN';
+    if (!_c.otype)  _c.otype  = (eid('ord-otype') && eid('ord-otype').value) || 'limit';
+    if (!_c.duration) _c.duration = (eid('ord-duration') && eid('ord-duration').value) || 'day';
+  } catch(_){}
   // Fresh open = fresh terminal tracking.
   G.orderStatus.terminalState = null;
   G.orderStatus.terminalText = null;
@@ -10124,12 +10141,26 @@ function openOrderStatusModal(ctx){
     +     '</div>'
     +     '<div id="osm-resubmit-card" style="display:none;background:var(--bg2);border:1px solid var(--amb3);border-radius:6px;padding:10px 12px;">'
     +       '<div style="font-family:var(--ff-brand);font-size:11px;color:var(--amb);letter-spacing:1px;margin-bottom:8px;">&#9658; RESUBMIT WITH NEW PARAMS</div>'
+    +       '<div id="osm-contract-row" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-family:var(--ff-mono);font-size:10px;color:var(--gry);margin-bottom:8px;padding:6px 8px;background:var(--bg0);border:var(--bdr);border-radius:4px;">'
+    +         '<span>CONTRACT:</span>'
+    +         '<b id="osm-r-ticker-display" style="color:var(--amb);font-size:12px;letter-spacing:.5px;">--</b>'
+    +         '<span id="osm-r-type-chip" style="background:rgba(0,212,255,0.12);color:var(--amb);padding:2px 7px;border-radius:3px;font-weight:700;letter-spacing:.5px;">--</span>'
+    +         '<span id="osm-r-current-display" style="margin-left:auto;color:var(--gry2);">--</span>'
+    +       '</div>'
+    +       '<div id="osm-r-chain-row" style="display:none;grid-template-columns:1fr 1fr;gap:8px;font-family:var(--ff-mono);font-size:10px;margin-bottom:8px;">'
+    +         '<label style="display:flex;flex-direction:column;gap:2px;color:var(--gry);"><span>EXPIRATION</span><select id="osm-r-exp" onchange="osmResubExpChange()" style="background:var(--bg0);border:var(--bdr);border-radius:3px;color:var(--wht);font-family:var(--ff-mono);font-size:11px;padding:5px 7px;"><option value="">(loading…)</option></select></label>'
+    +         '<label style="display:flex;flex-direction:column;gap:2px;color:var(--gry);"><span>STRIKE</span><select id="osm-r-strike" onchange="osmResubStrikeChange()" style="background:var(--bg0);border:var(--bdr);border-radius:3px;color:var(--wht);font-family:var(--ff-mono);font-size:11px;padding:5px 7px;"><option value="">(pick expiry)</option></select></label>'
+    +       '</div>'
+    +       '<div id="osm-r-chain-table-wrap" style="display:none;background:var(--bg0);border:var(--bdr);border-radius:4px;max-height:170px;overflow-y:auto;margin-bottom:8px;-webkit-overflow-scrolling:touch;">'
+    +         '<div id="osm-r-chain-table" style="font-family:var(--ff-mono);font-size:10px;color:var(--gry);padding:6px 8px;">Pick an expiry to view the chain&hellip;</div>'
+    +       '</div>'
     +       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-family:var(--ff-mono);font-size:10px;">'
     +         '<label style="display:flex;flex-direction:column;gap:2px;color:var(--gry);"><span>LIMIT $</span><input type="number" id="osm-r-lmt" step="0.01" min="0.01" style="background:var(--bg0);border:var(--bdr);border-radius:3px;color:var(--wht);font-family:var(--ff-mono);font-size:11px;padding:5px 7px;"></label>'
     +         '<label style="display:flex;flex-direction:column;gap:2px;color:var(--gry);"><span>STEP $</span><input type="number" id="osm-r-step" step="0.01" min="0.01" style="background:var(--bg0);border:var(--bdr);border-radius:3px;color:var(--wht);font-family:var(--ff-mono);font-size:11px;padding:5px 7px;"></label>'
     +         '<label style="display:flex;flex-direction:column;gap:2px;color:var(--gry);"><span>MAX ATTEMPTS</span><input type="number" id="osm-r-max" min="1" max="50" style="background:var(--bg0);border:var(--bdr);border-radius:3px;color:var(--wht);font-family:var(--ff-mono);font-size:11px;padding:5px 7px;"></label>'
     +         '<label style="display:flex;flex-direction:column;gap:2px;color:var(--gry);"><span>DELAY (sec)</span><input type="number" id="osm-r-delay" min="1" max="120" style="background:var(--bg0);border:var(--bdr);border-radius:3px;color:var(--wht);font-family:var(--ff-mono);font-size:11px;padding:5px 7px;"></label>'
-    +         '<label style="display:flex;flex-direction:column;gap:2px;color:var(--gry);grid-column:1/-1;"><span>START FROM</span><select id="osm-r-start" style="background:var(--bg0);border:var(--bdr);border-radius:3px;color:var(--wht);font-family:var(--ff-mono);font-size:11px;padding:5px 7px;"><option value="bid">Bid</option><option value="mid">Mid</option><option value="ask">Ask</option></select></label>'
+    +         '<label style="display:flex;flex-direction:column;gap:2px;color:var(--gry);"><span>QTY</span><input type="number" id="osm-r-qty" min="1" max="999" style="background:var(--bg0);border:var(--bdr);border-radius:3px;color:var(--wht);font-family:var(--ff-mono);font-size:11px;padding:5px 7px;"></label>'
+    +         '<label style="display:flex;flex-direction:column;gap:2px;color:var(--gry);"><span>START FROM</span><select id="osm-r-start" style="background:var(--bg0);border:var(--bdr);border-radius:3px;color:var(--wht);font-family:var(--ff-mono);font-size:11px;padding:5px 7px;"><option value="bid">Bid</option><option value="mid">Mid</option><option value="ask">Ask</option></select></label>'
     +       '</div>'
     +       '<div style="display:flex;gap:8px;margin-top:10px;">'
     +         '<button class="btn blu" id="osm-resubmit-btn" style="flex:1;padding:9px;font-weight:700;font-size:12px;" onclick="resubmitFromModal()">&#9658; RESUBMIT</button>'
@@ -10149,6 +10180,39 @@ function openOrderStatusModal(ctx){
     if (eid('osm-r-max'))   eid('osm-r-max').value   = c.maxAttempts || '';
     if (eid('osm-r-delay')) eid('osm-r-delay').value = c.delaySec    || '';
     if (eid('osm-r-start')) eid('osm-r-start').value = c.startFrom   || 'bid';
+    if (eid('osm-r-qty'))   eid('osm-r-qty').value   = c.qty || '';
+    // 2026-05-11 v2.16.21: populate the contract chip + (for options)
+    // load the chain so the user can pick a different strike / exp date
+    // without leaving the modal.
+    var tk = (c.ticker || c.sym || '').toString().toUpperCase();
+    var typ = (c.type || '').toString().toUpperCase();
+    if (eid('osm-r-ticker-display')) eid('osm-r-ticker-display').textContent = tk || '--';
+    if (eid('osm-r-type-chip'))      eid('osm-r-type-chip').textContent      = typ || '--';
+    if (eid('osm-r-current-display')){
+      var cur = '';
+      if (typ === 'STOCK') cur = 'shares';
+      else if (c.strike && c.exp) cur = c.strike + (typ==='PUT'?'P':'C') + ' • ' + (typeof fmtDateUS==='function' ? fmtDateUS(c.exp) : c.exp);
+      eid('osm-r-current-display').textContent = cur || '';
+    }
+    if ((typ === 'CALL' || typ === 'PUT') && c.mode !== 'roll'){
+      var row = eid('osm-r-chain-row');
+      if (row) row.style.display = 'grid';
+      var tableWrap = eid('osm-r-chain-table-wrap');
+      if (tableWrap) tableWrap.style.display = 'block';
+      try { _osmLoadResubmitChain(tk, typ); } catch(e){ console.warn('[osm chain]', e); }
+    }
+    // For roll mode, swap the contract chip to reflect both legs.
+    if (c.mode === 'roll'){
+      if (eid('osm-r-ticker-display')) eid('osm-r-ticker-display').textContent = (c.ticker || '--');
+      if (eid('osm-r-type-chip'))      eid('osm-r-type-chip').textContent      = 'ROLL';
+      if (eid('osm-r-current-display')){
+        eid('osm-r-current-display').textContent = (c.occSym || '?') + ' → ' + (c.rollLeg2OccSym || '?');
+      }
+      // Hide QTY field for roll resubmit — leg quantities live on the roll modal.
+      var qrow = eid('osm-r-qty'); if (qrow && qrow.parentNode) qrow.parentNode.style.display = 'none';
+    } else {
+      var qrow2 = eid('osm-r-qty'); if (qrow2 && qrow2.parentNode) qrow2.parentNode.style.display = '';
+    }
   }, 0);
 
   // Elapsed-time tick (every 500ms).
@@ -10413,6 +10477,11 @@ function showOrderTerminalBanner(state, ctx){
 
 function cancelOrderFromModal(){
   var c = G.orderStatus.ctx || {};
+  // Roll: flip the roll-cancel flag so the running walker bails on next iteration.
+  if (c.mode === 'roll'){
+    if (typeof cancelRollFill === 'function') cancelRollFill();
+    return;
+  }
   // Step-fill: just flip the cancel flag; the running loop catches it on next iteration.
   if (c.mode === 'step'){
     if (typeof cancelStepFill === 'function') cancelStepFill();
@@ -10443,25 +10512,69 @@ function resubmitFromModal(){
   // Block if step-fill is still running (defensive — button only shows on terminal).
   if (G.stepFillActive){ toast('Wait for current step-fill to finish'); return; }
 
-  // Read user's edits and write them back into the order ticket form fields,
-  // then re-fire submitOrder() so the standard validation and step-fill path
-  // run unchanged. Mutating the price ensures the duplicate-loop detector
-  // doesn't lock us out (loopKey at line 9736 hashes the limit value).
+  var c = (G.orderStatus && G.orderStatus.ctx) || {};
+
+  // 2026-05-11 v2.16.21: ROLL mode reuses the order-status modal for
+  // visibility, but resubmit re-fires the roll (which already knows
+  // about its 2 legs from G_roll). The user can adjust the new leg
+  // contract via FIND BEST in the roll modal in the background before
+  // hitting RESUBMIT here.
+  if (c.mode === 'roll'){
+    if (G_roll && G_roll.rollActive){ toast('Wait for current roll to finish'); return; }
+    closeOrderStatusModal();
+    setTimeout(function(){ try{ submitRoll(); }catch(e){ console.error('[osm roll resubmit]', e); toast('Resubmit failed: '+e.message); } }, 80);
+    return;
+  }
+
+  // ALWAYS restore the full contract context to the order ticket form
+  // before resubmitting. Prior bug: if the ticker had been cleared
+  // from the form (manual CLEAR or other path) between the failed
+  // order and the resubmit, submitOrder() would bail with "Enter a
+  // symbol first" even though the modal clearly knew which contract
+  // the user wanted to retry. Sourcing from G.orderStatus.ctx
+  // (snapshotted on modal open) makes the resubmit path
+  // self-sufficient regardless of form state, and lets the user pick
+  // a different strike/exp from the new dropdowns before resubmitting.
   var lmtEl  = eid('osm-r-lmt');
   var stEl   = eid('osm-r-step');
   var maxEl  = eid('osm-r-max');
   var dlyEl  = eid('osm-r-delay');
   var srtEl  = eid('osm-r-start');
+  var qtyEl  = eid('osm-r-qty');
+  var expEl  = eid('osm-r-exp');
+  var strEl  = eid('osm-r-strike');
 
+  // Resolve final contract values: dropdowns (if user changed them) → ctx → form.
+  var finalTicker = (c.ticker || c.sym || (eid('ord-sym')&&eid('ord-sym').value) || '').toString().trim().toUpperCase();
+  var finalType   = (c.type || (eid('ord-type')&&eid('ord-type').value) || 'CALL').toString().toUpperCase();
+  var finalAction = (c.action || (eid('ord-action')&&eid('ord-action').value) || 'BUY_TO_OPEN').toString();
+  var finalExp    = (expEl && expEl.value) || c.exp || (eid('ord-exp')&&eid('ord-exp').value) || '';
+  var finalStrike = (strEl && strEl.value) || c.strike || (eid('ord-strike')&&eid('ord-strike').value) || '';
+  var finalQty    = (qtyEl && qtyEl.value) || c.qty || (eid('ord-qty')&&eid('ord-qty').value) || 1;
+  if (!finalTicker){ toast('No ticker context available — open the order ticket and try again'); return; }
+
+  // Write the contract identity back to the form so submitOrder()'s
+  // existing validation path finds it.
+  if (eid('ord-sym'))    eid('ord-sym').value    = finalTicker;
+  if (eid('ord-type'))   eid('ord-type').value   = finalType;
+  if (eid('ord-action')) eid('ord-action').value = finalAction;
+  if (eid('ord-qty'))    eid('ord-qty').value    = finalQty;
+  if (finalType !== 'STOCK'){
+    if (eid('ord-strike') && finalStrike) eid('ord-strike').value = finalStrike;
+    if (eid('ord-exp')    && finalExp)    eid('ord-exp').value    = finalExp;
+  }
+  // Re-run the strike/exp dependent UI wiring (option-type toggle, ASR
+  // month label, etc.) so the form is internally consistent.
+  try { if (typeof onOrderTypeChange === 'function') onOrderTypeChange(); } catch(_){}
+  try { if (typeof onSymbolChange === 'function') onSymbolChange(); } catch(_){}
+
+  // Step-fill controls
   if (lmtEl && lmtEl.value && eid('ord-lmt')) eid('ord-lmt').value = Number(lmtEl.value).toFixed(2);
   if (maxEl && maxEl.value && eid('sf-max')) eid('sf-max').value = parseInt(maxEl.value) || 10;
   if (dlyEl && dlyEl.value && eid('sf-delay')) eid('sf-delay').value = parseInt(dlyEl.value) || 3;
   if (srtEl && srtEl.value && eid('sf-start')) eid('sf-start').value = srtEl.value;
-  // Step size — sf-step is readonly (auto from coverage). To override, set
-  // sf-coverage so the calc reflects the requested step. Skip if user left blank.
-  // BUG-18 fix 2026-05-09: restore readOnly after writing so the field
-  // doesn't stay editable forever. Without this, the user could type into
-  // it and have their value silently overwritten by the next coverage tick.
+  // Step size — sf-step is readonly (auto from coverage). Toggle off to
+  // write, then restore so the field doesn't stay editable forever.
   if (stEl && stEl.value && eid('sf-step')){
     eid('sf-step').readOnly = false;
     eid('sf-step').value = Number(stEl.value).toFixed(2);
@@ -10473,6 +10586,170 @@ function resubmitFromModal(){
 
   closeOrderStatusModal();
   setTimeout(function(){ try{ submitOrder(); }catch(e){ console.error('[osm resubmit]', e); toast('Resubmit failed: '+e.message); } }, 80);
+}
+
+// ─── Resubmit-popup chain loader ────────────────────────────────────
+// 2026-05-11 v2.16.21: populates the EXP + STRIKE dropdowns inside the
+// order-status modal so the user can pick a different contract before
+// resubmitting. side is locked to the original order's side (CALL vs
+// PUT). Reuses Tradier expirations + chains endpoints with the same
+// tradierFetch TTLs the order ticket uses.
+function _osmLoadResubmitChain(ticker, side){
+  ticker = String(ticker||'').toUpperCase().trim();
+  side = String(side||'').toUpperCase();
+  if (!ticker || (side !== 'CALL' && side !== 'PUT')) return;
+  var expSel = eid('osm-r-exp');
+  var strSel = eid('osm-r-strike');
+  var tbl    = eid('osm-r-chain-table');
+  if (!expSel || !strSel) return;
+  expSel.innerHTML = '<option value="">(loading…)</option>';
+  strSel.innerHTML = '<option value="">(pick expiry)</option>';
+  if (tbl) tbl.innerHTML = '<div style="padding:6px 8px;color:var(--gry);">Loading expirations for '+_esc(ticker)+'&hellip;</div>';
+  var creds = (typeof getTradierCreds === 'function') ? getTradierCreds() : null;
+  if (!creds || !creds.key){
+    expSel.innerHTML = '<option value="">(no API key)</option>';
+    if (tbl) tbl.innerHTML = '<div style="padding:6px 8px;color:var(--wrn);">Tradier credentials not set — set in API tab.</div>';
+    return;
+  }
+  var expUrl = creds.host + '/v1/markets/options/expirations?symbol=' + encodeURIComponent(ticker) + '&includeAllRoots=true';
+  var p = (typeof tradierFetch === 'function')
+    ? tradierFetch(expUrl, { headers:{Authorization:'Bearer '+creds.key, Accept:'application/json'} }, 6*60*60*1000)
+    : fetch(expUrl, { headers:{Authorization:'Bearer '+creds.key, Accept:'application/json'} });
+  p.then(function(r){ return r.json(); }).then(function(data){
+    var dates = (data && data.expirations && data.expirations.date) || [];
+    if (typeof dates === 'string') dates = [dates];
+    if (!Array.isArray(dates) || !dates.length){
+      expSel.innerHTML = '<option value="">(none)</option>';
+      if (tbl) tbl.innerHTML = '<div style="padding:6px 8px;color:var(--wrn);">No expirations for '+_esc(ticker)+'.</div>';
+      return;
+    }
+    var nowMs = Date.now();
+    function _dteFor(d){ return Math.round((new Date(d+'T20:30:00Z').getTime() - nowMs) / (24*3600*1000)); }
+    var c = (G.orderStatus && G.orderStatus.ctx) || {};
+    var preselect = c.exp && dates.indexOf(c.exp) >= 0 ? c.exp : dates[0];
+    expSel.innerHTML = dates.map(function(d){
+      var dte = _dteFor(d);
+      var lbl = (typeof fmtDateUS === 'function' ? fmtDateUS(d) : d) + ' ('+dte+'d)';
+      return '<option value="'+_esc(d)+'"'+(d===preselect?' selected':'')+'>'+_esc(lbl)+'</option>';
+    }).join('');
+    _osmLoadResubmitChainForExp(ticker, side, preselect);
+  }).catch(function(e){
+    expSel.innerHTML = '<option value="">(error)</option>';
+    if (tbl) tbl.innerHTML = '<div style="padding:6px 8px;color:var(--wrn);">Chain error: '+_esc(e.message||'fail')+'</div>';
+  });
+}
+function _osmLoadResubmitChainForExp(ticker, side, exp){
+  ticker = String(ticker||'').toUpperCase().trim();
+  side = String(side||'').toUpperCase();
+  if (!ticker || !exp) return;
+  var strSel = eid('osm-r-strike');
+  var tbl    = eid('osm-r-chain-table');
+  if (strSel) strSel.innerHTML = '<option value="">(loading…)</option>';
+  if (tbl) tbl.innerHTML = '<div style="padding:6px 8px;color:var(--gry);">Loading '+_esc(side)+'s for '+_esc(exp)+'&hellip;</div>';
+  var creds = (typeof getTradierCreds === 'function') ? getTradierCreds() : null;
+  if (!creds || !creds.key) return;
+  var url = creds.host + '/v1/markets/options/chains?symbol='+encodeURIComponent(ticker)+'&expiration='+encodeURIComponent(exp)+'&greeks=true';
+  var p = (typeof tradierFetch === 'function')
+    ? tradierFetch(url, { headers:{Authorization:'Bearer '+creds.key, Accept:'application/json'} }, 5*60*1000)
+    : fetch(url, { headers:{Authorization:'Bearer '+creds.key, Accept:'application/json'} });
+  p.then(function(r){ return r.json(); }).then(function(data){
+    var opts = (data && data.options && data.options.option) || [];
+    if (!Array.isArray(opts)) opts = [opts];
+    var wantType = side.toLowerCase();   // 'call' or 'put'
+    var filtered = opts.filter(function(o){ return o && o.option_type === wantType; });
+    filtered.sort(function(a,b){ return parseFloat(a.strike) - parseFloat(b.strike); });
+    if (!filtered.length){
+      if (strSel) strSel.innerHTML = '<option value="">(none)</option>';
+      if (tbl) tbl.innerHTML = '<div style="padding:6px 8px;color:var(--wrn);">No '+_esc(side)+' contracts for '+_esc(exp)+'.</div>';
+      return;
+    }
+    // Pre-select ctx.strike if present, else nearest-ATM.
+    var c = (G.orderStatus && G.orderStatus.ctx) || {};
+    var ctxStrike = c.strike ? parseFloat(c.strike) : null;
+    var spot = parseFloat(filtered[0].underlying || 0) || ctxStrike || parseFloat(filtered[Math.floor(filtered.length/2)].strike);
+    var bestStrike = filtered[0].strike;
+    if (ctxStrike){
+      bestStrike = filtered.reduce(function(b,o){ return Math.abs(parseFloat(o.strike)-ctxStrike) < Math.abs(parseFloat(b)-ctxStrike) ? o.strike : b; }, filtered[0].strike);
+    } else {
+      bestStrike = filtered.reduce(function(b,o){ return Math.abs(parseFloat(o.strike)-spot) < Math.abs(parseFloat(b)-spot) ? o.strike : b; }, filtered[0].strike);
+    }
+    if (strSel){
+      strSel.innerHTML = filtered.map(function(o){
+        var s = String(o.strike);
+        var bid = (o.bid!=null) ? Number(o.bid).toFixed(2) : '--';
+        var ask = (o.ask!=null) ? Number(o.ask).toFixed(2) : '--';
+        return '<option value="'+_esc(s)+'"'+(String(o.strike)===String(bestStrike)?' selected':'')+'>$'+_esc(s)+' • bid '+_esc(bid)+' / ask '+_esc(ask)+'</option>';
+      }).join('');
+    }
+    // Render a compact chain table — click a row to select that strike.
+    if (tbl){
+      var rows = filtered.map(function(o){
+        var s = String(o.strike);
+        var bid = (o.bid!=null) ? Number(o.bid).toFixed(2) : '--';
+        var ask = (o.ask!=null) ? Number(o.ask).toFixed(2) : '--';
+        var mid = (o.bid!=null && o.ask!=null) ? ((+o.bid + +o.ask)/2).toFixed(2) : '--';
+        var delta = (o.greeks && o.greeks.delta!=null) ? Number(o.greeks.delta).toFixed(2) : '--';
+        var isSel = String(o.strike) === String(bestStrike);
+        var rowBg = isSel ? 'background:rgba(0,212,255,0.10);' : '';
+        return '<tr data-strike="'+_esc(s)+'" onclick="osmResubPickStrike(\''+_esc(s)+'\')" style="cursor:pointer;'+rowBg+'">'
+          + '<td style="padding:3px 6px;color:var(--amb);font-weight:700;text-align:right;">$'+_esc(s)+'</td>'
+          + '<td style="padding:3px 6px;color:var(--gry);text-align:right;">'+_esc(bid)+'</td>'
+          + '<td style="padding:3px 6px;color:var(--wht);text-align:right;font-weight:700;">'+_esc(mid)+'</td>'
+          + '<td style="padding:3px 6px;color:var(--gry);text-align:right;">'+_esc(ask)+'</td>'
+          + '<td style="padding:3px 6px;color:var(--gry2);text-align:right;">'+_esc(delta)+'</td>'
+          + '</tr>';
+      }).join('');
+      tbl.innerHTML = '<table style="width:100%;border-collapse:collapse;font-family:var(--ff-mono);font-size:10px;">'
+        + '<thead style="position:sticky;top:0;background:var(--bg0);"><tr style="color:var(--gry);">'
+        + '<th style="padding:4px 6px;text-align:right;">STRIKE</th>'
+        + '<th style="padding:4px 6px;text-align:right;">BID</th>'
+        + '<th style="padding:4px 6px;text-align:right;">MID</th>'
+        + '<th style="padding:4px 6px;text-align:right;">ASK</th>'
+        + '<th style="padding:4px 6px;text-align:right;">&#916;</th>'
+        + '</tr></thead><tbody>'+rows+'</tbody></table>';
+    }
+    // Cache filtered list for click-to-select prefill of LIMIT $
+    G._osmResubChainCache = { ticker: ticker, exp: exp, side: side, opts: filtered };
+  }).catch(function(e){
+    if (strSel) strSel.innerHTML = '<option value="">(error)</option>';
+    if (tbl) tbl.innerHTML = '<div style="padding:6px 8px;color:var(--wrn);">Chain error: '+_esc(e.message||'fail')+'</div>';
+  });
+}
+function osmResubExpChange(){
+  var expSel = eid('osm-r-exp');
+  var c = (G.orderStatus && G.orderStatus.ctx) || {};
+  if (!expSel || !c.ticker) return;
+  _osmLoadResubmitChainForExp(c.ticker, c.type, expSel.value);
+}
+function osmResubStrikeChange(){
+  var strSel = eid('osm-r-strike');
+  if (!strSel) return;
+  osmResubPickStrike(strSel.value);
+}
+function osmResubPickStrike(strike){
+  if (!strike) return;
+  strike = String(strike);
+  // Sync the dropdown
+  var strSel = eid('osm-r-strike');
+  if (strSel && strSel.value !== strike) strSel.value = strike;
+  // Highlight the matching row in the mini chain table
+  var tbl = eid('osm-r-chain-table');
+  if (tbl){
+    tbl.querySelectorAll('tr[data-strike]').forEach(function(tr){
+      tr.style.background = (tr.getAttribute('data-strike') === strike) ? 'rgba(0,212,255,0.10)' : '';
+    });
+  }
+  // Auto-suggest LIMIT $ from the picked contract's mid price (bid/ask average)
+  // so the user doesn't have to retype. They can still edit it.
+  var cache = G._osmResubChainCache;
+  if (cache && Array.isArray(cache.opts)){
+    var hit = cache.opts.find(function(o){ return String(o.strike) === strike; });
+    if (hit && hit.bid != null && hit.ask != null){
+      var mid = (+hit.bid + +hit.ask) / 2;
+      var lmtEl = eid('osm-r-lmt');
+      if (lmtEl && mid > 0) lmtEl.value = mid.toFixed(2);
+    }
+  }
 }
 
 // ─── SMART POLL: returns as soon as order hits a terminal status, or after
@@ -22496,6 +22773,16 @@ function rollLog(msg,cls){
   line.textContent='['+new Date().toLocaleTimeString()+'] '+msg;
   log.appendChild(line);
   log.scrollTop=log.scrollHeight;
+  // 2026-05-11 v2.16.21: mirror roll log lines into the order-status
+  // modal when one is open in 'roll' mode, so the user can watch the
+  // roll execute even if the roll modal is scrolled off / on a small
+  // screen.
+  try {
+    if (G.orderStatus && G.orderStatus.modalEl && G.orderStatus.ctx && G.orderStatus.ctx.mode === 'roll'){
+      var kind = cls === 'ok' ? 'filled' : cls === 'err' ? 'rejected' : 'sent';
+      updateOrderStatusModal({ logLine: msg, logKind: kind });
+    }
+  } catch(_) {}
 }
 
 function rollGetCreds(){
@@ -22945,6 +23232,7 @@ function cancelRollFill(){
   eid('roll-status').textContent='Cancelled';
   eid('roll-submit-btn').disabled=false;
   eid('roll-submit-btn').textContent='↻ EXECUTE ROLL';
+  try { updateOrderStatusModal({ state:'cancelled', stateText:'ROLL CANCELLED', logLine:'■ Cancelled by user', logKind:'cancelled' }); } catch(_){}
 }
 
 // Atomic multi-leg roll. Single Tradier `class=multileg` order with both
@@ -23100,6 +23388,31 @@ async function submitRoll(){
   var coverage=+eid('roll-sf-coverage').value||100;
   var fallback=eid('roll-sf-fallback').value;
 
+  // 2026-05-11 v2.16.21: open the order-status popup for the roll so
+  // the user sees a high-visibility progress modal (same chrome as a
+  // single-order submit) with a RESUBMIT option on terminal failure.
+  try {
+    openOrderStatusModal({
+      mode: 'roll',
+      creds: c, acct: acct,
+      sym: G_roll.ticker, ticker: G_roll.ticker, occSym: G_roll.occSym,
+      side: 'ROLL',
+      qty: q1,
+      maxAttempts: maxAtt, delaySec: delay,
+      // Snapshot leg metadata so a possible RESUBMIT path has the full picture.
+      rollLeg2OccSym: G_roll.leg2 && G_roll.leg2.occSym,
+      rollCoverage: coverage,
+      rollFallback: fallback
+    });
+    updateOrderStatusModal({
+      state:'working',
+      stateText:'ROLL RUNNING — '+G_roll.ticker,
+      logLine:'Roll started — close '+G_roll.occSym+' x'+q1+' → open '+(G_roll.leg2&&G_roll.leg2.occSym)+' x'+q2,
+      logKind:'sent',
+      attempt: 0, maxAttempts: maxAtt
+    });
+  } catch(e){ console.warn('[osm roll open]', e); }
+
   // Refresh BOTH legs' bid/ask just before submitting. The quotes captured
   // at FIND BEST / REFRESH QUOTE click time can be 30s-5min stale by the
   // time the user reviews and hits EXECUTE. A fresh fetch ensures LEG 1
@@ -23165,6 +23478,7 @@ async function submitRoll(){
       eid('roll-submit-btn').disabled = false; eid('roll-submit-btn').textContent = '\u21bb EXECUTE ROLL';
       G_roll.rollActive = false;
       toast('Roll complete: '+G_roll.ticker+' (atomic)');
+      try { updateOrderStatusModal({ state:'filled', stateText:'ROLL FILLED \u2014 '+G_roll.ticker, logLine:'\u2713 Atomic multileg filled', logKind:'filled' }); } catch(_){}
       setTimeout(function(){ if(G.acctId) fetchPositions(); }, 3000);
       return;
     }
@@ -23265,6 +23579,7 @@ async function submitRoll(){
     eid('roll-submit-btn').disabled=false; eid('roll-submit-btn').textContent='↻ EXECUTE ROLL';
     G_roll.rollActive=false;
     toast('Roll aborted: could not close existing position');
+    try { updateOrderStatusModal({ state:'not-filled', stateText:'ROLL FAILED — LEG 1 unfilled', logLine:'✗ LEG 1 walker exhausted — naked position avoided', logKind:'rejected' }); } catch(_){}
     return;
   }
 
@@ -23352,6 +23667,14 @@ async function submitRoll(){
   G_roll.rollActive=false;
   toast(l2Filled?'Roll complete: '+G_roll.ticker:'Roll partial: LEG 2 not filled');
   pushNotify(l2Filled?'Roll complete':'Roll partial', G_roll.ticker+' \u2014 '+(net>=0?'CREDIT':'DEBIT')+' '+fmtD(Math.abs(net)), 'roll-'+G_roll.ticker);
+  try {
+    updateOrderStatusModal({
+      state: l2Filled ? 'filled' : 'not-filled',
+      stateText: (l2Filled ? 'ROLL COMPLETE \u2014 ' : 'ROLL PARTIAL \u2014 ')+G_roll.ticker+' \u2022 NET '+(net>=0?'CREDIT':'DEBIT')+' '+fmtD(Math.abs(net)),
+      logLine: (l2Filled?'\u2713 ROLL COMPLETE':'\u26a0 LEG 2 not filled \u2014 open position may be naked')+' | NET '+(net>=0?'CREDIT':'DEBIT')+' '+fmtD(Math.abs(net)),
+      logKind: l2Filled ? 'filled' : 'rejected'
+    });
+  } catch(_){}
   setTimeout(function(){if(G.acctId)fetchPositions();},3000);
 }
 
@@ -25530,7 +25853,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.16.20-chart-modal-default-tradier';
+var APP_VERSION = '2.16.21-resubmit-popup-chain-roll-status';
 // Page-source fallback constants removed. Each visitor now provides their own
 // API credentials via the API tab (or, for Tradier, sets up the worker proxy
 // at worker/tradier-proxy/ \u2014 keys never reach the browser at all).
