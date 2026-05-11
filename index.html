@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-11T01:00-scan-table-horizontal-swipe">
+<meta name="op-build" content="2026-05-11T02:00-chart-modal-default-tradier">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -735,6 +735,23 @@ tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
 .gex-pill.mis{background:rgba(255,179,0,.10);color:var(--ambb);border:1px solid rgba(255,179,0,.4);cursor:pointer;}
 .gex-pill.mis:hover{background:rgba(255,179,0,.25);}
 .gex-pill.busy{background:rgba(0,212,255,.10);color:var(--blu);border:1px solid rgba(0,212,255,.4);cursor:wait;}
+/* Quick-chart mini button — sits inline next to a ticker symbol in the
+   scan results table and the positions table. Tap opens #chart-modal
+   for that ticker (same renderer the watchlist chart uses). Sized
+   small enough not to interfere with the symbol but large enough to be
+   tappable on iPhone (≈22×22 with 28px touch padding from the
+   padding:3px 5px + line-height). v2.16.20. */
+.chart-mini-btn{display:inline-flex;align-items:center;justify-content:center;
+  background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.30);
+  border-radius:3px;color:var(--amb);padding:2px 4px;margin-right:5px;
+  cursor:pointer;vertical-align:middle;line-height:1;
+  -webkit-tap-highlight-color:rgba(0,212,255,0.15);}
+.chart-mini-btn:hover{background:rgba(0,212,255,.18);border-color:var(--amb);}
+.chart-mini-btn svg{display:block;}
+@media(max-width:480px){
+  /* Slightly larger tap area on phone */
+  .chart-mini-btn{padding:3px 5px;margin-right:6px;}
+}
 /* Top-themes ribbon: marquee scroll right→left, pause on hover. The
    inner .themes-marquee element contains TWO copies of the same content
    so when the first copy translates -50% (one-copy-width), the second
@@ -5467,6 +5484,27 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
       <button onclick="closeHelpModal()" title="Close">✕</button>
     </div>
     <div class="help-modal-body" id="help-modal-body"></div>
+  </div>
+</div>
+
+<!-- ── QUICK CHART MODAL ─────────────────────────────────────────────
+     2026-05-11 v2.16.20: shared candlestick popup for any ticker in
+     the scan results or positions table. Same renderer as the
+     watchlist chart (EMA10/20/50 overlays, daily S/R clusters, ECharts
+     dataZoom). Toggle DAILY / 1 MIN; tap outside or × to close. -->
+<div id="chart-modal" onclick="if(event.target===this)closeChartModal()" style="display:none;position:fixed;inset:0;z-index:8200;background:rgba(0,0,0,.78);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:20px;">
+  <div style="background:var(--bg1);border:1px solid var(--amb);border-radius:8px;width:min(96vw,1100px);height:min(86vh,720px);display:flex;flex-direction:column;box-shadow:0 12px 48px rgba(0,0,0,.6);overflow:hidden;">
+    <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:var(--bdr);background:var(--bg2);flex-wrap:wrap;">
+      <span id="chart-modal-title" style="font-family:var(--ff-brand);font-size:14px;font-weight:700;color:var(--amb);letter-spacing:1px;text-shadow:var(--glow-cyan);">--</span>
+      <span id="chart-modal-sub" style="color:var(--gry);font-size:10px;font-family:var(--ff-mono);flex:1;text-align:left;min-width:60px;">--</span>
+      <button class="btn blu" id="chart-modal-tf-d" onclick="chartModalSetTf('D')" style="font-size:10px;padding:5px 12px;">DAILY</button>
+      <button class="btn" id="chart-modal-tf-1m" onclick="chartModalSetTf('1m')" style="font-size:10px;padding:5px 12px;">1 MIN</button>
+      <button onclick="closeChartModal()" title="Close (Esc)" style="background:transparent;border:1px solid var(--bg3);color:var(--gry);font-size:18px;font-weight:700;width:32px;height:32px;border-radius:4px;cursor:pointer;line-height:1;padding:0;">&#10005;</button>
+    </div>
+    <div id="chart-modal-canvas-wrap" style="flex:1;position:relative;background:#ffffff;min-height:0;">
+      <div id="chart-modal-canvas" style="position:absolute;inset:0;"></div>
+      <div id="chart-modal-loading" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#7090c8;font-size:11px;font-family:var(--ff-mono);letter-spacing:1px;background:#ffffff;">&#8212; loading &#8212;</div>
+    </div>
   </div>
 </div>
 
@@ -18740,7 +18778,7 @@ function renderScan(){
       +  '<div style="line-height:1.1;">'+(idx+1)+'</div>'
       +  (_why ? '<div style="font-size:8px;color:'+_whyCol+';margin-top:1px;white-space:nowrap;">'+_why+'</div>' : '')
       +'</td>'
-      +'<td><b>'+tk+'</b>'+gexPill+'</td>'
+      +'<td>'+chartIconBtnHtml(tk)+'<b>'+tk+'</b>'+gexPill+'</td>'
       +'<td>'+scoreBar+'</td>'
       +'<td>'+sigBadge+'</td>'
       +'<td><button class="btn" style="font-size:10px;padding:3px 10px;white-space:nowrap;border-color:var(--amb);color:var(--amb);background:var(--amb3);" onclick="event.stopPropagation();openContractPanel(\''+tk+'\')" title="View all call contracts">▲ BUY</button></td>'
@@ -20097,6 +20135,237 @@ function _wlDrawCandles(ticker, days, kind){
   }
 }
 
+// \u2500\u2500 QUICK CHART MODAL \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// 2026-05-11 v2.16.20: pop the watchlist-style candlestick chart for
+// any ticker. Wired to a small chart button in each scan row and each
+// position row. Same EMA10/20/50 overlays + daily S/R clusters as the
+// watchlist chart. Click outside or \u00d7 to dismiss, Esc also closes.
+function openChartModal(ticker){
+  if(!ticker) return;
+  ticker = String(ticker).toUpperCase().trim();
+  if(!ticker) return;
+  G._chartModalTicker = ticker;
+  if(!G._chartModalTf) G._chartModalTf = 'D';
+  var modal = eid('chart-modal');
+  if(!modal) return;
+  modal.style.display = 'flex';
+  _chartModalUpdateTfButtons();
+  _chartModalRender(ticker);
+  if(!G._chartModalEscWired){
+    G._chartModalEscWired = true;
+    document.addEventListener('keydown', function(e){
+      var m = eid('chart-modal');
+      if(e.key === 'Escape' && m && m.style.display === 'flex') closeChartModal();
+    });
+  }
+}
+function closeChartModal(){
+  var modal = eid('chart-modal');
+  if(modal) modal.style.display = 'none';
+  if(G._chartModalChart){ try{ G._chartModalChart.dispose(); }catch(e){} G._chartModalChart = null; }
+  if(G._chartModalResizeObs){ try{ G._chartModalResizeObs.disconnect(); }catch(e){} G._chartModalResizeObs = null; }
+}
+function chartModalSetTf(tf){
+  G._chartModalTf = tf;
+  _chartModalUpdateTfButtons();
+  if(G._chartModalTicker) _chartModalRender(G._chartModalTicker);
+}
+function _chartModalUpdateTfButtons(){
+  var d = eid('chart-modal-tf-d'), m = eid('chart-modal-tf-1m');
+  if(d) d.className = G._chartModalTf === 'D' ? 'btn blu' : 'btn';
+  if(m) m.className = G._chartModalTf === '1m' ? 'btn blu' : 'btn';
+}
+function _chartModalRender(ticker){
+  var canvas = eid('chart-modal-canvas'), loading = eid('chart-modal-loading');
+  if(!canvas || typeof echarts === 'undefined') return;
+  if(G._chartModalChart){ try{ G._chartModalChart.dispose(); }catch(e){} G._chartModalChart = null; }
+  if(loading){ loading.style.display = 'flex'; loading.textContent = 'Loading '+ticker+' ('+(G._chartModalTf==='D'?'Daily':'1 Min')+')...'; }
+  var titleEl = eid('chart-modal-title');
+  if(titleEl) titleEl.textContent = ticker + ' \u2014 ' + (G._chartModalTf==='D' ? 'DAILY' : '1 MIN');
+  var subEl = eid('chart-modal-sub');
+  if(subEl) subEl.textContent = '--';
+
+  var creds = (typeof rollGetCreds === 'function') ? rollGetCreds() : null;
+  if(!creds || !creds.key){
+    if(loading) loading.textContent = 'No Tradier API key \u2014 set one in the API tab';
+    return;
+  }
+  var host = creds.host, key = creds.key;
+
+  if(G._chartModalTf === 'D'){
+    var end = new Date(), start = new Date(); start.setDate(start.getDate() - 120);
+    var fmtD = function(d){ return d.toISOString().slice(0,10); };
+    tradierFetch(host+'/v1/markets/history?symbol='+ticker+'&interval=daily&start='+fmtD(start)+'&end='+fmtD(end),{
+      headers:{Authorization:'Bearer '+key,Accept:'application/json'}
+    }, 30*60*1000).then(function(r){return r.json();})
+    .then(function(data){
+      var days = (data.history && data.history.day) ? data.history.day : [];
+      if(!Array.isArray(days)) days = [days];
+      if(!days.length){ if(loading) loading.textContent = 'No daily data for '+ticker; return; }
+      _chartModalDrawCandles(ticker, days, 'daily');
+    }).catch(function(e){ if(loading) loading.textContent = 'Chart error: '+e.message; });
+  } else {
+    var now = new Date(), mStart = new Date(now); mStart.setHours(9,30,0,0);
+    var mEnd = new Date(now); mEnd.setHours(16,0,0,0);
+    if(now.getDay()===0) mStart.setDate(mStart.getDate()-2);
+    if(now.getDay()===6) mStart.setDate(mStart.getDate()-1);
+    var fmtTs = function(d){ return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2)+' '+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)+':00'; };
+    tradierFetch(host+'/v1/markets/timesales?symbol='+ticker+'&interval=1min&start='+encodeURIComponent(fmtTs(mStart))+'&end='+encodeURIComponent(fmtTs(mEnd))+'&session_filter=open',{
+      headers:{Authorization:'Bearer '+key,Accept:'application/json'}
+    }, 60*1000).then(function(r){return r.json();})
+    .then(function(data){
+      var series = (data.series && data.series.data) ? data.series.data : [];
+      if(!Array.isArray(series)) series = [series];
+      if(!series.length){ if(loading) loading.textContent = 'No intraday data (market closed?)'; return; }
+      var days = series.map(function(s){ return {date: s.time, open:s.open, high:s.high, low:s.low, close:s.close}; });
+      _chartModalDrawCandles(ticker, days, 'minute');
+    }).catch(function(e){ if(loading) loading.textContent = 'Chart error: '+e.message; });
+  }
+}
+function _chartModalDrawCandles(ticker, days, kind){
+  var canvas = eid('chart-modal-canvas'), loading = eid('chart-modal-loading');
+  if(loading) loading.style.display = 'none';
+  var labels = days.map(function(d){
+    if(kind==='minute') return (d.date||'').slice(11,16);
+    return (d.date||'').slice(5);
+  });
+  var closes = days.map(function(d){ return +d.close; });
+  function calcEma(data, period){
+    var k=2/(period+1), out=[], prev=null;
+    data.forEach(function(v,i){
+      if(i < period-1){ out.push(null); return; }
+      if(prev === null){ prev = data.slice(0, period).reduce(function(a,b){return a+b;},0)/period; out.push(+prev.toFixed(2)); return; }
+      prev = v*k + prev*(1-k); out.push(+prev.toFixed(2));
+    });
+    return out;
+  }
+  var ema10 = calcEma(closes, 10), ema20 = calcEma(closes, 20), ema50 = calcEma(closes, 50);
+  function findSR(data, lb){
+    lb = lb || 4;
+    var highs=[], lows=[];
+    for(var i=lb; i<data.length-lb; i++){
+      var h=+data[i].high, l=+data[i].low, isH=true, isL=true;
+      for(var j=i-lb; j<i; j++){ if(+data[j].high>h) isH=false; if(+data[j].low<l) isL=false; }
+      for(var j2=i+1; j2<=i+lb; j2++){ if(+data[j2].high>h) isH=false; if(+data[j2].low<l) isL=false; }
+      if(isH) highs.push(h); if(isL) lows.push(l);
+    }
+    var rng = (Math.max.apply(null, closes) - Math.min.apply(null, closes)) * 0.015;
+    function cluster(pts){
+      var zones = [];
+      pts.sort(function(a,b){return a-b;});
+      pts.forEach(function(p){
+        var m = null;
+        for(var i=0; i<zones.length; i++){ if(Math.abs(zones[i].mid - p) < rng){ m = zones[i]; break; } }
+        if(m){ m.vals.push(p); m.mid = m.vals.reduce(function(a,b){return a+b;},0)/m.vals.length; }
+        else zones.push({mid:p, vals:[p]});
+      });
+      return zones.map(function(z){ return {lo:+(z.mid-rng*0.6).toFixed(2), hi:+(z.mid+rng*0.6).toFixed(2)}; });
+    }
+    return { res: cluster(highs), sup: cluster(lows) };
+  }
+  var sr = (kind === 'daily' && days.length > 10) ? findSR(days, 4) : {res:[], sup:[]};
+  var resAreas = sr.res.map(function(z){ return [
+    {yAxis:z.lo, itemStyle:{color:'rgba(255,60,60,0.15)', borderColor:'rgba(255,82,82,0.55)', borderWidth:1}},
+    {yAxis:z.hi}
+  ]; });
+  var supAreas = sr.sup.map(function(z){ return [
+    {yAxis:z.lo, itemStyle:{color:'rgba(0,210,100,0.12)', borderColor:'rgba(0,230,118,0.55)', borderWidth:1}},
+    {yAxis:z.hi}
+  ]; });
+  var zoomStart = kind === 'daily'
+    ? Math.max(0, Math.round(((days.length-22)/days.length)*100))
+    : 0;
+  var ec = echarts.init(canvas, null, {renderer:'canvas'});
+  G._chartModalChart = ec;
+  ec.setOption({
+    backgroundColor:'transparent', animation:false,
+    tooltip:{
+      trigger:'axis',
+      axisPointer:{type:'cross', crossStyle:{color:'rgba(55,138,221,0.35)', width:1}},
+      backgroundColor:'#0b1522', borderColor:'rgba(0,212,255,0.25)',
+      textStyle:{color:'#c8daf8', fontSize:10},
+      formatter: function(params){
+        var c=null; for(var i=0;i<params.length;i++){ if(params[i].seriesName==='Price'){ c=params[i]; break; } }
+        if(!c) return '';
+        var d = days[c.dataIndex];
+        var chg = (((+d.close - +d.open)/+d.open)*100).toFixed(2);
+        var e10 = ema10[c.dataIndex], e20 = ema20[c.dataIndex], e50 = ema50[c.dataIndex];
+        return '<b>'+c.name+'</b><br>O:$'+fmt2(d.open)+' H:$'+fmt2(d.high)+' L:$'+fmt2(d.low)+' C:$'+fmt2(d.close)+'<br>'+(chg>=0?'+':'')+chg+'%'
+          + (e10 ? '<br><span style="color:#00e676">EMA10:$'+e10+'</span>' : '')
+          + (e20 ? '<br><span style="color:#ffd740">EMA20:$'+e20+'</span>' : '')
+          + (e50 ? '<br><span style="color:#ff5252">EMA50:$'+e50+'</span>' : '');
+      }
+    },
+    grid:{left:56, right:12, top:18, bottom:60},
+    xAxis:{type:'category', data:labels, axisLine:{lineStyle:{color:'rgba(120,140,180,0.15)'}}, axisLabel:{color:'#7090c8', fontSize:9, interval:Math.floor(days.length/6)}, splitLine:{show:false}},
+    yAxis:{
+      scale:true,
+      splitLine:{lineStyle:{color:'rgba(120,140,180,0.1)', type:'dashed'}},
+      axisLabel:{color:'#7090c8', fontSize:9, formatter:function(v){
+        if (v < 10)  return '$'+v.toFixed(2);
+        if (v < 100) return '$'+v.toFixed(1);
+        return '$'+v.toFixed(0);
+      }}
+    },
+    dataZoom:[
+      {type:'inside', start:zoomStart, end:100, filterMode:'filter'},
+      {type:'slider', start:zoomStart, end:100, bottom:8, height:22, filterMode:'filter', borderColor:'rgba(0,212,255,0.15)', fillerColor:'rgba(0,212,255,0.05)', handleStyle:{color:'#378ADD'}, textStyle:{color:'#7090c8', fontSize:8}, dataBackground:{areaStyle:{color:'rgba(0,212,255,0.04)'}}, showDetail:false}
+    ],
+    series:[
+      {name:'Price', type:'candlestick', data: days.map(function(d){ return [+d.open, +d.close, +d.low, +d.high]; }),
+        itemStyle:{color:'#1D9E75', color0:'#D85A30', borderColor:'#1D9E75', borderColor0:'#D85A30', borderWidth:1},
+        barMaxWidth:10, markArea:{silent:true, data: resAreas.concat(supAreas)}},
+      {name:'EMA10', type:'line', data:ema10, smooth:false, lineStyle:{color:'#00e676', width:1.5}, symbol:'none', connectNulls:false},
+      {name:'EMA20', type:'line', data:ema20, smooth:false, lineStyle:{color:'#ffd740', width:1.5}, symbol:'none', connectNulls:false},
+      {name:'EMA50', type:'line', data:ema50, smooth:false, lineStyle:{color:'#ff5252', width:2}, symbol:'none', connectNulls:false}
+    ]
+  });
+  try{
+    if(G._chartModalResizeObs) G._chartModalResizeObs.disconnect();
+    G._chartModalResizeObs = new ResizeObserver(function(){ try{ ec.resize(); }catch(e){} });
+    G._chartModalResizeObs.observe(canvas);
+  }catch(e){}
+  if(!ec._lockEndWired){
+    ec._lockEndWired = true;
+    ec.on('dataZoom', function(params){
+      if (ec._suppressLock) return;
+      var batch = params.batch || [params];
+      var needsClamp = false;
+      var newStart = null;
+      batch.forEach(function(b){
+        if (b && typeof b.end === 'number' && b.end < 100){
+          needsClamp = true;
+          if (typeof b.start === 'number') newStart = b.start;
+        }
+      });
+      if (needsClamp){
+        ec._suppressLock = true;
+        try { ec.dispatchAction({ type:'dataZoom', start: (newStart != null ? newStart : zoomStart), end: 100 }); }
+        finally { ec._suppressLock = false; }
+      }
+    });
+  }
+  var sub = eid('chart-modal-sub');
+  if(sub){
+    var last = days[days.length-1];
+    var chg = last && last.open ? (((+last.close - +last.open)/+last.open)*100).toFixed(2) : '0.00';
+    sub.textContent = 'Last $'+fmt2(last.close)+' ('+(chg>=0?'+':'')+chg+'%) \u2014 '+days.length+' bars';
+  }
+}
+// Reusable HTML snippet for the inline chart button. Place inside a
+// table cell next to a ticker. Caller passes the ticker symbol; we
+// stop propagation so the row's onclick (e.g. viewDetail) doesn't fire.
+function chartIconBtnHtml(ticker){
+  var t = String(ticker||'').replace(/'/g,'').toUpperCase();
+  if(!t) return '';
+  return '<button class="chart-mini-btn" onclick="event.stopPropagation();openChartModal(\''+t+'\')" '
+    + 'title="Open chart for '+t+' (DAILY + 1MIN, EMAs, S/R)" aria-label="Chart '+t+'">'
+    + '<svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">'
+    + '<path d="M1.5 10.5 V1.5 M1.5 10.5 H10.5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/>'
+    + '<path d="M3 8 L5 5.2 L7 7 L10 3.2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>'
+    + '</svg></button>';
+}
+
 function parseOccSymbol(sym){
   // OCC format: ROOT(1-6 chars) + YYMMDD(6) + C/P + STRIKE(8 digits)
   // Anything that doesn't match this pattern is a stock/ETF, NOT an option.
@@ -20882,7 +21151,7 @@ function renderPositionsTable(pos,srcLabel){
       +equityCellHL                                                                                           // EQUITY
       +'<td class="'+dayPnlCls+'">'+dayPnlTxt+'</td>'                                                        // DAY P/L $
       +'<td class="'+pnlCls+'">'+(p.pnl>=0?'+':'')+fmtD(p.pnl)+'</td>'                                       // TOTAL P/L $
-      +'<td class="col-ticker"><b>'+tk+'</b>'+(isStock?' <span style="color:var(--gry);font-size:10px;font-weight:600;">EQ</span>':'')+'</td>'  // TICKER
+      +'<td class="col-ticker">'+chartIconBtnHtml(tk)+'<b>'+tk+'</b>'+(isStock?' <span style="color:var(--gry);font-size:10px;font-weight:600;">EQ</span>':'')+'</td>'  // TICKER
       +expCell                                                                                                // EXP
       +strikeCell                                                                                             // STRIKE
       +stockPxCellHL                                                                                          // STOCK PRICE
@@ -25261,7 +25530,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.16.19-scan-table-horizontal-swipe';
+var APP_VERSION = '2.16.20-chart-modal-default-tradier';
 // Page-source fallback constants removed. Each visitor now provides their own
 // API credentials via the API tab (or, for Tradier, sets up the worker proxy
 // at worker/tradier-proxy/ \u2014 keys never reach the browser at all).
@@ -26355,15 +26624,16 @@ var PF_PALETTE = [
 
 function pfColor(i){ return PF_PALETTE[i % PF_PALETTE.length]; }
 
-// Canonical default names for built-in columns. If a column's `id` matches
-// a key here but the stored `name` has drifted (e.g. keystrokes landed in
-// the header input by accident), we restore the canonical name on load.
+// Canonical default name for the built-in Tradier column. If a stored
+// column's id is `tradier` but its display name drifted (e.g. accidental
+// keystrokes landed in the header input), we restore "Tradier" on load.
+// 2026-05-11 v2.16.20: Joint / Alex / Bianca / Individual entries removed
+// from this map — they were specific to the original developer's accounts
+// and shouldn't ship as defaults for anyone forking the project. Existing
+// users who already have those columns in their localStorage keep them
+// untouched.
 var PF_CANONICAL_NAMES = {
-  tradier: 'Tradier',
-  joint: 'Joint',
-  alex: 'Alex',
-  bianca: 'Bianca',
-  individual: 'Individual'
+  tradier: 'Tradier'
 };
 
 // ── Data layer ─────────────────────────────────────────────────────────────
@@ -26406,15 +26676,17 @@ function pfLoad(){
       }
     }
   } catch(e){}
-  // default
+  // 2026-05-11 v2.16.20: ship with only the auto-pulled Tradier column.
+  // The previous default seeded four extra manual columns (Joint / Alex /
+  // Bianca / Individual) that were the original developer's personal
+  // sub-accounts and confused new users opening the link. Now the Portfolio
+  // tab opens to a single Tradier column that hydrates from the user's
+  // own API key via pfAutoPullTradier(). Users can still add their own
+  // manual columns with `+ ADD COLUMN`.
   return {
     v: 1,
     columns: [
-      { id:'tradier',    name:'Tradier',    type:'tradier', rows:[] },
-      { id:'joint',      name:'Joint',      type:'manual',  rows:[] },
-      { id:'alex',       name:'Alex',       type:'manual',  rows:[] },
-      { id:'bianca',     name:'Bianca',     type:'manual',  rows:[] },
-      { id:'individual', name:'Individual', type:'manual',  rows:[] }
+      { id:'tradier', name:'Tradier', type:'tradier', rows:[] }
     ]
   };
 }
