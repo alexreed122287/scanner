@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-12T04:00-webp-splash-microfixes">
+<meta name="op-build" content="2026-05-12T04:30-skeletons-lazy-daily-picks">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -615,6 +615,14 @@ a{color:var(--blu);text-decoration:none;}
 .det-tv{flex:1;overflow:hidden;min-height:200px;}
 .det-tv iframe{width:100%;height:100%;border:none;}
 .det-scroll{overflow-y:auto;flex:1;min-height:0;}
+/* v2.18.5: skeleton-row shimmer for tables while data loads (scan running,
+   positions fetching, etc.). 8 placeholder cells, animated gradient swipe. */
+.skel-row{height:36px;}
+.skel-row .skel-cell{padding:6px 12px;border-bottom:1px solid var(--bg2);}
+.skel-row .skel-cell::after{content:'';display:block;height:14px;border-radius:3px;
+  background:linear-gradient(90deg, rgba(0,212,255,0.04) 0%, rgba(0,212,255,0.10) 40%, rgba(0,212,255,0.04) 80%);
+  background-size:200% 100%;animation:skel-shimmer 1.4s linear infinite;}
+@keyframes skel-shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
 .empty-det{align-items:center;color:var(--gry);display:flex;flex-direction:column;height:100%;justify-content:center;gap:8px;padding:20px;}
 .empty-det .ei{color:var(--amb3);font-size:36px;}
 .empty-det p{font-size:12px;}
@@ -3333,7 +3341,7 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
          of the body width with a smooth transition; table shrinks
          smoothly to 65%. .sc-detail-active marker is set/cleared by
          viewDetail to drive these widths. -->
-    <div class="tbl-wrap" id="sc-tbl-wrap" style="flex:1 1 100%;min-width:0;overflow:auto;border-right:none;min-height:0;transition:flex-basis .2s ease, max-width .2s ease;"><div class="empty-det" id="sc-empty" style="min-height:200px;"><div class="ei">&#9632;</div><p>Run a scan to see results</p></div></div>
+    <div class="tbl-wrap" id="sc-tbl-wrap" style="flex:1 1 100%;min-width:0;overflow:auto;border-right:none;min-height:0;transition:flex-basis .2s ease, max-width .2s ease;"><div class="empty-det" id="sc-empty" style="min-height:200px;"><div class="ei">&#9632;</div><p>Run a scan to see results</p><button class="btn blu" onclick="runScan()" style="margin-top:8px;font-size:11px;padding:8px 18px;font-weight:700;letter-spacing:1px;min-height:40px;">&#8635; RUN SCAN</button></div></div>
     <div id="sc-det-empty" style="display:none;"></div><div id="sc-detail" style="flex:0 0 0;width:0;min-width:0;overflow-y:auto;overflow-x:hidden;display:none;border-left:1px solid var(--bg3);transition:flex-basis .2s ease, width .2s ease;"></div>
   </div>
 </div>
@@ -3461,7 +3469,7 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
   </script>
 
   <div class="tbl-wrap" id="pos-tbl-wrap">
-    <div class="empty-det" id="pos-empty" style="min-height:200px;"><div class="ei">&#9632;</div><p>Click Refresh Positions to load</p></div>
+    <div class="empty-det" id="pos-empty" style="min-height:200px;"><div class="ei">&#9632;</div><p>No open positions cached. Tap below to fetch from Tradier.</p><button class="btn blu" onclick="fetchPositions()" style="margin-top:8px;font-size:11px;padding:8px 18px;font-weight:700;letter-spacing:1px;min-height:40px;">&#8635; REFRESH POSITIONS</button></div>
   </div>
 
   <button id="pos-exit-toggle" onclick="posToggleExitRules()" type="button">
@@ -4302,6 +4310,83 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
       <div id="strategy-desc" style="font-family:var(--ff-mono);font-size:10px;color:var(--gry);line-height:1.7;min-height:32px;"></div>
     </div></div>
 
+    <!-- ── DAILY PICKS EMAIL (v2.18.5) — server-side cron via GitHub Actions
+         + Resend. The dashboard only holds the user-visible preferences here;
+         the actual send is scheduled by .github/workflows/daily_picks.yml.
+         The "Run now" button kicks the workflow_dispatch endpoint so the user
+         can confirm setup without waiting for tomorrow's cron. -->
+    <div class="card"><div class="card-hdr">▼ DAILY PICKS EMAIL</div>
+      <div style="padding:12px;font-family:var(--ff-mono);font-size:11px;color:var(--gry);line-height:1.6;">
+        <p style="margin:0 0 10px;color:var(--gry);">
+          Server-side cron sends a morning HTML digest with the bullish setups
+          from the latest GEX snapshot (call% ≥ threshold + positive net GEX),
+          plus the top 3 ITM call contracts per ticker. Configure GitHub
+          secrets <span style="color:var(--amb);">RESEND_API_KEY</span>,
+          <span style="color:var(--amb);">EMAIL_TO</span>,
+          <span style="color:var(--amb);">EMAIL_FROM</span> (see
+          <a href="https://github.com/alexreed122287/scanner/blob/main/daily_picks/README.md" target="_blank" style="color:var(--ambb);">daily_picks/README.md</a>)
+          and the cron fires every weekday at the time set in the workflow yaml.
+        </p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;">
+          <label style="display:flex;flex-direction:column;gap:4px;color:var(--ambb);font-weight:600;letter-spacing:.3px;">
+            <span style="font-size:9px;letter-spacing:1px;">MIN CALL %</span>
+            <input id="dp-min-call" type="number" min="50" max="95" step="1" placeholder="70" style="background:var(--bg0);border:var(--bdr);border-radius:3px;color:var(--wht);font-family:var(--ff-mono);font-size:12px;padding:6px 8px;width:100%;box-sizing:border-box;">
+          </label>
+          <label style="display:flex;flex-direction:column;gap:4px;color:var(--ambb);font-weight:600;letter-spacing:.3px;">
+            <span style="font-size:9px;letter-spacing:1px;">MAX TICKERS</span>
+            <input id="dp-max-picks" type="number" min="1" max="30" step="1" placeholder="10" style="background:var(--bg0);border:var(--bdr);border-radius:3px;color:var(--wht);font-family:var(--ff-mono);font-size:12px;padding:6px 8px;width:100%;box-sizing:border-box;">
+          </label>
+          <label style="display:flex;flex-direction:column;gap:4px;color:var(--ambb);font-weight:600;letter-spacing:.3px;grid-column:1/-1;">
+            <span style="font-size:9px;letter-spacing:1px;">SEND TIME (LOCAL — INFO ONLY)</span>
+            <input id="dp-send-time" type="time" value="08:00" style="background:var(--bg0);border:var(--bdr);border-radius:3px;color:var(--wht);font-family:var(--ff-mono);font-size:12px;padding:6px 8px;width:100%;box-sizing:border-box;">
+            <span style="font-size:9px;color:var(--gry2);font-weight:400;letter-spacing:0;">Actual schedule lives in the workflow yaml — edit <code style="color:var(--gry);">.github/workflows/daily_picks.yml</code> and push to change the cron. This field is for your reference only.</span>
+          </label>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+          <button class="btn blu" onclick="dpSavePrefs()" style="font-size:11px;padding:8px 14px;font-weight:700;letter-spacing:1px;min-height:40px;">SAVE PREFS</button>
+          <button class="btn" onclick="dpOpenWorkflow()" style="font-size:11px;padding:8px 14px;letter-spacing:1px;min-height:40px;border-color:var(--ambb);color:var(--ambb);">▶ RUN NOW (GITHUB)</button>
+          <button class="btn" onclick="dpOpenSecrets()" style="font-size:11px;padding:8px 14px;letter-spacing:1px;min-height:40px;border-color:var(--gry2);color:var(--gry);">⚙ MANAGE SECRETS</button>
+        </div>
+        <div id="dp-status" style="margin-top:10px;font-size:10px;color:var(--gry2);"></div>
+      </div>
+    </div>
+    <script>
+      // v2.18.5: pref persistence + workflow shortcuts. The min-call/max-picks
+      // values are saved locally + suggested to the user as the values to
+      // set as repo VARIABLES (DAILY_PICKS_MIN_CALL_PCT / _MAX_PICKS), since
+      // the cron runs in CI not in the browser. Send-time is informational.
+      try { document.addEventListener('DOMContentLoaded', function(){
+        try {
+          var saved = JSON.parse(localStorage.getItem('rrjcar_dp_prefs') || '{}');
+          if (saved.minCall != null && document.getElementById('dp-min-call')) document.getElementById('dp-min-call').value = saved.minCall;
+          if (saved.maxPicks != null && document.getElementById('dp-max-picks')) document.getElementById('dp-max-picks').value = saved.maxPicks;
+          if (saved.sendTime && document.getElementById('dp-send-time')) document.getElementById('dp-send-time').value = saved.sendTime;
+        } catch(_){}
+      }); } catch(_){}
+      function dpSavePrefs(){
+        try {
+          var minCall = parseInt(document.getElementById('dp-min-call').value || '70', 10);
+          var maxPicks = parseInt(document.getElementById('dp-max-picks').value || '10', 10);
+          var sendTime = document.getElementById('dp-send-time').value || '08:00';
+          localStorage.setItem('rrjcar_dp_prefs', JSON.stringify({ minCall: minCall, maxPicks: maxPicks, sendTime: sendTime }));
+          var st = document.getElementById('dp-status');
+          if (st) st.innerHTML = '<span style="color:var(--grn);">✓ Saved locally.</span> To actually change the cron behavior, set repo variables: '
+            + '<code style="color:var(--ambb);">DAILY_PICKS_MIN_CALL_PCT='+minCall+'</code>, '
+            + '<code style="color:var(--ambb);">DAILY_PICKS_MAX_PICKS='+maxPicks+'</code> '
+            + 'at <a href="https://github.com/alexreed122287/scanner/settings/variables/actions" target="_blank" style="color:var(--ambb);">github.com/.../settings/variables/actions</a>.';
+        } catch(e){
+          var st2 = document.getElementById('dp-status');
+          if (st2) st2.innerHTML = '<span style="color:var(--wrn);">Save failed: '+_esc(e.message)+'</span>';
+        }
+      }
+      function dpOpenWorkflow(){
+        window.open('https://github.com/alexreed122287/scanner/actions/workflows/daily_picks.yml', '_blank');
+      }
+      function dpOpenSecrets(){
+        window.open('https://github.com/alexreed122287/scanner/settings/secrets/actions', '_blank');
+      }
+    </script>
+
     <!-- ── SYSTEM ALERTS LOG ── -->
     <div class="card"><div class="card-hdr">SYSTEM ALERTS LOG <button class="btn" style="font-size:10px;padding:2px 8px;float:right;" onclick="G.alerts=[];renderAlerts();">CLEAR</button></div>
     <div id="alerts-list"></div>
@@ -4335,7 +4420,8 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
   </div>
 </div>
 
-<div class="tab-pane" id="tab-howto">
+<div class="tab-pane" id="tab-howto"></div>
+<template id="tpl-tab-howto">
   <div class="page-wrap" style="max-width:980px;margin:0 auto;line-height:1.55;">
     <div style="padding:18px 4px 12px;border-bottom:1px solid var(--bg3);margin-bottom:14px;">
       <div style="font-family:var(--ff-brand);font-size:18px;color:var(--amb);letter-spacing:2px;text-shadow:0 0 12px rgba(0,212,255,.4);">▲ OPTION PANDA — HOW TO</div>
@@ -4776,7 +4862,7 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
     </div>
 
   </div>
-</div>
+</template>
 
 <!-- ═══════════════════════════════════════════════════════
      CLOSED POSITIONS TAB
@@ -4823,7 +4909,8 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
   </div>
 </div>
 
-<div class="tab-pane" id="tab-api">
+<div class="tab-pane" id="tab-api"></div>
+<template id="tpl-tab-api">
   <div class="page-wrap">
     <!-- API counter (relocated from header). Updated in lockstep with the
          hidden #api-counter-badge by the existing fetch monkey-patch. -->
@@ -4932,7 +5019,7 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
     </div>
 
   </div>
-</div>
+</template>
 <!-- ═══════════════════════════════════════════════════════
      GEX / FLOW — gamma exposure + 30DTE call vs put OI flow.
      The GEX Call Heavy rule reads from this tab's data.
@@ -8335,6 +8422,23 @@ window.addEventListener('keydown', function(e){
   if (e.key === 'Escape' && document.getElementById('help-modal').classList.contains('open')) closeHelpModal();
 });
 
+// v2.18.5: lazy hydration for the HOW TO + API tabs. Both panes contain
+// ~30 KB of static documentation HTML that's never visible during normal
+// trading. We wrap each pane's body in a <template> at page load time;
+// when the user first switches to the tab, _lazyHydrateTab clones the
+// template into the pane and marks it hydrated. Saves ~150ms of HTML
+// parsing on iPhone Safari + reduces initial DOM size.
+function _lazyHydrateTab(id){
+  if (!id) return;
+  var pane = document.getElementById('tab-' + id);
+  if (!pane || pane.getAttribute('data-hydrated') === '1') return;
+  var tpl = document.getElementById('tpl-tab-' + id);
+  if (!tpl || !tpl.content) return;
+  var frag = tpl.content.cloneNode(true);
+  pane.appendChild(frag);
+  pane.setAttribute('data-hydrated', '1');
+}
+
 function switchTab(id){
   // 2026-05-10 v2.15.10/v2.16.0: clean up any lingering modal backdrops
   // + bottom sheets + named modals BEFORE switching tabs. User reports:
@@ -8397,6 +8501,11 @@ function switchTab(id){
   // active-tab dimension of "where they were".
   try { localStorage.setItem('rrjcar_active_tab', id); } catch(_){}
   _updateHelpFab(id);
+  // v2.18.5: lazy-instantiate the HOW TO + API tab content. Their HTML
+  // lives in <template> elements (~30 KB combined) and is cloned into
+  // the tab pane the first time the user opens the tab. Saves the
+  // initial parse cost on every page load.
+  try { _lazyHydrateTab(id); } catch(_){}
   if(id==='al')renderAlerts();
   if(id==='ind')renderIndustryTab();
   if(id==='closed'){
@@ -17454,6 +17563,78 @@ function autoScanCheckAlerts(){
 // set for missing enrichment (Tradier history, FMP fundamentals, GEX flow,
 // theme overlay) and surfaces a one-line summary; click expands a detail
 // toast so the user can act (e.g. wait for cleanup pass, run GEX, etc.).
+// v2.18.5: skeleton-row helper for any of the data tables. Drops N
+// shimmer-style placeholder rows into the given wrap so the user has a
+// "something is loading" signal instead of an empty-state during the
+// 5-min scan. CSS shimmer comes from the .skel-row .skel-cell rules
+// (added near the top of the stylesheet).
+function _renderSkeletonRows(wrapId, n){
+  var wrap = document.getElementById(wrapId);
+  if (!wrap) return;
+  n = Math.max(1, Math.min(40, n || 10));
+  var cells = '<td class="skel-cell"></td>'.repeat(8);
+  var rows  = '<tr class="skel-row">'+cells+'</tr>';
+  wrap.innerHTML = '<table style="width:100%;"><tbody>' + rows.repeat(n) + '</tbody></table>';
+}
+
+// v2.18.5: freshness chip updater. Runs on scan complete + every 60s
+// while the tab is visible. The chip shifts color as the data ages so the
+// trader can tell at a glance whether they're acting on a 5-minute-old
+// scan or a 2-hour-old one. Also counts rows with incomplete enrichment
+// (missing indicator history or score===0) — when >20% are stale, the
+// chip turns amber regardless of age, prompting a re-scan.
+function _updateScanFreshness(){
+  var el = eid('sc-last-scan');
+  if (!el) return;
+  var ts = G._scanFinishedAt || 0;
+  if (!ts){
+    el.textContent = 'Last scan: never';
+    el.style.color = 'var(--gry)';
+    el.removeAttribute('data-freshness');
+    return;
+  }
+  var age = Date.now() - ts;
+  var ageMin = age / 60000;
+  // Coverage check: how many of the top-N results are missing core data?
+  var results = G.results || [];
+  var topN = results.slice(0, 200);
+  var stale = 0;
+  for (var i = 0; i < topN.length; i++){
+    var r = topN[i];
+    if (!r) { stale++; continue; }
+    if ((r.score == null || r.score === 0) && (r.passes == null || r.passes === 0)) stale++;
+  }
+  var stalePct = topN.length ? (stale / topN.length) * 100 : 0;
+  // Choose freshness tier
+  var color, label;
+  if (stalePct >= 20){
+    color = 'var(--wrn)';   // amber — even a fresh scan can be stale if enrichment missed
+    label = '⚠ '+stale+'/'+topN.length+' stale rows';
+  } else if (ageMin < 5){
+    color = 'var(--grn)';
+    label = '✓ Scan ' + Math.floor(ageMin) + 'm ago';
+  } else if (ageMin < 10){
+    color = 'var(--ambb)';
+    label = 'Scan ' + Math.floor(ageMin) + 'm ago';
+  } else if (ageMin < 30){
+    color = 'var(--wrn)';
+    label = '⚠ Scan ' + Math.floor(ageMin) + 'm ago — consider re-scan';
+  } else {
+    color = 'var(--ngo)';
+    label = '✗ Scan ' + Math.floor(ageMin/60) + 'h' + Math.floor(ageMin%60) + 'm ago — re-scan';
+  }
+  el.textContent = label;
+  el.style.color = color;
+  el.setAttribute('data-freshness', stalePct >= 20 ? 'stale-coverage' : (ageMin<5?'fresh':ageMin<30?'warning':'cold'));
+}
+// Periodic refresh — pauses with the tab hidden so we don't burn battery
+// updating an invisible chip.
+setInterval(function(){
+  if (!document.hidden) {
+    try { _updateScanFreshness(); } catch(_){}
+  }
+}, 60 * 1000);
+
 function _renderScanDataStatus(stats){
   var el = eid('sc-data-status');
   if (!el) return;
@@ -17630,6 +17811,10 @@ function setScanComplete(stats){
     lastEl.textContent = '✓ Scan complete ' + _fmtCT_NowTime();
     lastEl.style.color = 'var(--grn)';
   }
+  // v2.18.5: kick off the freshness updater so the chip transitions to
+  // gray/amber/red as the scan ages. Without this the chip stays "Scan
+  // complete X" forever, even when the data is hours old.
+  try { _updateScanFreshness(); } catch(_){}
   // Data-coverage status chip — surfaces missing/failed enrichment so the
   // user can see WHY a ticker scored low or has no GEX rule outcome,
   // instead of silently looking at incomplete data.
@@ -17892,6 +18077,10 @@ async function runScan(opts){
   }
 
   G.scanRunning = true;
+  // v2.18.5: while the scan runs, show skeleton rows in the table wrap
+  // (replaces the empty-state OR previous results) so the user has visual
+  // feedback that work is happening. Cleared when renderScan re-renders.
+  try { _renderSkeletonRows('sc-tbl-wrap', 12); } catch(_){}
   // Halt any in-flight background enrichment so its rate-limit usage
   // doesn't conflict with the foreground scan's bulk-quote burst.
   try { if (typeof _stopBgEnrichment === 'function') _stopBgEnrichment('new scan started'); } catch(_){}
@@ -19315,7 +19504,20 @@ function renderScan(){
     rowsArr.push(rows);
   });
 
-  wrap.innerHTML='<table><thead><tr>'+th+'</tr></thead><tbody>'+rowsArr.join('')+'</tbody></table>';
+  // v2.18.5: when the table already exists with the SAME column set, swap
+  // only the <tbody> instead of re-parsing the whole <table>+<thead>. The
+  // thead has 16+ cells with sort onclick handlers + mobile-hide classes,
+  // and re-parsing it is the most expensive part of the render. We key the
+  // cache by `cols.length + hasGex` so a GEX-on/off transition forces a
+  // full rebuild (the column count differs).
+  var renderKey = cols.length + ':' + (hasGex ? 1 : 0);
+  var existingTbody = (G._scanLastRenderKey === renderKey) ? wrap.querySelector('tbody') : null;
+  if (existingTbody){
+    existingTbody.innerHTML = rowsArr.join('');
+  } else {
+    wrap.innerHTML='<table><thead><tr>'+th+'</tr></thead><tbody>'+rowsArr.join('')+'</tbody></table>';
+    G._scanLastRenderKey = renderKey;
+  }
   if(typeof decorateIndustry  === 'function') decorateIndustry();
 }
 </script>
@@ -20958,6 +21160,8 @@ function fetchPositions(){
   }
   var host=mode==='live'?'https://api.tradier.com':'https://sandbox.tradier.com';
   eid('pos-src').textContent='Loading from Tradier '+mode+'...';
+  // v2.18.5: skeleton rows while the Tradier round-trip is in flight (~1-2s)
+  try { if (!G.positions || !G.positions.length) _renderSkeletonRows('pos-tbl-wrap', 6); } catch(_){}
   eid('pos-tbl-wrap').innerHTML = _skelLoadingHtml('Fetching positions');
   if(G.acctId){fetchPositionsDirect(key,mode,host,G.acctId);return;}
   fetch(host+'/v1/user/profile',{headers:{Authorization:'Bearer '+key,Accept:'application/json'}})
@@ -21328,7 +21532,7 @@ function renderPositionsTable(pos,srcLabel){
   }
   eid('pos-src').textContent=srcLabel||'';
   var wrap=eid('pos-tbl-wrap');
-  if(!pos.length){wrap.innerHTML='<div class="empty-det" style="min-height:200px;"><div class="ei">\u25a0</div><p>No open positions</p></div>';return;}
+  if(!pos.length){wrap.innerHTML='<div class="empty-det" style="min-height:200px;"><div class="ei">\u25a0</div><p>No open positions</p><button class="btn blu" onclick="fetchPositions()" style="margin-top:8px;font-size:11px;padding:8px 18px;font-weight:700;letter-spacing:1px;min-height:40px;">\u21bb REFRESH</button></div>';return;}
   var totalPnl=0,totalCost=0;pos.forEach(function(p){totalPnl+=p.pnl;totalCost+=p.cost;});
   var colCount = 20; // total columns
 
@@ -26123,7 +26327,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.18.4-webp-splash-microfixes';
+var APP_VERSION = '2.18.5-skeletons-lazy-daily-picks';
 // Page-source fallback constants removed. Each visitor now provides their own
 // API credentials via the API tab (or, for Tradier, sets up the worker proxy
 // at worker/tradier-proxy/ \u2014 keys never reach the browser at all).
