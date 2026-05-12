@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-12T05:30-ah-flat-uses-close">
+<meta name="op-build" content="2026-05-12T05:45-use-change-usd-fallback">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -26283,30 +26283,44 @@ function updateHeaderQuotes(){
       var hasApiPct = (raw !== undefined && raw !== null && raw !== '' && !isNaN(rawNum));
       var prevC = parseFloat(q.prevclose);
       var todayC = parseFloat(q.close);
-      // v2.18.9: the canonical AH case — Tradier reports `last === prevclose`
-      // (no AH activity yet) AND `change_percentage === 0` AND `close`
-      // contains today's actual RTH close that differs from prevclose.
-      // Use (close - prevclose)/prevclose so the ribbon shows TODAY's
-      // daily change for the entire after-hours window, instead of
-      // collapsing to 0% the moment the user looks past 4 PM ET.
+      var changeUsd = parseFloat(q.change);
+      var hasChangeUsd = !isNaN(changeUsd) && Math.abs(changeUsd) > 0.001;
+      // v2.18.10: the bullet-proof AH path. The thing Tradier ALWAYS gets
+      // right is `change` (the dollar amount vs prior close) — even when
+      // change_percentage and/or prevclose come back as 0/empty/missing.
+      // So if q.change is non-zero, derive % from it: chg% = change /
+      // (last - change) * 100. This bypasses every flavor of Tradier's
+      // broken-percentage payload, including the AH equity case where
+      // last/prevclose/change_percentage all return numerically equal.
       var lastEqPrev = price > 0 && prevC > 0 && Math.abs(price - prevC) < 0.0001;
       var hasGoodTodayClose = todayC > 0 && prevC > 0 && Math.abs(todayC - prevC) > 0.0001;
       var ahFlatDaily = lastEqPrev && hasGoodTodayClose;
-      // Suspicious zero: API says 0 but price != prevclose → bypass.
-      var suspiciousZero = hasApiPct && rawNum === 0 && prevC > 0 && price > 0 && Math.abs(price - prevC) > 0.0001;
+      // Suspicious zero: API says 0 but EITHER prevclose disagrees with
+      // price OR we have a non-zero dollar change. Both signals mean the
+      // 0% is bogus and we should recompute.
+      var priceVsPrevNonzero = prevC > 0 && price > 0 && Math.abs(price - prevC) > 0.0001;
+      var suspiciousZero = hasApiPct && rawNum === 0 && (priceVsPrevNonzero || hasChangeUsd);
       if (ahFlatDaily){
         chgPct = ((todayC - prevC) / prevC) * 100;
       } else if (hasApiPct && !suspiciousZero){
         chgPct = rawNum;
       } else {
-        // Recompute from prevclose
-        if (prevC > 0 && price > 0) chgPct = ((price - prevC) / prevC) * 100;
-        // Recompute from today's close (used during AH when prevclose is
-        // yesterday's and close is today's RTH close)
+        // PRIMARY: derive from `change` (dollar) when present — most robust
+        // path. Works whether or not prevclose / close are populated.
+        if (hasChangeUsd && price > 0){
+          var derivedPrev = price - changeUsd;
+          if (derivedPrev > 0.0001) chgPct = (changeUsd / derivedPrev) * 100;
+        }
+        // SECONDARY: recompute from prevclose
+        if ((chgPct === undefined || isNaN(chgPct)) && prevC > 0 && price > 0){
+          chgPct = ((price - prevC) / prevC) * 100;
+        }
+        // TERTIARY: today's close (AH where prevclose is yesterday's and
+        // close is today's RTH close)
         if ((chgPct === undefined || isNaN(chgPct)) ){
           if (todayC > 0 && todayC !== price) chgPct = ((price - todayC) / todayC) * 100;
         }
-        // AH-specific delta as last resort
+        // QUATERNARY: AH-specific delta as last resort
         if ((chgPct === undefined || isNaN(chgPct)) && typeof ahDelta === 'function'){
           var ahd = ahDelta(q);
           if (ahd && ahd.pct) chgPct = ahd.pct;
@@ -26349,7 +26363,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.18.9-ah-flat-uses-close';
+var APP_VERSION = '2.18.10-use-change-usd-fallback';
 // Page-source fallback constants removed. Each visitor now provides their own
 // API credentials via the API tab (or, for Tradier, sets up the worker proxy
 // at worker/tradier-proxy/ \u2014 keys never reach the browser at all).
