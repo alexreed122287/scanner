@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-12T08:00-ah-percent-zero-fix">
+<meta name="op-build" content="2026-05-12T09:00-data-gap-scope-fix">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -14496,6 +14496,12 @@ async function _bgEnrichTick() {
   if (st.enriched > 0 && st.enriched % 10 === 0) {
     try { G.results.sort(_resultRankCompare); G.filtered = excludedFilteredResults(); renderBuySig(); renderScan(); } catch(_){}
   }
+  // 2026-05-12 v2.18.16: refresh the data-status chip as the
+  // background pass cures Tradier history gaps. Previously the chip
+  // was computed once after the bulk pass and never updated, so users
+  // saw "Tradier history N/200 missing" frozen until next scan even
+  // though background enrichment was steadily closing the gap.
+  try { if (typeof _renderScanDataStatus === 'function') _renderScanDataStatus(); } catch(_){}
 }
 
 function _stopBgEnrichment(reason) {
@@ -14512,6 +14518,8 @@ function _stopBgEnrichment(reason) {
     renderScan();
   } catch(_){}
   _renderBgEnrichBadge();
+  // 2026-05-12 v2.18.16: final chip refresh once background completes.
+  try { if (typeof _renderScanDataStatus === 'function') _renderScanDataStatus(); } catch(_){}
 }
 
 function _pauseBgEnrichment(reason) {
@@ -17654,35 +17662,46 @@ setInterval(function(){
 function _renderScanDataStatus(stats){
   var el = eid('sc-data-status');
   if (!el) return;
-  var topN = Math.min(200, (G.results || []).length);
-  if (!topN) { el.style.display = 'none'; return; }
-  var top = G.results.slice(0, topN);
-  var indMissing = top.filter(function(r){ return !r.indEnriched; }).length;
-  var fmpMissing = top.filter(function(r){ return !r.fmpEnriched; }).length;
+  // 2026-05-12 v2.18.16: scope the coverage check to the FOREGROUND
+  // enrichment limit (SC_ENRICH_LIMIT, default 60), not the legacy
+  // top-200. Previously this chip checked 200 tickers but foreground
+  // enrichment is bounded to 60 — so ranks 61-200 were ALWAYS flagged
+  // as "missing", producing "Tradier history 140/200 · FMP fundamentals
+  // 194/200" the user reported. Background pass (only Tradier history,
+  // not FMP) eventually fills ranks 61-200 but that's separate scope.
+  var foregroundN = Math.min(window._SC_ENRICH_LIMIT || 60, (G.results || []).length);
+  if (!foregroundN) { el.style.display = 'none'; return; }
+  var foreground = G.results.slice(0, foregroundN);
+  var indMissing = foreground.filter(function(r){ return !r.indEnriched; }).length;
+  var fmpMissing = foreground.filter(function(r){ return !r.fmpEnriched; }).length;
+  // GEX coverage is broader (top 200 typically), keep its own scope.
+  var gexScopeN = Math.min(200, (G.results || []).length);
   var gexCovered = (G.gexData && G.gexData.length) || 0;
-  var gexMissing = topN - gexCovered;
+  var gexMissing = Math.max(0, gexScopeN - gexCovered);
   var themesMissing = !(typeof G_THEME_OVERLAY !== 'undefined' && G_THEME_OVERLAY && G_THEME_OVERLAY.ticker2theme && Object.keys(G_THEME_OVERLAY.ticker2theme).length);
   var fmpPaused = false;
   try {
     var pausedUntil = parseInt(localStorage.getItem('rrjcar_fmp_paused_until') || '0', 10);
     if (pausedUntil && Date.now() < pausedUntil) fmpPaused = true;
   } catch(_){}
+  // Background pass progress (Tradier history only, ranks 61-200).
+  var bgActive = !!(window._bgEnrich && window._bgEnrich.active);
   var issues = [];
   // Stragglers cleanup runs at +3s, so up to 5% indMissing is expected pre-cleanup
-  if (indMissing > Math.max(5, topN * 0.05)) {
-    issues.push({label:'Tradier history', n:indMissing, total:topN, reason:'Rate-limited or 429s on history fetch — cleanup pass retries in ~3s.'});
+  if (indMissing > Math.max(5, foregroundN * 0.05)) {
+    issues.push({label:'Tradier history', n:indMissing, total:foregroundN, reason:'Rate-limited or 429s on history fetch — cleanup pass retries in ~3s.'});
   }
-  if (fmpMissing > Math.max(10, topN * 0.10) && !fmpPaused) {
-    issues.push({label:'FMP fundamentals', n:fmpMissing, total:topN, reason:'FMP didn\'t return profile/grades for these tickers — coverage gap or rate-limited.'});
+  if (fmpMissing > Math.max(10, foregroundN * 0.10) && !fmpPaused) {
+    issues.push({label:'FMP fundamentals', n:fmpMissing, total:foregroundN, reason:'FMP didn\'t return profile/grades for these tickers — coverage gap, expired key, or rate-limited.'});
   }
   if (fmpPaused) {
-    issues.push({label:'FMP', n:topN, total:topN, reason:'FMP API paused (likely 429 or 402 hit). Resumes automatically.'});
+    issues.push({label:'FMP', n:foregroundN, total:foregroundN, reason:'FMP API paused (likely 429 or 402 hit). Resumes automatically.'});
   }
   if (gexMissing > 0) {
-    issues.push({label:'GEX/Flow', n:gexMissing, total:topN, reason:'Run GEX tab or click RUN on individual rows. GEX auto-fires 20s after scan if a key is configured.'});
+    issues.push({label:'GEX/Flow', n:gexMissing, total:gexScopeN, reason:'Run GEX tab or click RUN on individual rows. GEX auto-fires 20s after scan if a key is configured.'});
   }
   if (themesMissing) {
-    issues.push({label:'Theme overlay', n:topN, total:topN, reason:'theme_scores.json failed to load — Strong Sector + theme filter rules will pass-through.'});
+    issues.push({label:'Theme overlay', n:foregroundN, total:foregroundN, reason:'theme_scores.json failed to load — Strong Sector + theme filter rules will pass-through.'});
   }
   if (!issues.length) {
     el.style.display = 'inline-block';
@@ -18304,6 +18323,12 @@ function finishScan(){
   // rank 60 still appear in the scan list with bulk-quote scores; clicking
   // their detail pane fetches indicator history on-demand.
   var SC_ENRICH_LIMIT = 60;
+  // 2026-05-12 v2.18.16: expose to window so the data-status chip
+  // (_renderScanDataStatus, scoped to /scope/ matching this constant)
+  // can read it without duplicating the magic number. Used to be 200
+  // in the chip — which falsely flagged ranks 61-200 as "missing" even
+  // though they were never in the foreground enrichment scope.
+  window._SC_ENRICH_LIMIT = SC_ENRICH_LIMIT;
   var enrichTotal = Math.min(SC_ENRICH_LIMIT, G.results.length);
   var fmpDone = 0, indDone = 0;
   // Watchdog — after 6 minutes, finalize the scan no matter what's still in
@@ -18551,7 +18576,8 @@ function finishScan(){
   }
 
   // Sequential enrichment queue — one ticker at a time, no browser lockup.
-  // Same SC_ENRICH_LIMIT (200) as the FMP queue.
+  // Same SC_ENRICH_LIMIT (60) as the FMP queue. Comment used to say 200
+  // — that was the legacy cap before the 2026-04-29 retune to 60.
   var enrichQueue = G.results.slice(0, SC_ENRICH_LIMIT).map(function(r){ return r.ticker; });
   var enrichIdx = 0;
   function enrichNext(){
@@ -26514,7 +26540,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.18.15-ah-percent-zero-fix';
+var APP_VERSION = '2.18.16-data-gap-scope-fix';
 // Page-source fallback constants removed. Each visitor now provides their own
 // API credentials via the API tab (or, for Tradier, sets up the worker proxy
 // at worker/tradier-proxy/ \u2014 keys never reach the browser at all).
