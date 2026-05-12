@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-12T02:30-ct-timezone-fix">
+<meta name="op-build" content="2026-05-12T03:30-tier-ab-cleanup">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -4348,7 +4348,7 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
           <li><b>Manage open positions</b> from the POSITIONS tab. Enable Trailing Stop and Smart Exits at the bottom of that tab to auto-close on adverse moves.</li>
         </ol>
         <div style="background:var(--amb3);padding:8px 12px;border-radius:3px;margin-top:8px;font-family:var(--ff-mono);font-size:11px;color:var(--ambb);">
-          <b>Pro tip:</b> Page reloads preserve your scan results, GEX data, positions, and trail-stop config via localStorage — no re-fetch on refresh. Cache TTLs: scan results 30min, GEX 24h, positions 5min.
+          <b>Pro tip:</b> Page reloads preserve your scan results, GEX data, positions, and trail-stop config via localStorage — no re-fetch on refresh. Cache TTLs: scan results 30min, GEX 6h, positions 5min.
         </div>
       </div>
     </div>
@@ -4734,7 +4734,7 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
         <p>Every external data source has a localStorage cache to minimize API calls. TTLs:</p>
         <ul style="padding-left:20px;">
           <li><b>Scan results</b> — 30 minutes. Restored on tab switch and page reload.</li>
-          <li><b>GEX/Flow</b> — 24 hours. Persists overnight; OI moves daily.</li>
+          <li><b>GEX/Flow</b> — 6 hours (v2.18.0 — was 24h, tightened so intraday vol spikes don't show stale OI).</li>
           <li><b>Positions</b> — 5 minutes. Click REFRESH on the Positions tab for live.</li>
           <li><b>Tradier expirations</b> — 6 hours (intraday-stable).</li>
           <li><b>Tradier history</b> — 24 hours (daily bars don't change intraday).</li>
@@ -4755,7 +4755,7 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
           <li><b>"Scanner shows random tickers"</b> — fixed 2026-05-02. If you see them, hard-reload (Cmd+Shift+R / Ctrl+Shift+R) to bust browser cache.</li>
           <li><b>"⚠ data gaps after scan"</b> — informational. Top 60 tickers always fully enrich; ranks 61–200 fill in via background pass over the next ~2 minutes. Tradier history takes longer than FMP because indicator-history fetches are paced harder to avoid 429s.</li>
           <li><b>"Buy notification fired before scan finished"</b> — fixed 2026-05-03. Notifications now fire only after the stragglers cleanup pass completes (~3–5s after scan-complete), not on partial data.</li>
-          <li><b>"GEX not caching"</b> — TTL bumped to 24h on 2026-05-03. If you reload within 24h of a successful runGex, the data hydrates immediately. Older cache may need one fresh runGex to populate the new format.</li>
+          <li><b>"GEX not caching"</b> — TTL is 6h (v2.18.0). If you reload within 6h of a successful runGex, the data hydrates immediately. Older cache needs a fresh runGex.</li>
           <li><b>"Indices wrap to multiple rows on small windows"</b> — they horizontal-scroll on laptop now. iPhone shows them in a single horizontal-scroll strip below the wordmark.</li>
           <li><b>"Sectors / Themes dropdown hidden behind table"</b> — fixed 2026-05-03 via position:fixed. Hard-reload if still occurring.</li>
           <li><b>"STEX score 79 ranks above TEAM score 100"</b> — you have the PRE/POST MARKET preset active, which sorts by absolute gap % instead of score. Click ✕ CLEAR in the STRATEGY row to restore score-based ranking.</li>
@@ -13075,11 +13075,6 @@ function tagOutlierTrades() {
 
 // END-OF-DAY RECONCILIATION MODAL — REMOVED 2026-05-08 per user request.
 // Was 3 sequential prompt() dialogs at 4:05pm ET that interrupted the
-// session. Function kept as a no-op so any external/console caller
-// (`showEodReconciliation()` was originally documented as console-callable)
-// doesn't throw a ReferenceError. Auto-fire setInterval deleted.
-function showEodReconciliation() { /* removed — no-op */ }
-
 // IC ANALYSIS — Spearman rank correlation between each scoring rule's
 // pass/fail status at entry and forward 1d/3d/5d return. Reads closed-trade
 // log + shadow-book entries with forward returns. Drops |IC| < 0.02 rules
@@ -13998,15 +13993,18 @@ async function checkSmartExits(){
     return;
   }
   G._smartExitRunning = true;
-  // v2.17.3: 5-min watchdog so a hung impl (network never resolves the
-  // promise) can't stick the flag forever and block all future evals.
+  // v2.18.2: watchdog 5min → 15min. The 5-min mark could clear the flag
+  // while a legitimately slow Tradier batch was still in flight, letting
+  // the next 60s tick start a SECOND concurrent run and breaking the
+  // reentrancy guarantee. 15 min is well above worst-case observed
+  // latency (retry chains hit hardest at ~3-4 min) while still bounded.
   if (G._smartExitWatchdog) clearTimeout(G._smartExitWatchdog);
   G._smartExitWatchdog = setTimeout(function(){
     if (G._smartExitRunning){
-      console.warn('[smart-exit] watchdog clearing stuck inflight flag after 5min');
+      console.warn('[smart-exit] watchdog clearing stuck inflight flag after 15min');
       G._smartExitRunning = false;
     }
-  }, 5 * 60 * 1000);
+  }, 15 * 60 * 1000);
   try {
     await _checkSmartExitsImpl();
   } finally {
@@ -16041,7 +16039,6 @@ function buildDetail(r,detId,emptyId){
   // Charts removed \u2014 detail panel shows signals + option chain only
 }
 
-function renderTickerChart(ticker) { /* charts removed — no-op */ }
 
 function switchDetTab(ticker, tab){
   var sigDiv   = eid('det-signals-'+ticker);
@@ -19154,8 +19151,13 @@ function renderScan(){
     }
   });
 
-  var rows='';
+  // v2.18.2: push to array + join at the end instead of `rows+=...`
+  // inside the forEach. Each `+=` reallocated the entire growing string;
+  // on 200 rows × ~4 concats/row this was an O(n²) operation costing
+  // ~150 ms on iPhone. Array.push + join cuts it to ~30 ms.
+  var rowsArr = [];
   rowSrc.forEach(function(r, idx){
+    var rows = '';   // per-iteration local; pushed to rowsArr at end
     var sigBadge=r.isGo?'<span class="badge go">GO</span>':'<span class="badge nogo">NO-GO</span>';
     var chgCls=r.changePct>=0?'pnl-pos':'pnl-neg';
     var tk=r.ticker;
@@ -19275,19 +19277,20 @@ function renderScan(){
         } else {
           sugCell = '<td class="col-hide-mobile" style="color:var(--gry);font-size:10px;">--</td>';
         }
-        rows += sugCell;
+        rows+=sugCell;
         // BULL \u2605 composite: visualize the score used by the bullish sort
         var bullCompScore = (r.score || 0) + (gx.call >= 70 ? (gx.call - 70) * 0.6 : -((70 - gx.call) * 0.2)) + (gx.gex > 0 ? 4 : 0);
         var bullCompCls = bullCompScore >= 150 ? 'pnl-pos' : bullCompScore >= 120 ? '' : 'pnl-neg';
-        rows += '<td class="col-hide-mobile '+bullCompCls+'" style="font-family:var(--ff-mono);font-size:11px;" title="Bullish composite = scanner score + GEX call-% adjustment (above/below 70 floor) + net-GEX sign bonus. Sort by this to surface the highest-conviction long-call setups first.">'+bullCompScore.toFixed(0)+'</td>';
+        rows+='<td class="col-hide-mobile '+bullCompCls+'" style="font-family:var(--ff-mono);font-size:11px;" title="Bullish composite = scanner score + GEX call-% adjustment (above/below 70 floor) + net-GEX sign bonus. Sort by this to surface the highest-conviction long-call setups first.">'+bullCompScore.toFixed(0)+'</td>';
       } else {
         rows+='<td class="col-hide-mobile" style="color:var(--gry);font-size:10px;">--</td><td class="col-hide-mobile" style="color:var(--gry);font-size:10px;">--</td><td class="col-hide-mobile" style="color:var(--gry);font-size:10px;">--</td><td class="col-hide-mobile" style="color:var(--gry);font-size:10px;">--</td>';
       }
     }
     rows+='</tr>';
+    rowsArr.push(rows);
   });
 
-  wrap.innerHTML='<table><thead><tr>'+th+'</tr></thead><tbody>'+rows+'</tbody></table>';
+  wrap.innerHTML='<table><thead><tr>'+th+'</tr></thead><tbody>'+rowsArr.join('')+'</tbody></table>';
   if(typeof decorateIndustry  === 'function') decorateIndustry();
 }
 </script>
@@ -19315,14 +19318,23 @@ function saveGexCache(){
   // the lock so the next hydrate/scan can run. (RACE-1 follow-up.)
   G._gexInflight = false;
   if (!G.gexData || !G.gexData.length) return;
-  try {
-    localStorage.setItem(GEX_CACHE_KEY, JSON.stringify({
-      ts: Date.now(),
-      data: G.gexData
-    }));
-  } catch(e) { /* quota — fine, in-memory survives session */ }
-  // Track last-fetch ts in memory so post-scan auto-trigger can skip if recent
+  // Track in-memory ts synchronously so post-scan freshness checks work
+  // even before the disk write lands.
   G._gexLastFetchTs = Date.now();
+  // v2.18.2: debounce 500ms. JSON.stringify on a 500-row gexData array
+  // costs ~30 ms on iPhone Safari; rapid multi-refresh sequences (scan
+  // → auto-GEX → single-ticker RUN) used to serialize the whole array
+  // 2-3× in quick succession. Debounce coalesces into one write.
+  if (G._gexSaveDebounce) clearTimeout(G._gexSaveDebounce);
+  G._gexSaveDebounce = setTimeout(function(){
+    G._gexSaveDebounce = null;
+    try {
+      localStorage.setItem(GEX_CACHE_KEY, JSON.stringify({
+        ts: G._gexLastFetchTs || Date.now(),
+        data: G.gexData
+      }));
+    } catch(e) { /* quota — fine, in-memory survives session */ }
+  }, 500);
 }
 
 // Returns true if GEX data was refreshed within the last `windowMin` minutes.
@@ -26086,7 +26098,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.18.1-ct-timezone-fix';
+var APP_VERSION = '2.18.2-tier-ab-cleanup';
 // Page-source fallback constants removed. Each visitor now provides their own
 // API credentials via the API tab (or, for Tradier, sets up the worker proxy
 // at worker/tradier-proxy/ \u2014 keys never reach the browser at all).
@@ -27032,6 +27044,11 @@ function _drainTradierQueue(){
   }
 }
 
+// v2.18.2: track in-flight requests by URL. Concurrent fetches of the same
+// URL (even with ttlMs=0) share one network round-trip. Common case: page
+// load fires `updateHeaderQuotes()` AND `runScan()` both fetching SPY/QQQ/
+// IWM quotes within 100 ms — old code hit Tradier twice. Cleared on settle.
+var T_INFLIGHT = {};
 function tradierFetch(url, opts, ttlMs){
   ttlMs = ttlMs || 0;
   // Cache hit — synth Response-like object so callers' .then(r=>r.json()) works.
@@ -27051,8 +27068,15 @@ function tradierFetch(url, opts, ttlMs){
       });
     }
   }
+  // In-flight dedup — second caller piggybacks on the first's Response.
+  // We clone() so each caller can independently consume .json() / .text().
+  if (T_INFLIGHT[url]){
+    return T_INFLIGHT[url].then(function(r){
+      try { return r.clone(); } catch(_){ return r; }
+    });
+  }
   // Cache miss → enqueue through rate limiter
-  return new Promise(function(resolve, reject){
+  var p = new Promise(function(resolve, reject){
     T_RATE.pending.push({
       url: url, opts: opts,
       resolve: function(r){
@@ -27068,6 +27092,9 @@ function tradierFetch(url, opts, ttlMs){
     });
     if(!T_RATE.drainScheduled) _drainTradierQueue();
   });
+  T_INFLIGHT[url] = p;
+  p.then(function(){ delete T_INFLIGHT[url]; }, function(){ delete T_INFLIGHT[url]; });
+  return p;
 }
 
 // ── Bounded localStorage for per-ticker caches ─────────────────────────────
@@ -29084,10 +29111,19 @@ function _openInGoogleSheet(tsv, toastMsg){
   // Open a fresh blank Google Sheet in a new tab. sheets.new is Google's
   // official shortlink for "create a new spreadsheet" — no template, no
   // intermediate landing page.
-  try { window.open('https://sheets.new', '_blank'); } catch(_){}
+  // v2.18.2: check the return value — popup blockers return null/undefined,
+  // and previously the user just saw "paste with ⌘V" toast but nothing
+  // ever opened. Now we surface a clear toast pointing them to retry.
+  var winRef = null;
+  try { winRef = window.open('https://sheets.new', '_blank'); } catch(_){}
   if (typeof toast === 'function'){
-    var pasteHint = ok ? ' — paste with ⌘V / Ctrl+V' : ' — clipboard blocked, retry';
-    toast((toastMsg || 'Exported') + pasteHint);
+    if (!winRef){
+      toast('Pop-up blocked — allow pop-ups for this site, then click again. Data is in your clipboard.');
+    } else if (!ok){
+      toast('Sheet opened but clipboard blocked — copy from the source again.');
+    } else {
+      toast((toastMsg || 'Exported') + ' — paste with ⌘V / Ctrl+V');
+    }
   }
 }
 
@@ -29294,20 +29330,46 @@ function init(){
     localStorage.removeItem('rrjcar_closed_trades');
     var THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
     var now = Date.now();
-    var prefixesWithTs = ['rrjcar_hist_', 'rrjcar_indicator_', 'rrjcar_news_', 'rrjcar_fmp_paused_until'];
+    // v2.18.2: explicit allowlist of cache-only prefixes (data we can
+    // re-fetch from the API). Settings and preferences are NEVER touched
+    // here even if they happen to grow a `ts` field. Defensive denylist
+    // protects against future prefix collisions.
+    var CACHE_PREFIXES = [
+      'rrjcar_hist_',           // per-ticker daily-bar history
+      'rrjcar_indicator_',      // per-ticker indicator computations
+      'rrjcar_news_',           // news fetch cache (includes _cache_v1)
+      'rrjcar_ob_hist_',        // order-book historical cache
+      'rrjcar_fmp_paused_until' // FMP rate-limit pause sentinel
+    ];
+    var NEVER_SWEEP = [
+      'rrjcar_app_settings_v',  'rrjcar_active_tab',
+      'rrjcar_notif_settings_v','rrjcar_notif_cooldowns_v',
+      'rrjcar_pos_open',        'rrjcar_pos_alerts',
+      'rrjcar_pos_thesis',      'rrjcar_pos_thesis_archive',
+      'rrjcar_portfolio',       'rrjcar_pnl_baseline',
+      'rrjcar_eq_trail',        'rrjcar_eq_hist',
+      'rrjcar_journal',         'rrjcar_pos_sort',
+      'rrjcar_at_state',        'rrjcar_mode',
+      'rrjcar_eod_equity_log_v','rrjcar_manual_bp',
+      'rrjcar_custom_tickers'
+    ];
+    var purged = 0;
     for (var i = localStorage.length - 1; i >= 0; i--){
       var k = localStorage.key(i);
       if (!k) continue;
-      if (!prefixesWithTs.some(function(p){ return k.indexOf(p) === 0; })) continue;
+      if (NEVER_SWEEP.some(function(p){ return k.indexOf(p) === 0; })) continue;
+      if (!CACHE_PREFIXES.some(function(p){ return k.indexOf(p) === 0; })) continue;
       try {
         var raw = localStorage.getItem(k);
         var obj = JSON.parse(raw);
         var ts = obj && (obj.ts || obj.t || obj.fetchedAt);
         if (typeof ts === 'number' && (now - ts) > THIRTY_DAYS){
           localStorage.removeItem(k);
+          purged++;
         }
       } catch(_){}
     }
+    if (purged > 0) console.log('[storage-hygiene] purged ' + purged + ' stale cache entries (>30d)');
   } catch(_){}
   // Register service worker for iOS push notifications. iOS 16.4+ requires
   // a service worker registration for notifications to actually fire — the
@@ -29418,6 +29480,17 @@ function init(){
   // ~120 callbacks/min and one localStorage write/min while idle.
   setInterval(function(){ if (!document.hidden) updateClock(); }, 1000);
   setInterval(function(){ if (!document.hidden) saveAppSettings(); }, 60000);
+  // v2.18.2: on tab return, fire an immediate clock + settings catch-up so
+  // the visible state isn't stale for up to 60s while we wait for the next
+  // interval tick. saveAppSettings flush also catches changes made while
+  // hidden but never persisted.
+  try {
+    document.addEventListener('visibilitychange', function(){
+      if (document.hidden) return;
+      try { updateClock(); } catch(_){}
+      try { saveAppSettings(); } catch(_){}
+    });
+  } catch(_){}
 
   // ── Restore cached data — ZERO API calls on load ────────────────────────
 
