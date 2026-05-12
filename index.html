@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-12T05:15-suspicious-zero-recompute">
+<meta name="op-build" content="2026-05-12T05:30-ah-flat-uses-close">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -26281,15 +26281,22 @@ function updateHeaderQuotes(){
       var raw = q.change_percentage;
       var rawNum = parseFloat(raw);
       var hasApiPct = (raw !== undefined && raw !== null && raw !== '' && !isNaN(rawNum));
-      // v2.18.8: trust the API value UNLESS it's a "suspicious zero" —
-      // i.e. Tradier returned "0" but price != prevclose, which means
-      // the change-percent field is stale/empty and the actual gap
-      // would compute to non-zero. User report: all equity indices
-      // showing 0% after-hours while VIX (which has a real value)
-      // displayed correctly. Bypass to recompute path in that case.
       var prevC = parseFloat(q.prevclose);
+      var todayC = parseFloat(q.close);
+      // v2.18.9: the canonical AH case — Tradier reports `last === prevclose`
+      // (no AH activity yet) AND `change_percentage === 0` AND `close`
+      // contains today's actual RTH close that differs from prevclose.
+      // Use (close - prevclose)/prevclose so the ribbon shows TODAY's
+      // daily change for the entire after-hours window, instead of
+      // collapsing to 0% the moment the user looks past 4 PM ET.
+      var lastEqPrev = price > 0 && prevC > 0 && Math.abs(price - prevC) < 0.0001;
+      var hasGoodTodayClose = todayC > 0 && prevC > 0 && Math.abs(todayC - prevC) > 0.0001;
+      var ahFlatDaily = lastEqPrev && hasGoodTodayClose;
+      // Suspicious zero: API says 0 but price != prevclose → bypass.
       var suspiciousZero = hasApiPct && rawNum === 0 && prevC > 0 && price > 0 && Math.abs(price - prevC) > 0.0001;
-      if (hasApiPct && !suspiciousZero){
+      if (ahFlatDaily){
+        chgPct = ((todayC - prevC) / prevC) * 100;
+      } else if (hasApiPct && !suspiciousZero){
         chgPct = rawNum;
       } else {
         // Recompute from prevclose
@@ -26297,7 +26304,6 @@ function updateHeaderQuotes(){
         // Recompute from today's close (used during AH when prevclose is
         // yesterday's and close is today's RTH close)
         if ((chgPct === undefined || isNaN(chgPct)) ){
-          var todayC = parseFloat(q.close);
           if (todayC > 0 && todayC !== price) chgPct = ((price - todayC) / todayC) * 100;
         }
         // AH-specific delta as last resort
@@ -26343,7 +26349,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.18.8-suspicious-zero-recompute';
+var APP_VERSION = '2.18.9-ah-flat-uses-close';
 // Page-source fallback constants removed. Each visitor now provides their own
 // API credentials via the API tab (or, for Tradier, sets up the worker proxy
 // at worker/tradier-proxy/ \u2014 keys never reach the browser at all).
