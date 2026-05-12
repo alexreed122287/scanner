@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-12T09:00-data-gap-scope-fix">
+<meta name="op-build" content="2026-05-12T10:00-export-clipboard-race">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -26540,7 +26540,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.18.16-data-gap-scope-fix';
+var APP_VERSION = '2.18.17-export-clipboard-race';
 // Page-source fallback constants removed. Each visitor now provides their own
 // API credentials via the API tab (or, for Tradier, sets up the worker proxy
 // at worker/tradier-proxy/ \u2014 keys never reach the browser at all).
@@ -29528,45 +29528,109 @@ function loadPortfolio(){ /* no-op loader — data loaded on demand in renderPor
 //  into the new sheet that opens in a new tab.
 // ═══════════════════════════════════════════════════════════════════════════
 function _openInGoogleSheet(tsv, toastMsg){
+  // 2026-05-12 v2.18.17: previously called `navigator.clipboard.writeText`
+  // WITHOUT awaiting the Promise, then synchronously fired `window.open`
+  // which transferred focus to the new tab. When the source document
+  // loses focus mid-write, the Promise rejects silently — the new Sheet
+  // opens but the clipboard never received the TSV, so the user pasted
+  // nothing into an empty sheet. User report: "The export matrix is
+  // opening Google Sheets but not populating any information."
+  //
+  // Order now:
+  //   1. Synchronous textarea + execCommand('copy') — no focus race.
+  //   2. window.open — both still inside the same user-gesture task so
+  //      the popup blocker stays happy.
+  //   3. If (1) failed, fire async navigator.clipboard.writeText AFTER
+  //      window.open (best-effort) and surface a clear error if it
+  //      still doesn't work.
+  //   4. _showFallbackExportModal as last-resort so the user can hand-
+  //      copy the TSV from a textarea without re-running the export.
   var ok = false;
   try {
-    if (navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(tsv);
-      ok = true;
-    }
-  } catch(_){}
-  if (!ok){
-    // Fallback: drop the data into a textarea + execCommand('copy') so
-    // older browsers (and any context without async clipboard) still work.
-    try {
-      var ta = document.createElement('textarea');
-      ta.value = tsv;
-      ta.style.position = 'fixed';
-      ta.style.left = '-9999px';
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand('copy');
-      document.body.removeChild(ta);
-      ok = true;
-    } catch(_){}
-  }
-  // Open a fresh blank Google Sheet in a new tab. sheets.new is Google's
-  // official shortlink for "create a new spreadsheet" — no template, no
-  // intermediate landing page.
-  // v2.18.2: check the return value — popup blockers return null/undefined,
-  // and previously the user just saw "paste with ⌘V" toast but nothing
-  // ever opened. Now we surface a clear toast pointing them to retry.
+    var ta = document.createElement('textarea');
+    ta.value = tsv;
+    // Off-screen but selectable. opacity:0 + readOnly so iOS doesn't pop
+    // a keyboard while the textarea is briefly focused.
+    ta.readOnly = true;
+    ta.style.position = 'fixed';
+    ta.style.top = '0';
+    ta.style.left = '0';
+    ta.style.opacity = '0';
+    ta.style.pointerEvents = 'none';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    try { ta.setSelectionRange(0, tsv.length); } catch(_){}
+    ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+  } catch(_){ ok = false; }
+  // Open the new tab while still inside the user gesture. The popup
+  // blocker on Chrome/Safari permits this because we haven't awaited
+  // anything yet.
   var winRef = null;
   try { winRef = window.open('https://sheets.new', '_blank'); } catch(_){}
+  // If the synchronous copy failed, try the async Clipboard API as a
+  // second attempt. Won't block window.open since that already fired.
+  if (!ok && navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(tsv).then(function(){
+      if (typeof toast === 'function') toast((toastMsg || 'Exported') + ' — paste with ⌘V / Ctrl+V');
+    }, function(){
+      // Both paths failed — surface the data in a modal so the user can
+      // manually copy without re-running the export.
+      _showFallbackExportModal(tsv, toastMsg);
+    });
+    return;
+  }
   if (typeof toast === 'function'){
     if (!winRef){
-      toast('Pop-up blocked — allow pop-ups for this site, then click again. Data is in your clipboard.');
+      if (ok){
+        toast('Pop-up blocked — allow pop-ups for this site, then click again. Data is in your clipboard.');
+      } else {
+        // Both clipboard AND popup blocked — show the fallback modal so
+        // the user has SOMETHING to work with.
+        _showFallbackExportModal(tsv, toastMsg);
+      }
     } else if (!ok){
-      toast('Sheet opened but clipboard blocked — copy from the source again.');
+      _showFallbackExportModal(tsv, toastMsg);
     } else {
       toast((toastMsg || 'Exported') + ' — paste with ⌘V / Ctrl+V');
     }
+  } else if (!ok){
+    _showFallbackExportModal(tsv, toastMsg);
   }
+}
+
+// Fallback when both synchronous + async clipboard paths fail. Shows the
+// TSV in a textarea inside a modal so the user can select-all + copy by
+// hand. 2026-05-12 v2.18.17.
+function _showFallbackExportModal(tsv, toastMsg){
+  // Reuse #export-gos-modal if present so we don't add another DOM
+  // singleton; otherwise build an ad-hoc fallback.
+  var existing = document.getElementById('export-fallback-modal');
+  if (existing) existing.remove();
+  var modal = document.createElement('div');
+  modal.id = 'export-fallback-modal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:9700;background:rgba(0,0,0,.8);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:20px;';
+  modal.onclick = function(e){ if (e.target === modal) modal.remove(); };
+  modal.innerHTML =
+      '<div style="background:var(--bg1);border:1px solid var(--amb);border-radius:8px;width:min(96vw,720px);max-height:86vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 12px 48px rgba(0,0,0,.6);">'
+    +   '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:var(--bdr);background:var(--bg2);">'
+    +     '<span style="font-family:var(--ff-brand);font-size:13px;color:var(--amb);letter-spacing:1px;flex:1;">EXPORT — manual copy</span>'
+    +     '<button onclick="document.getElementById(\'export-fallback-modal\').remove()" style="background:transparent;border:1px solid var(--bg3);color:var(--gry);font-size:18px;font-weight:700;width:32px;height:32px;border-radius:4px;cursor:pointer;line-height:1;padding:0;">&#10005;</button>'
+    +   '</div>'
+    +   '<div style="padding:12px 14px;color:var(--gry);font-size:11px;font-family:var(--ff-mono);">'
+    +     'Clipboard auto-copy was blocked by the browser. Tap the textarea to select all, copy, then paste into your sheet.'
+    +   '</div>'
+    +   '<textarea id="export-fallback-text" readonly onclick="this.select()" style="flex:1;width:calc(100% - 28px);margin:0 14px 12px;background:var(--bg0);border:1px solid var(--bg3);border-radius:4px;color:var(--wht);font-family:var(--ff-mono);font-size:11px;padding:10px;resize:vertical;min-height:200px;white-space:pre;overflow:auto;"></textarea>'
+    +   '<div style="display:flex;gap:8px;padding:0 14px 14px;">'
+    +     '<button class="btn blu" onclick="(function(){var t=document.getElementById(\'export-fallback-text\');t.select();try{document.execCommand(\'copy\');if(typeof toast===\'function\')toast(\'Copied to clipboard\');}catch(_){}})()" style="flex:1;padding:9px;font-weight:700;font-size:12px;">Copy</button>'
+    +     '<button class="btn" onclick="document.getElementById(\'export-fallback-modal\').remove()" style="flex:0 0 80px;padding:9px;font-size:11px;">Done</button>'
+    +   '</div>'
+    + '</div>';
+  document.body.appendChild(modal);
+  var taFb = document.getElementById('export-fallback-text');
+  if (taFb){ taFb.value = tsv; setTimeout(function(){ try{ taFb.focus(); taFb.select(); }catch(_){} }, 50); }
+  if (typeof toast === 'function') toast((toastMsg || 'Exported') + ' — clipboard blocked, copy manually from the popup.');
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
