@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-12T07:30-proactive-anchor-seed">
+<meta name="op-build" content="2026-05-12T08:00-ah-percent-zero-fix">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -9537,6 +9537,11 @@ function showSimQuote(sym,type){
 
 // Returns true if the quote's last trade occurred outside 09:30–16:00 ET.
 // Uses Tradier's `trade_date` (milliseconds since epoch).
+// 2026-05-11 v2.16.23: previously used `mins >= 960` which classified the
+// 16:00 ET closing auction print (mins == 960) as AH. For cash indices like
+// SPX / VIX that don't trade AH at all, every closing print got flagged →
+// header tickers rendered a "·AH 0.00%" chip indefinitely. Now strictly
+// `mins > 960` (16:01 ET or later) qualifies as after-hours.
 function isAHTrade(q){
   if(!q || !q.trade_date) return false;
   var ms = +q.trade_date;
@@ -9545,12 +9550,17 @@ function isAHTrade(q){
     timeZone: 'America/New_York', hour: 'numeric', minute: 'numeric', hour12: false
   }).split(':').map(Number);
   var mins = parts[0] * 60 + parts[1];
-  return mins < 570 || mins >= 960;  // <9:30 or ≥16:00 ET
+  return mins < 570 || mins > 960;  // <9:30 ET OR >16:00 ET
 }
 
 // Computes the AH-only delta relative to today's RTH close. Returns null if
 // we can't compute it confidently (no close, close === prevclose meaning the
 // regular session hasn't ended yet, or trivial delta).
+// 2026-05-11 v2.16.23: previously bailed only when |delta| < $0.005 (half a
+// cent absolute). For a $540 index that's 0.0009% — still renders "+0.00%"
+// after .toFixed(2). User report: "Tickers for indices still showing 0% AH
+// on full scanner tab". Now the threshold is percentage-based (|pct| < 0.01%)
+// so a sub-basis-point move yields null instead of a misleading 0.00% chip.
 function ahDelta(q){
   if(!isAHTrade(q)) return null;
   var last = parseFloat(q.last), close = parseFloat(q.close), prev = parseFloat(q.prevclose);
@@ -9558,7 +9568,9 @@ function ahDelta(q){
   if(close === prev) return null;  // session not yet closed — `close` is just yesterday's
   var delta = last - close;
   if(Math.abs(delta) < 0.005) return null;
-  return { delta: delta, pct: (delta / close) * 100, close: close };
+  var pct = (delta / close) * 100;
+  if(Math.abs(pct) < 0.01) return null;  // would render as "+0.00%" — hide
+  return { delta: delta, pct: pct, close: close };
 }
 
 function renderQuotePanel(q){
@@ -26472,14 +26484,19 @@ function updateHeaderQuotes(){
         // After-hours marker — bumped from 8px to 10px so it's actually
         // readable. ·AH +X.XX% appended to the daily change so the user
         // sees both: regular-session % change AND extended-hours move.
+        // 2026-05-11 v2.16.23: drop the bare "·AH" placeholder that used
+        // to render when ahDelta returned null. Cash indices (SPX, VIX,
+        // GLD with no AH liquidity, etc.) hit this fallback every weekend
+        // and after every close, showing a misleading "·AH" with no
+        // number. Now we only surface the AH chip when ahDelta yields a
+        // delta that won't round to 0.00% — otherwise the cell just
+        // shows the daily change.
         if(typeof isAHTrade === 'function' && isAHTrade(q)){
           var ah = typeof ahDelta === 'function' ? ahDelta(q) : null;
           if(ah){
             var s = ah.pct >= 0 ? '+' : '';
             var ahCol = ah.pct >= 0 ? 'var(--grn)' : '#ef4444';
             ahMark = ' <span style="font-size:10px;color:'+ahCol+';letter-spacing:0;font-weight:600;" title="After-hours change vs RTH close">·AH '+s+ah.pct.toFixed(2)+'%</span>';
-          } else {
-            ahMark = ' <span style="font-size:10px;opacity:0.6;letter-spacing:0;" title="After-hours session active (delta unavailable)">·AH</span>';
           }
         }
         cel.innerHTML = '('+(chgPct>=0?'+':'')+chgPct.toFixed(2)+'%)' + ahMark;
@@ -26497,7 +26514,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.18.14-proactive-anchor-seed';
+var APP_VERSION = '2.18.15-ah-percent-zero-fix';
 // Page-source fallback constants removed. Each visitor now provides their own
 // API credentials via the API tab (or, for Tradier, sets up the worker proxy
 // at worker/tradier-proxy/ \u2014 keys never reach the browser at all).
