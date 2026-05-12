@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-12T05:45-use-change-usd-fallback">
+<meta name="op-build" content="2026-05-12T06:00-anchor-prevclose-cache">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -26285,6 +26285,35 @@ function updateHeaderQuotes(){
       var todayC = parseFloat(q.close);
       var changeUsd = parseFloat(q.change);
       var hasChangeUsd = !isNaN(changeUsd) && Math.abs(changeUsd) > 0.001;
+      // v2.18.11: persist a per-symbol "session-anchor" price the first
+      // time we see a non-zero baseline (any of prevclose / close / last
+      // != prevclose). Stays in localStorage across reloads so the AH
+      // ribbon can still compute % when Tradier returns 0/missing for
+      // every quote field except `last`. The anchor only refreshes when
+      // we get a fresh baseline — never overwritten by the same flat
+      // payload we're trying to escape.
+      var ANCHOR_KEY = 'rrjcar_idx_anchor';
+      var anchors;
+      try { anchors = JSON.parse(localStorage.getItem(ANCHOR_KEY) || '{}') || {}; }
+      catch(_) { anchors = {}; }
+      var anchor = anchors[p.sym];
+      var anchorPrev = anchor && typeof anchor.prev === 'number' ? anchor.prev : 0;
+      // Refresh anchor when Tradier gives us a usable prevclose OR a
+      // change_usd that lets us derive one.
+      if (prevC > 0 && price > 0 && Math.abs(price - prevC) > 0.0001){
+        anchors[p.sym] = { prev: prevC, ts: Date.now() };
+      } else if (hasChangeUsd && price > 0){
+        var dp = price - changeUsd;
+        if (dp > 0.0001) anchors[p.sym] = { prev: dp, ts: Date.now() };
+      } else if (todayC > 0 && Math.abs(todayC - (prevC||0)) > 0.0001 && prevC > 0){
+        anchors[p.sym] = { prev: prevC, ts: Date.now() };
+      }
+      // GC anchors older than 7 days so a long-stale close can't poison
+      // the ribbon on the user's next reload.
+      Object.keys(anchors).forEach(function(k){
+        if (anchors[k] && anchors[k].ts && (Date.now() - anchors[k].ts) > 7*24*60*60*1000) delete anchors[k];
+      });
+      try { localStorage.setItem(ANCHOR_KEY, JSON.stringify(anchors)); } catch(_){}
       // v2.18.10: the bullet-proof AH path. The thing Tradier ALWAYS gets
       // right is `change` (the dollar amount vs prior close) — even when
       // change_percentage and/or prevclose come back as 0/empty/missing.
@@ -26299,7 +26328,10 @@ function updateHeaderQuotes(){
       // price OR we have a non-zero dollar change. Both signals mean the
       // 0% is bogus and we should recompute.
       var priceVsPrevNonzero = prevC > 0 && price > 0 && Math.abs(price - prevC) > 0.0001;
-      var suspiciousZero = hasApiPct && rawNum === 0 && (priceVsPrevNonzero || hasChangeUsd);
+      var hasAnchorPrev = anchorPrev > 0 && price > 0 && Math.abs(price - anchorPrev) > 0.0001;
+      // suspiciousZero fires when API says 0 but any independent source
+      // (prevclose, change USD, or our anchored prevclose) disagrees.
+      var suspiciousZero = hasApiPct && rawNum === 0 && (priceVsPrevNonzero || hasChangeUsd || hasAnchorPrev);
       if (ahFlatDaily){
         chgPct = ((todayC - prevC) / prevC) * 100;
       } else if (hasApiPct && !suspiciousZero){
@@ -26310,6 +26342,14 @@ function updateHeaderQuotes(){
         if (hasChangeUsd && price > 0){
           var derivedPrev = price - changeUsd;
           if (derivedPrev > 0.0001) chgPct = (changeUsd / derivedPrev) * 100;
+        }
+        // SECONDARY (NEW v2.18.11): use the locally-anchored prevclose.
+        // This is the path that fires when Tradier returns NOTHING usable
+        // for the equity ETFs — only `last`. Once we've cached a real
+        // prevclose from any prior successful poll (today or yesterday),
+        // we can keep computing % against it.
+        if ((chgPct === undefined || isNaN(chgPct)) && hasAnchorPrev){
+          chgPct = ((price - anchorPrev) / anchorPrev) * 100;
         }
         // SECONDARY: recompute from prevclose
         if ((chgPct === undefined || isNaN(chgPct)) && prevC > 0 && price > 0){
@@ -26363,7 +26403,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.18.10-use-change-usd-fallback';
+var APP_VERSION = '2.18.11-anchor-prevclose-cache';
 // Page-source fallback constants removed. Each visitor now provides their own
 // API credentials via the API tab (or, for Tradier, sets up the worker proxy
 // at worker/tradier-proxy/ \u2014 keys never reach the browser at all).
