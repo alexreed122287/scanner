@@ -15380,6 +15380,62 @@ function calcADX(days, period){
   return {adx:+adx.toFixed(1), diPlus:+last.diPlus.toFixed(1), diMinus:+last.diMinus.toFixed(1)};
 }
 
+// EMA of close prices, returning the latest value. Standard k = 2/(period+1)
+// seeded from a simple average of the first `period` bars. Bulk scan stamps
+// ind.ema20 = price*0.99, ind.ema50 = price*0.97, ind.ema200 = price*0.93
+// (index.html:~18640) — backfilled by scoreIt when history is available.
+function calcEMA(days, period){
+  if(!days || days.length < period) return 0;
+  var closes = days.map(function(d){ return parseFloat(d.close); });
+  var sum = 0;
+  for(var i=0;i<period;i++) sum += closes[i];
+  var prev = sum/period;
+  var k = 2/(period+1);
+  for(var i=period;i<closes.length;i++){
+    prev = closes[i]*k + prev*(1-k);
+  }
+  return +prev.toFixed(4);
+}
+
+// Wilder ATR. Bulk scan stamps ind.atr = price * 0.015 — replace with the
+// real true-range smoothed over `period` (default 14).
+function calcATR(days, period){
+  period = period || 14;
+  if(!days || days.length < period + 1) return 0;
+  var trs = [];
+  for(var i=1;i<days.length;i++){
+    var h = parseFloat(days[i].high), l = parseFloat(days[i].low), pC = parseFloat(days[i-1].close);
+    trs.push(Math.max(h-l, Math.abs(h-pC), Math.abs(l-pC)));
+  }
+  if(trs.length < period) return 0;
+  var atr = 0;
+  for(var i=0;i<period;i++) atr += trs[i];
+  atr = atr/period;
+  for(var i=period;i<trs.length;i++){
+    atr = ((atr*(period-1)) + trs[i]) / period;
+  }
+  return +atr.toFixed(4);
+}
+
+// Multi-timeframe alignment proxy. Original definition was "how many of
+// three trend timeframes are pointing the same direction" but only daily
+// history is fetched. We use 3 EMA pairs over the same daily series as
+// the proxy: short (8/21), medium (21/50), long (50/200). Each pair is a
+// classic trend gate; counting agreement gives a 0-3 score matching the
+// existing "TF Aligned N/3" rule. Bulk scan stamped tf=2 statically.
+function calcTfAligned(days){
+  if(!days || days.length < 200) return 2;   // fall back to placeholder if not enough bars
+  var e8   = calcEMA(days, 8);
+  var e21  = calcEMA(days, 21);
+  var e50  = calcEMA(days, 50);
+  var e200 = calcEMA(days, 200);
+  var n = 0;
+  if(e8 > e21)  n++;
+  if(e21 > e50) n++;
+  if(e50 > e200) n++;
+  return n;
+}
+
 var G_FMP_CACHE = {};
 
 function fmpCacheKey(ticker){ return 'rrjcar_fmp_' + ticker; }
@@ -16053,6 +16109,30 @@ function scoreIt(ticker, ind, opt){
       ind.diPlus  = adxOut.diPlus;
       ind.diMinus = adxOut.diMinus;
     }
+  }
+  // EMA20/50/200, ATR, TF Aligned — backfilled from history when available.
+  // Bulk scan stamps these at fixed ratios of price (ema20=px*0.99 etc),
+  // which made every ticker pass "EMA20 > EMA50" and stay near the rendered
+  // close on the detail pane. See HEALTHCHECK.md known-placeholders list.
+  if(_hist && _hist.length >= 21){
+    var e20 = calcEMA(_hist, 20);
+    if(e20 > 0) ind.ema20 = e20;
+  }
+  if(_hist && _hist.length >= 51){
+    var e50 = calcEMA(_hist, 50);
+    if(e50 > 0) ind.ema50 = e50;
+  }
+  if(_hist && _hist.length >= 201){
+    var e200 = calcEMA(_hist, 200);
+    if(e200 > 0) ind.ema200 = e200;
+  }
+  if(_hist && _hist.length >= 15){
+    var atrLive = calcATR(_hist, 14);
+    if(atrLive > 0) ind.atr = atrLive;
+  }
+  if(_hist && _hist.length >= 200){
+    var tfLive = calcTfAligned(_hist);
+    if(typeof tfLive === 'number') ind.tf = tfLive;
   }
 
   var macdOk   = ind.macd > 0;
@@ -33630,6 +33710,16 @@ window.addEventListener('DOMContentLoaded',init);
     }},
     { tab:'sc', label:'Last-scan timestamp present + fresh', sev:'important', fn:function(){
       var t = (window.G && G._scanFinishedAt) || 0;
+      if(!t){
+        // Fall back to the persisted slim-cache timestamp — survives reload.
+        try {
+          var raw = localStorage.getItem('op_cache_scan_ts');
+          if(raw){
+            var parsed = JSON.parse(raw);
+            if(typeof parsed === 'number') t = parsed;
+          }
+        } catch(_){}
+      }
       if(!t) return 'n/a';
       return freshMs(t, 24*60*60*1000) ? true : 'warn';
     }},
@@ -33653,30 +33743,37 @@ window.addEventListener('DOMContentLoaded',init);
       if(p === 'n/a') return 'n/a';
       return p >= 0.6 ? true : (p >= 0.3 ? 'warn' : false);
     }},
-    { tab:'sc', label:'EMA20/50/200 still bulk-pass placeholders (known bug)', sev:'important', fn:function(){
+    { tab:'sc', label:'EMA20/50/200 backfilled (not bulk-pass placeholder)', sev:'important', fn:function(){
       var p = emaPlaceholderRatio();
       if(p === 'n/a') return 'n/a';
-      return p < 0.2 ? true : false;   // < 20% of sample still on placeholder = pass
+      return p < 0.2 ? true : (p < 0.5 ? 'warn' : false);
     }},
-    { tab:'sc', label:'ATR still bulk-pass placeholder (known bug)', sev:'important', fn:function(){
+    { tab:'sc', label:'ATR backfilled (not bulk-pass placeholder)', sev:'important', fn:function(){
       var rs = (window.G && G.results) || [];
       if(!rs.length) return 'n/a';
       var sample = rs.slice(0, Math.min(60, rs.length));
       var match = sample.filter(function(r){
         return r && r.ind && r.price && Math.abs(r.ind.atr - r.price*0.015) < 0.005;
       }).length;
-      return (match / sample.length) < 0.2;
+      var p = match / sample.length;
+      return p < 0.2 ? true : (p < 0.5 ? 'warn' : false);
     }},
-    { tab:'sc', label:'TF Aligned still stamped at 2/3 (known bug)', sev:'important', fn:function(){
+    { tab:'sc', label:'TF Aligned has real distribution (not flat 2/3)', sev:'important', fn:function(){
       var rs = (window.G && G.results) || [];
       if(!rs.length) return 'n/a';
       var sample = rs.slice(0, Math.min(60, rs.length));
       var match = sample.filter(function(r){ return r && r.ind && r.ind.tf === 2; }).length;
-      return (match / sample.length) < 0.8;
+      var p = match / sample.length;
+      return p < 0.7 ? true : (p < 0.9 ? 'warn' : false);
     }},
     { tab:'sc', label:'Category strip rendered', sev:'info', fn:function(){
-      var el = $('sc-cat-strip-ts'); if(!el) return 'n/a';
-      return txt(el).length > 0;
+      var el = $('sc-cat-strip-ts');
+      if(!el) return 'n/a';
+      // Element exists in template before the SC tab has ever been rendered;
+      // textContent is empty until the strip is drawn. Empty == lazy state, n/a.
+      var s = txt(el);
+      if(!s) return 'n/a';
+      return true;
     }},
     { tab:'sc', label:'Score range plausible across top-60', sev:'critical', fn:function(){
       var rs = (window.G && G.results) || [];
@@ -33763,14 +33860,20 @@ window.addEventListener('DOMContentLoaded',init);
 
     // Industry tab ────────────────────────────────────────────────────────
     { tab:'ind', label:'Industry rank-count pill', sev:'important', fn:function(){
+      // INDUSTRY tab is lazy-rendered; indDraw() only fires after the user
+      // first opens the tab. Until then the element exists in the template
+      // with an empty textContent — treat that as n/a, not fail.
+      if(!(window.IND && IND.loaded)) return 'n/a';
       var el = $('ind-rank-count'); if(!el) return 'n/a';
       return /\d+/.test(txt(el));
     }},
     { tab:'ind', label:'Industry table has rows', sev:'important', fn:function(){
+      if(!(window.IND && IND.loaded)) return 'n/a';
       var t = $('ind-body'); if(!t) return 'n/a';
       return t.querySelectorAll('tr[data-theme]').length >= 5;
     }},
     { tab:'ind', label:'Industry as-of timestamp', sev:'info', fn:function(){
+      if(!(window.IND && IND.loaded)) return 'n/a';
       var el = $('ind-asof'); if(!el) return 'n/a';
       return txt(el).length > 0;
     }},

@@ -84,10 +84,10 @@ Claude-managed:
 | **TECHNICAL INDICATORS grid — `RSI(14)`** | `ind.rsi` (live) | `ind.rsi !== 50` after history loads. |
 | **TECHNICAL INDICATORS grid — `MACD Hist`** | `ind.macd` (live) | `ind.macd !== 0` after history loads. |
 | **TECHNICAL INDICATORS grid — `ADX`** | `ind.adx` (live) | `ind.adx !== 30` after history loads. |
-| `EMA20/50` cell | `ind.ema20`, `ind.ema50` | **KNOWN ISSUE**: still bulk-pass placeholder (`price * 0.99` / `price * 0.97`). Predicate compares to placeholder ratio; failing here means the underlying bug. |
-| `EMA200` cell | `ind.ema200` | **KNOWN ISSUE**: bulk-pass placeholder `price * 0.93`. |
-| `ATR` cell | `ind.atr` | **KNOWN ISSUE**: bulk-pass placeholder `price * 0.015`. |
-| `TF Aligned` cell | `ind.tf` | **KNOWN ISSUE**: stamped at 2/3; no multi-TF computation. |
+| `EMA20/50` cell | `ind.ema20`, `ind.ema50` (live via `calcEMA`) | `ind.ema20 !== price*0.99` && `ind.ema50 !== price*0.97` after history loads. |
+| `EMA200` cell | `ind.ema200` (live via `calcEMA(200)`) | `ind.ema200 !== price*0.93` after history loads (requires ≥ 201 bars). |
+| `ATR` cell | `ind.atr` (live via Wilder `calcATR(14)`) | `ind.atr !== price*0.015` after history loads. |
+| `TF Aligned` cell | `ind.tf` (live via `calcTfAligned` — 8/21, 21/50, 50/200 EMA pairs) | Not all rows = 2; distribution across 0-3. |
 | `Volume` cell | `ind.vol` from Tradier bulk quote | > 0; color reflects `vol > avgVol`. |
 | `RS vs SPY 5d` cell | `ind.relStr5d` | Signed number; `0` is allowed but suspicious if every ticker shows `0`. |
 | `52Wk High` cell | `ind.week52hi` from Tradier bulk quote | > 0, ≥ current price (within rounding). |
@@ -206,14 +206,18 @@ Claude-managed:
 
 ---
 
-## Known placeholders to fix next
+## Placeholder backfills — status
 
-These are stamped in the bulk-scan path (`index.html:~18640`) and have no backfill yet — health check intentionally fails on them so the bug stays visible:
+All known bulk-scan placeholders (`index.html:~18640`) now have backfills in `scoreIt` that resolve via history (in-memory `G_HIST_CACHE` → 24h `loadHistCache` localStorage). When a ticker has enough bars, the live computation overwrites the placeholder in place:
 
-- `ind.ema20 = price * 0.99`
-- `ind.ema50 = price * 0.97`
-- `ind.ema200 = price * 0.93`
-- `ind.atr   = price * 0.015`
-- `ind.tf    = 2`
-
-PRs #21–#23 fixed `rsi`, `macd`, `adx`, `diPlus`, `diMinus`, `sectorPf`. The above five remain.
+| Field | Placeholder (bulk pass) | Live calc | Min bars | PR |
+|---|---|---|---|---|
+| `ind.rsi` | `50` | `calcRSIatIndex(days,14)` | 16 | #22 / #23 |
+| `ind.macd` | `0` | `calcMACD(days,12,26,9)` | 35 | #21 |
+| `ind.adx`, `diPlus`, `diMinus` | `30` / undef / undef | `calcADX(days,14)` | 30 | #21 |
+| Sector PF | `undefined` (key mismatch) | `SECTOR_PF[SECTOR_PF_MAP[su.s]]` | n/a | #21 |
+| `ind.ema20` | `price * 0.99` | `calcEMA(days,20)` | 21 | this PR |
+| `ind.ema50` | `price * 0.97` | `calcEMA(days,50)` | 51 | this PR |
+| `ind.ema200` | `price * 0.93` | `calcEMA(days,200)` | 201 | this PR |
+| `ind.atr` | `price * 0.015` | Wilder `calcATR(days,14)` | 15 | this PR |
+| `ind.tf` | `2` | `calcTfAligned(days)` — agreement count across 8/21, 21/50, 50/200 EMA pairs | 200 | this PR |
