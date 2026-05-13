@@ -7195,6 +7195,27 @@ window.fmpFetch = function(url, opts){
 var PROVEN=['URI','C','GOOG','GS','JPM','HAL','VLO','MPC','ICE','CME','FTNT','ORCL','PANW','KO','RCL','NVDA','MSFT','AMZN','V','META','CAT','XOM','PLTR','MRVL','MU','ZS','SMCI','KTOS','AVAV','LITE','COHR','GLW','AMD','GOOGL','TSLA','AMAT','LRCX','RTX','NOC'];
 var AVOID=['LULU','OXY','TDG','DIS','CMCSA','GIS','PWR','MRNA','RIVN','PLUG'];
 var SECTOR_PF={Industrials:3.53,Utilities:3.28,Finance:3.07,Healthcare:2.20,Communication:2.10,Technology:2.80,Staples:2.35,Materials:2.31,Energy:1.90,Consumer:1.80,RealEstate:1.75};
+// Tradier returns long-form sector names ("Producer manufacturing",
+// "Health technology", etc.) while SECTOR_PF keys are short. Without this map
+// every SECTOR_PF[su.s] returned undefined → pf=0 → "Sector PF > 2" failed
+// on every ticker. Keep both forms so already-short inputs still resolve.
+var SECTOR_PF_MAP={
+  'Producer manufacturing':'Industrials','Industrial services':'Industrials',
+  'Commercial services':'Industrials','Transportation':'Industrials',
+  'Distribution services':'Industrials',
+  'Utilities':'Utilities',
+  'Finance':'Finance',
+  'Health technology':'Healthcare','Health services':'Healthcare',
+  'Communications':'Communication',
+  'Technology services':'Technology','Electronic technology':'Technology',
+  'Consumer non-durables':'Staples',
+  'Process industries':'Materials','Non-energy minerals':'Materials',
+  'Energy minerals':'Energy',
+  'Consumer durables':'Consumer','Retail trade':'Consumer','Consumer services':'Consumer',
+  'Industrials':'Industrials','Healthcare':'Healthcare','Communication':'Communication',
+  'Technology':'Technology','Staples':'Staples','Materials':'Materials','Energy':'Energy',
+  'Consumer':'Consumer','RealEstate':'RealEstate'
+};
 // Full S&P 500 universe with sectors \u2014 used for dynamic Tradier screener
 var UNIVERSE_FULL=[
   // Auto-generated from alex_tickers.csv (canonical universe).
@@ -15270,6 +15291,82 @@ function calcCMO(days, period){
   return +(((sumUp-sumDn)/total)*100).toFixed(1);
 }
 
+// MACD histogram (12/26/9 default). Returns the last bar's MACD-line minus
+// signal-line. Previously absent: bulk scan stamped ind.macd=0 and nothing
+// ever replaced it, so the "MACD Hist +" rule failed on every ticker.
+function calcMACD(days, fast, slow, sig){
+  fast = fast||12; slow = slow||26; sig = sig||9;
+  if(!days || days.length < slow + sig) return 0;
+  function ema(values, period){
+    if(values.length < period) return [];
+    var k = 2/(period+1), sum = 0;
+    for(var i=0;i<period;i++) sum += values[i];
+    var prev = sum/period, out = [prev];
+    for(var i=period;i<values.length;i++){
+      prev = values[i]*k + prev*(1-k);
+      out.push(prev);
+    }
+    return out;
+  }
+  var closes = days.map(function(d){ return parseFloat(d.close); });
+  var emaF = ema(closes, fast);
+  var emaS = ema(closes, slow);
+  if(!emaF.length || !emaS.length) return 0;
+  // emaF starts (fast-1) bars in; emaS starts (slow-1) bars in. Trim emaF.
+  var offset = slow - fast;
+  var macdLine = [];
+  for(var i=0; i<emaS.length; i++){
+    var fIdx = i + offset;
+    if(fIdx >= emaF.length) break;
+    macdLine.push(emaF[fIdx] - emaS[i]);
+  }
+  if(macdLine.length < sig) return 0;
+  var sigLine = ema(macdLine, sig);
+  if(!sigLine.length) return 0;
+  return +((macdLine[macdLine.length-1] - sigLine[sigLine.length-1])).toFixed(4);
+}
+
+// Wilder ADX with DI+/DI-. Returns {adx, diPlus, diMinus}. Without this the
+// "ADX > 25" rule was reading a flat 30 placeholder (always pass, no signal)
+// and the "ADX 15-25 + DI+>DI-" early-trend bonus could never fire because
+// diPlus/diMinus were undefined.
+function calcADX(days, period){
+  period = period||14;
+  var z = {adx:0, diPlus:0, diMinus:0};
+  if(!days || days.length < period*2 + 1) return z;
+  var tr=[], plusDM=[], minusDM=[];
+  for(var i=1; i<days.length; i++){
+    var h=parseFloat(days[i].high), l=parseFloat(days[i].low);
+    var pH=parseFloat(days[i-1].high), pL=parseFloat(days[i-1].low), pC=parseFloat(days[i-1].close);
+    tr.push(Math.max(h-l, Math.abs(h-pC), Math.abs(l-pC)));
+    var up=h-pH, dn=pL-l;
+    plusDM.push((up>dn && up>0) ? up : 0);
+    minusDM.push((dn>up && dn>0) ? dn : 0);
+  }
+  var atr=0, smP=0, smM=0;
+  for(var i=0;i<period;i++){ atr+=tr[i]; smP+=plusDM[i]; smM+=minusDM[i]; }
+  var dxList=[];
+  for(var i=period; i<tr.length; i++){
+    atr = atr - (atr/period) + tr[i];
+    smP = smP - (smP/period) + plusDM[i];
+    smM = smM - (smM/period) + minusDM[i];
+    var dip = atr ? (smP/atr)*100 : 0;
+    var dim = atr ? (smM/atr)*100 : 0;
+    var s = dip + dim;
+    var dx = s ? (Math.abs(dip-dim)/s)*100 : 0;
+    dxList.push({dx:dx, diPlus:dip, diMinus:dim});
+  }
+  if(dxList.length < period) return z;
+  var adx=0;
+  for(var i=0;i<period;i++) adx += dxList[i].dx;
+  adx = adx/period;
+  for(var i=period;i<dxList.length;i++){
+    adx = ((adx*(period-1)) + dxList[i].dx) / period;
+  }
+  var last = dxList[dxList.length-1];
+  return {adx:+adx.toFixed(1), diPlus:+last.diPlus.toFixed(1), diMinus:+last.diMinus.toFixed(1)};
+}
+
 var G_FMP_CACHE = {};
 
 function fmpCacheKey(ticker){ return 'rrjcar_fmp_' + ticker; }
@@ -15902,6 +15999,25 @@ function scoreIt(ticker, ind, opt){
   // U/D Volume Ratio in commit 3.
   var rsiOk    = ind.rsi >= 40 && ind.rsi <= 70;                                  // permissive band
   var rsiCross = ind.rsi >= 50 && ind.rsi <= 65;                                  // tight Cardwell zone (early entry)
+
+  // Bulk-scan stamps ind.macd=0 and ind.adx=30 as placeholders (index.html
+  // ~line 18512). Compute live values from cached daily history when present,
+  // and backfill the result into `ind` so detail-pane widgets show the real
+  // numbers instead of the placeholders.
+  var _hist = (typeof G_HIST_CACHE !== 'undefined') ? G_HIST_CACHE[ticker] : null;
+  if(_hist && _hist.length >= 35){
+    var macdHist = calcMACD(_hist);
+    if(typeof macdHist === 'number') ind.macd = macdHist;
+  }
+  if(_hist && _hist.length >= 30){
+    var adxOut = calcADX(_hist, 14);
+    if(adxOut && adxOut.adx > 0){
+      ind.adx     = adxOut.adx;
+      ind.diPlus  = adxOut.diPlus;
+      ind.diMinus = adxOut.diMinus;
+    }
+  }
+
   var macdOk   = ind.macd > 0;
   var adxOk    = ind.adx > 25;                                                     // confirmed trend
   var adxEarly = ind.adx >= 15 && ind.adx <= 25 && (ind.diPlus||0) > (ind.diMinus||0); // emerging trend (Wilder original)
@@ -15909,7 +16025,11 @@ function scoreIt(ticker, ind, opt){
   var tfOk     = ind.tf >= 2;
   var su       = UNIVERSE_FULL.filter(function(u){ return u.t === ticker; })[0] ||
                  UNIVERSE.filter(function(u){ return u.t === ticker; })[0];
-  var pf       = su ? (SECTOR_PF[su.s] || 0) : 0;
+  // SECTOR_PF keys are short ("Industrials"); UNIVERSE_FULL stores Tradier
+  // long-form sector names ("Producer manufacturing"). Resolve via map; fall
+  // back to the raw key for already-short inputs (e.g. UNIVERSE static fallback).
+  var pfKey    = su ? (SECTOR_PF_MAP[su.s] || su.s) : null;
+  var pf       = pfKey ? (SECTOR_PF[pfKey] || 0) : 0;
   var sectOk   = pf > 2;
 
   // 52-wk high: George-Hwang JF 2004 effect concentrates within 5% of high.
