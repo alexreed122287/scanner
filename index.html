@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-13T02:00-positions-bal-badge">
+<meta name="op-build" content="2026-05-13T02:15-headers-pre%-fixes">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -17884,6 +17884,13 @@ function _renderSkeletonRows(wrapId, n){
   var cells = '<td class="skel-cell"></td>'.repeat(8);
   var rows  = '<tr class="skel-row">'+cells+'</tr>';
   wrap.innerHTML = '<table style="width:100%;"><tbody>' + rows.repeat(n) + '</tbody></table>';
+  // v2.18.30: invalidate the renderScan tbody-swap cache. The skeleton
+  // table has NO <thead>, so the next renderScan must do a full table
+  // rebuild — otherwise the tbody-only swap path runs and the user
+  // sees rows with no column titles (regression report).
+  if (wrapId === 'sc-tbl-wrap'){
+    try { G._scanLastRenderKey = null; } catch(_){}
+  }
 }
 
 // v2.18.5: freshness chip updater. Runs on scan complete + every 60s
@@ -18338,6 +18345,21 @@ async function fetchDynamicUniverse(key, mode){
         changePct = +(((price - _prevC) / _prevC) * 100).toFixed(2);
       } else if (_todayC > 0 && Math.abs(_todayC - _prevC) > 0.0001){
         changePct = +(((_todayC - _prevC) / _prevC) * 100).toFixed(2);
+      }
+      // v2.18.30: NEW pre-market fallback — when last==prevclose (no AH
+      // print yet) and `change` is 0, try the bid/ask midpoint. During
+      // active pre-market a quote can have an indicative mid even when
+      // no print has hit the tape, which is the real "where it's going
+      // to open" signal we want for gap detection.
+      if (changePct === 0) {
+        var _bid = parseFloat(q.bid) || 0;
+        var _ask = parseFloat(q.ask) || 0;
+        if (_bid > 0 && _ask > 0 && _prevC > 0){
+          var _mid = (_bid + _ask) / 2;
+          if (Math.abs(_mid - _prevC) > 0.0001){
+            changePct = +(((_mid - _prevC) / _prevC) * 100).toFixed(2);
+          }
+        }
       }
     }
     if(price < minPrice) return;
@@ -26956,7 +26978,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.18.29-positions-bal-badge';
+var APP_VERSION = '2.18.30-headers-pre%-fixes';
 // v2.18.21: DEFAULT feedback webhook. Every visitor's "Submit Feedback"
 // form posts here (unless they've overridden via ALERTS → Feedback
 // Webhook). The URL points to a Google Apps Script Web App owned by
