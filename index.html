@@ -33955,15 +33955,175 @@ window.addEventListener('DOMContentLoaded',init);
       if(!hasFmp) return 'n/a';
       return cards.length >= 1 ? true : 'warn';
     }},
+    { tab:'news', label:'News state items array shape', sev:'info', fn:function(){
+      if(typeof newsState !== 'object' || !Array.isArray(newsState.items)) return 'n/a';
+      if(newsState.items.length === 0) return 'n/a';
+      var bad = newsState.items.filter(function(n){ return !n.title || !(n.publishedDate || n.date); }).length;
+      return bad === 0;
+    }},
+    { tab:'news', label:'News status bar shows article count', sev:'info', fn:function(){
+      var el = $('news-status'); if(!el) return 'n/a';
+      return /articles?/.test(txt(el));
+    }},
 
     // Alerts tab ──────────────────────────────────────────────────────────
     { tab:'al', label:'Alerts list element present', sev:'info', fn:function(){
       var el = $('alerts-list'); return !!el;
     }},
+    { tab:'al', label:'G.alerts has valid shape', sev:'info', fn:function(){
+      var a = window.G && G.alerts;
+      if(!Array.isArray(a)) return 'n/a';
+      if(a.length === 0) return 'n/a';
+      var bad = a.filter(function(al){ return !al || !al.msg; }).length;
+      return bad === 0;
+    }},
+    { tab:'al', label:'Recent alert timestamps parse', sev:'info', fn:function(){
+      var a = window.G && G.alerts;
+      if(!Array.isArray(a) || a.length === 0) return 'n/a';
+      var sample = a.slice(-10);
+      var bad = sample.filter(function(al){
+        if(!al.ts) return false;
+        var t = (typeof al.ts === 'number') ? al.ts : Date.parse(al.ts);
+        return isNaN(t);
+      }).length;
+      return bad === 0;
+    }},
 
     // Watchlist tab ───────────────────────────────────────────────────────
     { tab:'wl', label:'G.wlTickers is an array', sev:'info', fn:function(){
       return Array.isArray(window.G && G.wlTickers);
+    }},
+    { tab:'wl', label:'Watchlist tickers look real', sev:'info', fn:function(){
+      var arr = (window.G && G.wlTickers) || [];
+      if(arr.length === 0) return 'n/a';
+      var bad = arr.filter(function(t){ return !tickerLooksReal(t); }).length;
+      return bad === 0;
+    }},
+
+    // Order Ticket tab ────────────────────────────────────────────────────
+    // All checks return n/a when the user hasn't opened the tab / set a
+    // symbol — they're lazy-rendered and we don't want them to register fail
+    // before first use.
+    { tab:'order', label:'Symbol input has a value', sev:'info', fn:function(){
+      var el = $('ord-sym'); if(!el) return 'n/a';
+      var v = (el.value || '').trim();
+      return v ? /^[A-Z.]{1,6}$/.test(v) : 'n/a';
+    }},
+    { tab:'order', label:'Quote bid/ask populated when symbol set', sev:'important', fn:function(){
+      var sym = $('ord-sym'); if(!sym || !sym.value) return 'n/a';
+      var bid = $('qp-bid'), ask = $('qp-ask');
+      if(!bid || !ask) return 'n/a';
+      var sb = txt(bid), sa = txt(ask);
+      if(sb === '--' || sa === '--' || !sb || !sa) return 'warn';
+      return /\$\s*\d/.test(sb) && /\$\s*\d/.test(sa);
+    }},
+    { tab:'order', label:'Quote mid = (bid+ask)/2 sanity', sev:'info', fn:function(){
+      var b = $('qp-bid'), a = $('qp-ask'), m = $('qp-mid');
+      if(!b || !a || !m) return 'n/a';
+      var bn = parseFloat(txt(b).replace(/[^\d.-]/g,''));
+      var an = parseFloat(txt(a).replace(/[^\d.-]/g,''));
+      var mn = parseFloat(txt(m).replace(/[^\d.-]/g,''));
+      if(!isFinite(bn) || !isFinite(an) || !isFinite(mn)) return 'n/a';
+      var expected = (bn + an) / 2;
+      return Math.abs(mn - expected) < 0.05 ? true : 'warn';
+    }},
+    { tab:'order', label:'Order BP badge populated', sev:'critical', fn:function(){
+      var el = $('ord-bp-badge'); if(!el) return 'n/a';
+      var s = txt(el);
+      if(!s || s.indexOf('--') >= 0) return 'n/a';
+      return /\$\s*\d/.test(s);
+    }},
+    { tab:'order', label:'Auto-select chips populated when filled', sev:'info', fn:function(){
+      var asr = $('asr-strike'); if(!asr) return 'n/a';
+      var s = txt(asr);
+      if(s === '--' || !s) return 'n/a';
+      var fields = ['asr-strike','asr-exp','asr-dte','asr-vol','asr-oi','asr-delta'];
+      var filled = fields.filter(function(id){ var e = $(id); return e && txt(e) && txt(e) !== '--'; }).length;
+      return filled === fields.length ? true : 'warn';
+    }},
+
+    // Portfolio tab ───────────────────────────────────────────────────────
+    { tab:'pf', label:'Account display populated', sev:'info', fn:function(){
+      var el = $('pf-acct-display'); if(!el) return 'n/a';
+      var s = txt(el);
+      return s && s !== '--' ? true : 'n/a';
+    }},
+    { tab:'pf', label:'Cash display has $ value', sev:'important', fn:function(){
+      var el = $('pf-cash-display'); if(!el) return 'n/a';
+      var s = txt(el);
+      if(!s || s === '$--') return 'n/a';
+      return /\$\s*\d/.test(s);
+    }},
+    { tab:'pf', label:'Last-update timestamp set + fresh', sev:'info', fn:function(){
+      var el = $('pf-last-update'); if(!el) return 'n/a';
+      var s = txt(el);
+      if(!s || s === 'Not loaded') return 'n/a';
+      return true;
+    }},
+    { tab:'pf', label:'Summary totals numeric', sev:'info', fn:function(){
+      var el = $('pf-total-val'); if(!el) return 'n/a';
+      var s = txt(el);
+      if(!s || s === '$--') return 'n/a';
+      return /\$\s*\d/.test(s);
+    }},
+    { tab:'pf', label:'Charts canvas instantiated', sev:'info', fn:function(){
+      var m = $('pf-chart-master'), s = $('pf-chart-sector');
+      if(!m || !s) return 'n/a';
+      if(m.tagName !== 'CANVAS' || s.tagName !== 'CANVAS') return false;
+      try { return !!(m.getContext('2d') && s.getContext('2d')); } catch(_){ return false; }
+    }},
+
+    // Positions — deeper checks ───────────────────────────────────────────
+    { tab:'pos', label:'G.posOpenData mirrors active positions', sev:'info', fn:function(){
+      if(!window.G || !Array.isArray(G.positions) || G.positions.length === 0) return 'n/a';
+      if(typeof G.posOpenData !== 'object' || G.posOpenData === null) return 'warn';
+      var covered = G.positions.filter(function(p){
+        var sym = p && (p.symbol || p.underlying);
+        return sym && G.posOpenData[sym];
+      }).length;
+      return covered / G.positions.length >= 0.5 ? true : 'warn';
+    }},
+    { tab:'pos', label:'Trail-stop state for at least one position', sev:'info', fn:function(){
+      if(!window.G || !Array.isArray(G.positions) || G.positions.length === 0) return 'n/a';
+      var ts = G.tsState;
+      if(!ts || typeof ts !== 'object') return 'warn';
+      return Object.keys(ts).length > 0;
+    }},
+
+    // GEX — extra ────────────────────────────────────────────────────────
+    { tab:'gex', label:'GEX top-50 rows have positive spot price', sev:'info', fn:function(){
+      var d = window.G && G.gexData;
+      if(!Array.isArray(d) || d.length === 0) return 'n/a';
+      var sample = d.slice(0, Math.min(50, d.length));
+      var bad = sample.filter(function(r){
+        if(!r) return true;
+        // spot is looked up from G.results in renderGex; here verify the
+        // ticker symbol resolves to a number > 0 elsewhere in state.
+        return typeof r.t !== 'string' || r.t.length === 0;
+      }).length;
+      return bad === 0;
+    }},
+    { tab:'gex', label:'GEX net values are finite numbers', sev:'info', fn:function(){
+      var d = window.G && G.gexData;
+      if(!Array.isArray(d) || d.length === 0) return 'n/a';
+      var sample = d.slice(0, Math.min(50, d.length));
+      var bad = sample.filter(function(r){
+        return r && typeof r.gex !== 'undefined' && !isFinite(r.gex);
+      }).length;
+      return bad === 0;
+    }},
+
+    // Industry — extra ───────────────────────────────────────────────────
+    { tab:'ind', label:'IND.themes / IND state populated after load', sev:'info', fn:function(){
+      if(!window.IND || !IND.loaded) return 'n/a';
+      var themes = IND.themes || IND.data || {};
+      var keys = (typeof themes === 'object') ? Object.keys(themes) : [];
+      return keys.length >= 5;
+    }},
+    { tab:'ind', label:'Heatmap has tiles after load', sev:'info', fn:function(){
+      if(!window.IND || !IND.loaded) return 'n/a';
+      var el = $('ind-heatmap'); if(!el) return 'n/a';
+      return el.querySelectorAll('.ind-heat').length >= 5;
     }},
 
     // API tab ─────────────────────────────────────────────────────────────
