@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-13T00:15-chart-hdr-no-wrap">
+<meta name="op-build" content="2026-05-13T00:30-collapse-4-chip-group">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -752,6 +752,12 @@ tr.pos-row-earn-soon b{color:#ff8a65;text-shadow:0 0 8px rgba(216,90,48,0.55);}
 .sec-seg.open{color:var(--amb);border-color:var(--amb);background:var(--amb3);}
 .sec-seg.open .sec-seg-arr{transform:rotate(90deg);}
 .sec-seg-arr{display:inline-block;font-size:9px;color:var(--amb);transition:transform .15s;}
+/* v2.18.24: master + group for 4-chip collapse */
+#sc-seg-group{display:inline-flex;gap:6px;align-items:center;flex-wrap:nowrap;}
+#sc-seg-group.sc-seg-group-collapsed{display:none;}
+.sec-seg-master{border-color:var(--amb3);color:var(--amb);}
+.sec-seg-master.open{color:var(--amb);border-color:var(--amb);background:var(--amb3);}
+.sec-seg-master.open .sec-seg-arr{transform:rotate(90deg);}
 /* Scanner detail panel — keep all interior content (especially button
    rows) inside the panel boundary. The det-hdr and any .ord-row inside
    wrap rather than overflow horizontally; watchlist buttons + action
@@ -3227,11 +3233,18 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
       <span>☰</span><span>FILTERS</span><span class="mft-arr">▾</span>
       <span id="sc-mobile-filter-count" style="margin-left:8px;color:var(--gry);font-size:10px;"></span>
     </button>
-    <!-- 4-segment collapsible header bar (item 8a) -->
-    <button type="button" class="sec-seg" data-target="sc-bar-strategy" onclick="toggleSecSeg('sc-bar-strategy')" title="Click to expand / collapse the STRATEGY presets row"><span class="sec-seg-arr">▶</span>STRATEGY</button>
-    <button type="button" class="sec-seg" data-target="sc-bar-filters" onclick="toggleSecSeg('sc-bar-filters')" title="Click to expand / collapse the FILTERS row"><span class="sec-seg-arr">▶</span>FILTERS</button>
-    <button type="button" class="sec-seg" data-target="sc-bar-mustpass" onclick="toggleSecSeg('sc-bar-mustpass')" title="Click to expand / collapse the MUST PASS chips row"><span class="sec-seg-arr">▶</span>MUST PASS</button>
-    <button type="button" class="sec-seg" data-target="sc-bar-screener" onclick="toggleSecSeg('sc-bar-screener')" title="Click to expand / collapse the SCREENER inputs"><span class="sec-seg-arr">▶</span>SCREENER</button>
+    <!-- v2.18.24: 4-chip group (STRATEGY / FILTERS / MUST PASS / SCREENER)
+         hidden behind a single master "FILTERS" chip. Default collapsed so
+         the action row reads SCAN · EXPORT · SEARCH · status — no
+         filter-row visual noise. Tap the master chip to reveal the 4
+         section chips (each then individually toggles its own bar). -->
+    <button type="button" class="sec-seg sec-seg-master" id="sc-seg-master" onclick="toggleSegGroup()" title="Show / hide the STRATEGY · FILTERS · MUST PASS · SCREENER section chips"><span class="sec-seg-arr">▶</span>FILTERS</button>
+    <span id="sc-seg-group" class="sc-seg-group-collapsed">
+      <button type="button" class="sec-seg" data-target="sc-bar-strategy" onclick="toggleSecSeg('sc-bar-strategy')" title="Click to expand / collapse the STRATEGY presets row"><span class="sec-seg-arr">▶</span>STRATEGY</button>
+      <button type="button" class="sec-seg" data-target="sc-bar-filters" onclick="toggleSecSeg('sc-bar-filters')" title="Click to expand / collapse the FILTERS row"><span class="sec-seg-arr">▶</span>FILTERS</button>
+      <button type="button" class="sec-seg" data-target="sc-bar-mustpass" onclick="toggleSecSeg('sc-bar-mustpass')" title="Click to expand / collapse the MUST PASS chips row"><span class="sec-seg-arr">▶</span>MUST PASS</button>
+      <button type="button" class="sec-seg" data-target="sc-bar-screener" onclick="toggleSecSeg('sc-bar-screener')" title="Click to expand / collapse the SCREENER inputs"><span class="sec-seg-arr">▶</span>SCREENER</button>
+    </span>
     <!-- SCAN + status: scroll-locked to right (item 5) — buttons keep
          their full width, dyn-w spans truncate first.
          SCAN gets a solid filled cyan background + glow (instead of the
@@ -26863,7 +26876,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.18.23-chart-hdr-no-wrap';
+var APP_VERSION = '2.18.24-collapse-4-chip-group';
 // v2.18.21: DEFAULT feedback webhook. Every visitor's "Submit Feedback"
 // form posts here (unless they've overridden via ALERTS → Feedback
 // Webhook). The URL points to a Google Apps Script Web App owned by
@@ -31201,6 +31214,20 @@ function toggleSecSeg(targetId){
   // No-persist: always start closed on next reload per user spec 2026-05-04.
   var seg = document.querySelector('.sec-seg[data-target="'+targetId+'"]');
   if (seg) seg.classList.toggle('open', !target.classList.contains('collapsed'));
+}
+
+// v2.18.24: master toggle for the 4-chip section group. Default state =
+// collapsed (group hidden, action row shows only SCAN/EXPORT/SEARCH).
+// Tapping the FILTERS master chip reveals STRATEGY/FILTERS/MUST PASS/
+// SCREENER. Sub-chips retain their per-row toggle behavior unchanged.
+// No localStorage persist — always re-collapses on reload per the same
+// no-persist spec the per-row collapses follow.
+function toggleSegGroup(){
+  var group = document.getElementById('sc-seg-group');
+  var master = document.getElementById('sc-seg-master');
+  if (!group || !master) return;
+  var nowCollapsed = group.classList.toggle('sc-seg-group-collapsed');
+  master.classList.toggle('open', !nowCollapsed);
 }
 
 window.addEventListener('DOMContentLoaded',init);
