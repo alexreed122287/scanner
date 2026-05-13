@@ -16004,7 +16004,23 @@ function scoreIt(ticker, ind, opt){
   // (index.html ~line 18633). Compute live values from cached daily history
   // when present, and backfill the result into `ind` so detail-pane widgets
   // show the real numbers instead of the placeholders.
-  var _hist = (typeof G_HIST_CACHE !== 'undefined') ? G_HIST_CACHE[ticker] : null;
+  //
+  // Resolve history with a three-tier fallback: in-memory G_HIST_CACHE → 24h
+  // localStorage cache (loadHistCache) → null. Without the localStorage
+  // fallback the bulk-pass scoreIt always saw an empty G_HIST_CACHE and the
+  // backfill never fired during the initial render — users observed RSI 50 /
+  // MACD 0 / ADX 30 on every row until foreground enrichment slowly
+  // overwrote the top 60 (and even then ranks 61+ stayed at placeholders
+  // until bg-enrich completed minutes later).
+  var _hist = null;
+  try {
+    if(typeof G_HIST_CACHE !== 'undefined' && G_HIST_CACHE[ticker]){
+      _hist = G_HIST_CACHE[ticker];
+    } else if(typeof loadHistCache === 'function'){
+      _hist = loadHistCache(ticker);
+      if(_hist && typeof G_HIST_CACHE !== 'undefined') G_HIST_CACHE[ticker] = _hist;
+    }
+  } catch(_){}
   if(_hist && _hist.length >= 16){
     var rsiVal = calcRSIatIndex(_hist, 14, _hist.length - 1);
     if(typeof rsiVal === 'number' && !isNaN(rsiVal)){
@@ -30579,6 +30595,31 @@ function init(){
   var cachedScan = cacheGet(CACHE_KEYS.scanResults);
   if(cachedScan && cachedScan.length){
     G.results = cachedScan;
+    // Rehydrate ind from each ticker's localStorage history cache and re-score
+    // through scoreIt. Slim-cache entries written by older builds (or written
+    // before enrichment completed) carry the bulk-scan placeholder values
+    // (rsi=50, macd=0, adx=30); without this pass the UI shows those
+    // placeholders on every reload until the user runs a fresh scan and waits
+    // for enrichment.
+    try {
+      cachedScan.forEach(function(r){
+        if(!r || !r.ticker) return;
+        if(!r.ind) r.ind = {};
+        try {
+          if(typeof scoreIt === 'function'){
+            var sc = scoreIt(r.ticker, r.ind, r.opt || {});
+            if(sc){
+              r.score = sc.score;
+              r.techScore = sc.techScore;
+              r.fundScore = sc.fundScore;
+              r.isGo = sc.isGo;
+              r.rules = sc.rules;
+              r.passes = sc.passes;
+            }
+          }
+        } catch(_){}
+      });
+    } catch(_){}
     G.filtered = cachedScan.filter(function(r){ return tickerPassesSectorExclusion(r.ticker, r.sector); });
     if(typeof renderBuySig==='function') renderBuySig();
     if(typeof renderScan==='function') renderScan();
