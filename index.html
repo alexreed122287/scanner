@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-12T11:00-export-modal-first">
+<meta name="op-build" content="2026-05-12T22:00-tz-earnings-bp-feedback">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -685,6 +685,11 @@ tr.sel-row td{background:var(--blu3);}
    avoid accidentally triggering a PDT day-trade flag. */
 tr.pos-row-today td{background:rgba(255,193,7,0.10);border-bottom-color:rgba(255,193,7,0.35);}
 tr.pos-row-today td:first-child{box-shadow:inset 4px 0 0 var(--ambb);}
+/* v2.18.19: earnings within 3 days — bold amber-red row */
+tr.pos-row-earn-soon td{background:rgba(216,90,48,0.14);border-bottom-color:rgba(216,90,48,0.45);font-weight:700;}
+tr.pos-row-earn-soon td:first-child{box-shadow:inset 4px 0 0 #d85a30;}
+tr.pos-row-earn-soon b{color:#ff8a65;text-shadow:0 0 8px rgba(216,90,48,0.55);}
+.pos-earn-tag{display:inline-block;margin-left:6px;padding:2px 6px;border:1px solid #d85a30;background:rgba(216,90,48,0.18);color:#ff8a65;font-family:var(--ff-mono);font-size:9px;font-weight:800;letter-spacing:.5px;border-radius:3px;text-shadow:none;vertical-align:middle;}
 .today-pill{display:inline-block;background:var(--ambb);color:var(--bg0);font-size:9px;font-weight:800;letter-spacing:1px;padding:1px 6px;border-radius:2px;margin-left:6px;text-shadow:none;animation:today-pulse 2.4s ease-in-out infinite;}
 @keyframes today-pulse{0%,100%{box-shadow:0 0 0 rgba(255,193,7,0);}50%{box-shadow:0 0 12px rgba(255,193,7,0.55);}}
 .badge{border-radius:2px;font-size:10px;font-weight:700;padding:1px 6px;display:inline-block;}
@@ -3164,6 +3169,37 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
   </div>
 </div>
 <div class="tab-pane active" id="tab-sc">
+  <!-- v2.18.19: press-and-hold Buying Power chip. Bottom-right above the
+       bot-nav. Tiny "$" glyph; pointerdown reveals the live BP, release
+       hides it. Pointer Events handle touch + mouse uniformly. -->
+  <div id="sc-bp-peek" onpointerdown="_bpPeekStart(event)" onpointerup="_bpPeekEnd()" onpointerleave="_bpPeekEnd()" onpointercancel="_bpPeekEnd()" oncontextmenu="event.preventDefault();return false;" title="Press and hold to see Buying Power" style="position:fixed;right:14px;bottom:calc(86px + env(safe-area-inset-bottom));z-index:80;width:34px;height:34px;border-radius:50%;background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.30);color:var(--ambb);font-family:var(--ff-mono);font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;touch-action:none;opacity:0.55;transition:opacity .15s;">$</div>
+  <div id="sc-bp-peek-value" style="display:none;position:fixed;right:54px;bottom:calc(86px + env(safe-area-inset-bottom));z-index:81;background:var(--bg1);border:1px solid var(--ambb);border-radius:6px;padding:8px 12px;font-family:var(--ff-mono);font-size:12px;font-weight:700;letter-spacing:.5px;color:var(--grn);box-shadow:0 0 18px rgba(0,212,255,0.35);white-space:nowrap;pointer-events:none;"></div>
+  <script>
+    function _bpPeekStart(e){
+      try { e && e.preventDefault && e.preventDefault(); } catch(_){}
+      var btn = document.getElementById('sc-bp-peek');
+      var val = document.getElementById('sc-bp-peek-value');
+      if (!btn || !val) return;
+      btn.style.opacity = '1';
+      var bp = (window.G && G.lastBP && G.lastBP.option);
+      if (bp != null && isFinite(bp)){
+        val.textContent = 'BP: $' + Number(bp).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+        val.style.color = bp > 0 ? 'var(--grn)' : 'var(--wrn)';
+      } else {
+        val.textContent = 'BP: loading…';
+        val.style.color = 'var(--gry)';
+        try { if (typeof fetchBalances === 'function') fetchBalances(); } catch(_){}
+      }
+      val.style.display = 'block';
+      try { if (typeof hap === 'function') hap(8); } catch(_){}
+    }
+    function _bpPeekEnd(){
+      var btn = document.getElementById('sc-bp-peek');
+      var val = document.getElementById('sc-bp-peek-value');
+      if (btn) btn.style.opacity = '0.55';
+      if (val) val.style.display = 'none';
+    }
+  </script>
   <!-- Mobile-only: condensed action bar with SCAN + Filters toggle -->
   <!-- Sticky action row — single line: 4 section toggles + SCAN + status.
        Each segment toggles its corresponding sc-bar-* collapsible inline.
@@ -4387,6 +4423,59 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
       }
     </script>
 
+    <!-- ── FEEDBACK WEBHOOK (v2.18.19) ── -->
+    <div class="card"><div class="card-hdr">▼ FEEDBACK WEBHOOK</div>
+      <div style="padding:12px;font-family:var(--ff-mono);font-size:11px;color:var(--gry);line-height:1.6;">
+        <p style="margin:0 0 10px;">
+          Configure the Google Apps Script Web App URL that receives feedback
+          from the ✉ FAB. Each submission appends one row to a shared Google
+          Sheet you can give developers read access to.
+          See <a href="https://github.com/alexreed122287/scanner/blob/main/feedback/README.md" target="_blank" style="color:var(--ambb);">feedback/README.md</a> for the 5-minute setup.
+        </p>
+        <label style="display:flex;flex-direction:column;gap:4px;margin-top:6px;color:var(--ambb);font-weight:600;letter-spacing:.3px;">
+          <span style="font-size:9px;letter-spacing:1px;">APPS SCRIPT WEB APP URL</span>
+          <input id="fb-webhook-input" type="url" placeholder="https://script.google.com/macros/s/AKfycb.../exec" style="background:var(--bg0);border:var(--bdr);border-radius:3px;color:var(--wht);font-family:var(--ff-mono);font-size:11px;padding:7px 10px;width:100%;box-sizing:border-box;">
+        </label>
+        <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+          <button class="btn blu" onclick="fbSaveWebhook()" style="font-size:11px;padding:8px 14px;font-weight:700;letter-spacing:1px;min-height:40px;">SAVE</button>
+          <button class="btn" onclick="fbTestWebhook()" style="font-size:11px;padding:8px 14px;letter-spacing:1px;min-height:40px;border-color:var(--ambb);color:var(--ambb);">▶ SEND TEST</button>
+          <button class="btn" onclick="fbClearWebhook()" style="font-size:11px;padding:8px 14px;letter-spacing:1px;min-height:40px;border-color:var(--gry2);color:var(--gry);">CLEAR</button>
+        </div>
+        <div id="fb-webhook-status" style="margin-top:8px;font-size:10px;color:var(--gry2);"></div>
+      </div>
+    </div>
+    <script>
+      try { document.addEventListener('DOMContentLoaded', function(){
+        try { var v = localStorage.getItem('rrjcar_fb_webhook') || ''; var el = document.getElementById('fb-webhook-input'); if (el) el.value = v; } catch(_){}
+      }); } catch(_){}
+      function fbSaveWebhook(){
+        var el = document.getElementById('fb-webhook-input');
+        var st = document.getElementById('fb-webhook-status');
+        if (!el) return;
+        var v = (el.value || '').trim();
+        try { localStorage.setItem('rrjcar_fb_webhook', v); } catch(_){}
+        if (st) st.innerHTML = v ? '<span style="color:var(--grn);">✓ Saved.</span>' : '<span style="color:var(--wrn);">Webhook cleared — feedback FAB will warn until set.</span>';
+      }
+      function fbClearWebhook(){
+        var el = document.getElementById('fb-webhook-input');
+        if (el) el.value = '';
+        try { localStorage.removeItem('rrjcar_fb_webhook'); } catch(_){}
+        var st = document.getElementById('fb-webhook-status');
+        if (st) st.innerHTML = '<span style="color:var(--gry);">Cleared.</span>';
+      }
+      function fbTestWebhook(){
+        var v = '';
+        try { v = (localStorage.getItem('rrjcar_fb_webhook') || '').trim(); } catch(_){}
+        var st = document.getElementById('fb-webhook-status');
+        if (!v){ if (st) st.innerHTML = '<span style="color:var(--wrn);">Save the URL first.</span>'; return; }
+        if (st) st.innerHTML = '<span style="color:var(--gry);">Sending test row…</span>';
+        var payload = { type:'test', subject:'[TEST] webhook connectivity', body:'If you can see this row in your Google Sheet, the webhook is wired up correctly.', version: (typeof APP_VERSION !== 'undefined' ? APP_VERSION : ''), activeTab:'al', submittedAt: new Date().toISOString(), userAgent: (navigator.userAgent || '').slice(0, 200) };
+        fetch(v, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(payload) })
+          .then(function(){ if (st) st.innerHTML = '<span style="color:var(--grn);">✓ Sent — check your Google Sheet.</span>'; })
+          .catch(function(e){ if (st) st.innerHTML = '<span style="color:var(--ngo);">Send failed: '+(e && e.message?e.message:'network error')+'</span>'; });
+      }
+    </script>
+
     <!-- ── SYSTEM ALERTS LOG ── -->
     <div class="card"><div class="card-hdr">SYSTEM ALERTS LOG <button class="btn" style="font-size:10px;padding:2px 8px;float:right;" onclick="G.alerts=[];renderAlerts();">CLEAR</button></div>
     <div id="alerts-list"></div>
@@ -5595,6 +5684,126 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
      reads the active tab id and opens the modal with the matching HOW TO
      section's content (cloned from the existing #tab-howto cards). -->
 <button class="help-fab" id="help-fab-btn" onclick="openHelpFor()" title="Open the HOW TO section for the current tab" style="display:none;">?</button>
+<!-- v2.18.19: feedback FAB stacked above the help FAB. Click opens a
+     compact form that POSTs to a Google Apps Script webhook (URL set
+     in the ALERTS tab → FEEDBACK card). See feedback/README.md. -->
+<button class="help-fab feedback-fab" id="feedback-fab-btn" onclick="openFeedbackModal()" title="Submit feedback or a change request — saves to your shared Google Sheet" style="display:flex;bottom:66px;">&#9993;</button>
+<div id="feedback-modal" onclick="if(event.target===this)closeFeedbackModal()" style="display:none;position:fixed;inset:0;z-index:9100;background:rgba(0,0,0,.72);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:24px;">
+  <div style="background:var(--bg1);border:1px solid var(--amb);border-radius:8px;max-width:480px;width:100%;max-height:88vh;overflow-y:auto;box-shadow:0 12px 48px rgba(0,0,0,.6);">
+    <div style="padding:14px 18px;border-bottom:1px solid var(--bg3);background:var(--bg2);display:flex;align-items:center;justify-content:space-between;">
+      <div style="font-family:var(--ff-brand);font-size:13px;color:var(--amb);letter-spacing:2px;">&#9993; SUBMIT FEEDBACK</div>
+      <button class="btn" onclick="closeFeedbackModal()" style="font-size:14px;padding:6px 10px;min-width:36px;min-height:36px;">&#10005;</button>
+    </div>
+    <div style="padding:16px 18px;">
+      <div id="fb-status" style="display:none;margin-bottom:10px;padding:8px 10px;border-radius:4px;font-size:11px;font-family:var(--ff-mono);"></div>
+      <label style="display:flex;flex-direction:column;gap:4px;margin-bottom:10px;color:var(--ambb);font-weight:600;letter-spacing:.3px;">
+        <span style="font-size:9px;letter-spacing:1px;">TYPE</span>
+        <select id="fb-type" style="background:var(--bg0);border:var(--bdr);border-radius:3px;color:var(--wht);font-family:var(--ff-mono);font-size:12px;padding:8px 10px;width:100%;box-sizing:border-box;">
+          <option value="bug">Bug report</option>
+          <option value="feature">Feature request</option>
+          <option value="ux">UX / polish</option>
+          <option value="data">Data quality issue</option>
+          <option value="other">Other</option>
+        </select>
+      </label>
+      <label style="display:flex;flex-direction:column;gap:4px;margin-bottom:10px;color:var(--ambb);font-weight:600;letter-spacing:.3px;">
+        <span style="font-size:9px;letter-spacing:1px;">SUBJECT</span>
+        <input id="fb-subject" type="text" maxlength="120" placeholder="One-line summary" style="background:var(--bg0);border:var(--bdr);border-radius:3px;color:var(--wht);font-family:var(--ff-mono);font-size:12px;padding:8px 10px;width:100%;box-sizing:border-box;">
+      </label>
+      <label style="display:flex;flex-direction:column;gap:4px;margin-bottom:10px;color:var(--ambb);font-weight:600;letter-spacing:.3px;">
+        <span style="font-size:9px;letter-spacing:1px;">DETAILS</span>
+        <textarea id="fb-body" rows="5" maxlength="2000" placeholder="What you saw, what you expected, steps to reproduce, etc." style="background:var(--bg0);border:var(--bdr);border-radius:3px;color:var(--wht);font-family:var(--ff-mono);font-size:12px;padding:8px 10px;width:100%;box-sizing:border-box;resize:vertical;min-height:90px;"></textarea>
+      </label>
+      <div style="display:flex;gap:8px;margin-top:14px;justify-content:flex-end;flex-wrap:wrap;">
+        <button class="btn" onclick="closeFeedbackModal()" style="font-size:11px;padding:9px 14px;letter-spacing:1px;min-height:40px;border-color:var(--gry2);color:var(--gry);">CANCEL</button>
+        <button class="btn blu" id="fb-send-btn" onclick="submitFeedback()" style="font-size:11px;padding:9px 14px;font-weight:700;letter-spacing:1px;min-height:40px;">&#9658; SEND</button>
+      </div>
+      <div style="margin-top:12px;font-size:10px;color:var(--gry2);line-height:1.6;">
+        Submissions append a row to your Google Sheet via the configured Apps Script webhook
+        (set the URL in the ALERTS tab → FEEDBACK card).
+        Includes browser, app version, and current tab automatically.
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  function openFeedbackModal(){
+    var m = document.getElementById('feedback-modal');
+    if (m) m.style.display = 'flex';
+    var st = document.getElementById('fb-status');
+    if (st) st.style.display = 'none';
+  }
+  function closeFeedbackModal(){
+    var m = document.getElementById('feedback-modal');
+    if (m) m.style.display = 'none';
+  }
+  function submitFeedback(){
+    var subjectEl = document.getElementById('fb-subject');
+    var bodyEl = document.getElementById('fb-body');
+    var typeEl = document.getElementById('fb-type');
+    var st = document.getElementById('fb-status');
+    var btn = document.getElementById('fb-send-btn');
+    var subject = (subjectEl && subjectEl.value || '').trim();
+    var body = (bodyEl && bodyEl.value || '').trim();
+    if (!subject || !body){
+      if (st){
+        st.style.display = 'block';
+        st.style.background = 'rgba(255,170,0,0.10)';
+        st.style.color = 'var(--wrn)';
+        st.style.border = '1px solid var(--wrn)';
+        st.textContent = 'Subject + details are both required.';
+      }
+      return;
+    }
+    var webhook = '';
+    try { webhook = (localStorage.getItem('rrjcar_fb_webhook') || '').trim(); } catch(_){}
+    if (!webhook){
+      if (st){
+        st.style.display = 'block';
+        st.style.background = 'rgba(255,82,82,0.10)';
+        st.style.color = 'var(--ngo)';
+        st.style.border = '1px solid var(--ngo)';
+        st.innerHTML = 'No webhook configured. Set one in the ALERTS tab → FEEDBACK card. <a href="https://github.com/alexreed122287/scanner/blob/main/feedback/README.md" target="_blank" style="color:var(--ambb);">Setup walkthrough</a>.';
+      }
+      return;
+    }
+    var payload = {
+      type: typeEl ? typeEl.value : 'other',
+      subject: subject,
+      body: body,
+      version: (typeof APP_VERSION !== 'undefined' ? APP_VERSION : ''),
+      activeTab: (function(){try{return localStorage.getItem('rrjcar_active_tab')||'sc';}catch(_){return 'sc';}})(),
+      submittedAt: new Date().toISOString(),
+      userAgent: (navigator.userAgent || '').slice(0, 200)
+    };
+    if (btn){ btn.disabled = true; btn.textContent = 'SENDING…'; }
+    fetch(webhook, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(payload) })
+      .then(function(){
+        if (st){
+          st.style.display = 'block';
+          st.style.background = 'rgba(0,230,118,0.10)';
+          st.style.color = 'var(--grn)';
+          st.style.border = '1px solid var(--grn)';
+          st.textContent = '✓ Feedback submitted. Thank you.';
+        }
+        if (subjectEl) subjectEl.value = '';
+        if (bodyEl) bodyEl.value = '';
+        setTimeout(closeFeedbackModal, 1500);
+      })
+      .catch(function(e){
+        if (st){
+          st.style.display = 'block';
+          st.style.background = 'rgba(255,82,82,0.10)';
+          st.style.color = 'var(--ngo)';
+          st.style.border = '1px solid var(--ngo)';
+          st.textContent = 'Send failed: ' + (e && e.message ? e.message : 'network error');
+        }
+      })
+      .finally(function(){
+        if (btn){ btn.disabled = false; btn.innerHTML = '&#9658; SEND'; }
+      });
+  }
+</script>
 <div id="help-modal" onclick="if(event.target===this)closeHelpModal()">
   <div class="help-modal-inner">
     <div class="help-modal-hdr">
@@ -7655,22 +7864,18 @@ function _parseTradierDate(s){
   if (s instanceof Date) return s;
   var str = String(s).trim();
   if (!str) return null;
-  // Has explicit timezone marker, or date-only (parses as UTC midnight), or
-  // any other shape we don't recognize as naive ET ISO → one Date allocation.
-  // The naive-ET branch below is the only hot path that needs offset math.
+  // v2.18.19: TREAT NAIVE ISO AS UTC, not ET wall time. The prior v2.18.1
+  // assumption (naive = ET) shifted daytime opens by +4/+5 hours, making
+  // 10:30 AM CT fills display as 2:30 PM CT or later ("after market close"
+  // per user report). Tradier's date_acquired is naive UTC; appending Z
+  // lets the Date parser do its job. _fmtCT_* still converts to CT.
   var m = str.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(?::(\d{2})(?:\.(\d+))?)?$/);
   if (!m || /Z$|[+-]\d{2}:?\d{2}$/.test(str)){
     var d0 = new Date(str);
     return isNaN(d0.getTime()) ? null : d0;
   }
-  var y=+m[1], mo=+m[2]-1, day=+m[3], h=+m[4], mi=+m[5], se=+(m[6]||0);
-  var ms = m[7] ? parseInt((m[7]+'000').slice(0,3), 10) : 0;
-  // First take the wall components as if they were UTC, then subtract the ET
-  // offset for that instant so the resulting UTC ms matches the actual UTC
-  // instant for that ET wall time. (ET offset is negative, e.g. -4 EDT.)
-  var asIfUtcMs = Date.UTC(y, mo, day, h, mi, se, ms);
-  var etOff = _etOffsetHoursAt(asIfUtcMs);
-  return new Date(asIfUtcMs - etOff * 3600000);
+  var d1 = new Date(str + 'Z');
+  return isNaN(d1.getTime()) ? null : d1;
 }
 // Format a Date as MM-DD-YYYY in America/Chicago.
 function _fmtCT_Date(d){
@@ -21567,6 +21772,56 @@ function formatOpenedDateTime(p, openedToday){
     + '</td>';
 }
 
+// v2.18.19: one-time-per-day popup listing positions with earnings in the
+// next 3 days. Fires once per CT calendar day so a user who keeps the
+// dashboard open overnight gets a fresh warning the next morning.
+function _maybeShowEarningsSoonPopup(pos){
+  if (!pos || !pos.length) return;
+  if (typeof getDaysToEarnings !== 'function') return;
+  var seenTks = {};
+  var entries = [];
+  pos.forEach(function(p){
+    var tk = (p.underlying || '').toUpperCase();
+    if (!tk || seenTks[tk]) return;
+    var d = getDaysToEarnings(tk);
+    if (d == null || d < 0 || d > 3) return;
+    seenTks[tk] = true;
+    entries.push({ ticker: tk, days: d });
+  });
+  if (!entries.length) return;
+  var todayKey;
+  try { todayKey = _fmtCT_Date(new Date()); } catch(_) { todayKey = new Date().toISOString().slice(0,10); }
+  var seenKey = 'rrjcar_earn_popup_seen';
+  try { if (localStorage.getItem(seenKey) === todayKey) return; } catch(_){}
+  entries.sort(function(a,b){ return a.days - b.days; });
+  var existing = document.getElementById('earn-popup-modal');
+  if (existing) existing.remove();
+  var modal = document.createElement('div');
+  modal.id = 'earn-popup-modal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:9800;background:rgba(0,0,0,0.65);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:24px;';
+  modal.onclick = function(e){ if (e.target === modal) modal.remove(); };
+  var rows = entries.map(function(e){
+    var dayLbl = e.days === 0 ? 'TODAY' : (e.days === 1 ? 'TOMORROW' : (e.days+' days'));
+    var color = e.days === 0 ? '#ff5252' : (e.days === 1 ? '#ff8a65' : '#ffd740');
+    return '<tr style="border-top:1px solid var(--bg3);">'
+      + '<td style="padding:10px 12px;"><b style="color:'+color+';font-size:14px;letter-spacing:1px;">'+e.ticker+'</b></td>'
+      + '<td style="padding:10px 12px;text-align:right;color:'+color+';font-family:var(--ff-mono);font-size:12px;font-weight:700;">'+dayLbl+'</td>'
+      + '</tr>';
+  }).join('');
+  modal.innerHTML = '<div style="background:var(--bg1);border:1px solid #d85a30;border-radius:10px;max-width:440px;width:100%;box-shadow:0 0 32px rgba(216,90,48,0.30);">'
+    + '<div style="padding:16px 20px;border-bottom:1px solid var(--bg3);background:linear-gradient(135deg,rgba(216,90,48,0.20),rgba(255,82,82,0.10));">'
+    +   '<div style="font-family:var(--ff-brand);font-size:14px;letter-spacing:2px;color:#ff8a65;">⚠ EARNINGS WITHIN 3 DAYS</div>'
+    +   '<div style="font-size:11px;color:var(--gry);margin-top:4px;">Open positions with earnings in the next 3 sessions. Close or roll before the print — binary event risk.</div>'
+    + '</div>'
+    + '<table style="width:100%;border-collapse:collapse;font-family:var(--ff-mono);">'+rows+'</table>'
+    + '<div style="padding:14px 20px;border-top:1px solid var(--bg3);display:flex;gap:8px;justify-content:flex-end;">'
+    +   '<button class="btn" onclick="document.getElementById(\'earn-popup-modal\').remove();" style="font-size:11px;padding:8px 16px;min-height:40px;border-color:var(--gry2);color:var(--gry);">REMIND ME TODAY</button>'
+    +   '<button class="btn blu" onclick="(function(){try{localStorage.setItem(\'rrjcar_earn_popup_seen\',\''+todayKey+'\');}catch(_){};document.getElementById(\'earn-popup-modal\').remove();})()" style="font-size:11px;padding:8px 16px;min-height:40px;font-weight:700;letter-spacing:1px;">DISMISS FOR TODAY</button>'
+    + '</div>'
+    + '</div>';
+  document.body.appendChild(modal);
+}
+
 function renderPositionsTable(pos,srcLabel){
   // Cache live positions so page reload doesn't need an API call
   if(pos&&pos.length&&srcLabel&&srcLabel.indexOf('cached')===-1){
@@ -21576,6 +21831,8 @@ function renderPositionsTable(pos,srcLabel){
     G._posLoadedLive = true;
     hideStaleBanner('tab-pos');
   }
+  // v2.18.19: once-per-day earnings warning popup
+  try { _maybeShowEarningsSoonPopup(pos); } catch(_){}
   eid('pos-src').textContent=srcLabel||'';
   var wrap=eid('pos-tbl-wrap');
   if(!pos.length){wrap.innerHTML='<div class="empty-det" style="min-height:200px;"><div class="ei">\u25a0</div><p>No open positions</p><button class="btn blu" onclick="fetchPositions()" style="margin-top:8px;font-size:11px;padding:8px 18px;font-weight:700;letter-spacing:1px;min-height:40px;">\u21bb REFRESH</button></div>';return;}
@@ -21958,12 +22215,23 @@ function renderPositionsTable(pos,srcLabel){
     var dayPnlTxt = dayPnlVal == null ? '<span style="color:var(--gry2);">—</span>'
                                       : (dayPnlVal >= 0 ? '+' : '') + fmtD(dayPnlVal);
     var dayPnlSortAttr = dayPnlVal == null ? -999999 : dayPnlVal;
+    // v2.18.19: earnings-within-3-days highlight (red row + ⚠ EARN tag).
+    var earnDays = (typeof getDaysToEarnings === 'function') ? getDaysToEarnings(tk) : null;
+    var earnSoon = earnDays != null && earnDays >= 0 && earnDays <= 3;
+    var rowClasses = [];
+    if (openedToday) rowClasses.push('pos-row-today');
+    if (earnSoon) rowClasses.push('pos-row-earn-soon');
+    var rowClassAttr = rowClasses.length ? ' class="'+rowClasses.join(' ')+'"' : '';
+    var rowTitle = openedToday ? 'Opened or rolled today — closing intraday triggers a PDT day-trade'
+                   : (earnSoon ? ('⚠ Earnings in '+earnDays+' day'+(earnDays===1?'':'s')+' — close or roll before the print') : '');
+    var rowTitleAttr = rowTitle ? ' title="'+rowTitle+'"' : '';
     html += '<tr data-tk="'+tk+'" data-tp="'+tp+'" data-st="'+st+'" data-ex="'+ex+'" data-qty="'+qty+'" data-sym="'+sym+'"'
       + ' data-sort-mid="'+(p.last||0)+'" data-sort-pnl="'+(p.pnl||0)+'" data-sort-pnlpct="'+(p.pnlPct||0)+'"'
       + ' data-sort-daypnl="'+dayPnlSortAttr+'"'
       + ' data-sort-strike="'+(st||0)+'" data-sort-exp="'+(ex||'')+'" data-sort-dte="'+(p.dte||0)+'"'
       + ' data-sort-opened="'+(p.openTs||p.dateAcquired||'')+'"'
-      + (openedToday ? ' class="pos-row-today" title="Opened or rolled today — closing intraday triggers a PDT day-trade"' : '')
+      + ' data-earn-days="'+(earnDays==null?'':earnDays)+'"'
+      + rowClassAttr + rowTitleAttr
       + '>'
       // Cell order updated 2026-05-08 — DAY P/L $ inserted between EQUITY and (renamed) TOTAL P/L $:
       // OPENED · EQUITY · DAY P/L $ · TOTAL P/L $ · TICKER · EXP · STRIKE · STOCK PRICE ·
@@ -21973,7 +22241,10 @@ function renderPositionsTable(pos,srcLabel){
       +equityCellHL                                                                                           // EQUITY
       +'<td class="'+dayPnlCls+'">'+dayPnlTxt+'</td>'                                                        // DAY P/L $
       +'<td class="'+pnlCls+'">'+(p.pnl>=0?'+':'')+fmtD(p.pnl)+'</td>'                                       // TOTAL P/L $
-      +'<td class="col-ticker">'+chartIconBtnHtml(tk)+'<b>'+tk+'</b>'+(isStock?' <span style="color:var(--gry);font-size:10px;font-weight:600;">EQ</span>':'')+'</td>'  // TICKER
+      +'<td class="col-ticker">'+chartIconBtnHtml(tk)+'<b>'+tk+'</b>'
+        +(isStock?' <span style="color:var(--gry);font-size:10px;font-weight:600;">EQ</span>':'')
+        +(earnSoon?' <span class="pos-earn-tag" title="Earnings in '+earnDays+'d">⚠ EARN '+earnDays+'d</span>':'')
+        +'</td>'  // TICKER
       +expCell                                                                                                // EXP
       +strikeCell                                                                                             // STRIKE
       +stockPxCellHL                                                                                          // STOCK PRICE
@@ -26540,7 +26811,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.18.18-export-modal-first';
+var APP_VERSION = '2.18.19-tz-earnings-bp-feedback';
 // Page-source fallback constants removed. Each visitor now provides their own
 // API credentials via the API tab (or, for Tradier, sets up the worker proxy
 // at worker/tradier-proxy/ \u2014 keys never reach the browser at all).
