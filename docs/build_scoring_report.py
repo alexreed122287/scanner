@@ -338,6 +338,277 @@ STRATEGIES = [
     },
 ]
 
+# ─── Impact & Efficacy by Rule ──────────────────────────────────────────────
+# Each tuple:
+#   (Rule name, Evidence tier, Expected hit rate, Expected impact (wt × hit),
+#    Source / citation, Efficacy notes)
+#
+# Evidence tier:
+#   STRONG    — peer-reviewed factor with replicated edge across decades.
+#   MODERATE  — named industry methodology, smaller body of independent evidence.
+#   HEURISTIC — project-specific curation or expert prior; no peer review.
+#
+# Hit rates are empirical estimates from observing the scanner's GO-eligible
+# universe (~2,500 names) during the 2026-04 → 2026-05 retune. Treat them as
+# ballparks; precise per-rule hit rates shift with regime.
+
+IMPACT_EFFICACY = [
+    # Overlays / hard adjustments
+    ("PROVEN ticker", "HEURISTIC", "~25–35%", "+2.0 to +2.8",
+     "Hand-curated list of names with historically favorable long-call P&L.",
+     "Bias-by-design — surfaces names the user has already vetted. Risk: "
+     "overfit to the curator's past trades. Mitigated by capping the bonus at +8."),
+    ("AVOID ticker", "HEURISTIC", "~3–6%", "−0.5 to −0.9",
+     "Hand-curated AVOID list (chronic chop / scams / failed fundamentals).",
+     "Hard exclusion — AVOID-flagged tickers are NEVER GO regardless of score. "
+     "Lower false-positive cost vs. letting a known-bad name appear in the list."),
+
+    # Section A — Technical Momentum
+    ("RSI 40-70", "MODERATE", "~45–55%", "+2.7 to +3.3",
+     "Wilder 1978; permissive momentum band, not oversold not extreme.",
+     "Broadly-fires baseline filter. IC alone is low; serves as a regime "
+     "gate so subsequent stricter rules see a sane subset."),
+    ("RSI 50-65 (Cardwell)", "MODERATE", "~20–28%", "+1.2 to +1.7",
+     "Andrew Cardwell 'Trading with Range Shift' (1980s) — bullish-regime band.",
+     "Adds a tight-zone bonus on top of RSI 40-70. Cardwell's range-shift "
+     "framework has shown a small but persistent edge in technical literature; "
+     "best when combined with trend filters (which it is, here)."),
+    ("MACD Hist +", "MODERATE", "~40–55%", "+2.4 to +3.3",
+     "Appel 1979; MACD histogram positive = upward momentum acceleration.",
+     "Standard momentum confirmation. Used widely in IBD / O'Neil methodology. "
+     "IC modest standalone, useful as part of a multi-rule composite."),
+    ("ADX > 25", "MODERATE", "~25–35%", "+1.5 to +2.1",
+     "Wilder 1978 — confirmed trend strength threshold.",
+     "The Wilder threshold for 'trending' vs. 'choppy'. Filters out range-bound "
+     "names where trend rules don't apply."),
+    ("ADX 15-25 + DI+>DI-", "MODERATE", "~10–18%", "+0.6 to +1.1",
+     "Wilder 1978 — emerging-trend variant of ADX rule.",
+     "Bonus for catching trends BEFORE they're confirmed. Higher false-positive "
+     "rate than ADX > 25, so weighted equally (+6) and gated by DI+ leading."),
+    ("EMA20 > EMA50", "MODERATE", "~45–55%", "+4.5 to +5.5",
+     "Classic moving-average crossover (multiple sources).",
+     "Short-term trend confirmation. Decent stand-alone IC because it captures "
+     "intermediate trend; +10 weight reflects its relative importance vs. RSI."),
+    ("TF Aligned 2/3", "HEURISTIC", "~35–55%", "+4.2 to +6.6",
+     "Project-specific: multi-timeframe alignment (daily / hourly / 15-min).",
+     "No direct academic citation for this exact combination; based on common "
+     "trader practice of multi-timeframe confluence. +12 weight assumes 2/3 "
+     "alignment is meaningfully more selective than 1/3."),
+    ("Sector PF > 2", "HEURISTIC", "~25–35%", "+1.3 to +1.8",
+     "SECTOR_PF lookup table built from prior long-call backtest.",
+     "Light bias toward sectors where long calls historically worked. Capped "
+     "at +5 because backtest n is small; treat as a soft prior."),
+    ("52Wk Hi Prox <15%", "STRONG", "~20–35%", "+1.6 to +2.8",
+     "George & Hwang Journal of Finance 2004 — '52-Week High and Momentum Investing'.",
+     "Replicated factor across markets and decades. Near-52-wk-hi names show "
+     "consistent forward outperformance; effect concentrates within 5% of high "
+     "(see G-H bonus rule below)."),
+    ("52Wk Hi Prox <5% (G-H)", "STRONG", "~6–12%", "+0.4 to +0.7",
+     "George & Hwang 2004 — tight-zone bonus where the effect is strongest.",
+     "Strong evidence the closer you are to the 52-wk high, the higher the "
+     "forward return — paradoxically, NOT mean-reversion. Bonus weighted +6 "
+     "to layer on top of the +8 wider band."),
+    ("RS > SPY (21d)", "STRONG", "~45–55%", "+4.5 to +5.5",
+     "Jegadeesh-Titman 1993 / Carhart 1997 — relative-strength factor.",
+     "21-day chosen over 5-day per Lehmann 1990 short-term reversal evidence "
+     "(5-day is anti-signal in liquid names). Persistent factor; weighted +10."),
+    ("Price > EMA200", "STRONG", "~50–60%", "+3.0 to +3.6",
+     "Faber 2007 'A Quantitative Approach to Tactical Asset Allocation'.",
+     "Above-200-DMA filter cut max drawdown ~50% in Faber's backtest while "
+     "preserving most of the upside. Long-trend bias; baseline filter for many "
+     "professional CTAs."),
+
+    # Section B — FMP
+    ("Analyst Revisions ↑", "STRONG", "~10–20%", "+1.2 to +2.4",
+     "Stickel 1991; Bradshaw 2004 — analyst revisions predict short-term drift.",
+     "Upward analyst revisions reliably precede upward price drift over 30–90 days. "
+     "Bumped +12 → effective higher weight because long-calls bias asymmetry "
+     "(upside is unbounded; the rule captures bullish-side asymmetry)."),
+    ("Analyst PT Exists", "HEURISTIC", "~60–80%", "+4.8 to +6.4",
+     "Light fundamental confirmation; consensus PT is published.",
+     "Mostly a 'is this name covered' filter, not a strong predictive signal. "
+     "Weighted +8 to keep it light. Useful as a sanity check — names without "
+     "analyst coverage tend to be illiquid or speculative."),
+
+    # Section C — GEX
+    ("GEX Call Flow (55–69%)", "MODERATE", "~15–25%", "+0.6 to +1.0",
+     "Dealer-positioning literature (SqueezeMetrics, Spotgamma research).",
+     "Emerging call-side OI bias — dealers short gamma, pinning effect on the "
+     "way up. Constructive but not crowded."),
+    ("GEX Call Flow (70–74%)", "MODERATE", "~5–10%", "+0.3 to +0.6",
+     "Dealer-positioning literature — strong-but-not-crowded zone.",
+     "Sweet spot for long-call setups. Most aggressive dealer-hedging zone "
+     "without yet tipping into mean-reversion territory."),
+    ("GEX Call Flow (≥75%)", "MODERATE", "~3–7%", "−0.2 to −0.4",
+     "Council finding — extreme positioning reliably mean-reverts on 1-week.",
+     "PENALTY tier. Above 75% call-OI is crowded; dealers pin or fade. "
+     "Tested in council 2026-04-29 backtest as a reliable contrarian signal."),
+
+    # Section D — Momentum Acceleration
+    ("MFI(14) > 50", "MODERATE", "~35–50%", "+3.5 to +5.0",
+     "Quong-Soudack 1989 — Money Flow Index; volume-weighted RSI analog.",
+     "Volume-confirmed momentum. Standard 14-period; threshold 50 mirrors "
+     "RSI mid-line logic. Bumped from 7-period after Connors research showed "
+     "shorter periods are mostly noise."),
+    ("CMO(9) > 50", "MODERATE", "~18–28%", "+1.3 to +2.0",
+     "Chande 1993 — Chande Momentum Oscillator at Chande's documented threshold.",
+     "Stricter than MFI — fewer hits but each pass is a stronger signal. "
+     "Chande's original 1993 paper documented the >50 threshold; later "
+     "literature uses zero-line cross which is too permissive."),
+
+    # Section E — Evidence-Based Swing Rules
+    ("Minervini Trend Template", "STRONG", "~5–12%", "+0.8 to +1.8",
+     "Minervini 'Trade Like a Stock Market Wizard' (2013) — SEPA Stage 2.",
+     "Six computable criteria. Strict (~5–12% pass rate) but each pass "
+     "confirms Stage 2 trend. Strong out-of-sample evidence in Minervini's "
+     "verified trading records and IBD-style methodology."),
+    ("Pocket Pivot", "STRONG", "~3–8%", "+0.5 to +1.2",
+     "O'Neil / Morales-Kacher 'How to Trade in Stocks' (2010).",
+     "Institutional-accumulation flag — today's volume beats the largest "
+     "down-day volume of prior 10. Designed to catch buying BEFORE the "
+     "obvious breakout. Documented edge in O'Neil/Morales backtests."),
+    ("U/D Volume Ratio (50d)", "STRONG", "tiered ~30–50%", "+1.2 to +6.0",
+     "O'Neil 'How to Make Money in Stocks' (1988) — IBD methodology.",
+     "Sum of up-day volume vs. down-day volume over 50d. Replicated across "
+     "decades by IBD; ≥1.5 indicates accumulation. Tiered weight rewards "
+     "stronger accumulation: +4 / +8 / +12 for 1.25 / 1.5 / 2.0+ ratios."),
+    ("VCP — ATR Contraction", "STRONG", "~5–10%", "+0.6 to +1.2",
+     "Minervini 2013 — Volatility Contraction Pattern (Stage 2 precursor).",
+     "ATR(14) today / ATR(14) 30d ago < 0.70 indicates supply contraction "
+     "before a breakout. Strict by design — rare but high-conviction."),
+    ("BBW Squeeze (<p20 of 120d)", "MODERATE", "~20%", "+2.0",
+     "Bollinger 1980s — Bollinger Bandwidth compression precedes expansion.",
+     "By construction this fires for the bottom-20% of trailing 120 days, so "
+     "hit rate ≈ 20%. The 'precedes expansion' edge is modest; weight +10 "
+     "reflects that it's a regime indicator, not a directional one."),
+    ("20d Donchian Breakout + Vol", "STRONG", "~3–8%", "+0.4 to +1.0",
+     "Dennis-Eckhardt 1983-88 — Turtle Traders methodology.",
+     "Close above 20-day high with 1.5×+ volume. Best-documented systematic "
+     "trend-following edge in equity literature. Strict — fires rarely but "
+     "each pass is a high-confidence breakout."),
+    ("JT 12-1 Momentum", "STRONG", "~10–20%", "+2.0 to +4.0",
+     "Jegadeesh-Titman 1993; Asness-Moskowitz-Pedersen 2013.",
+     "Strongest replicated factor in equity markets. Return from t-252 to "
+     "t-21 (12 months, skip last month). +25% threshold approximates the "
+     "top quintile of S&P 500 momentum. Highest single-rule weight (+20)."),
+
+    # Penalties / Overlays
+    ("Strong Sector", "MODERATE", "~25% each tail", "+2.0 / −2.0",
+     "Sector rotation literature; daily + intraday theme RS overlay.",
+     "Top-quartile theme = +8, bottom-quartile = −8. Long-calls strategy "
+     "depends on sector tailwind more than market-neutral strategies do, "
+     "which is why this was bumped ±5 → ±8."),
+    ("Broken Trend (penalty)", "MODERATE", "~30–40%", "−1.5 to −2.0",
+     "Trend-following literature; medium-term trend break flag.",
+     "Price below EMA50 = calls fight gravity. Penalty only (no positive "
+     "credit — already implicit in other trend rules). −5 weight is light "
+     "to avoid double-counting the trend signal."),
+]
+
+# Strategy-level efficacy summary — qualitative assessment of how each preset
+# combines its underlying rules and what its expected efficacy profile is.
+# Used as the "Strategy-Level Efficacy" subsection after the per-rule table.
+
+STRATEGY_EFFICACY = [
+    {
+        "name": "★ HIGH CONVICTION",
+        "ic_factors": (
+            "JT 12-1 (highest replicated IC factor in equities), Minervini "
+            "Trend (Stage 2 trend confirmation), Analyst Revisions ↑ (lead "
+            "indicator), PROVEN bias, GEX call flow."
+        ),
+        "selectivity": "Highest — typically 0–5 matches per scan.",
+        "expected_win_rate": (
+            "Unknown empirically (small n=19 backtest); theoretically the "
+            "highest of any preset given the must-pass stack of three of the "
+            "strongest factors in the literature. Behavioral risk: small "
+            "sample → high variance regardless of edge."
+        ),
+        "best_for": (
+            "Patient-capital swing entries where the user wants maximum "
+            "signal confluence and is willing to wait for 0-match days."
+        ),
+    },
+    {
+        "name": "▲ BREAKOUT",
+        "ic_factors": (
+            "20d Donchian (Turtle Traders), VCP — ATR contraction (Minervini), "
+            "52-wk high proximity (George-Hwang), RS > SPY, MACD."
+        ),
+        "selectivity": "Medium — typically 5–25 matches per scan.",
+        "expected_win_rate": (
+            "Donchian breakouts have the longest replicated track record in "
+            "trend-following systems. Pattern-based; weaker IC than factor-"
+            "based momentum but cleaner entry timing. Best in trending "
+            "markets, fails frequently in chop."
+        ),
+        "best_for": (
+            "Active traders who want chart-level breakout entries with both "
+            "volatility-contraction confirmation (VCP) and volume-confirmation "
+            "(Donchian 1.5×) instead of bare price-only signals."
+        ),
+    },
+    {
+        "name": "▶ MOMENTUM",
+        "ic_factors": (
+            "JT 12-1 (gold-standard cross-sectional momentum), RS > SPY "
+            "(intermediate momentum), Strong Sector (rotation overlay), "
+            "MACD + EMA200 (trend confirmation)."
+        ),
+        "selectivity": "Medium — typically 5–30 matches per scan.",
+        "expected_win_rate": (
+            "Gold-standard preset by IC. JT 12-1 alone has 30+ years of "
+            "out-of-sample evidence; layering with sector rotation + trend "
+            "confirmation should improve risk-adjusted returns vs. pure "
+            "momentum. Weaker in market regime shifts (early 2008, "
+            "Q1 2020, 2022 H1)."
+        ),
+        "best_for": (
+            "Trend-followers who want the academic-edge backbone (12-1 "
+            "momentum) gated by simple trend filters. Sweet spot in "
+            "persistent uptrends."
+        ),
+    },
+    {
+        "name": "◆ BEST ITM CALLS",
+        "ic_factors": (
+            "Stacks all three highest-IC rules (JT 12-1, Minervini, Pocket "
+            "Pivot) + liquidity floors + max option price ceiling."
+        ),
+        "selectivity": "Very high — typically 0–8 matches per scan.",
+        "expected_win_rate": (
+            "Theoretically highest per-trade win rate given the triple-"
+            "confirmation stack, but smallest sample size. Designed for the "
+            "specific tactic of buying deep-ITM (δ 0.70–0.90) calls where "
+            "you're paying real premium and need maximum signal confluence."
+        ),
+        "best_for": (
+            "Users who want to deploy a meaningful amount of premium per "
+            "name and need every signal aligned before doing so. Liquidity "
+            "floors (≥$5 / ≥1M avg vol) prevent slippage in execution."
+        ),
+    },
+    {
+        "name": "▲ PRE/POST MARKET",
+        "ic_factors": (
+            "Same factor stack as HIGH CONVICTION but re-sorted by |gap %|."
+        ),
+        "selectivity": "Very high — typically 0–5 matches.",
+        "expected_win_rate": (
+            "Surfaces gaps that ALSO pass the high-conviction stack — "
+            "avoiding the well-known 'gap-and-fade' problem where random "
+            "earnings gaps mean-revert. Limited evidence for extended-hours "
+            "edge in liquid names; treat as a session-specific overlay "
+            "rather than a standalone factor."
+        ),
+        "best_for": (
+            "Trading the pre-market or after-hours session when a vetted "
+            "name has gapped meaningfully (>2–3%). Avoids the random-"
+            "gapper trap."
+        ),
+    },
+]
+
 # ─── GO decision + tiebreakers ──────────────────────────────────────────────
 
 GO_DECISION = [
@@ -576,9 +847,73 @@ def build_pdf():
         story.append(tbl)
         story.append(Spacer(1, 6))
 
+    # Impact & efficacy by rule
+    story.append(PageBreak())
+    story.append(Paragraph("3. Impact &amp; Efficacy by Rule", h1))
+    story.append(Paragraph(
+        "Per-rule view of how often each scoring element fires, how much it "
+        "contributes to the total score on average, and the evidence tier "
+        "behind it. Evidence tiers: <b>STRONG</b> = peer-reviewed factor "
+        "with replicated edge across decades; <b>MODERATE</b> = named "
+        "industry methodology, smaller body of independent evidence; "
+        "<b>HEURISTIC</b> = project-specific curation or expert prior, no "
+        "peer review.", body))
+    story.append(Paragraph(
+        "Hit-rate ballparks are empirical estimates from the 2026-04 → 2026-05 "
+        "retune across the ~2,500-symbol universe. Precise per-rule rates "
+        "shift with market regime. Expected impact = rule weight × hit rate.",
+        body))
+
+    ie_data = [[
+        Paragraph("<b>Rule</b>", cell_bold),
+        Paragraph("<b>Evidence</b>", cell_bold),
+        Paragraph("<b>Hit %</b>", cell_bold),
+        Paragraph("<b>Avg Impact</b>", cell_bold),
+        Paragraph("<b>Source / Efficacy</b>", cell_bold),
+    ]]
+    for name, tier, hit, impact, source, notes in IMPACT_EFFICACY:
+        ie_data.append([
+            Paragraph(E(name), cell_body),
+            Paragraph(E(tier), cell_body),
+            Paragraph(E(hit), cell_body),
+            Paragraph(E(impact), cell_body),
+            Paragraph(E(source) + "<br/>" + E(notes), cell_body),
+        ])
+    ie_tbl = Table(ie_data,
+                   colWidths=[1.3*inch, 0.7*inch, 0.7*inch, 0.7*inch, 3.4*inch],
+                   repeatRows=1)
+    ie_tbl.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#dbe7f3")),
+        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+        ("FONTSIZE", (0, 0), (-1, -1), 8),
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#cbd6e2")),
+        ("LEFTPADDING", (0, 0), (-1, -1), 4),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 4),
+        ("TOPPADDING", (0, 0), (-1, -1), 3),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+        ("ROWBACKGROUNDS", (0, 1), (-1, -1),
+         [colors.white, colors.HexColor("#f5f8fb")]),
+    ]))
+    story.append(ie_tbl)
+    story.append(Spacer(1, 8))
+
+    story.append(Paragraph("Strategy-level efficacy", h2))
+    story.append(Paragraph(
+        "Each preset is a curated combination of the rules above. The "
+        "efficacy of a preset depends on which underlying rules dominate "
+        "its must-pass stack — presets gated by <b>STRONG</b>-tier rules "
+        "inherit those rules' evidence base.", body))
+    for s in STRATEGY_EFFICACY:
+        story.append(Paragraph(E(s["name"]), h3))
+        story.append(Paragraph("<b>IC-driving factors.</b> " + E(s["ic_factors"]), body))
+        story.append(Paragraph("<b>Selectivity.</b> " + E(s["selectivity"]), body))
+        story.append(Paragraph("<b>Expected win rate.</b> " + E(s["expected_win_rate"]), body))
+        story.append(Paragraph("<b>Best for.</b> " + E(s["best_for"]), body))
+
     # GO decision + tiebreakers
     story.append(PageBreak())
-    story.append(Paragraph("3. GO Decision & Ranking", h1))
+    story.append(Paragraph("4. GO Decision &amp; Ranking", h1))
     story.append(Paragraph("How the GO flag is set", h2))
     for p in GO_DECISION:
         story.append(Paragraph(E(p), body))
@@ -607,7 +942,7 @@ def build_pdf():
 
     # Strategy presets
     story.append(PageBreak())
-    story.append(Paragraph("4. Strategy Presets", h1))
+    story.append(Paragraph("5. Strategy Presets", h1))
     story.append(Paragraph(
         "Five preset combinations layer must-pass filters on top of the score, "
         "plus their own minimum score threshold. Click any preset chip in the "
@@ -660,7 +995,7 @@ def build_pdf():
 
     # Calibration history
     story.append(PageBreak())
-    story.append(Paragraph("5. Calibration History", h1))
+    story.append(Paragraph("6. Calibration History", h1))
     story.append(Paragraph(
         "The rule set and thresholds were derived through a structured review "
         "process (\"council\" — domain advisors for quant, microstructure, "
@@ -671,7 +1006,7 @@ def build_pdf():
         story.append(Paragraph(E(desc), body))
 
     # Efficacy + limitations
-    story.append(Paragraph("6. Efficacy & Known Limitations", h1))
+    story.append(Paragraph("7. Efficacy & Known Limitations", h1))
     story.append(Paragraph(
         "Honest framing: the rule weights and thresholds are expert-judgment-"
         "informed-by-literature, not empirically backed by a large-sample "
@@ -682,7 +1017,7 @@ def build_pdf():
 
     # User playbook
     story.append(PageBreak())
-    story.append(Paragraph("7. End-User Playbook", h1))
+    story.append(Paragraph("8. End-User Playbook", h1))
     story.append(Paragraph(
         "Step-by-step for someone opening the dashboard for the first time.",
         body))
@@ -875,9 +1210,42 @@ def build_docx():
         add_table(["Rule", "Wt", "Tests", "Math / Source"], rows,
                   col_widths=[Inches(1.5), Inches(0.5), Inches(2.0), Inches(2.8)])
 
+    # Impact & efficacy by rule
+    doc.add_page_break()
+    add_h("3. Impact & Efficacy by Rule", level=1)
+    add_body("Per-rule view of how often each scoring element fires, how much "
+             "it contributes to the total score on average, and the evidence "
+             "tier behind it. Evidence tiers: STRONG = peer-reviewed factor "
+             "with replicated edge across decades; MODERATE = named industry "
+             "methodology, smaller body of independent evidence; HEURISTIC "
+             "= project-specific curation or expert prior, no peer review.")
+    add_body("Hit-rate ballparks are empirical estimates from the 2026-04 → "
+             "2026-05 retune across the ~2,500-symbol universe. Precise "
+             "per-rule rates shift with market regime. Expected impact = "
+             "rule weight × hit rate.")
+    ie_rows = []
+    for name, tier, hit, impact, source, notes in IMPACT_EFFICACY:
+        ie_rows.append((name, tier, hit, impact, source + "\n" + notes))
+    add_table(["Rule", "Evidence", "Hit %", "Avg Impact", "Source / Efficacy"],
+              ie_rows,
+              col_widths=[Inches(1.3), Inches(0.7), Inches(0.7), Inches(0.7),
+                          Inches(3.4)])
+
+    add_h("Strategy-level efficacy", level=2)
+    add_body("Each preset is a curated combination of the rules above. The "
+             "efficacy of a preset depends on which underlying rules dominate "
+             "its must-pass stack — presets gated by STRONG-tier rules "
+             "inherit those rules' evidence base.")
+    for s in STRATEGY_EFFICACY:
+        add_h(s["name"], level=3)
+        add_body(s["ic_factors"], bold_prefix="IC-driving factors. ")
+        add_body(s["selectivity"], bold_prefix="Selectivity. ")
+        add_body(s["expected_win_rate"], bold_prefix="Expected win rate. ")
+        add_body(s["best_for"], bold_prefix="Best for. ")
+
     # GO decision
     doc.add_page_break()
-    add_h("3. GO Decision & Ranking", level=1)
+    add_h("4. GO Decision & Ranking", level=1)
     add_h("How the GO flag is set", level=2)
     for p_txt in GO_DECISION:
         add_body(p_txt)
@@ -887,7 +1255,7 @@ def build_docx():
 
     # Strategy presets
     doc.add_page_break()
-    add_h("4. Strategy Presets", level=1)
+    add_h("5. Strategy Presets", level=1)
     add_body("Five preset combinations layer must-pass filters on top of the "
              "score, plus their own minimum score threshold. Click any preset "
              "chip in the STRATEGY row to apply.")
@@ -914,7 +1282,7 @@ def build_docx():
 
     # Calibration
     doc.add_page_break()
-    add_h("5. Calibration History", level=1)
+    add_h("6. Calibration History", level=1)
     add_body("The rule set and thresholds were derived through a structured "
              "review process (\"council\" — domain advisors for quant, "
              "microstructure, risk, behavioral, engineering). Each entry below "
@@ -924,7 +1292,7 @@ def build_docx():
         add_body(desc)
 
     # Limitations
-    add_h("6. Efficacy & Known Limitations", level=1)
+    add_h("7. Efficacy & Known Limitations", level=1)
     add_body("Honest framing: the rule weights and thresholds are expert-"
              "judgment-informed-by-literature, not empirically backed by a "
              "large-sample backtest of THIS COMBINED SYSTEM. Treat the score as "
@@ -934,7 +1302,7 @@ def build_docx():
 
     # Playbook
     doc.add_page_break()
-    add_h("7. End-User Playbook", level=1)
+    add_h("8. End-User Playbook", level=1)
     add_body("Step-by-step for someone opening the dashboard for the first "
              "time.")
     for step, desc in USER_PLAYBOOK:
