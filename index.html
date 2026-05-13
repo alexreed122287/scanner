@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-13T01:00-six-fixes-batch">
+<meta name="op-build" content="2026-05-13T01:15-action-row-one-line">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -461,10 +461,10 @@ a{color:var(--blu);text-decoration:none;}
   #sc-tbl-wrap .empty-det-panda{width:100px !important;max-width:100px !important;}
   #sc-tbl-wrap .empty-det p{font-size:11px !important;color:var(--gry2) !important;margin:0 !important;}
   .empty-det-panda{width:clamp(180px, 60vw, 320px) !important;}
-  /* Permanent SCAN action row: scrunch but keep the SCAN button on
-     the right edge — last-scan + data-status truncate first */
-  #sc-action-row{padding:6px 8px !important;flex-wrap:wrap !important;}
-  #sc-action-row #sc-last-scan{width:auto !important;flex:1 1 auto !important;}
+  /* Permanent SCAN action row: single row, no wrap (v2.18.26).
+     last-scan truncates first; data-status hidden when tight. */
+  #sc-action-row{padding:5px 8px !important;flex-wrap:nowrap !important;overflow-x:hidden !important;}
+  #sc-action-row #sc-last-scan{width:auto !important;flex:0 1 90px !important;min-width:0 !important;font-size:9px !important;overflow:hidden !important;text-overflow:ellipsis !important;}
   #sc-action-row #sc-data-status{display:none !important;}
 }
 @media(min-width:481px) and (max-width:1024px){
@@ -1536,13 +1536,13 @@ tr.pos-row-earn-soon b{color:#ff8a65;text-shadow:0 0 8px rgba(216,90,48,0.55);}
      to its natural horizontal-scroll layout with no reserved slot. */
   #sc-bar-mustpass:not(.collapsed){flex-wrap:nowrap !important;
     overflow-x:auto !important;padding-right:10px !important;}
-  /* Search input lives in #sc-action-row now. On iPhone we let it take
-     a full row of its own below SCAN + EXPORT GOs so the placeholder
-     text isn't clipped at 14px font-size. */
-  #sc-action-row #sc-search{flex:1 1 100% !important;
-    width:100% !important;font-size:14px !important;
-    min-height:42px !important;padding:8px 12px !important;
-    order:99 !important;}
+  /* v2.18.26: keep the entire scanner action row on ONE line at mobile
+     widths. Search input shrinks to a compact slot (60–110px, grows
+     into spare space); placeholder is short enough not to clip. */
+  #sc-action-row #sc-search{flex:1 1 60px !important;
+    width:auto !important;font-size:11px !important;
+    min-height:34px !important;padding:6px 10px !important;
+    min-width:60px !important;order:auto !important;}
 
   /* API tab: the test-result panel can grow long; cap and scroll within. */
   #api-test-result{max-height:240px !important;overflow:auto !important;}
@@ -1556,12 +1556,21 @@ tr.pos-row-earn-soon b{color:#ff8a65;text-shadow:0 0 8px rgba(216,90,48,0.55);}
      never clip silently. */
   .tbl-wrap{overflow-x:auto !important;-webkit-overflow-scrolling:touch;}
 
-  /* Headers / sticky bars: ensure SCAN action row never wraps the
-     SCAN button to a 3rd line — keep SCAN + EXPORT GOs on the second
-     row when chips occupy row 1. */
-  #sc-action-row{flex-wrap:wrap !important;gap:6px !important;}
+  /* v2.18.26: scanner action row is ONE row on mobile. With the 4 sub-
+     chips now hidden behind a single FILTERS master (v2.18.24), the
+     row reads: FILTERS · SCAN · EXPORT · Search · Last scan — fits
+     440px iPhone Pro Max width without wrap. */
+  #sc-action-row{flex-wrap:nowrap !important;gap:4px !important;overflow-x:hidden !important;padding:5px 8px !important;}
   #sc-action-row #sc-run-btn-top, #sc-action-row #sc-export-go-top{
-    flex:1 1 calc(50% - 4px) !important;min-height:42px !important;}
+    flex:0 0 auto !important;min-height:34px !important;
+    font-size:11px !important;padding:6px 10px !important;
+    white-space:nowrap !important;letter-spacing:.5px !important;}
+  /* FILTERS master chip stays compact too */
+  #sc-action-row #sc-seg-master{flex:0 0 auto !important;
+    font-size:10px !important;padding:5px 8px !important;}
+  /* Last-scan freshness chip shrinks first when room is tight */
+  #sc-action-row #sc-last-scan{flex:0 1 90px !important;min-width:0 !important;
+    font-size:9px !important;overflow:hidden !important;text-overflow:ellipsis !important;}
 }
 
 /* Desktop / wide screens: hide the hamburger, show chips inline */
@@ -3261,7 +3270,7 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
          MUST-PASS row but the user wanted it parked alongside SCAN +
          EXPORT GOs so it's reachable even when those filter rows are
          collapsed. Same id (#sc-search) + same handler. -->
-    <input type="text" id="sc-search" placeholder="Search ticker..." oninput="onScSearch()" style="font-family:var(--ff-mono);font-size:11px;padding:5px 10px;background:var(--bg1);border:1px solid var(--bg3);border-radius:3px;color:var(--amb);width:160px;flex:0 0 auto;">
+    <input type="text" id="sc-search" placeholder="Search…" oninput="onScSearch()" style="font-family:var(--ff-mono);font-size:11px;padding:5px 10px;background:var(--bg1);border:1px solid var(--bg3);border-radius:3px;color:var(--amb);width:120px;flex:0 1 120px;min-width:0;">
     <span id="sc-last-scan" class="dyn-w" style="color:var(--gry);font-size:10px;font-family:var(--ff-mono);width:160px;flex:0 1 160px;min-width:60px;text-align:left;" title="Timestamp of the most recent SCAN completion. Persists across page reloads from localStorage.">Last scan: never</span>
     <span id="sc-data-status" class="dyn-w" style="display:none;font-size:10px;font-family:var(--ff-mono);width:140px;flex:0 1 140px;min-width:0;text-align:left;cursor:pointer;" title="Click for data-coverage details from the last scan."></span>
   </div>
@@ -26935,7 +26944,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.18.25-six-fixes-batch';
+var APP_VERSION = '2.18.26-action-row-one-line';
 // v2.18.21: DEFAULT feedback webhook. Every visitor's "Submit Feedback"
 // form posts here (unless they've overridden via ALERTS → Feedback
 // Webhook). The URL points to a Google Apps Script Web App owned by
