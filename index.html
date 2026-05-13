@@ -16000,11 +16000,19 @@ function scoreIt(ticker, ind, opt){
   var rsiOk    = ind.rsi >= 40 && ind.rsi <= 70;                                  // permissive band
   var rsiCross = ind.rsi >= 50 && ind.rsi <= 65;                                  // tight Cardwell zone (early entry)
 
-  // Bulk-scan stamps ind.macd=0 and ind.adx=30 as placeholders (index.html
-  // ~line 18512). Compute live values from cached daily history when present,
-  // and backfill the result into `ind` so detail-pane widgets show the real
-  // numbers instead of the placeholders.
+  // Bulk-scan stamps ind.rsi=50, ind.macd=0, ind.adx=30 as placeholders
+  // (index.html ~line 18633). Compute live values from cached daily history
+  // when present, and backfill the result into `ind` so detail-pane widgets
+  // show the real numbers instead of the placeholders.
   var _hist = (typeof G_HIST_CACHE !== 'undefined') ? G_HIST_CACHE[ticker] : null;
+  if(_hist && _hist.length >= 16){
+    var rsiVal = calcRSIatIndex(_hist, 14, _hist.length - 1);
+    if(typeof rsiVal === 'number' && !isNaN(rsiVal)){
+      ind.rsi = +rsiVal.toFixed(1);
+      rsiOk    = ind.rsi >= 40 && ind.rsi <= 70;
+      rsiCross = ind.rsi >= 50 && ind.rsi <= 65;
+    }
+  }
   if(_hist && _hist.length >= 35){
     var macdHist = calcMACD(_hist);
     if(typeof macdHist === 'number') ind.macd = macdHist;
