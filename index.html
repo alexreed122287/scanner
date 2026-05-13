@@ -16090,6 +16090,10 @@ function scoreIt(ticker, ind, opt){
       if(_hist && typeof G_HIST_CACHE !== 'undefined') G_HIST_CACHE[ticker] = _hist;
     }
   } catch(_){}
+  // Stamp ind._synth when no history is available. Renderers (buildDetail,
+  // renderBuySig) surface this so the user doesn't mistake bulk-pass
+  // placeholders (rsi=50, ema20=price*0.99, etc.) for live values.
+  ind._synth = !(_hist && _hist.length >= 30);
   if(_hist && _hist.length >= 16){
     var rsiVal = calcRSIatIndex(_hist, 14, _hist.length - 1);
     if(typeof rsiVal === 'number' && !isNaN(rsiVal)){
@@ -16667,7 +16671,11 @@ function buildDetail(r,detId,emptyId){
     +'<div class="chain-tab" id="dtab-chain" onclick="switchDetTab(\''+r.ticker+'\',\'chain\')">&#9783; OPTION CHAIN</div>'
     +'</div>'
     +'<div id="det-signals-'+r.ticker+'" style="display:flex;flex-direction:column;overflow:hidden;flex:1;">'    +'<div class="det-scroll">'
-    +'<div class="s-hdr">TECHNICAL INDICATORS</div>'
+    +'<div class="s-hdr">TECHNICAL INDICATORS'
+    +(ind && ind._synth
+        ? ' <span title="No history cached yet for this ticker — values shown are bulk-pass placeholders. Live indicators populate once enrichment reaches this ticker." style="font-family:var(--ff-mono);font-size:9px;font-weight:600;color:var(--amb);background:rgba(255,184,0,0.12);border:1px solid rgba(255,184,0,0.35);border-radius:3px;padding:1px 5px;margin-left:8px;letter-spacing:.5px;">SYNTHETIC</span>'
+        : '')
+    +'</div>'
     +'<div class="ind-grid">'
     +'<div class="ig-cell"><div class="ig-lbl">RSI(14)</div><div class="ig-val '+(ind.rsi<40||ind.rsi>70?'warn':'')+'">'+ind.rsi+'</div></div>'
     +'<div class="ig-cell"><div class="ig-lbl">MACD Hist</div><div class="ig-val '+(ind.macd>=0?'pos':'neg')+'">'+(ind.macd>=0?'+':'')+ind.macd+'</div></div>'
@@ -33765,6 +33773,17 @@ window.addEventListener('DOMContentLoaded',init);
       var match = sample.filter(function(r){ return r && r.ind && r.ind.tf === 2; }).length;
       var p = match / sample.length;
       return p < 0.7 ? true : (p < 0.9 ? 'warn' : false);
+    }},
+    { tab:'sc', label:'Top-60 _synth ratio (history coverage)', sev:'important', fn:function(){
+      var rs = (window.G && G.results) || [];
+      if(!rs.length) return 'n/a';
+      var sample = rs.slice(0, Math.min(60, rs.length));
+      var synth = sample.filter(function(r){ return r && r.ind && r.ind._synth === true; }).length;
+      var p = synth / sample.length;
+      // Top-60 should be fully enriched after foreground pass. _synth on top-60
+      // means history fetch is mid-flight or has been failing — warn at any
+      // presence, fail above 30%.
+      return p === 0 ? true : (p < 0.3 ? 'warn' : false);
     }},
     { tab:'sc', label:'Category strip rendered', sev:'info', fn:function(){
       var el = $('sc-cat-strip-ts');
