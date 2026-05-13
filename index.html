@@ -5022,6 +5022,19 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
       <span id="api-counter-tab" onclick="showApiBreakdown()" title="Click to view per-endpoint breakdown" style="cursor:pointer;font-family:var(--ff-mono);font-size:14px;font-weight:700;color:var(--amb);">0</span>
       <span style="font-family:var(--ff-mono);font-size:10px;color:var(--gry);">(resets at 11:00 PM CST)</span>
     </div>
+    <!-- Data Liveness Health Check — surfaces stale/placeholder values per
+         HEALTHCHECK.md. Runs the registry in window.opHealthCheck() and
+         renders the result inline. -->
+    <div class="card collapsible" id="api-healthcheck-card">
+      <div class="card-hdr">DATA HEALTH CHECK</div>
+      <div class="card-body">
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">
+          <button class="btn" id="hc-run-btn" onclick="try{window.opHealthCheckRender('hc-result');}catch(e){console.error(e);}" style="font-size:11px;padding:5px 12px;border-color:var(--ambb);color:var(--ambb);">&#9654; RUN HEALTH CHECK</button>
+          <span style="font-size:10px;color:var(--gry);">Inventories every tab's data elements and flags placeholders, stale caches, missing keys. Contract: <code>HEALTHCHECK.md</code>. Console-equivalent: <code>window.opHealthCheck()</code>.</span>
+        </div>
+        <div id="hc-result" style="overflow-x:auto;"></div>
+      </div>
+    </div>
     <div class="card collapsible" id="api-card"><div class="card-hdr">API CONFIGURATION</div>
     <div class="card-body api-form">
       <div class="api-row"><label>FMP API KEY (financialmodelingprep.com)</label><input id="api-fmp" type="password" placeholder="Enter FMP key..."><div class="api-status" id="fmp-status"></div></div>
@@ -33515,6 +33528,409 @@ window.addEventListener('DOMContentLoaded',init);
    v2.4.1. localStorage key `rrjcar_eod_equity_log_v1` will simply
    stop being written; existing data lingers harmlessly.
    Full dead-code body removed 2026-05-09 per audit CODE-1. */
+
+// ═══════════════════════════════════════════════════════════════════════════
+// DATA LIVENESS HEALTH CHECK
+//
+// Single source of truth for "every data element on screen is dynamic and
+// not a placeholder." Each check has tab + label + severity + a predicate
+// returning true (pass), false (fail), 'warn', 'n/a', or any thrown error.
+//
+// Contract documented in HEALTHCHECK.md. Run via:
+//   window.opHealthCheck()              -> all checks, console.table
+//   window.opHealthCheck('sc')          -> filter by tab
+//   window.opHealthCheckRender(elt)     -> render html table into elt
+// ═══════════════════════════════════════════════════════════════════════════
+(function(){
+  function $(id){ return document.getElementById(id); }
+  function num(el){ if(!el) return NaN; var v = parseFloat(String(el.textContent||'').replace(/[$,%]/g,'').replace(/[+]/g,'')); return v; }
+  function txt(el){ return el ? String(el.textContent||'').trim() : ''; }
+  function existsAndVisible(el){ return !!(el && (el.offsetParent !== null || el.tagName === 'CANVAS')); }
+  function pctNonPlaceholderRsi(){
+    var rs = (window.G && G.results) || [];
+    if(!rs.length) return 'n/a';
+    var sample = rs.slice(0, Math.min(60, rs.length));
+    var nonPh = sample.filter(function(r){ return r && r.ind && typeof r.ind.rsi === 'number' && Math.abs(r.ind.rsi - 50) > 0.05; }).length;
+    return nonPh / sample.length;
+  }
+  function pctNonPlaceholderAdx(){
+    var rs = (window.G && G.results) || [];
+    if(!rs.length) return 'n/a';
+    var sample = rs.slice(0, Math.min(60, rs.length));
+    var nonPh = sample.filter(function(r){ return r && r.ind && typeof r.ind.adx === 'number' && Math.abs(r.ind.adx - 30) > 0.05; }).length;
+    return nonPh / sample.length;
+  }
+  function pctNonPlaceholderMacd(){
+    var rs = (window.G && G.results) || [];
+    if(!rs.length) return 'n/a';
+    var sample = rs.slice(0, Math.min(60, rs.length));
+    var nonPh = sample.filter(function(r){ return r && r.ind && typeof r.ind.macd === 'number' && Math.abs(r.ind.macd) > 0.0005; }).length;
+    return nonPh / sample.length;
+  }
+  function sectorPfResolved(){
+    var rs = (window.G && G.results) || [];
+    if(!rs.length || typeof SECTOR_PF !== 'object' || typeof SECTOR_PF_MAP !== 'object') return 'n/a';
+    var sample = rs.slice(0, Math.min(60, rs.length));
+    var resolved = sample.filter(function(r){
+      if(!r.sector) return false;
+      var key = SECTOR_PF_MAP[r.sector] || r.sector;
+      return SECTOR_PF[key] > 0;
+    }).length;
+    return resolved / sample.length;
+  }
+  function emaPlaceholderRatio(){
+    var rs = (window.G && G.results) || [];
+    if(!rs.length) return 'n/a';
+    var sample = rs.slice(0, Math.min(60, rs.length));
+    var matches = sample.filter(function(r){
+      if(!r || !r.ind || !r.price) return false;
+      return Math.abs(r.ind.ema20 - r.price*0.99) < 0.01 ||
+             Math.abs(r.ind.ema50 - r.price*0.97) < 0.01 ||
+             Math.abs(r.ind.ema200 - r.price*0.93) < 0.01;
+    }).length;
+    return matches / sample.length;
+  }
+  function freshMs(tsMs, maxMs){
+    if(!tsMs) return false;
+    return (Date.now() - tsMs) < maxMs;
+  }
+  function tickerLooksReal(t){ return typeof t === 'string' && /^[A-Z.]{1,6}$/.test(t); }
+  function hasIndexQuote(idEl){
+    var el = $(idEl); if(!el) return 'n/a';
+    var s = txt(el);
+    return s && s !== '--' && !isNaN(parseFloat(s.replace(/[$,]/g,''))) && parseFloat(s.replace(/[$,]/g,'')) > 0;
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // CHECK REGISTRY
+  // ─────────────────────────────────────────────────────────────────────────
+  var CHECKS = [
+    // Header / ribbon ─────────────────────────────────────────────────────
+    { tab:'hdr', label:'Clock updating', sev:'info', fn:function(){
+      var el = $('clk-logo'); if(!el) return 'n/a';
+      var s = txt(el); return /\d{1,2}:\d{2}:\d{2}\s*(AM|PM)/i.test(s);
+    }},
+    { tab:'hdr', label:'Version chip', sev:'info', fn:function(){
+      var el = $('hdr-version'); if(!el) return 'n/a';
+      return /v\d+\.\d+/.test(txt(el));
+    }},
+    { tab:'hdr', label:'SPY quote', sev:'important', fn:function(){ return hasIndexQuote('h-spy'); }},
+    { tab:'hdr', label:'QQQ quote', sev:'important', fn:function(){ return hasIndexQuote('h-qqq'); }},
+    { tab:'hdr', label:'DIA quote', sev:'important', fn:function(){ return hasIndexQuote('h-dia'); }},
+    { tab:'hdr', label:'IWM quote', sev:'important', fn:function(){ return hasIndexQuote('h-iwm'); }},
+    { tab:'hdr', label:'VIX quote', sev:'important', fn:function(){ return hasIndexQuote('h-vix'); }},
+    { tab:'hdr', label:'TRADE token pill state', sev:'info', fn:function(){
+      var el = $('hdr-trade-token'); if(!el) return 'n/a';
+      var s = txt(el).toLowerCase(); return s.includes('lock') || s.includes('ready') || s.includes('arm');
+    }},
+
+    // Scan tab ─────────────────────────────────────────────────────────────
+    { tab:'sc', label:'G.results populated', sev:'critical', fn:function(){
+      return Array.isArray(window.G && G.results) && G.results.length > 0;
+    }},
+    { tab:'sc', label:'Last-scan timestamp present + fresh', sev:'important', fn:function(){
+      var t = (window.G && G._scanFinishedAt) || 0;
+      if(!t) return 'n/a';
+      return freshMs(t, 24*60*60*1000) ? true : 'warn';
+    }},
+    { tab:'sc', label:'Top-60 RSI not all = 50 placeholder (PR #22/#23)', sev:'critical', fn:function(){
+      var p = pctNonPlaceholderRsi();
+      if(p === 'n/a') return 'n/a';
+      return p >= 0.5 ? true : (p >= 0.2 ? 'warn' : false);
+    }},
+    { tab:'sc', label:'Top-60 ADX not all = 30 placeholder (PR #21)', sev:'critical', fn:function(){
+      var p = pctNonPlaceholderAdx();
+      if(p === 'n/a') return 'n/a';
+      return p >= 0.5 ? true : (p >= 0.2 ? 'warn' : false);
+    }},
+    { tab:'sc', label:'Top-60 MACD not all = 0 placeholder (PR #21)', sev:'critical', fn:function(){
+      var p = pctNonPlaceholderMacd();
+      if(p === 'n/a') return 'n/a';
+      return p >= 0.5 ? true : (p >= 0.2 ? 'warn' : false);
+    }},
+    { tab:'sc', label:'Sector PF resolution rate (PR #21)', sev:'critical', fn:function(){
+      var p = sectorPfResolved();
+      if(p === 'n/a') return 'n/a';
+      return p >= 0.6 ? true : (p >= 0.3 ? 'warn' : false);
+    }},
+    { tab:'sc', label:'EMA20/50/200 still bulk-pass placeholders (known bug)', sev:'important', fn:function(){
+      var p = emaPlaceholderRatio();
+      if(p === 'n/a') return 'n/a';
+      return p < 0.2 ? true : false;   // < 20% of sample still on placeholder = pass
+    }},
+    { tab:'sc', label:'ATR still bulk-pass placeholder (known bug)', sev:'important', fn:function(){
+      var rs = (window.G && G.results) || [];
+      if(!rs.length) return 'n/a';
+      var sample = rs.slice(0, Math.min(60, rs.length));
+      var match = sample.filter(function(r){
+        return r && r.ind && r.price && Math.abs(r.ind.atr - r.price*0.015) < 0.005;
+      }).length;
+      return (match / sample.length) < 0.2;
+    }},
+    { tab:'sc', label:'TF Aligned still stamped at 2/3 (known bug)', sev:'important', fn:function(){
+      var rs = (window.G && G.results) || [];
+      if(!rs.length) return 'n/a';
+      var sample = rs.slice(0, Math.min(60, rs.length));
+      var match = sample.filter(function(r){ return r && r.ind && r.ind.tf === 2; }).length;
+      return (match / sample.length) < 0.8;
+    }},
+    { tab:'sc', label:'Category strip rendered', sev:'info', fn:function(){
+      var el = $('sc-cat-strip-ts'); if(!el) return 'n/a';
+      return txt(el).length > 0;
+    }},
+    { tab:'sc', label:'Score range plausible across top-60', sev:'critical', fn:function(){
+      var rs = (window.G && G.results) || [];
+      if(!rs.length) return 'n/a';
+      var sample = rs.slice(0, Math.min(60, rs.length));
+      var bad = sample.filter(function(r){ return !(r.score >= 0 && r.score <= 260); }).length;
+      return bad === 0;
+    }},
+    { tab:'sc', label:'Tickers look like real symbols', sev:'critical', fn:function(){
+      var rs = (window.G && G.results) || [];
+      if(!rs.length) return 'n/a';
+      var bad = rs.slice(0, 60).filter(function(r){ return !tickerLooksReal(r.ticker); }).length;
+      return bad === 0;
+    }},
+
+    // Buy Sig tab ─────────────────────────────────────────────────────────
+    { tab:'bs', label:'GO count consistent with G.results', sev:'critical', fn:function(){
+      var el = $('bs-go'); if(!el) return 'n/a';
+      var go = parseInt(txt(el)||'0',10);
+      var actualGo = ((window.G&&G.results)||[]).filter(function(r){return r.isGo;}).length;
+      return go === actualGo;
+    }},
+    { tab:'bs', label:'Top sector chip resolves to a known sector', sev:'important', fn:function(){
+      var el = $('bs-sect'); if(!el) return 'n/a';
+      var s = txt(el);
+      if(!s || s === '--') return 'n/a';
+      return typeof SECTOR_PF_MAP === 'object' && (SECTOR_PF_MAP[s] || (typeof SECTOR_PF === 'object' && SECTOR_PF[s])) ? true : 'warn';
+    }},
+    { tab:'bs', label:'Total scanned matches G.results.length', sev:'info', fn:function(){
+      var el = $('bs-scan'); if(!el) return 'n/a';
+      return parseInt(txt(el)||'0',10) === ((window.G&&G.results)||[]).length;
+    }},
+
+    // Positions tab ───────────────────────────────────────────────────────
+    { tab:'pos', label:'G.positions array shape', sev:'critical', fn:function(){
+      if(!window.G || !Array.isArray(G.positions)) return 'n/a';
+      if(G.positions.length === 0) return 'n/a';
+      var bad = G.positions.filter(function(p){ return !p || !p.symbol; }).length;
+      return bad === 0;
+    }},
+    { tab:'pos', label:'Open-positions count badge populated', sev:'important', fn:function(){
+      var el = $('pos-count'); if(!el) return 'n/a';
+      var n = parseInt(txt(el)||'0',10);
+      return n === ((window.G&&G.positions)||[]).length;
+    }},
+    { tab:'pos', label:'Buying-power badge has a $ value', sev:'critical', fn:function(){
+      var el = $('pos-bp-badge') || $('sc-bp-peek-value') || $('ord-bp-badge'); if(!el) return 'n/a';
+      return /\$\s*\d/.test(txt(el));
+    }},
+    { tab:'pos', label:'lastBP.option in G is numeric > 0', sev:'critical', fn:function(){
+      var bp = window.G && G.lastBP && G.lastBP.option;
+      if(bp == null) return 'n/a';
+      return typeof bp === 'number' && bp > 0;
+    }},
+
+    // Portfolio tab ───────────────────────────────────────────────────────
+    { tab:'pf', label:'Profit Factor (#cl-pf) is finite or ∞ or --', sev:'critical', fn:function(){
+      var el = $('cl-pf'); if(!el) return 'n/a';
+      var s = txt(el);
+      if(s === '--' || s === '∞') return true;
+      var v = parseFloat(s);
+      return isFinite(v) && v >= 0;
+    }},
+
+    // GEX tab ─────────────────────────────────────────────────────────────
+    { tab:'gex', label:'G.gexData populated', sev:'important', fn:function(){
+      var d = window.G && G.gexData;
+      if(!Array.isArray(d) || d.length === 0) return 'n/a';
+      return d.length > 0;
+    }},
+    { tab:'gex', label:'GEX source is not "sim" when Tradier configured', sev:'critical', fn:function(){
+      var src = window.G && G._gexSource;
+      var hasKey = false;
+      try { hasKey = !!(localStorage.getItem('rrjcar_tr_key') || localStorage.getItem('rrjcar_tradier_proxy_live_token')); } catch(_){}
+      if(!src) return 'n/a';
+      if(!hasKey) return 'n/a';
+      return src !== 'sim';
+    }},
+    { tab:'gex', label:'GEX timestamp recent (< 24h)', sev:'important', fn:function(){
+      var t = window.G && G._gexLastFetchTs;
+      if(!t) return 'n/a';
+      return freshMs(t, 24*60*60*1000) ? true : 'warn';
+    }},
+
+    // Industry tab ────────────────────────────────────────────────────────
+    { tab:'ind', label:'Industry rank-count pill', sev:'important', fn:function(){
+      var el = $('ind-rank-count'); if(!el) return 'n/a';
+      return /\d+/.test(txt(el));
+    }},
+    { tab:'ind', label:'Industry table has rows', sev:'important', fn:function(){
+      var t = $('ind-body'); if(!t) return 'n/a';
+      return t.querySelectorAll('tr[data-theme]').length >= 5;
+    }},
+    { tab:'ind', label:'Industry as-of timestamp', sev:'info', fn:function(){
+      var el = $('ind-asof'); if(!el) return 'n/a';
+      return txt(el).length > 0;
+    }},
+
+    // News tab ────────────────────────────────────────────────────────────
+    { tab:'news', label:'News list rendered', sev:'info', fn:function(){
+      var el = $('news-list'); if(!el) return 'n/a';
+      var cards = el.querySelectorAll('.news-card');
+      var hasFmp = false;
+      try { hasFmp = !!localStorage.getItem('rrjcar_fmp'); } catch(_){}
+      if(!hasFmp) return 'n/a';
+      return cards.length >= 1 ? true : 'warn';
+    }},
+
+    // Alerts tab ──────────────────────────────────────────────────────────
+    { tab:'al', label:'Alerts list element present', sev:'info', fn:function(){
+      var el = $('alerts-list'); return !!el;
+    }},
+
+    // Watchlist tab ───────────────────────────────────────────────────────
+    { tab:'wl', label:'G.wlTickers is an array', sev:'info', fn:function(){
+      return Array.isArray(window.G && G.wlTickers);
+    }},
+
+    // API tab ─────────────────────────────────────────────────────────────
+    { tab:'api', label:'FMP key present', sev:'important', fn:function(){
+      try { return (localStorage.getItem('rrjcar_fmp')||'').length > 0; } catch(_){ return 'n/a'; }
+    }},
+    { tab:'api', label:'Tradier proxy URL configured', sev:'critical', fn:function(){
+      try { var v = localStorage.getItem('rrjcar_tradier_proxy')||''; return v.startsWith('https://'); } catch(_){ return 'n/a'; }
+    }},
+    { tab:'api', label:'Tradier live-mode token present', sev:'critical', fn:function(){
+      try { return (localStorage.getItem('rrjcar_tradier_proxy_live_token')||'').length >= 16; } catch(_){ return 'n/a'; }
+    }},
+    { tab:'api', label:'Default account matches Tradier format', sev:'important', fn:function(){
+      try {
+        var v = localStorage.getItem('rrjcar_acct_live') || localStorage.getItem('rrjcar_acct') || '';
+        if(!v) return 'n/a';
+        return /^[A-Z0-9]{6,10}$/i.test(v);
+      } catch(_){ return 'n/a'; }
+    }},
+    { tab:'api', label:'Mode toggle (live/sandbox)', sev:'important', fn:function(){
+      try { var v = (localStorage.getItem('rrjcar_mode')||'').toLowerCase(); return v === 'live' || v === 'sandbox'; } catch(_){ return 'n/a'; }
+    }},
+    { tab:'api', label:'FMP not in cool-down', sev:'important', fn:function(){
+      var t = window._fmpRateLimited || 0;
+      if(!t) return true;
+      return (Date.now() - t) > (window._FMP_COOLDOWN_MS||60000);
+    }},
+
+    // Cross-cutting ───────────────────────────────────────────────────────
+    { tab:'xref', label:'G_HIST_CACHE has data for top-10 results', sev:'important', fn:function(){
+      var rs = (window.G && G.results) || [];
+      if(!rs.length || typeof G_HIST_CACHE !== 'object') return 'n/a';
+      var top = rs.slice(0, 10);
+      var withHist = top.filter(function(r){ return G_HIST_CACHE[r.ticker] && G_HIST_CACHE[r.ticker].length >= 100; }).length;
+      return withHist >= Math.min(10, top.length) * 0.7 ? true : 'warn';
+    }},
+    { tab:'xref', label:'G_FMP_CACHE has entries', sev:'info', fn:function(){
+      if(typeof G_FMP_CACHE !== 'object') return 'n/a';
+      return Object.keys(G_FMP_CACHE).length > 0;
+    }},
+    { tab:'xref', label:'Slim scan-results cache size < 4MB', sev:'info', fn:function(){
+      try {
+        var v = localStorage.getItem('op_cache_scan_results') || '';
+        return v.length < 4 * 1024 * 1024;
+      } catch(_){ return 'n/a'; }
+    }},
+    { tab:'xref', label:'Tradier live-token cache primed', sev:'info', fn:function(){
+      return typeof window._liveTokenCache === 'string' && window._liveTokenCache.length > 0;
+    }},
+    { tab:'xref', label:'FMP circuit not open', sev:'important', fn:function(){
+      try { return typeof window._isFmpCircuitOpen === 'function' ? !window._isFmpCircuitOpen() : 'n/a'; } catch(_){ return 'n/a'; }
+    }},
+  ];
+
+  function classify(observed){
+    if(observed === true) return 'pass';
+    if(observed === false) return 'fail';
+    if(observed === 'warn') return 'warn';
+    if(observed === 'n/a') return 'n/a';
+    return 'pass';   // catch-all for truthy-but-non-bool predicates
+  }
+
+  function runOne(c){
+    var observed, status, detail;
+    try {
+      observed = c.fn();
+      status = classify(observed);
+      detail = typeof observed === 'number' ? observed.toFixed(2)
+             : observed === true ? '✓'
+             : observed === false ? '✗'
+             : String(observed);
+    } catch(e){
+      status = 'error';
+      detail = (e && e.message) || String(e);
+    }
+    return { tab:c.tab, label:c.label, severity:c.sev, status:status, detail:detail };
+  }
+
+  window.opHealthCheck = function(tabFilter){
+    var subset = CHECKS;
+    if(tabFilter) subset = CHECKS.filter(function(c){ return c.tab === tabFilter; });
+    var results = subset.map(runOne);
+    try {
+      console.table(results.map(function(r){ return { Tab:r.tab, Element:r.label, Severity:r.severity, Status:r.status, Detail:r.detail }; }));
+    } catch(_){}
+    var pass = results.filter(function(r){return r.status==='pass';}).length;
+    var fail = results.filter(function(r){return r.status==='fail';}).length;
+    var warn = results.filter(function(r){return r.status==='warn';}).length;
+    var na   = results.filter(function(r){return r.status==='n/a';}).length;
+    var err  = results.filter(function(r){return r.status==='error';}).length;
+    console.log('[opHealthCheck] ' + pass + '/' + results.length + ' pass · ' +
+                warn + ' warn · ' + fail + ' fail · ' + na + ' n/a · ' + err + ' error');
+    return results;
+  };
+
+  window.opHealthCheckRender = function(target){
+    var el = (typeof target === 'string') ? $(target) : target;
+    if(!el) return;
+    var results = window.opHealthCheck();
+    var counts = {pass:0,warn:0,fail:0,'n/a':0,error:0};
+    results.forEach(function(r){ counts[r.status] = (counts[r.status]||0) + 1; });
+    var color = {pass:'var(--grn)',warn:'var(--amb)',fail:'var(--wrn)','n/a':'var(--gry2)',error:'#d23'};
+    var rows = results.map(function(r){
+      var sev = r.severity === 'critical' ? '<b style="color:var(--wrn);">CRIT</b>'
+              : r.severity === 'important' ? '<b style="color:var(--amb);">IMPT</b>'
+              : '<span style="color:var(--gry);">info</span>';
+      var st = '<b style="color:'+(color[r.status]||'var(--gry)')+';">'+r.status.toUpperCase()+'</b>';
+      return '<tr>'
+        + '<td style="padding:3px 8px;color:var(--gry);">'+r.tab+'</td>'
+        + '<td style="padding:3px 8px;">'+r.label+'</td>'
+        + '<td style="padding:3px 8px;text-align:center;">'+sev+'</td>'
+        + '<td style="padding:3px 8px;text-align:center;">'+st+'</td>'
+        + '<td style="padding:3px 8px;color:var(--gry);font-size:11px;">'+r.detail+'</td>'
+        + '</tr>';
+    }).join('');
+    el.innerHTML =
+      '<div style="font-size:11px;color:var(--gry);margin-bottom:6px;">'
+        + '<b style="color:var(--grn);">'+counts.pass+' pass</b> · '
+        + '<b style="color:var(--amb);">'+counts.warn+' warn</b> · '
+        + '<b style="color:var(--wrn);">'+counts.fail+' fail</b> · '
+        + counts['n/a']+' n/a · '
+        + (counts.error||0)+' error · '
+        + 'ran at '+new Date().toLocaleTimeString()
+      + '</div>'
+      + '<table style="width:100%;font-size:12px;border-collapse:collapse;">'
+        + '<thead><tr style="color:var(--gry);text-align:left;border-bottom:1px solid var(--gry2);">'
+          + '<th style="padding:4px 8px;">Tab</th>'
+          + '<th style="padding:4px 8px;">Element</th>'
+          + '<th style="padding:4px 8px;text-align:center;">Sev</th>'
+          + '<th style="padding:4px 8px;text-align:center;">Status</th>'
+          + '<th style="padding:4px 8px;">Detail</th>'
+        + '</tr></thead>'
+        + '<tbody>'+rows+'</tbody>'
+      + '</table>';
+  };
+
+  console.log('[opHealthCheck] ready — '+CHECKS.length+' checks registered. Run window.opHealthCheck()');
+})();
 </script>
 </body>
 
