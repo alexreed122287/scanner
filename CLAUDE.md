@@ -83,7 +83,11 @@ console.log('parse errors='+errs);
 - `r.ind._synth === true` (auto-trader only)
 - `localStorage:rrjcar_tradier` and `rrjcar_tradier_proxy` are both unset (both)
 
-The `_synth` flag propagates from simInd/simOpt and from scoreIt's history-missing path. **Do not strip these gates** — they prevent real-money trades on randomly-generated indicators. Two static health checks (`api / Auto-trader synth-gate present in source`, `api / submitOrder sandbox refusal present in source`) introspect the function source so a refactor accidentally removing the guard fails CI.
+The `_synth` flag propagates from simInd/simOpt and from scoreIt's history-missing path. As of PR #31, `simQuote` and the three static-universe row pushes also carry `r._synth` and `r._synthSrc='simQuote'` for direct row-level introspection. **Do not strip these gates** — they prevent real-money trades on randomly-generated indicators. Three static health checks (`api / Auto-trader synth-gate present in source`, `api / submitOrder sandbox refusal present in source`, `sc / simQuote stamps _synth on result row`) introspect the function source so a refactor accidentally removing a guard fails CI.
+
+### `_synth` lifecycle (PR #32)
+
+`scoreIt` no longer uses `if(!ind._synth)` — that guard never CLEARED the flag once set, so live-scan rows stayed flagged even after `_bgEnrichTick` populated `G_HIST_CACHE`. New rule: `if(ind._synthSrc !== 'simInd') ind._synth = !(_hist && _hist.length >= 30);`. The simInd path (no-key sandbox) stays flagged forever because the rest of the row is random; every other path reflects current history. `renderScan` adds `class='row-synth'` (opacity .55, lifted to .85 on hover/select) when `r.ind._synth || r._synth`, and adds a tiny `?` indicator in the SCORE column.
 
 ### Slim-cache layout
 
@@ -108,17 +112,17 @@ The `_synth` flag propagates from simInd/simOpt and from scoreIt's history-missi
 | #27 | `.github/workflows/parse-check.yml` | Catch syntax errors in CI |
 | #28 | SANDBOX/SIM banner + simInd/simOpt `_synth` stamp | Global sandbox-mode signal |
 | #29 | Sparse-coverage health-check fill (50 → 72 predicates) | Coverage for Order, Portfolio, News, Watchlist, Alerts, Pos, GEX, Ind |
-| #30 (this session) | Auto-trader synth-gate + submitOrder sandbox refusal | Refuse real-money trades on `_synth: true` rows or with no credentials |
+| #30 | Auto-trader synth-gate + submitOrder sandbox refusal | Refuse real-money trades on `_synth: true` rows or with no credentials |
+| #31 | simQuote stamps `_synth:true, _synthSrc:'simQuote'` + new health check | Detail pane was showing real-looking price next to flagged indicators on sandbox path |
+| #32 | `.row-synth` dim on scan table + clear `_synth` after enrichment | Rank 61–200 placeholders were indistinguishable from real rows for ~7 min after a scan; scoreIt also wasn't clearing `_synth` once history landed, so the flag was stuck even on top-60 |
 
 ## Known bug list (not yet shipped, ranked)
 
-1. **`simQuote` no `_synth` propagation** — `simQuote` (line 13340) returns price/volume without flagging. Detail pane shows real-looking price next to flagged indicators. Mid-priority: real-money path is already gated by the sandbox key check, but UI is still misleading.
-2. **Rank 61–200 placeholder window** — bg-enrich is in progress for those ranks; scan table renders placeholders as if real for ~7 min after a scan. `_synth` flag fires in detail pane; scan table doesn't visually distinguish them. Fix: pulse-grey rows with `r.ind._synth === true` in `renderScan`.
-3. **`fetchPositions` stale-quote race** — when `fetchLiveQuotes` overlay fails, positions render against entry mark → P&L appears 0. Add a stale-quote class on rows where quote age > 60s.
-4. **Tradier 429 cascade** — bulk-quote 429 retries fall through to simQuote silently. `_synth` should propagate from simQuote to `r._synth`.
-5. **Background enrichment progress lying** — counter increments even when fetch fails. `bg-enrich-badge` shows `200/200` while `G_HIST_CACHE` has 80 entries.
-6. **Forward-return tracking** — shadow-book mentions `fwd1d/fwd3d/fwd5d`; no current backfill job. Edge measurement is meaningless without it.
-7. **localStorage quota write fail surfaces only in console** — user has no UI signal when slim-cache write fails.
+1. **`fetchPositions` stale-quote race** — when `fetchLiveQuotes` overlay fails, positions render against entry mark → P&L appears 0. Add a stale-quote class on rows where quote age > 60s.
+2. **Tradier 429 cascade** — bulk-quote 429 retries fall through to simQuote silently. Now that simQuote stamps `_synth` (PR #31) the row will at least surface as synthetic; still worth a discrete log/toast distinguishing rate-limit failure from no-key sandbox.
+3. **Background enrichment progress lying** — counter increments even when fetch fails. `bg-enrich-badge` shows `200/200` while `G_HIST_CACHE` has 80 entries.
+4. **Forward-return tracking** — shadow-book mentions `fwd1d/fwd3d/fwd5d`; no current backfill job. Edge measurement is meaningless without it.
+5. **localStorage quota write fail surfaces only in console** — user has no UI signal when slim-cache write fails.
 
 ## Things to NOT do
 
