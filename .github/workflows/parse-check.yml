@@ -1,0 +1,54 @@
+name: Parse Check
+
+# Sanity-checks every <script> block in index.html parses as valid JavaScript.
+# Catches unbalanced braces, stray syntax errors, and other regressions where
+# the page would silently load but never execute JS (no error visible in CI
+# until a user opens the browser console). Runs in seconds.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - '.github/workflows/parse-check.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - '.github/workflows/parse-check.yml'
+  workflow_dispatch:
+
+jobs:
+  parse:
+    name: index.html script parse-check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validate every <script> block parses
+        run: |
+          node -e "
+            const fs   = require('fs');
+            const html = fs.readFileSync('index.html','utf8');
+            const blocks = html.match(/<script\b[^>]*>([\s\S]*?)<\/script>/g) || [];
+            let errors = 0;
+            let idx = 0;
+            for (const block of blocks) {
+              idx++;
+              const body = block.replace(/^<script\b[^>]*>/,'').replace(/<\/script>\$/,'');
+              if (!body.trim()) continue;
+              try {
+                new Function(body);
+              } catch (e) {
+                errors++;
+                const head = body.split('\n').slice(0,3).join(' | ').slice(0, 200);
+                console.log('::error::block #' + idx + ' parse error: ' + e.message.split('\n')[0]);
+                console.log('  head: ' + head);
+              }
+            }
+            console.log('scanned ' + blocks.length + ' <script> blocks, ' + errors + ' parse errors');
+            process.exit(errors === 0 ? 0 : 1);
+          "
