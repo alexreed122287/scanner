@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-13T02:15-headers-pre%-fixes">
+<meta name="op-build" content="2026-05-13T03:00-simquote-synth-stamp">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -13375,7 +13375,8 @@ function simQuote(t){
     AMZN:185,RCL:195,MCD:265,KO:62,PG:165,GIS:65,LIN:430,NEM:38,NEE:75,DUK:105}[t]||100;
   var pr=+(base*(0.92+Math.random()*0.16)).toFixed(2);
   var chg=+((Math.random()-0.48)*base*0.025).toFixed(2);
-  return{price:pr,change:chg,changePct:+((chg/pr)*100).toFixed(2),volume:Math.floor(rnd(1e6,25e6))};
+  return{price:pr,change:chg,changePct:+((chg/pr)*100).toFixed(2),volume:Math.floor(rnd(1e6,25e6)),
+    _synth:true, _synthSrc:'simQuote'};  // PR #31: flag so detail pane + health check can surface
 }
 function simInd(t,price){
   var rsi=+rnd(32,78).toFixed(1);
@@ -18762,7 +18763,8 @@ async function runScan(opts){
       var q = simQuote(u.t), ind = simInd(u.t, q.price), opt = simOpt(q.price), sc2 = scoreIt(u.t, ind, opt);
       G.results.push({ticker:u.t, sector:u.s, price:q.price, change:q.change, changePct:q.changePct,
         volume:q.volume, ind:ind, opt:opt, score:sc2.score, isGo:sc2.isGo,
-        filtersPass:sc2.filtersPass, rules:sc2.rules, passes:sc2.passes});
+        filtersPass:sc2.filtersPass, rules:sc2.rules, passes:sc2.passes,
+        _synth:true, _synthSrc:'simQuote'});  // PR #31: stamp the row so consumers don't only see r.ind._synth
     });
     finishScan();
     return;
@@ -18780,7 +18782,8 @@ async function runScan(opts){
         var q = simQuote(u.t), ind = simInd(u.t, q.price), opt = simOpt(q.price), sc2 = scoreIt(u.t, ind, opt);
         G.results.push({ticker:u.t, sector:u.s, price:q.price, change:q.change, changePct:q.changePct,
           volume:q.volume, ind:ind, opt:opt, score:sc2.score, isGo:sc2.isGo,
-          filtersPass:sc2.filtersPass, rules:sc2.rules, passes:sc2.passes});
+          filtersPass:sc2.filtersPass, rules:sc2.rules, passes:sc2.passes,
+          _synth:true, _synthSrc:'simQuote'});  // PR #31: screener-failed fallback is still sim data
       });
       finishScan();
       return;
@@ -18848,7 +18851,8 @@ async function runScan(opts){
       var q = simQuote(u.t), ind = simInd(u.t, q.price), opt = simOpt(q.price), sc2 = scoreIt(u.t, ind, opt);
       G.results.push({ticker:u.t, sector:u.s, price:q.price, change:q.change, changePct:q.changePct,
         volume:q.volume, ind:ind, opt:opt, score:sc2.score, isGo:sc2.isGo,
-        filtersPass:sc2.filtersPass, rules:sc2.rules, passes:sc2.passes});
+        filtersPass:sc2.filtersPass, rules:sc2.rules, passes:sc2.passes,
+        _synth:true, _synthSrc:'simQuote'});  // PR #31: catch-block fallback is still sim data
     });
     try { finishScan(); }
     catch(e2){
@@ -27280,7 +27284,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.18.30-headers-pre%-fixes';
+var APP_VERSION = '2.18.31-simquote-synth-stamp';
 // v2.18.21: DEFAULT feedback webhook. Every visitor's "Submit Feedback"
 // form posts here (unless they've overridden via ALERTS → Feedback
 // Webhook). The URL points to a Google Apps Script Web App owned by
@@ -33853,6 +33857,27 @@ window.addEventListener('DOMContentLoaded',init);
       // If 100% are simInd it means no Tradier key OR every fetch failed.
       // Either way the scan is fully synthetic and trading is unsafe.
       return false;
+    }},
+    { tab:'sc', label:'simQuote stamps _synth on result row (PR #31)', sev:'critical', fn:function(){
+      // Static sanity: confirm simQuote and the three static-universe paths
+      // still propagate _synth. Without this, sandbox-mode rows show real-
+      // looking prices in the detail pane next to flagged indicators.
+      try {
+        var qSrc = (typeof simQuote === 'function') ? simQuote.toString() : '';
+        if(!qSrc) return 'n/a';
+        if(qSrc.indexOf("_synthSrc:'simQuote'") < 0 && qSrc.indexOf('_synthSrc: \'simQuote\'') < 0) return false;
+        // Confirm at least one push site stamps _synthSrc too (counts the
+        // static-universe row construction; a refactor that drops the stamp
+        // would fall back to relying only on ind._synth which is too noisy).
+        var rs = (window.G && G.results) || [];
+        if(!rs.length) return true;  // can't sample yet — source check is enough
+        // If runtime data is present and the bulk-pass came from simQuote,
+        // r._synthSrc must also be 'simQuote'.
+        var synthRows = rs.filter(function(r){ return r && r.ind && r.ind._synthSrc === 'simInd'; });
+        if(!synthRows.length) return true;  // live data path, nothing to verify
+        var stamped = synthRows.filter(function(r){ return r._synthSrc === 'simQuote'; }).length;
+        return stamped === synthRows.length ? true : (stamped > 0 ? 'warn' : false);
+      } catch(_){ return 'n/a'; }
     }},
     { tab:'hdr', label:'Sandbox banner reflects key state', sev:'info', fn:function(){
       var el = $('hdr-sandbox'); if(!el) return 'n/a';
