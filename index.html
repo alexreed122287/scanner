@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-13T03:00-simquote-synth-stamp">
+<meta name="op-build" content="2026-05-13T03:15-dim-synth-rows">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -691,6 +691,13 @@ td{border-bottom:var(--bdr);color:var(--wht);font-size:11px;padding:5px 10px;whi
    so the row doesn't visibly grow / reflow under the cursor. */
 tr:hover td{cursor:pointer;background:var(--amb3);}
 tr.sel-row td{background:var(--blu3);}
+/* PR #32: dim scan rows whose indicators are still synthetic (bulk-pass
+   placeholders for ranks 61-200; foreground enrich is still running or
+   bg-enrich hasn't reached them yet). Selected/hover states still win so
+   the row doesn't look "stuck" when the user clicks it. */
+tr.row-synth td{opacity:.55;}
+tr.row-synth:hover td,tr.row-synth.sel-row td{opacity:.85;}
+.score-synth-q{font-family:var(--ff-mono);font-size:10px;color:var(--gry2);margin-left:4px;cursor:help;vertical-align:middle;}
 /* Positions opened today (NY calendar date) — bright amber tint + left
    accent stripe so the user can spot fresh opens/rolls at a glance and
    avoid accidentally triggering a PDT day-trade flag. */
@@ -16129,13 +16136,16 @@ function scoreIt(ticker, ind, opt){
     }
   } catch(_){}
   // Stamp ind._synth when no history is available. Renderers (buildDetail,
-  // renderBuySig) surface this so the user doesn't mistake bulk-pass
-  // placeholders (rsi=50, ema20=price*0.99, etc.) for live values.
+  // renderBuySig, renderScan via the row-synth class added in PR #32) surface
+  // this so the user doesn't mistake bulk-pass placeholders (rsi=50,
+  // ema20=price*0.99, etc.) for live values.
   //
-  // If simInd already marked the input as synthetic (no Tradier key path),
-  // keep the flag — a real history fetch shouldn't silently overwrite it
-  // since the rest of the row's fields are still random.
-  if(!ind._synth){
+  // PR #32: the previous `if(!ind._synth)` guard never CLEARED the flag once
+  // set, so live-scan rows stayed flagged forever even after bg-enrich landed
+  // real history. The simInd path (no-key sandbox) must stay flagged because
+  // the rest of the row is random data; we identify it via _synthSrc='simInd'
+  // and skip the recompute there. Every other path reflects current history.
+  if(ind._synthSrc !== 'simInd'){
     ind._synth = !(_hist && _hist.length >= 30);
   }
   if(_hist && _hist.length >= 16){
@@ -20046,8 +20056,16 @@ function renderScan(){
 
     // Score bar \u2014 visual fill showing score out of 122
     var scorePct=Math.round((r.score/240)*100);
+    // PR #32: surface synthetic rows. ind._synth means the indicators are
+    // still bulk-pass placeholders (RSI=50, MACD=0, ema*0.97, etc.) because
+    // foreground/bg enrichment hasn't filled in real history yet. Stack the
+    // r._synth (sandbox path) check as a belt-and-braces guard.
+    var _isSynth = !!(r._synth === true || (r.ind && r.ind._synth === true));
+    var _synthQ = _isSynth
+      ? '<span class="score-synth-q" title="Synthetic / unenriched: indicators are bulk-pass placeholders (RSI 50, MACD 0, EMA estimates) until history lands. Score will update once enrichment reaches this rank.">?</span>'
+      : '';
     var scoreBar='<div style="display:inline-flex;align-items:center;gap:5px;">'
-      +'<b>'+Math.round(r.score)+'</b>'
+      +'<b>'+Math.round(r.score)+'</b>'+_synthQ
       +'<div style="width:36px;height:4px;background:var(--bg3);border-radius:2px;display:inline-block;vertical-align:middle;">'
       +'<div style="width:'+scorePct+'%;height:100%;background:'+(r.isGo?'var(--grn)':'var(--gry)')+';border-radius:2px;"></div>'
       +'</div></div>';
@@ -20118,7 +20136,7 @@ function renderScan(){
     } else {
       gexPill = '<span class="gex-pill mis" data-tk="'+tk+'" onclick="event.stopPropagation();runGexForTicker(\''+tk+'\')" title="RUN GEX for this ticker — fetches the 30-day options chain and computes call vs put OI flow + gamma flip strike. This ticker is outside the top-200 batch that runs automatically after every scan, so its GEX rule + bullish-flow indicator are still empty. Click RUN to fetch just this ticker (≈3s, 2 API calls). The button flips to ✓ once data lands.">RUN</span>';
     }
-    rows+='<tr data-ticker="'+tk+'" onclick="viewDetail(this.dataset.ticker,\'sc-detail\',\'sc-det-empty\')">'
+    rows+='<tr data-ticker="'+tk+'"'+(_isSynth?' class="row-synth"':'')+' onclick="viewDetail(this.dataset.ticker,\'sc-detail\',\'sc-det-empty\')">'
       +'<td style="text-align:center;padding:0;">'+starHTML(tk,14)+'</td>'
       +'<td style="text-align:center;font-size:10px;color:var(--gry2);font-family:var(--ff-mono);" title="'+_whyTitle.replace(/"/g,'&quot;')+'">'
       +  '<div style="line-height:1.1;">'+(idx+1)+'</div>'
@@ -27284,7 +27302,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.18.31-simquote-synth-stamp';
+var APP_VERSION = '2.18.32-dim-synth-rows';
 // v2.18.21: DEFAULT feedback webhook. Every visitor's "Submit Feedback"
 // form posts here (unless they've overridden via ALERTS → Feedback
 // Webhook). The URL points to a Google Apps Script Web App owned by
