@@ -12358,6 +12358,21 @@ function previewOrder(){
 }
 
 function submitOrder(){
+  // SANDBOX GATE — refuse submission when no Tradier key + no proxy is set.
+  // Belt-and-suspenders for the auto-trader gate added in the same PR: if
+  // the user somehow reaches the order ticket / slide-to-submit path with
+  // no credentials configured, ALL underlying data (quote, chain, BP) is
+  // synthetic and any submit would either fail with 401 or — worse — get
+  // routed through a misconfigured proxy. Refuse upfront with a clear toast.
+  try {
+    var hasTr   = !!localStorage.getItem('rrjcar_tradier');
+    var hasPxy  = !!localStorage.getItem('rrjcar_tradier_proxy');
+    if(!hasTr && !hasPxy){
+      toast('Refusing order — no Tradier key or proxy configured (SANDBOX mode)');
+      console.warn('[submitOrder] SANDBOX gate fired — no credentials in localStorage');
+      return;
+    }
+  } catch(_){}
   if(G.stepFillActive){toast('Step fill already running');return;}
   // NEW-C4 fix 2026-05-10: BUG-2 minimized-modal guard MUST run before
   // the spread route, otherwise SPREAD submit clobbers the tracking
@@ -26065,10 +26080,20 @@ async function runAutoScanCycle(){
     if(!qualifiedThisCycle[t]) delete G_AT.qualifiedOn[t];
   });
 
-  // Build candidates: score gate + persistence + position guards
+  // Build candidates: score gate + persistence + position guards + SYNTH GATE
+  // Refuse to fire on rows where the indicators were sourced from simInd /
+  // bulk-pass placeholders. Trading on _synth:true means trading on
+  // randomly-generated RSI / MACD / ADX / EMA values — the GO flag means
+  // nothing in that state. Also refuse when the SANDBOX banner is active
+  // (no Tradier key OR proxy), since simQuote price is synthetic too.
+  var _autoSandbox = false;
+  try { _autoSandbox = !(localStorage.getItem('rrjcar_tradier') || localStorage.getItem('rrjcar_tradier_proxy')); } catch(_){}
   var candidates = [];
+  var _synthSkipped = 0;
   results.forEach(function(r){
     if(!r.isGo||r.score<s.minScore) return;
+    if(r && r.ind && r.ind._synth === true){ _synthSkipped++; return; }
+    if(_autoSandbox){ _synthSkipped++; return; }
     if(atHasOpenPosition(r.ticker))  return;
     var lastTs = G_AT.openedToday[r.ticker+'_ts']||0;
     if(now-lastTs < cooldownMs) return;
@@ -26079,6 +26104,9 @@ async function runAutoScanCycle(){
     }
     candidates.push(r);
   });
+  if(_synthSkipped > 0){
+    atLog(_synthSkipped+' GO signal(s) skipped — synthetic data (no Tradier key or unenriched row)','warn');
+  }
 
   if(!candidates.length){
     var qualifying = Object.keys(G_AT.qualifiedOn).length;
@@ -33833,6 +33861,23 @@ window.addEventListener('DOMContentLoaded',init);
       var shown = el.style.display !== 'none';
       // shown ↔ no key
       return shown === !hasKey;
+    }},
+    { tab:'api', label:'Auto-trader synth-gate present in source', sev:'critical', fn:function(){
+      // Static sanity: confirm runAutoScanCycle still contains the
+      // r.ind._synth refusal we wired in. Surfaces if a future refactor
+      // accidentally strips the gate.
+      try {
+        var src = (typeof runAutoScanCycle === 'function') ? runAutoScanCycle.toString() : '';
+        if(!src) return 'n/a';
+        return src.indexOf('_synth') >= 0 && src.indexOf('_autoSandbox') >= 0;
+      } catch(_){ return 'n/a'; }
+    }},
+    { tab:'api', label:'submitOrder sandbox refusal present in source', sev:'critical', fn:function(){
+      try {
+        var src = (typeof submitOrder === 'function') ? submitOrder.toString() : '';
+        if(!src) return 'n/a';
+        return src.indexOf('SANDBOX mode') >= 0 || src.indexOf('SANDBOX gate') >= 0;
+      } catch(_){ return 'n/a'; }
     }},
     { tab:'sc', label:'Category strip rendered', sev:'info', fn:function(){
       var el = $('sc-cat-strip-ts');
