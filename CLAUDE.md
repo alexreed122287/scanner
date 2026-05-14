@@ -97,6 +97,30 @@ The `_synth` flag propagates from simInd/simOpt and from scoreIt's history-missi
 
 Threshold matches the order-ticket's existing `FORCE_REFRESH_MS = 60s` constant. **Do not remove the `_prevQuoteByPos` merge** — without it the user sees P&L flash to \$0 on any quote-fetch hiccup.
 
+### Tradier 429 cause attribution (PR #36)
+
+`fetchDynamicUniverse` checks `resp.status === 429` after each Pass 1 / Pass 2 batch and stamps `window._tradierRateLimited = Date.now()`. The empty-screened fallback in `runScan` compares that timestamp to `Date.now()` and shows one of two toasts:
+- Within 60s → `⚠ Tradier rate-limited (429) — retry in ~60s. Showing simulated data meanwhile.` + amber `RATE-LIMITED` universe label.
+- Stale → existing `⚠ Screener failed — using static universe`.
+
+Synthetic rows in either path carry `r._synthCause` (`'tradier-429'` vs `'screener-empty'`) for downstream attribution. Health check `sc / No recent Tradier 429 (PR #36)` fails inside 1 min, warns up to 5 min.
+
+### bg-enrich honest accounting (PR #37)
+
+The tick now bumps **exactly one** of three counters per iteration so the invariant `cursor === enriched + failed + skippedDone` holds. Badge text appends `· Nf` when `failed > 0`. **Do not add a fourth exit path without bumping a counter** — the `sc / bg-enrich accounting balances` health check will fail loudly if the totals diverge.
+
+### Shadow-book fwd-return scheduler (PR #38)
+
+`runShadowBookBackfill({ force })` wraps both `_shadowRefreshForward` (per-contract) and `_shadowRefreshScanForward` (per-ticker) with a 4h cooldown stored at `localStorage:rrjcar_shadow_backfill_ts`. `_shadowHasPending` short-circuits the API call when no entry is old enough (age ≥ 1d AND `fwd1d == null`). Scheduler fires 90s after `DOMContentLoaded` then every 4h. Silent unless something updates; emits a green `SYS` alert on success.
+
+The console-callable signature `window.runShadowBookBackfill({ force: true })` bypasses the cooldown for manual triggering.
+
+### localStorage quota signal (PR #39)
+
+`cacheSet` no longer swallows `QuotaExceededError`. On a quota error it calls `bsHardPrune` (drops `rrjcar_ob_hist_`, `rrjcar_hist_`, `rrjcar_fmp_` caches) and retries once, then stamps `window._quotaErrors` (count, lastKey, lastTs). `#hdr-quota` header pill flips to `⚠ STORAGE FULL` at the first hit and stays visible until the user clicks it (which runs `_resetQuotaWarning`). The pill survives across navigations because `_renderQuotaBadge` runs from the same DOM-ready hook as `_updateSandboxBanner`.
+
+`window._resetQuotaWarning()` is exposed for console use.
+
 ### Slim-cache layout
 
 `localStorage:op_cache_scan_results` (key `CACHE_KEYS.scanResults`) holds top-200 results post-scan. Trimmed at write to avoid 5 MB Safari quota. Restored at page load and re-scored. **Do not increase SLIM_CAP without measuring serialized size.**
@@ -124,13 +148,14 @@ Threshold matches the order-ticket's existing `FORCE_REFRESH_MS = 60s` constant.
 | #31 | simQuote stamps `_synth:true, _synthSrc:'simQuote'` + new health check | Detail pane was showing real-looking price next to flagged indicators on sandbox path |
 | #32 | `.row-synth` dim on scan table + clear `_synth` after enrichment | Rank 61–200 placeholders were indistinguishable from real rows for ~7 min after a scan; scoreIt also wasn't clearing `_synth` once history landed, so the flag was stuck even on top-60 |
 | #34 | Positions stale-quote race — carry forward prev quotes + visible flag | Quote-fetch failure in `fetchPositionsDirect` was rendering every row with last=0/pnl=0; now prev values merge from `_prevQuoteByPos` and rows over 60s old get a STALE pill + amber tint |
+| #36 | Surface Tradier 429 cause in scan fallback | `Screener failed — using static universe` was indistinguishable between rate-limit and config issues; now `window._tradierRateLimited` is stamped and the toast/alert distinguishes |
+| #37 | bg-enrich badge stops lying | Tick now bumps exactly one of `{enriched, failed, skippedDone}` per iteration; badge appends `· Nf` when failures > 0; tooltip shows full breakdown |
+| #38 | Auto-schedule shadow-book fwd-return backfill | `_shadowRefresh*Forward` existed but had to be called manually; new `runShadowBookBackfill` runs 90s after load + every 4h with cooldown stamp |
+| #39 | Surface localStorage quota failures in UI | `cacheSet` swallowed `QuotaExceededError` silently; new `#hdr-quota` pill + retry-after-prune logic + `_resetQuotaWarning` click handler |
 
 ## Known bug list (not yet shipped, ranked)
 
-1. **Tradier 429 cascade** — bulk-quote 429 retries fall through to simQuote silently. Now that simQuote stamps `_synth` (PR #31) the row will at least surface as synthetic; still worth a discrete log/toast distinguishing rate-limit failure from no-key sandbox.
-2. **Background enrichment progress lying** — counter increments even when fetch fails. `bg-enrich-badge` shows `200/200` while `G_HIST_CACHE` has 80 entries.
-3. **Forward-return tracking** — shadow-book mentions `fwd1d/fwd3d/fwd5d`; no current backfill job. Edge measurement is meaningless without it.
-4. **localStorage quota write fail surfaces only in console** — user has no UI signal when slim-cache write fails.
+_All known bugs from the previous session ledger have been addressed (PRs #31, #32, #34, #36–#39). When you find new issues, add them here in priority order._
 
 ## Things to NOT do
 
