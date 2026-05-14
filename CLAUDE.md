@@ -89,6 +89,14 @@ The `_synth` flag propagates from simInd/simOpt and from scoreIt's history-missi
 
 `scoreIt` no longer uses `if(!ind._synth)` — that guard never CLEARED the flag once set, so live-scan rows stayed flagged even after `_bgEnrichTick` populated `G_HIST_CACHE`. New rule: `if(ind._synthSrc !== 'simInd') ind._synth = !(_hist && _hist.length >= 30);`. The simInd path (no-key sandbox) stays flagged forever because the rest of the row is random; every other path reflects current history. `renderScan` adds `class='row-synth'` (opacity .55, lifted to .85 on hover/select) when `r.ind._synth || r._synth`, and adds a tiny `?` indicator in the SCORE column.
 
+### Positions stale-quote race (PR #34)
+
+`fetchPositionsDirect` snapshots `G.positions[*]` quote fields into `_prevQuoteByPos` keyed by OCC symbol BEFORE issuing the new bulk-quote fetch. Two merge points carry the previous values forward when the new fetch fails: a per-symbol miss inside the `.then`, and the outer `.catch` that fires when the whole quote fetch rejects. `p._quoteTs = Date.now()` is stamped only when a quote successfully populates `p.last`. `renderPositionsTable` derives two row classes from age:
+- `pos-row-stale-quote` when `Date.now() - _quoteTs > 60_000` → amber tint + `STALE Xs` pill prepended to the TOTAL P/L cell.
+- `pos-row-no-quote` when `_quoteTs` is missing AND `last == 0` (first fetch failed) → dimmed row + `NO QUOTE` pill.
+
+Threshold matches the order-ticket's existing `FORCE_REFRESH_MS = 60s` constant. **Do not remove the `_prevQuoteByPos` merge** — without it the user sees P&L flash to \$0 on any quote-fetch hiccup.
+
 ### Slim-cache layout
 
 `localStorage:op_cache_scan_results` (key `CACHE_KEYS.scanResults`) holds top-200 results post-scan. Trimmed at write to avoid 5 MB Safari quota. Restored at page load and re-scored. **Do not increase SLIM_CAP without measuring serialized size.**
@@ -115,14 +123,14 @@ The `_synth` flag propagates from simInd/simOpt and from scoreIt's history-missi
 | #30 | Auto-trader synth-gate + submitOrder sandbox refusal | Refuse real-money trades on `_synth: true` rows or with no credentials |
 | #31 | simQuote stamps `_synth:true, _synthSrc:'simQuote'` + new health check | Detail pane was showing real-looking price next to flagged indicators on sandbox path |
 | #32 | `.row-synth` dim on scan table + clear `_synth` after enrichment | Rank 61–200 placeholders were indistinguishable from real rows for ~7 min after a scan; scoreIt also wasn't clearing `_synth` once history landed, so the flag was stuck even on top-60 |
+| #34 | Positions stale-quote race — carry forward prev quotes + visible flag | Quote-fetch failure in `fetchPositionsDirect` was rendering every row with last=0/pnl=0; now prev values merge from `_prevQuoteByPos` and rows over 60s old get a STALE pill + amber tint |
 
 ## Known bug list (not yet shipped, ranked)
 
-1. **`fetchPositions` stale-quote race** — when `fetchLiveQuotes` overlay fails, positions render against entry mark → P&L appears 0. Add a stale-quote class on rows where quote age > 60s.
-2. **Tradier 429 cascade** — bulk-quote 429 retries fall through to simQuote silently. Now that simQuote stamps `_synth` (PR #31) the row will at least surface as synthetic; still worth a discrete log/toast distinguishing rate-limit failure from no-key sandbox.
-3. **Background enrichment progress lying** — counter increments even when fetch fails. `bg-enrich-badge` shows `200/200` while `G_HIST_CACHE` has 80 entries.
-4. **Forward-return tracking** — shadow-book mentions `fwd1d/fwd3d/fwd5d`; no current backfill job. Edge measurement is meaningless without it.
-5. **localStorage quota write fail surfaces only in console** — user has no UI signal when slim-cache write fails.
+1. **Tradier 429 cascade** — bulk-quote 429 retries fall through to simQuote silently. Now that simQuote stamps `_synth` (PR #31) the row will at least surface as synthetic; still worth a discrete log/toast distinguishing rate-limit failure from no-key sandbox.
+2. **Background enrichment progress lying** — counter increments even when fetch fails. `bg-enrich-badge` shows `200/200` while `G_HIST_CACHE` has 80 entries.
+3. **Forward-return tracking** — shadow-book mentions `fwd1d/fwd3d/fwd5d`; no current backfill job. Edge measurement is meaningless without it.
+4. **localStorage quota write fail surfaces only in console** — user has no UI signal when slim-cache write fails.
 
 ## Things to NOT do
 
