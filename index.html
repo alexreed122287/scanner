@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-13T03:15-dim-synth-rows">
+<meta name="op-build" content="2026-05-13T03:30-pos-stale-quote">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -708,6 +708,16 @@ tr.pos-row-earn-soon td{background:rgba(216,90,48,0.14);border-bottom-color:rgba
 tr.pos-row-earn-soon td:first-child{box-shadow:inset 4px 0 0 #d85a30;}
 tr.pos-row-earn-soon b{color:#ff8a65;text-shadow:0 0 8px rgba(216,90,48,0.55);}
 .pos-earn-tag{display:inline-block;margin-left:6px;padding:2px 6px;border:1px solid #d85a30;background:rgba(216,90,48,0.18);color:#ff8a65;font-family:var(--ff-mono);font-size:9px;font-weight:800;letter-spacing:.5px;border-radius:3px;text-shadow:none;vertical-align:middle;}
+/* PR #34: stale-quote race on positions table. fetchPositions catch path
+   used to render with last=0/pnl=0 when the bulk-quote fetch failed; now
+   prev values are carried forward and the row is visually flagged so the
+   user knows the P&L is not current. Hover/select states still win. */
+tr.pos-row-stale-quote td{background:rgba(255,160,30,0.08);color:var(--ambb);}
+tr.pos-row-stale-quote td:first-child{box-shadow:inset 4px 0 0 var(--wrn);}
+tr.pos-row-no-quote td{opacity:.55;color:var(--gry);}
+tr.pos-row-no-quote:hover td,tr.pos-row-no-quote.sel-row td{opacity:.85;}
+.stale-pos-pill{display:inline-block;margin-right:6px;padding:1px 5px;border:1px solid var(--wrn);background:rgba(255,160,30,0.18);color:var(--wrn);font-family:var(--ff-mono);font-size:9px;font-weight:800;letter-spacing:.5px;border-radius:3px;vertical-align:middle;}
+.stale-pos-pill.nq{border-color:var(--gry);background:rgba(120,120,120,0.18);color:var(--gry2);}
 .today-pill{display:inline-block;background:var(--ambb);color:var(--bg0);font-size:9px;font-weight:800;letter-spacing:1px;padding:1px 6px;border-radius:2px;margin-left:6px;text-shadow:none;animation:today-pulse 2.4s ease-in-out infinite;}
 @keyframes today-pulse{0%,100%{box-shadow:0 0 0 rgba(255,193,7,0);}50%{box-shadow:0 0 12px rgba(255,193,7,0.55);}}
 .badge{border-radius:2px;font-size:10px;font-weight:700;padding:1px 6px;display:inline-block;}
@@ -21891,6 +21901,20 @@ function fetchPositions(){
 }
 
 function fetchPositionsDirect(key,mode,host,acct){
+  // PR #34: snapshot the previous fetch's quote data so a quote-fetch failure
+  // can preserve P&L on screen instead of resetting every row to $0. Keyed
+  // by OCC symbol because that's the only stable identifier across refetches.
+  var _prevQuoteByPos = {};
+  (G.positions || []).forEach(function(prev){
+    if (!prev || !prev.symbol) return;
+    _prevQuoteByPos[prev.symbol] = {
+      last: prev.last, bid: prev.bid, ask: prev.ask,
+      pnl: prev.pnl, pnlPct: prev.pnlPct,
+      dayPnl: prev.dayPnl, dayPnlBasis: prev.dayPnlBasis,
+      delta: prev.delta, underlyingNow: prev.underlyingNow,
+      prevclose: prev.prevclose, _quoteTs: prev._quoteTs
+    };
+  });
   fetch(host+'/v1/accounts/'+acct+'/positions',{headers:{Authorization:'Bearer '+key,Accept:'application/json'}})
   .then(function(r){if(!r.ok)throw new Error('Positions HTTP '+r.status);return r.json();})
   .then(function(data){
@@ -21919,6 +21943,7 @@ function fetchPositionsDirect(key,mode,host,acct){
           if(q){
             var mid=q.bid&&q.ask?(q.bid+q.ask)/2:(q.last||0);
             p.last=mid;p.bid=q.bid||0;p.ask=q.ask||0;
+            p._quoteTs = Date.now();  // PR #34: stamp fresh-quote timestamp so renderPositionsTable can flag stale rows
             // Capture delta from greeks for the positions DELTA column.
             // Greeks come back on the same /quotes call (greeks=true).
             // For STOCK rows delta is implicitly 1.0 per share; we set
@@ -21978,6 +22003,18 @@ function fetchPositionsDirect(key,mode,host,acct){
             } else {
               p.dayPnl = perUnitChange * p.qty * mult;
               p.dayPnlBasis = 'since-prev-close';
+            }
+          } else {
+            // PR #34: a quote for this specific symbol came back missing from
+            // the bulk response. Preserve the previous fetch's data instead
+            // of leaving last=0/pnl=0 (was producing $0 P&L on screen).
+            var _pq = _prevQuoteByPos[p.symbol];
+            if (_pq){
+              p.last = _pq.last; p.bid = _pq.bid; p.ask = _pq.ask;
+              p.pnl = _pq.pnl; p.pnlPct = _pq.pnlPct;
+              p.dayPnl = _pq.dayPnl; p.dayPnlBasis = _pq.dayPnlBasis;
+              p.delta = _pq.delta; p.underlyingNow = _pq.underlyingNow;
+              p.prevclose = _pq.prevclose; p._quoteTs = _pq._quoteTs;
             }
           }
           // Record first-seen data (open timestamp + underlying price at open).
@@ -22082,7 +22119,29 @@ function fetchPositionsDirect(key,mode,host,acct){
           }
         }
       });
-    }).catch(function(){G.positions=pos;renderPositionsTable(pos,mode==='live'?'[TRADIER LIVE]':' [TRADIER SANDBOX]');fetchBalances();try{fetchPendingOrders();}catch(_){}try { if (typeof cwAutoAddFromPositions === 'function') cwAutoAddFromPositions(pos); } catch(_){}});
+    }).catch(function(qErr){
+      // PR #34: quote fetch failed entirely (network blip, 429, malformed
+      // response). Without merging, every row renders last=0/pnl=0 — user
+      // sees their P&L flash to $0 on a refresh. Carry forward each row's
+      // previous quote so the table keeps showing the last-known state, then
+      // renderPositionsTable flags rows whose _quoteTs is > 60s old.
+      pos.forEach(function(p){
+        var _pq = _prevQuoteByPos[p.symbol];
+        if (_pq){
+          p.last = _pq.last; p.bid = _pq.bid; p.ask = _pq.ask;
+          p.pnl = _pq.pnl; p.pnlPct = _pq.pnlPct;
+          p.dayPnl = _pq.dayPnl; p.dayPnlBasis = _pq.dayPnlBasis;
+          p.delta = _pq.delta; p.underlyingNow = _pq.underlyingNow;
+          p.prevclose = _pq.prevclose; p._quoteTs = _pq._quoteTs;
+        }
+      });
+      try { console.warn('[pos] quote fetch failed, merged prev quotes:', qErr && qErr.message || qErr); } catch(_){}
+      G.positions=pos;
+      renderPositionsTable(pos,mode==='live'?'[TRADIER LIVE]':' [TRADIER SANDBOX]');
+      fetchBalances();
+      try{fetchPendingOrders();}catch(_){}
+      try { if (typeof cwAutoAddFromPositions === 'function') cwAutoAddFromPositions(pos); } catch(_){}
+    });
   }).catch(function(e){showPosError('Tradier API error: '+e.message);});
 }
 function showPosError(msg){eid('pos-src').textContent='[ERROR]';eid('pos-tbl-wrap').innerHTML='<div class="empty-det" style="min-height:200px;"><div class="ei">\u25a0</div><p style="color:var(--wrn);">'+msg+'</p><p style="color:var(--gry);margin-top:8px;">Check API key in the API tab.</p></div>';}
@@ -22675,13 +22734,32 @@ function renderPositionsTable(pos,srcLabel){
     // v2.18.19: earnings-within-3-days highlight (red row + ⚠ EARN tag).
     var earnDays = (typeof getDaysToEarnings === 'function') ? getDaysToEarnings(tk) : null;
     var earnSoon = earnDays != null && earnDays >= 0 && earnDays <= 3;
+    // PR #34: surface stale / missing quote state. _quoteTs is stamped only
+    // when a quote successfully populates p.last in fetchPositionsDirect.
+    // No timestamp + no last → never had a quote (e.g. brand-new symbol on a
+    // failed first fetch). Old timestamp → carry-forward from a failed retry.
+    var _quoteAgeMs = (p._quoteTs && isFinite(p._quoteTs)) ? (Date.now() - p._quoteTs) : null;
+    var _quoteStale = _quoteAgeMs !== null && _quoteAgeMs > 60000;
+    var _noQuote = (_quoteAgeMs === null) && !(p.last > 0);
     var rowClasses = [];
     if (openedToday) rowClasses.push('pos-row-today');
     if (earnSoon) rowClasses.push('pos-row-earn-soon');
+    if (_quoteStale) rowClasses.push('pos-row-stale-quote');
+    if (_noQuote) rowClasses.push('pos-row-no-quote');
     var rowClassAttr = rowClasses.length ? ' class="'+rowClasses.join(' ')+'"' : '';
-    var rowTitle = openedToday ? 'Opened or rolled today — closing intraday triggers a PDT day-trade'
+    var _quoteAgeSec = _quoteAgeMs !== null ? Math.round(_quoteAgeMs/1000) : 0;
+    var rowTitle = _noQuote ? '⚠ No live quote — refresh failed before any successful fetch; P&L cannot be computed yet'
+                   : _quoteStale ? '⚠ Quote is '+_quoteAgeSec+'s stale — last refresh failed, showing carry-forward values. Tap REFRESH.'
+                   : openedToday ? 'Opened or rolled today — closing intraday triggers a PDT day-trade'
                    : (earnSoon ? ('⚠ Earnings in '+earnDays+' day'+(earnDays===1?'':'s')+' — close or roll before the print') : '');
     var rowTitleAttr = rowTitle ? ' title="'+rowTitle+'"' : '';
+    // Inline STALE / NO-QUOTE pill prepended to the TOTAL P/L cell so the
+    // user has an explicit signal beyond the dimmed row tint.
+    var _stalePill = _noQuote
+      ? '<span class="stale-pos-pill nq" title="No live quote yet">NO QUOTE</span> '
+      : (_quoteStale
+        ? '<span class="stale-pos-pill" title="Quote is '+_quoteAgeSec+'s stale">STALE '+_quoteAgeSec+'s</span> '
+        : '');
     html += '<tr data-tk="'+tk+'" data-tp="'+tp+'" data-st="'+st+'" data-ex="'+ex+'" data-qty="'+qty+'" data-sym="'+sym+'"'
       + ' data-sort-mid="'+(p.last||0)+'" data-sort-pnl="'+(p.pnl||0)+'" data-sort-pnlpct="'+(p.pnlPct||0)+'"'
       + ' data-sort-daypnl="'+dayPnlSortAttr+'"'
@@ -22697,7 +22775,7 @@ function renderPositionsTable(pos,srcLabel){
       +formatOpenedDateTime(p, openedToday)                                                                  // OPENED
       +equityCellHL                                                                                           // EQUITY
       +'<td class="'+dayPnlCls+'">'+dayPnlTxt+'</td>'                                                        // DAY P/L $
-      +'<td class="'+pnlCls+'">'+(p.pnl>=0?'+':'')+fmtD(p.pnl)+'</td>'                                       // TOTAL P/L $
+      +'<td class="'+pnlCls+'">'+_stalePill+(p.pnl>=0?'+':'')+fmtD(p.pnl)+'</td>'                            // TOTAL P/L $
       +'<td class="col-ticker">'+chartIconBtnHtml(tk)+'<b>'+tk+'</b>'
         +(isStock?' <span style="color:var(--gry);font-size:10px;font-weight:600;">EQ</span>':'')
         +(earnSoon?' <span class="pos-earn-tag" title="Earnings in '+earnDays+'d">⚠ EARN '+earnDays+'d</span>':'')
@@ -27302,7 +27380,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.18.32-dim-synth-rows';
+var APP_VERSION = '2.18.33-pos-stale-quote';
 // v2.18.21: DEFAULT feedback webhook. Every visitor's "Submit Feedback"
 // form posts here (unless they've overridden via ALERTS → Feedback
 // Webhook). The URL points to a Google Apps Script Web App owned by
