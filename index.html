@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-13T04:00-bg-enrich-honest-count">
+<meta name="op-build" content="2026-05-13T04:15-shadow-fwd-scheduler">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -13835,6 +13835,97 @@ async function _shadowRefreshScanForward() {
   return { updated: updated, total_entries: arr.length, tickers_refreshed: tickList.length };
 }
 
+// ───────────────────────────────────────────────────────────────────────────
+// PR #38: Forward-return backfill scheduler
+// ───────────────────────────────────────────────────────────────────────────
+// Both _shadowRefreshForward (per-contract shadow book) and
+// _shadowRefreshScanForward (per-ticker scan shadow book) used to require
+// manual console invocation — meaning fwd1d/fwd3d/fwd5d stayed null forever
+// in practice, and the shadowBookIC / scanIC analytics couldn't compute edge.
+//
+// This scheduler runs both refreshes:
+//   - 90s after every page load (gives auth / banner setup time to settle)
+//   - then every 4h while the tab is open
+// Last successful run is stamped to localStorage so a same-day reload
+// doesn't double-fetch. Skips entirely if neither store has any pending
+// entries (ageDays >= 1 && fwd*d == null).
+// ───────────────────────────────────────────────────────────────────────────
+var _SHADOW_BACKFILL_KEY  = 'rrjcar_shadow_backfill_ts';
+var _SHADOW_BACKFILL_MIN  = 4 * 3600 * 1000;   // 4h cooldown
+var _SHADOW_BACKFILL_BOOT = 90 * 1000;          // 90s after page load
+var _SHADOW_BACKFILL_LOOP = 4 * 3600 * 1000;    // re-check cadence
+
+function _shadowHasPending() {
+  var dayMs = 86400000;
+  var nowMs = Date.now();
+  function _pending(arr){
+    return arr.some(function(e){
+      if (!e || !e.ts) return false;
+      var age = (nowMs - e.ts) / dayMs;
+      return (age >= 1 && e.fwd1d == null) ||
+             (age >= 3 && e.fwd3d == null) ||
+             (age >= 5 && e.fwd5d == null);
+    });
+  }
+  try {
+    var contracts = JSON.parse(localStorage.getItem(_SHADOW_KEY) || '[]') || [];
+    if (_pending(contracts)) return true;
+  } catch(_){}
+  try {
+    var scans = JSON.parse(localStorage.getItem(_SHADOW_SCAN_KEY) || '[]') || [];
+    if (_pending(scans)) return true;
+  } catch(_){}
+  return false;
+}
+
+async function runShadowBookBackfill(opts) {
+  opts = opts || {};
+  var force = !!opts.force;
+  if (!force) {
+    try {
+      var lastTs = parseInt(localStorage.getItem(_SHADOW_BACKFILL_KEY) || '0', 10);
+      if (lastTs && (Date.now() - lastTs) < _SHADOW_BACKFILL_MIN) {
+        return { skipped: true, reason: 'cooldown', lastTs: lastTs };
+      }
+    } catch(_){}
+  }
+  if (!_shadowHasPending()) {
+    return { skipped: true, reason: 'no pending entries' };
+  }
+  var creds = (typeof getTradierCreds === 'function') ? getTradierCreds() : null;
+  if (!creds) {
+    return { skipped: true, reason: 'no Tradier creds' };
+  }
+  var out = { contracts: null, scans: null, ts: Date.now() };
+  try { out.contracts = await _shadowRefreshForward(); } catch(e){ out.contracts = { error: e && e.message }; }
+  try { out.scans     = await _shadowRefreshScanForward(); } catch(e){ out.scans     = { error: e && e.message }; }
+  try { localStorage.setItem(_SHADOW_BACKFILL_KEY, String(out.ts)); } catch(_){}
+  var summary = '[shadow-backfill] contracts updated '+(out.contracts && out.contracts.updated || 0)
+              + ', scans updated '+(out.scans && out.scans.updated || 0);
+  console.log(summary, out);
+  // Visible signal only when something actually changed — silent otherwise.
+  var anyUpdated = ((out.contracts && out.contracts.updated) || 0) + ((out.scans && out.scans.updated) || 0);
+  if (anyUpdated > 0 && typeof addAlert === 'function'){
+    try { addAlert('SYS', 'Shadow book backfilled '+anyUpdated+' forward-return field(s)', 'go'); } catch(_){}
+  }
+  return out;
+}
+window.runShadowBookBackfill = runShadowBookBackfill;
+
+(function _scheduleShadowBackfill(){
+  function _kick(){
+    setTimeout(function(){
+      try { runShadowBookBackfill(); } catch(_){}
+      setInterval(function(){ try { runShadowBookBackfill(); } catch(_){} }, _SHADOW_BACKFILL_LOOP);
+    }, _SHADOW_BACKFILL_BOOT);
+  }
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', _kick, { once: true });
+  } else {
+    _kick();
+  }
+})();
+
 // Aggregate shadow-book stats — exposed for UI / console inspection.
 // ═══════════════════════════════════════════════════════════════════════════
 //  LOCALSTORAGE QUOTA RECOVERY — auto-purge older entries when full
@@ -27447,7 +27538,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.18.35-bg-enrich-honest-count';
+var APP_VERSION = '2.18.36-shadow-fwd-scheduler';
 // v2.18.21: DEFAULT feedback webhook. Every visitor's "Submit Feedback"
 // form posts here (unless they've overridden via ALERTS → Feedback
 // Webhook). The URL points to a Google Apps Script Web App owned by
@@ -34040,6 +34131,24 @@ window.addEventListener('DOMContentLoaded',init);
         if(!synthRows.length) return true;  // live data path, nothing to verify
         var stamped = synthRows.filter(function(r){ return r._synthSrc === 'simQuote'; }).length;
         return stamped === synthRows.length ? true : (stamped > 0 ? 'warn' : false);
+      } catch(_){ return 'n/a'; }
+    }},
+    { tab:'sc', label:'Shadow-book fwd-returns being populated (PR #38)', sev:'info', fn:function(){
+      // Background backfill should fill fwd1d for any entry older than 24h.
+      // If we have 5+ entries old enough but zero fwd1d, the scheduler is
+      // broken (or has been broken since some entries were logged). 'warn'
+      // when we have eligible entries but coverage < 50%.
+      try {
+        var arr = JSON.parse(localStorage.getItem('rrjcar_shadow_scan_v1') || '[]') || [];
+        var dayMs = 86400000;
+        var nowMs = Date.now();
+        var eligible = arr.filter(function(e){ return e && e.ts && ((nowMs - e.ts) / dayMs) >= 1; });
+        if (eligible.length < 5) return 'n/a';
+        var filled = eligible.filter(function(e){ return e.fwd1d != null; }).length;
+        var pct = filled / eligible.length;
+        if (pct >= 0.5) return true;
+        if (pct > 0) return 'warn';
+        return false;
       } catch(_){ return 'n/a'; }
     }},
     { tab:'sc', label:'bg-enrich accounting balances (PR #37)', sev:'info', fn:function(){
