@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-13T04:45-fab-swap-feedback-left">
+<meta name="op-build" content="2026-05-13T05:00-fab-align-bp-bottom">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -270,9 +270,11 @@ a{color:var(--blu);text-decoration:none;}
 .feedback-fab{right:auto;left:14px;}
 /* v2.18.38: $ BP peek is now the bottom-right corner FAB (was previously
    stacked above ✉). Inline right:14px stays in the element's style;
-   here we just place its bottom. Mobile bumps via @media block below. */
-.bp-peek-fab{bottom:calc(20px + env(safe-area-inset-bottom));}
-.bp-peek-value{bottom:calc(20px + env(safe-area-inset-bottom));}
+   here we just place its bottom. Mobile bumps via @media block below.
+   v2.18.39: dropped env(safe-area-inset-bottom) so $ sits at the same
+   vertical level as the ✉ feedback FAB (which doesn't apply safe-area). */
+.bp-peek-fab{bottom:20px;}
+.bp-peek-value{bottom:20px;}
 /* GAP-1 fix 2026-05-09: BID/MID/ASK picker visible on every viewport,
    not just iPhone. Desktop SET BID/MID/ASK button trio hidden so the
    picker replaces them everywhere. */
@@ -310,9 +312,11 @@ a{color:var(--blu);text-decoration:none;}
   /* v2.18.38: ✉ feedback FAB moved to LEFT side on mobile too. */
   .feedback-fab{right: auto !important; left: 10px !important;}
   /* v2.18.38: $ BP peek now occupies the bottom-right corner on mobile
-     (was previously stacked above ✉ at bottom:108px). */
-  .bp-peek-fab{bottom: calc(62px + env(safe-area-inset-bottom)) !important; right:10px !important;}
-  .bp-peek-value{bottom: calc(62px + env(safe-area-inset-bottom)) !important; right:50px !important;}
+     (was previously stacked above ✉ at bottom:108px).
+     v2.18.39: dropped env(safe-area-inset-bottom) so $ matches ✉'s
+     bottom anchor exactly (was sitting ~34px higher on iPhone). */
+  .bp-peek-fab{bottom: 62px !important; right:10px !important;}
+  .bp-peek-value{bottom: 62px !important; right:50px !important;}
   /* On the order tab, the swipe-to-submit fixed bar sits ~82px from the
      bottom — lift any bottom-edge FAB above it. v2.18.38 adds
      .bp-peek-fab to the rule since it now sits at bottom:62px (was
@@ -27556,7 +27560,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.18.38-fab-swap-feedback-left';
+var APP_VERSION = '2.18.39-fab-align-bp-bottom';
 // v2.18.21: DEFAULT feedback webhook. Every visitor's "Submit Feedback"
 // form posts here (unless they've overridden via ALERTS → Feedback
 // Webhook). The URL points to a Google Apps Script Web App owned by
