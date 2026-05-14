@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-13T03:30-pos-stale-quote">
+<meta name="op-build" content="2026-05-13T03:45-tradier-429-cause">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -7067,6 +7067,7 @@ window._fmpDead = 0;              // timestamp when circuit tripped; 0 = closed
 window._FMP_CIRCUIT_RESET_MS = 30 * 60 * 1000;   // 30 min auto-reset
 window._fmpDeadToastShown = false;
 window._fmpRateLimited = 0;       // timestamp when 429 was hit; 0 = not limited
+window._tradierRateLimited = 0;   // PR #36: Tradier 429 timestamp; consumers compare to Date.now() to know how recent
 window._fmpRateLimitLogs = 0;     // suppress log spam after a few
 window._fmpQueue = [];
 window._fmpActive = 0;
@@ -18538,6 +18539,15 @@ async function fetchDynamicUniverse(key, mode){
         },
         body: 'symbols=' + encodeURIComponent(symbols) + '&greeks=false'
       });
+      // PR #36: distinguish 429 (transient — Tradier rate limit hit) from
+      // other failure modes (network blip, malformed body). Without this
+      // the caller toasts a generic 'Screener failed — using static
+      // universe' which is indistinguishable from no-API-key.
+      if (resp.status === 429) {
+        window._tradierRateLimited = Date.now();
+        console.warn('[scan] Pass 1 batch '+(b+1)+' got 429 from Tradier');
+        continue;
+      }
       var data = await resp.json();
       var q = data.quotes && data.quotes.quote;
       if(q){
@@ -18571,6 +18581,11 @@ async function fetchDynamicUniverse(key, mode){
           },
           body: 'symbols=' + encodeURIComponent(rsymbols) + '&greeks=false'
         });
+        if (rresp.status === 429) {
+          window._tradierRateLimited = Date.now();
+          console.warn('[scan] Pass 2 retry '+(r+1)+' got 429 from Tradier');
+          continue;
+        }
         var rdata = await rresp.json();
         var rq = rdata.quotes && rdata.quotes.quote;
         if(rq){
@@ -18794,16 +18809,29 @@ async function runScan(opts){
   setScanProgress(5, 'Contacting Tradier screener...');
   fetchDynamicUniverse(key, mode).then(function(screened){
     if(!screened || screened.length === 0){
-      // Screener failed \u2014 fall back to static universe
-      toast('\u26a0 Screener failed \u2014 using static universe');
-      eid('sc-universe-label').textContent = 'STATIC FALLBACK (' + UNIVERSE.length + ' tickers)';
+      // PR #36: distinguish a 429 rate-limit fallback from a generic
+      // screener failure. Both show the same "Screener failed" toast
+      // historically \u2014 user couldn't tell whether to retry in 60s
+      // (transient 429) or check their API key (real failure).
+      var _rlAgeMs = window._tradierRateLimited ? (Date.now() - window._tradierRateLimited) : Infinity;
+      var _rlRecent = _rlAgeMs < 60000;
+      if (_rlRecent){
+        toast('\u26a0 Tradier rate-limited (429) \u2014 retry in ~60s. Showing simulated data meanwhile.');
+        addAlert('SYS', 'Scan hit Tradier 429 \u2014 simulated fallback (retry in 60s). Auto-trader paused on synthetic rows by PR #30 gate.', 'warn');
+        eid('sc-universe-label').textContent = 'RATE-LIMITED (Tradier 429) \u2014 simulated';
+      } else {
+        toast('\u26a0 Screener failed \u2014 using static universe');
+        addAlert('SYS', 'Screener returned 0 tickers (not rate-limited) \u2014 check Tradier key or sandbox mode', 'warn');
+        eid('sc-universe-label').textContent = 'STATIC FALLBACK (' + UNIVERSE.length + ' tickers)';
+      }
       G.results = [];
       UNIVERSE.forEach(function(u){
         var q = simQuote(u.t), ind = simInd(u.t, q.price), opt = simOpt(q.price), sc2 = scoreIt(u.t, ind, opt);
         G.results.push({ticker:u.t, sector:u.s, price:q.price, change:q.change, changePct:q.changePct,
           volume:q.volume, ind:ind, opt:opt, score:sc2.score, isGo:sc2.isGo,
           filtersPass:sc2.filtersPass, rules:sc2.rules, passes:sc2.passes,
-          _synth:true, _synthSrc:'simQuote'});  // PR #31: screener-failed fallback is still sim data
+          _synth:true, _synthSrc:'simQuote',
+          _synthCause:(_rlRecent ? 'tradier-429' : 'screener-empty')});  // PR #36: cause attribution
       });
       finishScan();
       return;
@@ -27380,7 +27408,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.18.33-pos-stale-quote';
+var APP_VERSION = '2.18.34-tradier-429-cause';
 // v2.18.21: DEFAULT feedback webhook. Every visitor's "Submit Feedback"
 // form posts here (unless they've overridden via ALERTS → Feedback
 // Webhook). The URL points to a Google Apps Script Web App owned by
@@ -33974,6 +34002,19 @@ window.addEventListener('DOMContentLoaded',init);
         var stamped = synthRows.filter(function(r){ return r._synthSrc === 'simQuote'; }).length;
         return stamped === synthRows.length ? true : (stamped > 0 ? 'warn' : false);
       } catch(_){ return 'n/a'; }
+    }},
+    { tab:'sc', label:'No recent Tradier 429 (PR #36)', sev:'important', fn:function(){
+      // Surface Tradier rate-limit hits. window._tradierRateLimited is
+      // stamped by fetchDynamicUniverse when any batch returns 429; recent
+      // means the user's last scan fell back to simulated data. 'warn'
+      // when stale (>5min) — the fallback is correct but worth noting in
+      // case it correlates with sustained API stress.
+      var ts = window._tradierRateLimited || 0;
+      if (!ts) return true;
+      var ageMs = Date.now() - ts;
+      if (ageMs < 60000) return false;          // within last minute → recent fallback
+      if (ageMs < 5*60000) return 'warn';        // within last 5 min → likely visible to user
+      return true;                                // older than 5 min → resolved
     }},
     { tab:'hdr', label:'Sandbox banner reflects key state', sev:'info', fn:function(){
       var el = $('hdr-sandbox'); if(!el) return 'n/a';
