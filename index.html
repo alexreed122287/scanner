@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-13T03:45-tradier-429-cause">
+<meta name="op-build" content="2026-05-13T04:00-bg-enrich-honest-count">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -14803,6 +14803,12 @@ window._bgEnrich = window._bgEnrich || {
   cursor: 0,
   total: 0,
   enriched: 0,
+  // PR #37: separately track outcomes so the badge stops claiming N/N when
+  // most fetches actually failed. cursor === enriched + failed + skippedDone
+  // (where skippedDone counts queue entries that were already indEnriched at
+  // tick time, e.g. user clicked their detail row mid-pass).
+  failed: 0,
+  skippedDone: 0,
   intervalId: null,
   startedAt: 0,
 };
@@ -14827,6 +14833,8 @@ function _startBgEnrichment() {
   window._bgEnrich.cursor = 0;
   window._bgEnrich.total = queue.length;
   window._bgEnrich.enriched = 0;
+  window._bgEnrich.failed = 0;          // PR #37
+  window._bgEnrich.skippedDone = 0;     // PR #37
   window._bgEnrich.startedAt = Date.now();
   window._bgEnrich.queue = queue;
   console.log('[bg-enrich] starting — '+queue.length+' tickers queued (rank 61-'+_BG_ENRICH_MAX_RANK+')');
@@ -14839,7 +14847,13 @@ async function _bgEnrichTick() {
   if (!st.active || st.paused) return;
   if (st.cursor >= st.queue.length) { _stopBgEnrichment('completed'); return; }
   var r = st.queue[st.cursor++];
-  if (r.indEnriched) { return; } // double-check before fetching (e.g., user clicked detail meanwhile)
+  if (r.indEnriched) {
+    // PR #37: cursor still advances (so we stop at total) but this isn't
+    // a fresh enrichment. Track separately so the badge tooltip can show
+    // an accurate breakdown.
+    st.skippedDone++;
+    return;
+  }
   try {
     var days = await fetchIndicatorHistory(r.ticker);
     if (days && days.length >= 100) {
@@ -14856,13 +14870,25 @@ async function _bgEnrichTick() {
         r.rules = newScore.rules;
         r.passes = newScore.passes;
       } catch(e) { /* per-ticker score failure is non-fatal */ }
+    } else {
+      // PR #37: short response (rate-limit-degraded, sandbox stub, IPO with
+      // no history yet, null from fetchIndicatorHistory's catch). The badge
+      // used to silently treat this as "still attempted" without surfacing
+      // — user saw ENRICH 140/140 even when only ~half actually landed in
+      // G_HIST_CACHE.
+      st.failed++;
+      console.warn('[bg-enrich] '+r.ticker+' produced '+(days ? days.length : 'no')+' bars — counted as failure');
     }
   } catch (e) {
+    // PR #37: every error path counts as a failure so the totals balance.
+    st.failed++;
     // Rate-limit hit (429) or network — pause for 60s then resume
     if (e && /429|rate|limit/i.test(String(e.message || e))) {
       console.warn('[bg-enrich] rate-limit hit, pausing 60s');
       st.paused = true;
       setTimeout(function(){ st.paused = false; }, 60000);
+    } else {
+      console.warn('[bg-enrich] '+r.ticker+' threw: '+(e && e.message || e));
     }
   }
   _renderBgEnrichBadge();
@@ -14883,7 +14909,11 @@ function _stopBgEnrichment(reason) {
   var st = window._bgEnrich;
   if (st.intervalId) { clearInterval(st.intervalId); st.intervalId = null; }
   var elapsedSec = (st.startedAt && st.startedAt > 0) ? Math.round((Date.now()-st.startedAt)/1000) : 0;
-  console.log('[bg-enrich] stopped ('+reason+') — enriched '+st.enriched+'/'+st.total+' in '+elapsedSec+'s');
+  // PR #37: include failed + skipped counts in the completion log so
+  // discrepancies between the badge and G_HIST_CACHE size are debuggable.
+  console.log('[bg-enrich] stopped ('+reason+') — enriched '+st.enriched+
+              ', failed '+st.failed+', skipped(already-done) '+st.skippedDone+
+              ', of '+st.total+' queued in '+elapsedSec+'s');
   st.active = false;
   // Final re-sort + render
   try {
@@ -14919,10 +14949,19 @@ function _renderBgEnrichBadge() {
     return;
   }
   el.style.display = 'inline-flex';
-  el.textContent = (st.paused ? '⏸' : '↻') + ' ENRICH ' + st.enriched + '/' + st.total;
-  el.title = 'Background enrichment of tickers ranked 61–'+_BG_ENRICH_MAX_RANK+
-             '. ' + (st.paused ? 'Paused (rate limit or scan in progress).' :
-                                  'Fetching ~30 tickers/min so the new evidence-based rules can score them.');
+  // PR #37: badge text shows the honest count of enriched fetches. When
+  // failures > 0 we append "·Nf" so the user can see the gap between attempts
+  // and actual cache fills (which was the source of the "200/200 but
+  // G_HIST_CACHE has 80" misleading-progress bug).
+  var failTag = (st.failed > 0) ? ' · '+st.failed+'f' : '';
+  el.textContent = (st.paused ? '⏸' : '↻') + ' ENRICH ' + st.enriched + '/' + st.total + failTag;
+  el.title = 'Background enrichment of tickers ranked 61–'+_BG_ENRICH_MAX_RANK+'.'
+           + '\n  enriched (in G_HIST_CACHE): '+st.enriched
+           + '\n  failed (no bars / rate-limit / short response): '+st.failed
+           + '\n  already-done at tick time: '+st.skippedDone
+           + '\n  total queued: '+st.total
+           + '\n\n' + (st.paused ? 'Paused (rate limit or scan in progress).' :
+                                    'Fetching ~30 tickers/min so the new evidence-based rules can score them.');
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -27408,7 +27447,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.18.34-tradier-429-cause';
+var APP_VERSION = '2.18.35-bg-enrich-honest-count';
 // v2.18.21: DEFAULT feedback webhook. Every visitor's "Submit Feedback"
 // form posts here (unless they've overridden via ALERTS → Feedback
 // Webhook). The URL points to a Google Apps Script Web App owned by
@@ -34002,6 +34041,19 @@ window.addEventListener('DOMContentLoaded',init);
         var stamped = synthRows.filter(function(r){ return r._synthSrc === 'simQuote'; }).length;
         return stamped === synthRows.length ? true : (stamped > 0 ? 'warn' : false);
       } catch(_){ return 'n/a'; }
+    }},
+    { tab:'sc', label:'bg-enrich accounting balances (PR #37)', sev:'info', fn:function(){
+      // After bg-enrich completes, cursor === enriched + failed + skippedDone.
+      // If those don't add up, a future refactor has introduced an untracked
+      // exit path (e.g. a `return` inside the tick without bumping a counter).
+      var st = window._bgEnrich;
+      if (!st || (!st.active && st.cursor === 0)) return 'n/a';
+      var accounted = (st.enriched||0) + (st.failed||0) + (st.skippedDone||0);
+      if (accounted === st.cursor) return true;
+      // While running, a tick in-flight can put us off-by-one briefly. Only
+      // fail when stopped AND off by more than 1.
+      if (st.active && Math.abs(accounted - st.cursor) <= 1) return 'warn';
+      return false;
     }},
     { tab:'sc', label:'No recent Tradier 429 (PR #36)', sev:'important', fn:function(){
       // Surface Tradier rate-limit hits. window._tradierRateLimited is
