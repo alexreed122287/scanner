@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="2026-05-13T04:30-quota-ui-signal">
+<meta name="op-build" content="2026-05-13T04:45-fab-swap-feedback-left">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -263,11 +263,16 @@ a{color:var(--blu);text-decoration:none;}
    per-tab HOW TO modal via openHelpFor(). Mobile positioning shifts
    above the bot-nav (see @media block further down). */
 .help-fab{position:fixed;top:auto;bottom:20px;right:14px;z-index:7000;background:rgba(0,212,255,.10);border:1px solid var(--amb);color:var(--amb);font-family:var(--ff-mono);font-size:18px;font-weight:700;line-height:1;width:36px;height:36px;padding:0;border-radius:50%;cursor:pointer;text-transform:none;letter-spacing:0;backdrop-filter:blur(2px);display:flex;align-items:center;justify-content:center;opacity:0.7;}
-/* v2.18.22: $ BP peek stacked above ✉ feedback FAB. Bottom value tracks
-   the ✉ FAB's CSS bottom + 36px height + 10px gap. Mobile bumps via the
-   @media (max-width:768px) block below. */
-.bp-peek-fab{bottom:calc(66px + env(safe-area-inset-bottom));}
-.bp-peek-value{bottom:calc(66px + env(safe-area-inset-bottom));}
+/* v2.18.38: ✉ feedback FAB moved to LEFT side per user spec, $ BP peek
+   takes the bottom-right slot it vacated. The .feedback-fab override
+   wins over .help-fab's right:14px via specificity (both classes on
+   the same element). */
+.feedback-fab{right:auto;left:14px;}
+/* v2.18.38: $ BP peek is now the bottom-right corner FAB (was previously
+   stacked above ✉). Inline right:14px stays in the element's style;
+   here we just place its bottom. Mobile bumps via @media block below. */
+.bp-peek-fab{bottom:calc(20px + env(safe-area-inset-bottom));}
+.bp-peek-value{bottom:calc(20px + env(safe-area-inset-bottom));}
 /* GAP-1 fix 2026-05-09: BID/MID/ASK picker visible on every viewport,
    not just iPhone. Desktop SET BID/MID/ASK button trio hidden so the
    picker replaces them everywhere. */
@@ -302,16 +307,24 @@ a{color:var(--blu);text-decoration:none;}
     bottom: 62px !important;
     right: 10px !important;
   }
-  /* v2.18.22: ? FAB is hidden; the ✉ feedback FAB now occupies the
-     bottom-right slot directly (no horizontal offset needed). */
-  /* $ BP peek stacks above the ✉ FAB on mobile too — ✉ at bottom:62px
-     + 36px height + 10px gap = 108px. */
-  .bp-peek-fab{bottom: calc(108px + env(safe-area-inset-bottom)) !important; right:10px !important;}
-  .bp-peek-value{bottom: calc(108px + env(safe-area-inset-bottom)) !important; right:50px !important;}
+  /* v2.18.38: ✉ feedback FAB moved to LEFT side on mobile too. */
+  .feedback-fab{right: auto !important; left: 10px !important;}
+  /* v2.18.38: $ BP peek now occupies the bottom-right corner on mobile
+     (was previously stacked above ✉ at bottom:108px). */
+  .bp-peek-fab{bottom: calc(62px + env(safe-area-inset-bottom)) !important; right:10px !important;}
+  .bp-peek-value{bottom: calc(62px + env(safe-area-inset-bottom)) !important; right:50px !important;}
   /* On the order tab, the swipe-to-submit fixed bar sits ~82px from the
-     bottom — lift the fab above it. */
+     bottom — lift any bottom-edge FAB above it. v2.18.38 adds
+     .bp-peek-fab to the rule since it now sits at bottom:62px (was
+     108px and clear of the bar). */
   #tab-order.active ~ .help-fab,
-  body:has(#tab-order.active) .help-fab{
+  body:has(#tab-order.active) .help-fab,
+  #tab-order.active ~ .bp-peek-fab,
+  body:has(#tab-order.active) .bp-peek-fab{
+    bottom: 130px !important;
+  }
+  #tab-order.active ~ .bp-peek-value,
+  body:has(#tab-order.active) .bp-peek-value{
     bottom: 130px !important;
   }
 }
@@ -5731,13 +5744,14 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
      Legacy button kept (hidden, no-op) so _updateHelpFab() and
      openHelpFor() callsites elsewhere don't NPE. -->
 <button class="help-fab" id="help-fab-btn" onclick="openHelpFor()" style="display:none !important;">?</button>
-<!-- ✉ feedback FAB now occupies the bottom-right corner (was previously
-     offset to the left of the ? button). Posts to the configured Google
-     Apps Script webhook — see feedback/README.md. -->
+<!-- v2.18.38: ✉ feedback FAB moved to LEFT side per user spec — the $ BP
+     peek now occupies the bottom-RIGHT corner (was previously stacked
+     above ✉). Posts to the configured Google Apps Script webhook —
+     see feedback/README.md. -->
 <button class="help-fab feedback-fab" id="feedback-fab-btn" onclick="openFeedbackModal()" title="Submit feedback or a change request — saves to your shared Google Sheet" style="display:flex;">&#9993;</button>
-<!-- v2.18.28: $ BP peek — moved to global scope so every tab gets the
-     press-and-hold quick-look at buying power. Positioned via CSS
-     class .bp-peek-fab which stacks it ABOVE the ✉ feedback FAB. -->
+<!-- v2.18.38: $ BP peek now the bottom-RIGHT corner FAB (was stacked
+     above ✉ at bottom:66px). Positioned via .bp-peek-fab CSS class
+     (bottom:20px+safe-area). Inline right:14px is the horizontal anchor. -->
 <div id="sc-bp-peek" class="bp-peek-fab" onpointerdown="_bpPeekStart(event)" onpointerup="_bpPeekEnd()" onpointerleave="_bpPeekEnd()" onpointercancel="_bpPeekEnd()" oncontextmenu="event.preventDefault();return false;" title="Press and hold to see Buying Power" style="position:fixed;right:14px;z-index:80;width:34px;height:34px;border-radius:50%;background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.30);color:var(--ambb);font-family:var(--ff-mono);font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;touch-action:none;opacity:0.55;transition:opacity .15s;">$</div>
 <div id="sc-bp-peek-value" class="bp-peek-value" style="display:none;position:fixed;right:54px;z-index:81;background:var(--bg1);border:1px solid var(--ambb);border-radius:6px;padding:8px 12px;font-family:var(--ff-mono);font-size:12px;font-weight:700;letter-spacing:.5px;color:var(--grn);box-shadow:0 0 18px rgba(0,212,255,0.35);white-space:nowrap;pointer-events:none;"></div>
 <script>
@@ -27542,7 +27556,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = '2.18.37-quota-ui-signal';
+var APP_VERSION = '2.18.38-fab-swap-feedback-left';
 // v2.18.21: DEFAULT feedback webhook. Every visitor's "Submit Feedback"
 // form posts here (unless they've overridden via ALERTS → Feedback
 // Webhook). The URL points to a Google Apps Script Web App owned by
