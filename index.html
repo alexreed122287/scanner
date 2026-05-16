@@ -7950,7 +7950,7 @@ var UNIVERSE=[
   {t:'NEE',s:'Utilities'},{t:'DUK',s:'Utilities'}
 ];
 var G={results:[],filtered:[],gexData:[],wlTickers:[],positions:[],alerts:[],
-  sortCol:'score',sortDir:-1,selTicker:null,scanRunning:false,acctId:'',detailOpt:null,
+  sortCol:null,sortDir:-1,selTicker:null,scanRunning:false,acctId:'',detailOpt:null,
   liveQuote:null,stepFillActive:false,stepFillCancel:false,quoteRefreshTimer:null,
   tsActive:false,tsTimer:null,tsState:{},tsTriggered:{},tsConfig:{},posRefreshTimer:null,
   selectedSectors:(function(){try{var s=JSON.parse(localStorage.getItem('rrjcar_sel_sectors')||'[]');return new Set(s);}catch(e){return new Set();}}()),
@@ -8704,12 +8704,11 @@ function reclassifyGoThreshold(){
   thresh = regimeAdjustedThreshold(thresh);
   if(!G.results || !G.results.length) return;
   G.results.forEach(function(r){
-    var avoidBad = false;
-    if(r.rules){
-      // Re-evaluate the avoid condition from the rule scorecard — a rule with
-      // negative points that passed means a red flag was detected.
-      if(Array.isArray(r.rules)) r.rules.forEach(function(rl){ if(rl.pass && rl.pts && rl.pts < 0) avoidBad = true; });
-    }
+    // Match scoreIt's avoidBad: only the AVOID list is a hard GO block.
+    // The old rules-scanning check (rl.pass && rl.pts < 0) was inverted —
+    // penalty rules use pass:false when the bad condition is active, so the
+    // guard fired on intact-trend tickers and blocked them from GO.
+    var avoidBad = (typeof AVOID !== 'undefined' && AVOID.indexOf(r.ticker) >= 0);
     r.isGo = (r.score >= thresh) && !avoidBad;
   });
   // Recompute stats bar and re-filter results
@@ -15014,7 +15013,7 @@ async function _bgEnrichTick() {
   // Re-render scan results table every 10 enrichments so the user sees
   // updated scores without a full refresh storm.
   if (st.enriched > 0 && st.enriched % 10 === 0) {
-    try { G.results.sort(_resultRankCompare); G.filtered = excludedFilteredResults(); renderBuySig(); renderScan(); } catch(_){}
+    try { G.results.sort(_resultRankCompare); G.filtered = excludedFilteredResults(); _reapplySort(); renderBuySig(); renderScan(); } catch(_){}
   }
   // 2026-05-12 v2.18.16: refresh the data-status chip as the
   // background pass cures Tradier history gaps. Previously the chip
@@ -15038,6 +15037,7 @@ function _stopBgEnrichment(reason) {
   try {
     G.results.sort(_resultRankCompare);
     G.filtered = excludedFilteredResults();
+    _reapplySort();
     renderBuySig();
     renderScan();
   } catch(_){}
@@ -16437,6 +16437,24 @@ function scoreIt(ticker, ind, opt){
     var tfLive = calcTfAligned(_hist);
     if(typeof tfLive === 'number') ind.tf = tfLive;
   }
+  // Compute 21-day relative strength vs SPY when both histories are available.
+  // relStr21d was read in the RS rule but never populated, so the rule always
+  // fell back to relStr5d (today's changePct delta vs SPY). The 21d window is
+  // a better signal per Jegadeesh-Titman intermediate-momentum literature.
+  // SPY history is populated by the live scan enrichment path (SPY is always
+  // injected into fetchDynamicUniverse's universe at line ~18751).
+  if (_hist && _hist.length >= 22 && ticker !== 'SPY') {
+    try {
+      var _spyH = (typeof G_HIST_CACHE !== 'undefined' && G_HIST_CACHE['SPY'])
+               || (typeof loadHistCache === 'function' && loadHistCache('SPY'))
+               || null;
+      if (_spyH && _spyH.length >= 22) {
+        var _t21 = (_hist[_hist.length-1].close - _hist[_hist.length-22].close) / _hist[_hist.length-22].close * 100;
+        var _s21 = (_spyH[_spyH.length-1].close - _spyH[_spyH.length-22].close) / _spyH[_spyH.length-22].close * 100;
+        ind.relStr21d = +(_t21 - _s21).toFixed(2);
+      }
+    } catch(_){}
+  }
 
   var macdOk   = ind.macd > 0;
   var adxOk    = ind.adx > 25;                                                     // confirmed trend
@@ -16793,7 +16811,12 @@ function scoreIt(ticker, ind, opt){
       ? '$'+fmt2(ind.price)+' > EMA50 (trend intact)'
       : 'Awaiting data';
   if (brokenTrend) { score -= 5; techScore -= 5; }
-  res.push({n:'Broken Trend (penalty)', pass:!brokenTrend, val:brokenTrendVal, filter:false, pts:-5, isPenalty:true});
+  // pts:0 — the -5 is applied directly above (not via the pass-based pts
+  // accumulation). Keeping pts:-5 here was including -5 in sumPassPts for
+  // intact-trend tickers (pass:true), making score - sumPassPts = +5 across
+  // 83% of the universe. The score itself was always correct; only the pts
+  // metadata was wrong.
+  res.push({n:'Broken Trend (penalty)', pass:!brokenTrend, val:brokenTrendVal, filter:false, pts:0, isPenalty:true});
 
   // \u2500\u2500 GO DECISION \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
   // Score cap raised: 144 base + 8 GEX (was 6) + 8 sector (was 5) +
@@ -18577,10 +18600,8 @@ function _matchesPreset(r, filters){
   // "this row's score clears the preset's OWN minScore", which is the
   // strategy-specific GO definition. avoidBad red-flag check still uses
   // r.rules so we don't count tickers with a hit on a negative-points rule.
-  var avoidBad = false;
-  if (Array.isArray(r.rules)) r.rules.forEach(function(rl){
-    if (rl.pass && rl.pts && rl.pts < 0) avoidBad = true;
-  });
+  // Same fix as reclassifyGoThreshold: use AVOID list directly.
+  var avoidBad = (typeof AVOID !== 'undefined' && AVOID.indexOf(r.ticker) >= 0);
   var presetGo = (r.score >= (filters.minScore || 0)) && !avoidBad;
   if (filters.sig === 'GO' && !presetGo) return false;
   if (filters.sig === 'NO-GO' && presetGo) return false;
@@ -19542,7 +19563,8 @@ function finishScan(){
         // hover tooltips). Final guaranteed render fires from _maybeFinishScan.
         if(indDone % 25 === 0){
           G.results.sort(_resultRankCompare);
-          G.filtered = G.results.slice();
+          G.filtered = excludedFilteredResults();
+          _reapplySort();
           renderBuySig(); renderScan();
         }
         indDone++; _maybeFinishScan();
@@ -20116,6 +20138,18 @@ function copyExportModalText(){
   }catch(e){
     toast('Copy failed — select manually and press Cmd/Ctrl+C');
   }
+}
+
+// Re-apply G.sortCol/G.sortDir to G.filtered after any enrichment path resets
+// it via excludedFilteredResults(). Called from enrichment ticks so that a
+// user-clicked column sort survives background score updates.
+function _reapplySort(){
+  if(!G.sortCol || !G.filtered) return;
+  var col=G.sortCol, dir=G.sortDir;
+  G.filtered.sort(function(a,b){
+    if(col==='ticker'||col==='sector') return dir*(a[col]<b[col]?-1:a[col]>b[col]?1:0);
+    return dir*((a[col]||0)-(b[col]||0));
+  });
 }
 
 function sortTable(col){
