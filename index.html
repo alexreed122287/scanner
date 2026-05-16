@@ -16811,7 +16811,12 @@ function scoreIt(ticker, ind, opt){
       ? '$'+fmt2(ind.price)+' > EMA50 (trend intact)'
       : 'Awaiting data';
   if (brokenTrend) { score -= 5; techScore -= 5; }
-  res.push({n:'Broken Trend (penalty)', pass:!brokenTrend, val:brokenTrendVal, filter:false, pts:-5, isPenalty:true});
+  // pts:0 — the -5 is applied directly above (not via the pass-based pts
+  // accumulation). Keeping pts:-5 here was including -5 in sumPassPts for
+  // intact-trend tickers (pass:true), making score - sumPassPts = +5 across
+  // 83% of the universe. The score itself was always correct; only the pts
+  // metadata was wrong.
+  res.push({n:'Broken Trend (penalty)', pass:!brokenTrend, val:brokenTrendVal, filter:false, pts:0, isPenalty:true});
 
   // \u2500\u2500 GO DECISION \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
   // Score cap raised: 144 base + 8 GEX (was 6) + 8 sector (was 5) +
