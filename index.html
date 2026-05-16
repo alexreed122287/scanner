@@ -19494,6 +19494,16 @@ function finishScan(){
     setTimeout(_fmpNext, 500); // small delay so base scan renders first
   }
 
+  // Pre-fetch SPY history so relStr21d in scoreIt is active.
+  // SPY often ranks outside SC_ENRICH_LIMIT and never reaches the enrichment
+  // queue; without this, G_HIST_CACHE['SPY'] stays undefined and the 21-day
+  // RS computation added in the weekend fix is a no-op.
+  if (!G_HIST_CACHE['SPY']) {
+    fetchIndicatorHistory('SPY').then(function(days){
+      if (days) G_HIST_CACHE['SPY'] = days;
+    }).catch(function(){});
+  }
+
   // Sequential enrichment queue — one ticker at a time, no browser lockup.
   // Same SC_ENRICH_LIMIT (60) as the FMP queue. Comment used to say 200
   // — that was the legacy cap before the 2026-04-29 retune to 60.
