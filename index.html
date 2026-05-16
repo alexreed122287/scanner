@@ -26671,7 +26671,7 @@ var STRATEGY_MODES = {
     label: '\u25b2 PRE/POST MARKET',
     desc: 'Extended-hours gappers screened with the SAME filters as HIGH CONVICTION (PROVEN + Analyst \u2191 + GEX + JT 12-1 + Minervini), sorted by absolute gap %. Use any time the extended-hours session is active or on weekends.',
     filters: {sig:'GO', minScore:140, analyst:true, proven:true, gex:true,
-              jt12:true, minervini:true, _sortByGap:true}
+              jt12:true, minervini:true, _sortByGap:true, noEarn:false, noEarnDays:0}
   }
 };
 
@@ -26796,6 +26796,7 @@ function _renderProbePanel(innerHtml){
 }
 
 function applyStrategyMode(mode, silent){
+  try {
   if(mode === 'clear'){
     clearFilters();
     G.activePreset = null;
@@ -26808,11 +26809,16 @@ function applyStrategyMode(mode, silent){
   var sm = STRATEGY_MODES[mode];
   if(!sm) return;
   G.activePreset = mode;
+  document.querySelectorAll('button[onclick*="applyStrategyMode"]').forEach(function(b){
+    b.classList.toggle('blu', b.getAttribute('onclick').indexOf("'" + mode + "'") >= 0);
+  });
 
   // Apply signal and score filters. `||` was clobbering legitimate empty/zero
   // values from the preset (e.g. preMarket sets sig:'' and minScore:0).
   if(eid('sc-sig'))      eid('sc-sig').value      = (sm.filters.sig      !== undefined) ? sm.filters.sig      : 'GO';
   if(eid('sc-minscore')) eid('sc-minscore').value = (sm.filters.minScore !== undefined) ? sm.filters.minScore : 72;
+
+  var f = sm.filters;
 
   // Clear all indicator checkboxes first
   ['filt-analyst','filt-gex','filt-proven',
@@ -26833,7 +26839,6 @@ function applyStrategyMode(mode, silent){
   if (eid('filt-earn-days')) eid('filt-earn-days').value = String(defaultEarnDays);
 
   // Apply strategy-specific checkboxes
-  var f = sm.filters;
   if(f.analyst  && eid('filt-analyst'))  eid('filt-analyst').checked  = true;
   if(f.gex      && eid('filt-gex'))      eid('filt-gex').checked      = true;
   if(f.proven   && eid('filt-proven'))   eid('filt-proven').checked   = true;
@@ -26881,6 +26886,9 @@ function applyStrategyMode(mode, silent){
     // Auto-scan trigger removed 2026-05-02 per user spec: 'do not scan just
     // because i opened the scanner page or selected between strategies'.
     // The user clicks SCAN explicitly to fetch new data.
+  }
+  } catch(e) {
+    console.error('applyStrategyMode failed for mode', mode, e);
   }
 }
 
