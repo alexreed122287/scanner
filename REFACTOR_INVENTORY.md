@@ -93,6 +93,35 @@ When trend is **intact** (good): `brokenTrend=false` → `pass=true`, `pts=-5`. 
 
 ---
 
+## Bug A — Broken Trend penalty pts metadata inconsistency
+
+**Panda location:** `index.html:16796` — rule entry (after Bug A fix):
+```js
+res.push({n:'Broken Trend (penalty)', pass:!brokenTrend, val:brokenTrendVal, filter:false, pts:0, isPenalty:true});
+```
+The actual score deduction is applied inline above this line: `if(brokenTrend){ score-=5; techScore-=5; }`. The `pts` field is pure metadata used by audit/display code (e.g., `rules.filter(r=>r.pass).map(r=>r.pts).reduce(sum)`). Before the fix, `pts:-5` on the rule entry with `pass:true` for intact-trend tickers caused `sumPassPts` to undercount by 5 — making `score - sumPassPts = +5` for 83% of the universe. Score values were always correct; only the pts metadata was wrong.
+
+**RRJCAR cross-check:** No Broken Trend rule in rrjcar. Grepped for `isPenalty` — zero matches. The only score deduction in rrjcar is `score -= 15` for AVOID-listed tickers (inline at `index.html:2424`). No negative-pts rule entries exist. Bug A does not exist in rrjcar.
+
+**Shareable?** No — Panda-specific rule and pattern. Not a candidate for shared-core extraction.
+
+---
+
+## Bug B — SCORE ▼ default arrow on unsorted table
+
+**Panda location:** `index.html:7953` — `G` state init:
+```js
+// BEFORE: sortCol:'score',sortDir:-1
+// AFTER:  sortCol:null,sortDir:-1
+```
+`renderScan` reads `G.sortCol` to decide which header gets an arrow. Default `'score'` showed `▼` even though rows are ordered by `_resultRankCompare` (multi-tier: score → techScore → RS → theme → volume), not a flat score sort. Changed to `null` so no arrow shows until user explicitly clicks a column. A new `_reapplySort()` helper preserves user-applied sorts across bg-enrichment ticks that reset `G.filtered`.
+
+**RRJCAR cross-check:** `index.html:1267` — `var G={...,sortCol:'score',sortDir:-1,...}` — the same bug is present in rrjcar. The fix (change default to `sortCol:null`, add `_reapplySort()` after enrichment resets) applies directly. rrjcar's enrichment loop is simpler (no bg-enrich tick resetting G.filtered), so only the default needs to change.
+
+**Shareable?** Yes — the `sortCol:null` default fix is a one-line change applicable to rrjcar immediately. The `_reapplySort()` helper may not be needed in rrjcar if its enrichment path doesn't reset `G.filtered`.
+
+---
+
 ## Setup notes (Friday 2026-05-15)
 
 - Panda repo cloned to: `C:\Users\Ruiz Family Laptop\scanner`
