@@ -16341,7 +16341,7 @@ function scoreIt(ticker, ind, opt){
   var avoidBad = AVOID.indexOf(ticker) >= 0;
   var provenOk = PROVEN.indexOf(ticker) >= 0;
   if(avoidBad){ score -= 15; res.push({n:'AVOID ticker', pass:false, val:'-15pts', filter:false}); }
-  if(provenOk){ score += 8; techScore += 8; res.push({n:'PROVEN ticker', pass:true, val:'+8pts', filter:false}); }
+  if(provenOk){ score += 8; techScore += 8; res.push({n:'PROVEN ticker', pass:true, val:'+8pts', filter:false, pts:8}); }
 
   // \u2500\u2500 SECTION A: Technical Momentum (parameter-tuned 2026-04-29) \u2500\u2500\u2500\u2500\u2500\u2500
   // Council commit 2/3: existing rules tightened to evidence-based parameters
@@ -16799,6 +16799,12 @@ function scoreIt(ticker, ind, opt){
     }
   }
   res.push({n:'Strong Sector', pass:sectorOk, val:sectorVal, filter:false, pts:8, isTheme:true});
+  // Weak Sector penalty — separate entry so score - sumPassPts stays at 0 for
+  // demoted tickers. Strong Sector's pass stays false (correct — it didn't fire),
+  // so _RULE_TIERS.trend counting remains unaffected.
+  if (themeLive && (themeLive.combinedScore || 0) <= 25) {
+    res.push({n:'Weak Sector (penalty)', pass:true, val:sectorVal, filter:false, pts:-8, isTheme:true});
+  }
 
   // NEW Rule: Broken Trend (-5 penalty only) — explicit bearish-pattern flag
   // for long-calls-only. If price has fallen below EMA50, the medium-term
@@ -19492,6 +19498,16 @@ function finishScan(){
       setTimeout(_fmpNext, 250);
     }
     setTimeout(_fmpNext, 500); // small delay so base scan renders first
+  }
+
+  // Pre-fetch SPY history so relStr21d in scoreIt is active.
+  // SPY often ranks outside SC_ENRICH_LIMIT and never reaches the enrichment
+  // queue; without this, G_HIST_CACHE['SPY'] stays undefined and the 21-day
+  // RS computation added in the weekend fix is a no-op.
+  if (!G_HIST_CACHE['SPY']) {
+    fetchIndicatorHistory('SPY').then(function(days){
+      if (days) G_HIST_CACHE['SPY'] = days;
+    }).catch(function(){});
   }
 
   // Sequential enrichment queue — one ticker at a time, no browser lockup.
