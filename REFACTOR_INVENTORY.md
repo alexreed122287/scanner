@@ -122,6 +122,36 @@ The actual score deduction is applied inline above this line: `if(brokenTrend){ 
 
 ---
 
+## Fix 1 (followup) — SPY history pre-fetch to activate relStr21d
+
+**Panda location:** `index.html` — foreground enrichment setup in `runScan`. SPY is added to the dynamic screener universe (`index.html:18772`) but typically ranks outside `SC_ENRICH_LIMIT` (60), so `fetchIndicatorHistory('SPY')` was never called during a normal scan. `G_HIST_CACHE['SPY']` stayed `undefined`, making the `relStr21d` computation in `scoreIt` a no-op on every scan. Fix: fire-and-forget `fetchIndicatorHistory('SPY')` just before the enrichment queue starts (immediately after `fmpKey` resolution), independent of SPY's rank.
+
+**RRJCAR cross-check:** rrjcar has no `G_HIST_CACHE`, no `fetchIndicatorHistory`, and no `relStr21d` computation. SPY appears only as a sim-quote price seed (`baseMap.SPY`). Not applicable.
+
+**Shareable?** No — Panda-specific architecture (G_HIST_CACHE + relStr21d). When rrjcar adopts indicator history, this pattern should be carried over.
+
+---
+
+## Fix 2 (followup) — PROVEN ticker rule missing pts field
+
+**Panda location:** `index.html:16344` — before fix:
+```js
+if(provenOk){ score += 8; techScore += 8; res.push({n:'PROVEN ticker', pass:true, val:'+8pts', filter:false}); }
+```
+`pts` field absent → `undefined`. Score correctly adds +8 inline, but `rules.filter(r=>r.pass).map(r=>r.pts).reduce(sum)` contributes `NaN` (or 0 if guarded), leaving `score - sumPassPts = +8` for all 12 PROVEN tickers. Fix: add `pts:8` to the rule entry.
+
+Also fixed: **Weak Sector penalty** (`index.html:16801`). The Strong Sector rule applied `score -= 8` inline for `combo <= 25` but emitted `pass:false` on the rule entry, making the -8 invisible to the audit sum. Added a separate `{n:'Weak Sector (penalty)', pass:true, pts:-8}` entry so the deduction is accounted for. Strong Sector's `pass` remains `false` for demoted tickers, preserving `_RULE_TIERS.trend` conviction counting.
+
+**RRJCAR cross-check:** `index.html:2425` — same pattern:
+```js
+if(provenOk){ score += 8; techScore += 8; res.push({n:'PROVEN ticker', pass:true, val:'+8pts', filter:false}); }
+```
+Same missing `pts` field. rrjcar has no Strong Sector / Weak Sector rule, so no parallel for the sector penalty fix. PROVEN ticker fix is a one-line change applicable to rrjcar immediately.
+
+**Shareable?** Yes — PROVEN ticker `pts:8` fix is identical in both codebases. Strong Sector is Panda-only.
+
+---
+
 ## Setup notes (Friday 2026-05-15)
 
 - Panda repo cloned to: `C:\Users\Ruiz Family Laptop\scanner`
