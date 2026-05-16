@@ -26797,6 +26797,11 @@ function _renderProbePanel(innerHtml){
 
 function applyStrategyMode(mode, silent){
   try {
+  // Always clear blu from all preset buttons up front; the active mode (if any)
+  // will re-add it below. This ensures CLEAR also resets the highlight.
+  document.querySelectorAll('button[onclick*="applyStrategyMode"]').forEach(function(b){
+    b.classList.remove('blu');
+  });
   if(mode === 'clear'){
     clearFilters();
     G.activePreset = null;
@@ -26810,7 +26815,7 @@ function applyStrategyMode(mode, silent){
   if(!sm) return;
   G.activePreset = mode;
   document.querySelectorAll('button[onclick*="applyStrategyMode"]').forEach(function(b){
-    b.classList.toggle('blu', b.getAttribute('onclick').indexOf("'" + mode + "'") >= 0);
+    if(b.getAttribute('onclick').indexOf("'" + mode + "'") >= 0) b.classList.add('blu');
   });
 
   // Apply signal and score filters. `||` was clobbering legitimate empty/zero
