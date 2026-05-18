@@ -19106,6 +19106,16 @@ async function runScan(opts){
     G.results = [];
     var total = screened.length;
 
+    // FMP pre-warm: restore 24h-cached localStorage data into G_FMP_CACHE before scoring (Bug 2).
+    var __fmpPrewarmStart = performance.now();
+    screened.forEach(function(u){
+      if(!G_FMP_CACHE[u.t]){
+        var cached = loadFmpCache(u.t);
+        if(cached) G_FMP_CACHE[u.t] = cached;
+      }
+    });
+    console.log('[fmp-prewarm]', screened.length, 'tickers,', (performance.now() - __fmpPrewarmStart).toFixed(1) + 'ms');
+
     screened.forEach(function(u, idx){
       // Build indicators from what Tradier bulk quote already gave us
       // New v3.5 momentum quality fields included
