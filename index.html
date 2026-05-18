@@ -4356,6 +4356,7 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
         <button class="btn" style="font-size:11px;" onclick="applyStrategyMode('breakout')">&#9650; BREAKOUT</button>
         <button class="btn" style="font-size:11px;" onclick="applyStrategyMode('momentum')">&#9654; MOMENTUM</button>
         <button class="btn" style="font-size:11px;border-color:var(--grn);color:var(--grn);" onclick="applyStrategyMode('bestItmCalls')">&#9670; BEST ITM CALLS</button>
+        <button class="btn" style="font-size:11px;border-color:var(--ambb);color:var(--ambb);" onclick="applyStrategyMode('preMarket')">&#9650; PRE/POST MARKET</button>
         <button class="btn" style="font-size:11px;border-color:var(--gry2);color:var(--gry);" onclick="applyStrategyMode('clear')">CLEAR ALL</button>
       </div>
       <div id="strategy-desc" style="font-family:var(--ff-mono);font-size:10px;color:var(--gry);line-height:1.7;min-height:32px;"></div>
@@ -8110,8 +8111,9 @@ function _isWeekendET(date){
 // — only logs warnings, doesn't block anything.
 function _assertScanRuleNames(){
   var EXPECTED = [
-    'PROVEN ticker',
-    'AVOID ticker',
+    // PROVEN ticker and AVOID ticker intentionally omitted — they are
+    // whitelist-conditional and only fire for specific tickers. The SPY
+    // probe below would never emit them, causing a false-positive warning.
     'Analyst Revisions ↑',
     '52Wk Hi Prox <15%',
     'GEX Call Flow',
@@ -18861,7 +18863,16 @@ async function fetchDynamicUniverse(key, mode){
         );
         try {
           var fresp = await fetch(fmpBase + '/batch-quote-short?symbols=' + encodeURIComponent(fsymbols) + '&apikey=' + fmpKey);
-          var fdata = await fresp.json();
+          var ftext = await fresp.text();
+          // FMP returns the literal string "Restricted" (not JSON) for plan-gated
+          // endpoints. Detect non-JSON before parsing to avoid SyntaxError noise.
+          if (!ftext || (ftext[0] !== '{' && ftext[0] !== '[')) {
+            if (ftext && ftext.indexOf('Restricted') === 0) { /* expected — skip silently */ }
+            else { console.warn('[fmp] Pass 3 non-JSON response, first chars:', (ftext||'').slice(0,80)); }
+            continue;
+          }
+          var fdata;
+          try { fdata = JSON.parse(ftext); } catch(pe) { console.warn('[fmp] Pass 3 parse error:', pe.message.slice(0,60)); continue; }
           if(Array.isArray(fdata)){
             fdata.forEach(function(fq){
               if(!fq || !fq.symbol) return;
