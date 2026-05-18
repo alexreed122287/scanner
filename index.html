@@ -19658,9 +19658,9 @@ function finishScan(){
         var _gexCoverage = (G.gexData || []).length;
         var _gexExpected = Math.min(200, (G.results || []).filter(function(r){ return (r.score||0) >= 65; }).length);
         var _gexCoversEnough = _gexExpected > 0 && _gexCoverage >= _gexExpected * 0.5;
-        if (typeof _gexFreshWithin === 'function' && _gexFreshWithin(30) && _gexCoversEnough) {
-          console.log('[scan] GEX auto-trigger skipped \u2014 GEX data is <30min old and covers ' + _gexCoverage + '/' + _gexExpected + ' tickers');
-          try { addAlert('GEX', 'Auto-trigger skipped \u2014 GEX data is fresh (<30min, ' + _gexCoverage + ' tickers)', 'warn'); } catch(e){}
+        if (typeof _gexFreshWithin === 'function' && _gexFreshWithin(360) && _gexCoversEnough) {
+          console.log('[scan] GEX auto-trigger skipped \u2014 GEX data is <6h old and covers ' + _gexCoverage + '/' + _gexExpected + ' tickers');
+          try { addAlert('GEX', 'Auto-trigger skipped \u2014 GEX data is fresh (<6h, ' + _gexCoverage + ' tickers)', 'warn'); } catch(e){}
           return;
         }
         addAlert('GEX', 'Auto-refreshing GEX (score>=65 tickers, ~5s) after scan...', 'warn');
