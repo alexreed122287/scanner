@@ -8110,8 +8110,9 @@ function _isWeekendET(date){
 // — only logs warnings, doesn't block anything.
 function _assertScanRuleNames(){
   var EXPECTED = [
-    'PROVEN ticker',
-    'AVOID ticker',
+    // PROVEN ticker and AVOID ticker intentionally omitted — they are
+    // whitelist-conditional and only fire for specific tickers. The SPY
+    // probe below would never emit them, causing a false-positive warning.
     'Analyst Revisions ↑',
     '52Wk Hi Prox <15%',
     'GEX Call Flow',
