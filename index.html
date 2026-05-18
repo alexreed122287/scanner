@@ -19660,9 +19660,9 @@ function finishScan(){
         var _gexCoverage = (G.gexData || []).length;
         var _gexExpected = Math.min(200, (G.results || []).filter(function(r){ return (r.score||0) >= 65; }).length);
         var _gexCoversEnough = _gexExpected > 0 && _gexCoverage >= _gexExpected * 0.5;
-        if (typeof _gexFreshWithin === 'function' && _gexFreshWithin(30) && _gexCoversEnough) {
-          console.log('[scan] GEX auto-trigger skipped \u2014 GEX data is <30min old and covers ' + _gexCoverage + '/' + _gexExpected + ' tickers');
-          try { addAlert('GEX', 'Auto-trigger skipped \u2014 GEX data is fresh (<30min, ' + _gexCoverage + ' tickers)', 'warn'); } catch(e){}
+        if (typeof _gexFreshWithin === 'function' && _gexFreshWithin(360) && _gexCoversEnough) {
+          console.log('[scan] GEX auto-trigger skipped \u2014 GEX data is <6h old and covers ' + _gexCoverage + '/' + _gexExpected + ' tickers');
+          try { addAlert('GEX', 'Auto-trigger skipped \u2014 GEX data is fresh (<6h, ' + _gexCoverage + ' tickers)', 'warn'); } catch(e){}
           return;
         }
         addAlert('GEX', 'Auto-refreshing GEX (score>=65 tickers, ~5s) after scan...', 'warn');
@@ -21019,8 +21019,11 @@ function runGex(){
     return tradierFetch(host+'/v1/markets/options/expirations?symbol='+t+'&includeAllRoots=true', {
       headers:{Authorization:'Bearer '+key, Accept:'application/json'}
     }, 6*60*60*1000)
-    .then(function(r){return r.json();})
-    .then(function(d){
+    .then(function(r){ return r.text(); })
+    .then(function(text){
+      if (!text || (text[0] !== '{' && text[0] !== '[')) return {ticker:t, expiry:null};
+      var d;
+      try { d = JSON.parse(text); } catch(e) { return {ticker:t, expiry:null}; }
       var dates = [];
       try{ dates = d.expirations.date; if(!Array.isArray(dates)) dates=[dates]; }catch(e){}
       // Find nearest expiry in 25-50 calendar days (matches fetchOptionContract range)
@@ -21041,18 +21044,31 @@ function runGex(){
     return tradierFetch(host+'/v1/markets/options/chains?symbol='+e.ticker+'&expiration='+e.expiry.date+'&greeks=false', {
       headers:{Authorization:'Bearer '+key, Accept:'application/json'}
     }, 5*60*1000)
-    .then(function(r){return r.json();})
-    .then(function(d){
+    .then(function(r){ return r.text(); })
+    .then(function(text){
+      if (!text || (text[0] !== '{' && text[0] !== '[')) {
+        console.warn('[gex] chain unavailable for', e.ticker, '— non-JSON response, keeping prior value');
+        return {ticker:e.ticker, chain:[], expiry:e.expiry};
+      }
+      var d;
+      try { d = JSON.parse(text); } catch(ex) {
+        console.warn('[gex] chain unavailable for', e.ticker, '— parse error, keeping prior value');
+        return {ticker:e.ticker, chain:[], expiry:e.expiry};
+      }
       var opts = [];
       try{ opts=d.options.option; if(!Array.isArray(opts)) opts=[opts]; }catch(ex){}
       return {ticker:e.ticker, chain:opts, expiry:e.expiry, dte:e.expiry.dte};
     })
-    .catch(function(){ return {ticker:e.ticker, chain:[], expiry:e.expiry}; });
+    .catch(function(){
+      console.warn('[gex] chain unavailable for', e.ticker, '— fetch error, keeping prior value');
+      return {ticker:e.ticker, chain:[], expiry:e.expiry};
+    });
   }
 
   function _processChains(chains){
     // Step 3: compute net flow from call OI vs put OI
-    G.gexData = chains.map(function(c){
+    // Filter nulls that can arrive when Promise.allSettled catches a rejected promise.
+    G.gexData = chains.filter(Boolean).map(function(c){
       var result = G.results.filter(function(r){ return r.t===c.ticker||r.ticker===c.ticker; })[0];
       var price = result ? result.price : 0;
       var score = result ? result.score : 50;
@@ -21173,13 +21189,11 @@ function runGex(){
     var _batch = _expBatches[batchIdx];
     var _gt3=eid('gex-ts'); if(_gt3) _gt3.textContent = 'Expiry batch ' + (batchIdx+1) + '/' + _expBatches.length + '...';
     var expPromises = _batch.map(function(t){ return _fetchOneExpiry(t); });
-    Promise.all(expPromises).then(function(batchExpiries){
+    Promise.allSettled(expPromises).then(function(batchResults){
+      var batchExpiries = batchResults.map(function(r){ return r.status === 'fulfilled' ? r.value : null; });
       _allExpiries = _allExpiries.concat(batchExpiries);
       _gexProgState.exp += _batch.length; _renderGexProgress();
       console.log('[gex] batch', batchIdx+1, '/', _expBatches.length, '(expiries) done');
-      setTimeout(function(){ _runExpBatch(batchIdx+1); }, BATCH_DELAY_MS);
-    }).catch(function(e){
-      console.warn('[gex] expiry batch', batchIdx+1, 'failed:', e && (e.message||String(e)));
       setTimeout(function(){ _runExpBatch(batchIdx+1); }, BATCH_DELAY_MS);
     });
   }
@@ -21195,13 +21209,11 @@ function runGex(){
       var _batch = _chainBatches[batchIdx];
       var _gt4=eid('gex-ts'); if(_gt4) _gt4.textContent = 'Chain batch ' + (batchIdx+1) + '/' + _chainBatches.length + '...';
       var chainPromises = _batch.map(function(e){ return _fetchOneChain(e); });
-      Promise.all(chainPromises).then(function(batchChains){
+      Promise.allSettled(chainPromises).then(function(batchResults){
+        var batchChains = batchResults.map(function(r){ return r.status === 'fulfilled' ? r.value : null; });
         _allChains = _allChains.concat(batchChains);
         _gexProgState.chain += _batch.length; _renderGexProgress();
         console.log('[gex] batch', batchIdx+1, '/', _chainBatches.length, '(chains) done');
-        setTimeout(function(){ _runChainBatch(batchIdx+1); }, BATCH_DELAY_MS);
-      }).catch(function(e){
-        console.warn('[gex] chain batch', batchIdx+1, 'failed:', e && (e.message||String(e)));
         setTimeout(function(){ _runChainBatch(batchIdx+1); }, BATCH_DELAY_MS);
       });
     }
