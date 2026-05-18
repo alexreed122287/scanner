@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -19082,13 +19082,14 @@ async function runScan(opts){
 
     // FMP pre-warm: restore 24h-cached localStorage data into G_FMP_CACHE before scoring (Bug 2).
     var __fmpPrewarmStart = performance.now();
+    var __fmpPrewarmHits = 0;
     screened.forEach(function(u){
       if(!G_FMP_CACHE[u.t]){
         var cached = loadFmpCache(u.t);
-        if(cached) G_FMP_CACHE[u.t] = cached;
+        if(cached){ G_FMP_CACHE[u.t] = cached; __fmpPrewarmHits++; }
       }
     });
-    console.log('[fmp-prewarm]', screened.length, 'tickers,', (performance.now() - __fmpPrewarmStart).toFixed(1) + 'ms');
+    console.log('[fmp-prewarm]', screened.length, 'tickers scanned,', __fmpPrewarmHits, 'cache hits,', (performance.now() - __fmpPrewarmStart).toFixed(1) + 'ms');
 
     screened.forEach(function(u, idx){
       // Build indicators from what Tradier bulk quote already gave us
@@ -19622,22 +19623,19 @@ function finishScan(){
           console.log('[scan] GEX auto-trigger skipped \u2014 newer scan in progress');
           return;
         }
-        // Skip if GEX was just refreshed AND covers enough of the current
-        // results. A stale cache with only 8 tickers from a prior scheduled
-        // fire or manual click must not block a full 200-ticker refresh after
-        // a new scan. Coverage threshold: at least 50% of the top-200 slice.
+        // Skip if GEX was just refreshed AND covers enough of the current score>=65 set.
         var _gexCoverage = (G.gexData || []).length;
-        var _gexExpected = Math.min(200, (G.results || []).length);
+        var _gexExpected = Math.min(200, (G.results || []).filter(function(r){ return (r.score||0) >= 65; }).length);
         var _gexCoversEnough = _gexExpected > 0 && _gexCoverage >= _gexExpected * 0.5;
         if (typeof _gexFreshWithin === 'function' && _gexFreshWithin(30) && _gexCoversEnough) {
           console.log('[scan] GEX auto-trigger skipped \u2014 GEX data is <30min old and covers ' + _gexCoverage + '/' + _gexExpected + ' tickers');
           try { addAlert('GEX', 'Auto-trigger skipped \u2014 GEX data is fresh (<30min, ' + _gexCoverage + ' tickers)', 'warn'); } catch(e){}
           return;
         }
-        addAlert('GEX', 'Auto-refreshing GEX (top 200 tickers, ~4min) after scan...', 'warn');
+        addAlert('GEX', 'Auto-refreshing GEX (score>=65 tickers, ~5s) after scan...', 'warn');
         runGex();
       }, 0);
-    }, 20000);
+    }, 3000);  // was 20s — batched GEX now completes in ~5s
   }
 }
 
@@ -20886,14 +20884,20 @@ function runGex(){
   // Cost: 200 expirations + 200 chains = 400 Tradier calls per refresh, paced
   // by tradierFetch's 100/min wrapper rate limit (worst case ~4min total).
   // Tradeoff acknowledged by user \u2014 they explicitly chose option 3.
-  var GEX_TICKER_LIMIT = 200;
+  // Tunables \u2014 if 429s appear in production logs, reduce BATCH_SIZE or increase BATCH_DELAY_MS.
+  // At BATCH_SIZE=20 + 40 calls/batch + 300ms delay, peak rate bursts above Tradier's
+  // 120 req/min production cap. Sandbox tolerates this fine.
+  var BATCH_SIZE = 20;
+  var BATCH_DELAY_MS = 300;
+  var GEX_SCORE_THRESHOLD = 65;
+  var GEX_HARD_CAP = 200;  // safety cap; score filter is typically more restrictive
 
-  // Use top-N results by rank (multi-key tiebreaker already applied to G.results
-  // ordering at scan finalize). No longer biased toward GO vs NO-GO \u2014 every
-  // top-N ticker gets GEX coverage so its scorecard is complete.
   var sourceTickers;
   if(G.results && G.results.length > 0){
-    sourceTickers = G.results.slice(0, GEX_TICKER_LIMIT).map(function(r){ return r.ticker; });
+    sourceTickers = G.results
+      .filter(function(r){ return (r.score || 0) >= GEX_SCORE_THRESHOLD; })
+      .map(function(r){ return r.ticker; })
+      .slice(0, GEX_HARD_CAP);
   } else {
     sourceTickers = UNIVERSE.slice(0,30).map(function(u){ return u.t; });
   }
@@ -20922,22 +20926,11 @@ function runGex(){
     return;
   }
 
-  // Live path: fetch real 30DTE options chain for each ticker to compute net GEX flow.
-  // Call OI vs Put OI at 30DTE expiry = real flow proxy.
-  // No further slicing — sourceTickers already capped to GEX_TICKER_LIMIT (200) above.
   var gexTickers = sourceTickers;
-  // GEX dispatch: 600ms internal pacing \u00d7 2 fetches/ticker = 1.2s/ticker.
-  // 200 tickers = ~4min. Without this pacing the 200 expirations all hit
-  // the tradierFetch queue at once, swamping it; the queue still rate-limits
-  // but creates burst pressure that triggers cascading 429s. 600ms internal
-  // gap distributes evenly under the new 110/min wrapper cap.
-  // v2.17.3: 600 → 1000ms — iPhone LTE round-trip variance routinely spikes
-  // past 600ms, causing overlapping requests + cascading 429s. 1000ms gives
-  // a ~70% drop in overlap with only +60s total scan time.
-  var GEX_DISPATCH_MS = 1000;
-  var estMinutes = Math.ceil(gexTickers.length * 2 * GEX_DISPATCH_MS / 60000);
+  var __gexStart = performance.now();
+  console.log('[gex] runGex starting:', gexTickers.length, 'tickers (score>=' + GEX_SCORE_THRESHOLD + ', batch=' + BATCH_SIZE + ')');
   var _gt2=eid('gex-ts');
-  if(_gt2) _gt2.textContent = 'Fetching 30DTE options flow for ' + gexTickers.length + ' tickers (~' + estMinutes + 'min, paced)...';
+  if(_gt2) _gt2.textContent = 'Fetching GEX for ' + gexTickers.length + ' tickers in batches...';
 
   // Step 1: get expirations for all tickers, find nearest 25-50 calendar day expiry each
   var today = new Date();
@@ -20945,33 +20938,6 @@ function runGex(){
     return Math.round((d2 - d1) / 864e5); // same as fetchOptionContract \u2014 calendar days
   }
 
-  // Sequential dispatcher with N-millisecond spacing between dispatches.
-  // Returns Promise<Array<resolvedValue>> in input order.
-  // onProgress(done, total, phase) fires after each item settles so callers
-  // can update the status bar live instead of leaving the user staring at
-  // the same "Fetching..." text for 2-4 minutes while 400 calls drain.
-  function _gexPaced(items, delayMs, doFn, onProgress, phase){
-    return new Promise(function(resolve){
-      if (items.length === 0) return resolve([]);
-      var results = new Array(items.length);
-      var done = 0, idx = 0;
-      function next(){
-        if (idx >= items.length) return;
-        var i = idx++;
-        var p;
-        try { p = doFn(items[i]); } catch(e) { p = Promise.reject(e); }
-        Promise.resolve(p).then(function(r){ results[i] = r; }).catch(function(){ results[i] = null; }).then(function(){
-          done++;
-          if (typeof onProgress === 'function') {
-            try { onProgress(done, items.length, phase); } catch(_){}
-          }
-          if (done === items.length) resolve(results);
-        });
-        setTimeout(next, delayMs);
-      }
-      next();
-    });
-  }
 
   var _gexProgBar = eid('gex-progress-bar');
   var _gexProgFill = eid('gex-prog-fill');
@@ -21036,175 +21002,180 @@ function runGex(){
     .catch(function(){ return {ticker:t, expiry:null}; });
   }
 
-  _gexPaced(gexTickers, GEX_DISPATCH_MS, _fetchOneExpiry, _onExpiryProgress, 'expiries').then(function(expiries){
-    // Step 2: fetch options chains for tickers that have a valid expiry \u2014 also paced
-    function _fetchOneChain(e){
-      if(!e || !e.expiry) return Promise.resolve({ticker:(e&&e.ticker)||'', chain:[], expiry:null});
-      return tradierFetch(host+'/v1/markets/options/chains?symbol='+e.ticker+'&expiration='+e.expiry.date+'&greeks=false', {
-        headers:{Authorization:'Bearer '+key, Accept:'application/json'}
-      }, 5*60*1000)
-      .then(function(r){return r.json();})
-      .then(function(d){
-        var opts = [];
-        try{ opts=d.options.option; if(!Array.isArray(opts)) opts=[opts]; }catch(ex){}
-        return {ticker:e.ticker, chain:opts, expiry:e.expiry, dte:e.expiry.dte};
-      })
-      .catch(function(){ return {ticker:e.ticker, chain:[], expiry:e.expiry}; });
-    }
+  function _fetchOneChain(e){
+    if(!e || !e.expiry) return Promise.resolve({ticker:(e&&e.ticker)||'', chain:[], expiry:null});
+    return tradierFetch(host+'/v1/markets/options/chains?symbol='+e.ticker+'&expiration='+e.expiry.date+'&greeks=false', {
+      headers:{Authorization:'Bearer '+key, Accept:'application/json'}
+    }, 5*60*1000)
+    .then(function(r){return r.json();})
+    .then(function(d){
+      var opts = [];
+      try{ opts=d.options.option; if(!Array.isArray(opts)) opts=[opts]; }catch(ex){}
+      return {ticker:e.ticker, chain:opts, expiry:e.expiry, dte:e.expiry.dte};
+    })
+    .catch(function(){ return {ticker:e.ticker, chain:[], expiry:e.expiry}; });
+  }
 
-    _gexPaced(expiries, GEX_DISPATCH_MS, _fetchOneChain, _onChainProgress, 'chains').then(function(chains){
-      // Step 3: compute net flow from call OI vs put OI
-      G.gexData = chains.map(function(c){
-        var result = G.results.filter(function(r){ return r.t===c.ticker||r.ticker===c.ticker; })[0];
-        var price = result ? result.price : 0;
-        var score = result ? result.score : 50;
+  function _processChains(chains){
+    // Step 3: compute net flow from call OI vs put OI
+    G.gexData = chains.map(function(c){
+      var result = G.results.filter(function(r){ return r.t===c.ticker||r.ticker===c.ticker; })[0];
+      var price = result ? result.price : 0;
+      var score = result ? result.score : 50;
 
-        var callOI = 0, putOI = 0, callVol = 0, putVol = 0;
-        c.chain.forEach(function(opt){
-          var oi = parseInt(opt.open_interest) || 0;
-          var vol = parseInt(opt.volume) || 0;
-          if(opt.option_type === 'call'){ callOI += oi; callVol += vol; }
-          else { putOI += oi; putVol += vol; }
-        });
-
-        var totalOI = callOI + putOI || 1;
-        var totalVol = callVol + putVol || 1;
-
-        // Call% by OI \u2014 real net flow indicator
-        var callPctOI  = Math.round((callOI / totalOI) * 100);
-        var callPctVol = Math.round((callVol / totalVol) * 100);
-        // Blend OI and volume for final call%
-        var callPct = Math.round((callPctOI * 0.6) + (callPctVol * 0.4));
-        callPct = Math.max(10, Math.min(90, callPct));
-
-        // GEX magnitude proxy: (call OI - put OI) normalised by price
-        var netOI = callOI - putOI;
-        var gexMag = price > 0 ? Math.round(Math.abs(netOI) * price / 1000000) : Math.abs(netOI);
-        var gexSign = netOI >= 0 ? 1 : -1;
-
-        // Gamma flip: strike with highest combined OI near ATM
-        var flipStrike = price;
-        var maxOI = 0;
-        c.chain.forEach(function(opt){
-          var strike = parseFloat(opt.strike) || 0;
-          if(Math.abs(strike - price) > price * 0.1) return; // within 10% of price
-          var oi = (parseInt(opt.open_interest)||0);
-          if(oi > maxOI){ maxOI=oi; flipStrike=strike; }
-        });
-
-        // v2.17.3: pick a "suggested long call" from this expiry — slightly
-        // ITM (1-2 strikes below price) where delta is roughly 0.60-0.75
-        // and liquidity is decent. Captures bid/ask so the scanner can
-        // filter on premium without an extra fetch. Falls back to the
-        // ATM call if no ITM strike meets the liquidity bar.
-        var suggested = null;
-        var atmCall = null;
-        c.chain.forEach(function(opt){
-          if (opt.option_type !== 'call') return;
-          var strike = parseFloat(opt.strike) || 0;
-          if (!strike) return;
-          var bid = parseFloat(opt.bid) || 0;
-          var ask = parseFloat(opt.ask) || 0;
-          var mid = (bid > 0 && ask > 0) ? +((bid+ask)/2).toFixed(2) : 0;
-          var oi = parseInt(opt.open_interest) || 0;
-          var vol = parseInt(opt.volume) || 0;
-          if (mid <= 0) return;
-          var ent = { strike:strike, bid:bid, ask:ask, mid:mid, oi:oi, vol:vol, sym:opt.symbol };
-          // ATM = closest call strike to spot
-          if (!atmCall || Math.abs(strike - price) < Math.abs(atmCall.strike - price)){
-            atmCall = ent;
-          }
-          // Suggested: 1-3% ITM (strike between 0.97 and 0.99 of spot) with
-          // OI ≥ 100 (liquidity floor for retail size). Pick the one with
-          // the most OI in that band.
-          if (strike >= price * 0.97 && strike <= price * 0.99 && oi >= 100){
-            if (!suggested || oi > suggested.oi) suggested = ent;
-          }
-        });
-        if (!suggested) suggested = atmCall;
-
-        return {
-          t: c.ticker,
-          gex: gexSign * Math.max(1, gexMag),
-          flip: flipStrike || price,
-          call: callPct,
-          put: 100 - callPct,
-          callOI: callOI,
-          putOI: putOI,
-          dte: c.dte || 30,
-          exp: (c.expiry && c.expiry.date) || '',   // C-1: expose expiration for the renderer
-          price: price,
-          flow: callPct >= 50 ? 'CALL HEAVY' : 'PUT HEAVY',
-          flowCls: callPct >= 50 ? 'go' : 'nogo',
-          // v2.17.3: suggested call contract for this ticker. The scanner
-          // surfaces this so the user can see "what to buy" without
-          // diving into the chain picker; premium filter uses .mid.
-          sugStrike: suggested ? suggested.strike : null,
-          sugBid:    suggested ? suggested.bid : null,
-          sugAsk:    suggested ? suggested.ask : null,
-          sugMid:    suggested ? suggested.mid : null,
-          sugSym:    suggested ? suggested.sym : null,
-          sim: false
-        };
+      var callOI = 0, putOI = 0, callVol = 0, putVol = 0;
+      c.chain.forEach(function(opt){
+        var oi = parseInt(opt.open_interest) || 0;
+        var vol = parseInt(opt.volume) || 0;
+        if(opt.option_type === 'call'){ callOI += oi; callVol += vol; }
+        else { putOI += oi; putVol += vol; }
       });
 
-      try { clearInterval(_gexProgTick); } catch(_){}
-      if(_gexProgBar) _gexProgBar.style.display = 'none';
-      if(_gexLastScanEl){
-        var emptyCount = G.gexData.filter(function(r){ return !r.callOI && !r.putOI; }).length;
-        var elapsed = Math.round((Date.now() - _gexProgState.t0)/1000);
-        var timeStr = _fmtCT_Time(new Date()) + ' CT';
-        _gexLastScanEl.textContent = 'Last scan: ' + timeStr + ' (' + elapsed + 's, ' + G.gexData.length + ' tickers' + (emptyCount ? ', ' + emptyCount + ' empty' : '') + ')';
-        _gexLastScanEl.style.display = 'block';
-      }
-      renderGex();
-      // Persist so reload doesn't lose data within the 24h TTL window
-      saveGexCache();
-      addAlert('GEX','GEX/Flow refreshed \u2014 real 30DTE net flow for '+G.gexData.length+' tickers','warn');
-      // Re-score all results now that GEX data is available
-      G.results.forEach(function(r){
-        var updated = scoreIt(r.ticker, r.ind, r.opt);
-        r.score = updated.score; r.techScore = updated.techScore;
-        r.isGo = updated.isGo; r.rules = updated.rules; r.passes = updated.passes;
+      var totalOI = callOI + putOI || 1;
+      var totalVol = callVol + putVol || 1;
+
+      var callPctOI  = Math.round((callOI / totalOI) * 100);
+      var callPctVol = Math.round((callVol / totalVol) * 100);
+      var callPct = Math.round((callPctOI * 0.6) + (callPctVol * 0.4));
+      callPct = Math.max(10, Math.min(90, callPct));
+
+      var netOI = callOI - putOI;
+      var gexMag = price > 0 ? Math.round(Math.abs(netOI) * price / 1000000) : Math.abs(netOI);
+      var gexSign = netOI >= 0 ? 1 : -1;
+
+      var flipStrike = price;
+      var maxOI = 0;
+      c.chain.forEach(function(opt){
+        var strike = parseFloat(opt.strike) || 0;
+        if(Math.abs(strike - price) > price * 0.1) return;
+        var oi = (parseInt(opt.open_interest)||0);
+        if(oi > maxOI){ maxOI=oi; flipStrike=strike; }
       });
-      G.results.sort(_resultRankCompare);
-      G.filtered = excludedFilteredResults();
-      renderBuySig(); renderScan();
-      // Refresh any open detail panel so its rule scorecard reflects the new
-      // GEX data \u2014 was rendering stale "Run GEX/Flow tab first" even after
-      // GEX completed because buildDetail had captured rules at click time.
-      if (G.selTicker) {
-        try {
-          if (document.getElementById('bs-detail')) viewDetail(G.selTicker, 'bs-detail', 'bs-empty');
-          if (document.getElementById('sc-detail')) viewDetail(G.selTicker, 'sc-detail', 'sc-det-empty');
-        } catch(e) { console.warn('[gex] detail-panel refresh failed:', e.message); }
-      }
-      toast('GEX loaded \u2014 scores + scorecards updated');
-      // Re-check high-conviction signals now that GEX bonus is applied
-      checkHighConvictionSignals(G.results);
-      // Follow-up sector GEX pass \u2014 user spec 2026-05-02: 'apply this scan
-      // at minimum always to remaining electronic sectors and technology
-      // services sector tickers not already scanned'. Fires 5s after the
-      // main batch completes so the rate limiter has time to settle.
-      try { setTimeout(_runSectorGexFollowup, 5000); } catch(e) { console.warn('[gex] sector followup schedule failed:', e); }
+
+      var suggested = null;
+      var atmCall = null;
+      c.chain.forEach(function(opt){
+        if (opt.option_type !== 'call') return;
+        var strike = parseFloat(opt.strike) || 0;
+        if (!strike) return;
+        var bid = parseFloat(opt.bid) || 0;
+        var ask = parseFloat(opt.ask) || 0;
+        var mid = (bid > 0 && ask > 0) ? +((bid+ask)/2).toFixed(2) : 0;
+        var oi = parseInt(opt.open_interest) || 0;
+        var vol = parseInt(opt.volume) || 0;
+        if (mid <= 0) return;
+        var ent = { strike:strike, bid:bid, ask:ask, mid:mid, oi:oi, vol:vol, sym:opt.symbol };
+        if (!atmCall || Math.abs(strike - price) < Math.abs(atmCall.strike - price)){
+          atmCall = ent;
+        }
+        if (strike >= price * 0.97 && strike <= price * 0.99 && oi >= 100){
+          if (!suggested || oi > suggested.oi) suggested = ent;
+        }
+      });
+      if (!suggested) suggested = atmCall;
+
+      return {
+        t: c.ticker,
+        gex: gexSign * Math.max(1, gexMag),
+        flip: flipStrike || price,
+        call: callPct,
+        put: 100 - callPct,
+        callOI: callOI,
+        putOI: putOI,
+        dte: c.dte || 30,
+        exp: (c.expiry && c.expiry.date) || '',
+        price: price,
+        flow: callPct >= 50 ? 'CALL HEAVY' : 'PUT HEAVY',
+        flowCls: callPct >= 50 ? 'go' : 'nogo',
+        sugStrike: suggested ? suggested.strike : null,
+        sugBid:    suggested ? suggested.bid : null,
+        sugAsk:    suggested ? suggested.ask : null,
+        sugMid:    suggested ? suggested.mid : null,
+        sugSym:    suggested ? suggested.sym : null,
+        sim: false
+      };
     });
-  })
-  .catch(function(e){
-    console.warn('GEX fetch error:', e);
+
     try { clearInterval(_gexProgTick); } catch(_){}
     if(_gexProgBar) _gexProgBar.style.display = 'none';
-    if(_gexLastScanEl){ _gexLastScanEl.textContent = 'failed \u2014 sim fallback'; _gexLastScanEl.style.display = 'block'; }
-    // Fall back to simulated
-    G.gexData = sourceTickers.slice(0,20).map(function(t){
-      var gex=(Math.random()>0.5?1:-1)*Math.floor(rnd(100,9000));
-      var flip=+(rnd(50,500)).toFixed(2);var call=Math.floor(rnd(40,80));
-      return{t:t,gex:gex,flip:flip,call:call,put:100-call,flow:gex>0?'CALL HEAVY':'PUT HEAVY',flowCls:gex>0?'go':'nogo',sim:true};
-    });
+    if(_gexLastScanEl){
+      var emptyCount = G.gexData.filter(function(r){ return !r.callOI && !r.putOI; }).length;
+      var elapsed = Math.round((Date.now() - _gexProgState.t0)/1000);
+      var timeStr = _fmtCT_Time(new Date()) + ' CT';
+      _gexLastScanEl.textContent = 'Last scan: ' + timeStr + ' (' + elapsed + 's, ' + G.gexData.length + ' tickers' + (emptyCount ? ', ' + emptyCount + ' empty' : '') + ')';
+      _gexLastScanEl.style.display = 'block';
+    }
     renderGex();
-    addAlert('GEX','GEX fetch failed \u2014 showing simulated data','warn');
-  });
-}
+    saveGexCache();
+    addAlert('GEX','GEX/Flow refreshed — real 30DTE net flow for '+G.gexData.length+' tickers','warn');
+    G.results.forEach(function(r){
+      var updated = scoreIt(r.ticker, r.ind, r.opt);
+      r.score = updated.score; r.techScore = updated.techScore;
+      r.isGo = updated.isGo; r.rules = updated.rules; r.passes = updated.passes;
+    });
+    G.results.sort(_resultRankCompare);
+    G.filtered = excludedFilteredResults();
+    renderBuySig(); renderScan();
+    if (G.selTicker) {
+      try {
+        if (document.getElementById('bs-detail')) viewDetail(G.selTicker, 'bs-detail', 'bs-empty');
+        if (document.getElementById('sc-detail')) viewDetail(G.selTicker, 'sc-detail', 'sc-det-empty');
+      } catch(e) { console.warn('[gex] detail-panel refresh failed:', e.message); }
+    }
+    toast('GEX loaded — scores + scorecards updated');
+    checkHighConvictionSignals(G.results);
+    try { setTimeout(_runSectorGexFollowup, 5000); } catch(e) { console.warn('[gex] sector followup schedule failed:', e); }
+    var __gexElapsed = ((performance.now() - __gexStart) / 1000).toFixed(1);
+    console.log('[gex] runGex complete:', gexTickers.length, 'tickers in', __gexElapsed + 's');
+  }
 
+  // Batched expiry phase — 20 parallel per batch, 300ms between batches
+  var _allExpiries = [];
+  var _expBatches = [];
+  for(var _bi=0; _bi<gexTickers.length; _bi+=BATCH_SIZE) _expBatches.push(gexTickers.slice(_bi,_bi+BATCH_SIZE));
+
+  function _runExpBatch(batchIdx){
+    if(batchIdx >= _expBatches.length){ _runChainPhase(); return; }
+    var _batch = _expBatches[batchIdx];
+    var _gt3=eid('gex-ts'); if(_gt3) _gt3.textContent = 'Expiry batch ' + (batchIdx+1) + '/' + _expBatches.length + '...';
+    var expPromises = _batch.map(function(t){ return _fetchOneExpiry(t); });
+    Promise.all(expPromises).then(function(batchExpiries){
+      _allExpiries = _allExpiries.concat(batchExpiries);
+      _gexProgState.exp += _batch.length; _renderGexProgress();
+      console.log('[gex] batch', batchIdx+1, '/', _expBatches.length, '(expiries) done');
+      setTimeout(function(){ _runExpBatch(batchIdx+1); }, BATCH_DELAY_MS);
+    }).catch(function(e){
+      console.warn('[gex] expiry batch', batchIdx+1, 'failed:', e && (e.message||String(e)));
+      setTimeout(function(){ _runExpBatch(batchIdx+1); }, BATCH_DELAY_MS);
+    });
+  }
+
+  function _runChainPhase(){
+    var _validExp = _allExpiries.filter(function(e){ return e && e.expiry; });
+    var _chainBatches = [];
+    for(var _ci=0; _ci<_validExp.length; _ci+=BATCH_SIZE) _chainBatches.push(_validExp.slice(_ci,_ci+BATCH_SIZE));
+    var _allChains = [];
+
+    function _runChainBatch(batchIdx){
+      if(batchIdx >= _chainBatches.length){ _processChains(_allChains); return; }
+      var _batch = _chainBatches[batchIdx];
+      var _gt4=eid('gex-ts'); if(_gt4) _gt4.textContent = 'Chain batch ' + (batchIdx+1) + '/' + _chainBatches.length + '...';
+      var chainPromises = _batch.map(function(e){ return _fetchOneChain(e); });
+      Promise.all(chainPromises).then(function(batchChains){
+        _allChains = _allChains.concat(batchChains);
+        _gexProgState.chain += _batch.length; _renderGexProgress();
+        console.log('[gex] batch', batchIdx+1, '/', _chainBatches.length, '(chains) done');
+        setTimeout(function(){ _runChainBatch(batchIdx+1); }, BATCH_DELAY_MS);
+      }).catch(function(e){
+        console.warn('[gex] chain batch', batchIdx+1, 'failed:', e && (e.message||String(e)));
+        setTimeout(function(){ _runChainBatch(batchIdx+1); }, BATCH_DELAY_MS);
+      });
+    }
+    _runChainBatch(0);
+  }
+
+  _runExpBatch(0);
+}
 function renderGex(){
   var wrap=eid('gx-tbl-wrap');
   if(!wrap) return;
