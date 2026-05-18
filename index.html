@@ -41,13 +41,6 @@
      on the device's media query at launch time. The 512×512 icon scales up
      cleanly because it's the panda silhouette on a solid color. Without
      these, iOS shows a stark white loading screen which feels jarring. -->
-<!-- v2.18.4: iPhone 17 Pro Max splash (1290×2796 @3x). The previous startup
-     image was just a 512×512 icon on a black screen — looked truncated on
-     iPhone Pro Max. Includes a fallback startup image for any device that
-     doesn't match the explicit media query. -->
-<link rel="apple-touch-startup-image" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="assets/splash-1290x2796.png">
-<link rel="apple-touch-startup-image" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="assets/splash-1290x2796.png">
-<link rel="apple-touch-startup-image" href="assets/splash-1290x2796.png">
 <!-- iOS PWA polish: smooth scrolling + tap highlight color matching the brand -->
 <meta name="format-detection" content="telephone=no, date=no, email=no, address=no">
 <meta name="msapplication-TileColor" content="#050d14">
@@ -7956,6 +7949,10 @@ function _esc(s){
 }
 function fmt2(n){return isNaN(n)?'--':(+n).toFixed(2);}
 
+// Detect mobile/tablet for memory-pressure mitigations (Fix: iPad Safari OOM).
+// Tunables guarded by this flag: G.results cap 500, GEX BATCH_SIZE 8, HIST_CACHE cap 150.
+var IS_MOBILE = /iPad|iPhone|Android|Mobile/i.test(navigator.userAgent || '');
+
 // ── TIMEZONE-SAFE DATE HELPERS (v2.18.1) ──────────────────────────────────
 // Per user spec 2026-05-12: every displayed time is normalized to America/
 // Chicago (CST/CDT) regardless of the browser's local time. Tradier's
@@ -14796,6 +14793,19 @@ function applySmartExitsToUi(){
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
 var G_HIST_CACHE = {};
+// On mobile, cap in-memory history cache to 150 entries (~3.75 MB at 25 KB/entry)
+// so it doesn't compound the result-set OOM. Evicts the first-inserted key (FIFO).
+// Desktop is uncapped — 400 entries × 25 KB = 10 MB is acceptable.
+var _HIST_CACHE_CAP = IS_MOBILE ? 150 : Infinity;
+function _histCacheSet(ticker, days) {
+  G_HIST_CACHE[ticker] = days;
+  if (_HIST_CACHE_CAP < Infinity) {
+    var keys = Object.keys(G_HIST_CACHE);
+    if (keys.length > _HIST_CACHE_CAP) {
+      delete G_HIST_CACHE[keys[0]];
+    }
+  }
+}
 
 function histCacheKey(ticker){ return 'rrjcar_hist_' + ticker; }
 
@@ -14826,13 +14836,13 @@ function saveHistCache(ticker, days){
   bsSet(histCacheKey(ticker),
         JSON.stringify({days:days, ts:Date.now()}),
         'rrjcar_hist_', 86400000, 100);
-  G_HIST_CACHE[ticker] = days;
+  _histCacheSet(ticker, days);
 }
 
 async function fetchIndicatorHistory(ticker){
   if(G_HIST_CACHE[ticker]) return G_HIST_CACHE[ticker]; // session cache hit — no fetch needed
   var cached = loadHistCache(ticker);
-  if(cached){ G_HIST_CACHE[ticker] = cached; return cached; } // localStorage hit
+  if(cached){ _histCacheSet(ticker, cached); return cached; } // localStorage hit
   var key=_getTradierKey();
   if(!key) return null;
   var mode=localStorage.getItem('rrjcar_mode')||'sandbox';
@@ -14949,7 +14959,7 @@ async function _bgEnrichTick() {
   try {
     var days = await fetchIndicatorHistory(r.ticker);
     if (days && days.length >= 100) {
-      G_HIST_CACHE[r.ticker] = days;
+      _histCacheSet(r.ticker, days);
       r.indEnriched = true;
       st.enriched++;
       // Re-score with new history; the 7 new rules can now compute
@@ -16343,7 +16353,7 @@ function scoreIt(ticker, ind, opt){
       _hist = G_HIST_CACHE[ticker];
     } else if(typeof loadHistCache === 'function'){
       _hist = loadHistCache(ticker);
-      if(_hist && typeof G_HIST_CACHE !== 'undefined') G_HIST_CACHE[ticker] = _hist;
+      if(_hist && typeof G_HIST_CACHE !== 'undefined') _histCacheSet(ticker, _hist);
     }
   } catch(_){}
   // Stamp ind._synth when no history is available. Renderers (buildDetail,
@@ -17674,7 +17684,7 @@ function viewDetail(ticker,detId,emptyId){
    G.detailOpt={ticker:ticker,strike:optData.strike,exp:optData.exp};
    buildDetail(r,detId,emptyId); renderBuySig(); renderScan();
    fetchIndicatorHistory(ticker).then(function(days){
-    if(days){G_HIST_CACHE[ticker]=days;}
+    if(days){_histCacheSet(ticker,days);}
     var s1=scoreIt(ticker,r.ind,r.opt);
     r.score=s1.score;r.techScore=s1.techScore;r.fundScore=s1.fundScore;
     r.isGo=s1.isGo;r.rules=s1.rules;r.passes=s1.passes;
@@ -17692,7 +17702,7 @@ function viewDetail(ticker,detId,emptyId){
   });
  } else if(fmpKey){
   fetchIndicatorHistory(ticker).then(function(days){
-   if(days){G_HIST_CACHE[ticker]=days;}
+   if(days){_histCacheSet(ticker,days);}
    fetchFmpData(ticker).then(function(fmpData){
     if(!fmpData)return;
     var updated=scoreIt(ticker,r.ind,r.opt);
@@ -19127,6 +19137,16 @@ async function runScan(opts){
       }
     });
 
+    // Mobile memory cap: iPad Safari has a ~256 MB tab ceiling. Keeping the
+    // full 1,400-row result set at ~42 KB/row (~60 MB) pushes into OOM before
+    // enrichment even starts. Sort by score first so the cap keeps the best 500.
+    if (IS_MOBILE && G.results.length > 500) {
+      var _preMobileLen = G.results.length;
+      G.results.sort(_resultRankCompare);
+      G.results = G.results.slice(0, 500);
+      console.log('[scan] mobile: results capped 500/' + _preMobileLen + ' before enrichment');
+    }
+
     finishScan();
   }).catch(function(err){
     // CRITICAL: Without this catch, a rejection from fetchDynamicUniverse
@@ -19399,7 +19419,7 @@ function finishScan(){
         if (!r) { setTimeout(_retryNext, 100); return; }
         fetchIndicatorHistory(r.ticker).then(function(days){
           if (capturedGen !== G._scanGen) return;
-          if (days) G_HIST_CACHE[r.ticker] = days;
+          if (days) _histCacheSet(r.ticker, days);
           r.indEnriched = true;
           try {
             var u = scoreIt(r.ticker, r.ind, r.opt);
@@ -19491,7 +19511,7 @@ function finishScan(){
   // RS computation added in the weekend fix is a no-op.
   if (!G_HIST_CACHE['SPY']) {
     fetchIndicatorHistory('SPY').then(function(days){
-      if (days) G_HIST_CACHE['SPY'] = days;
+      if (days) _histCacheSet('SPY', days);
     }).catch(function(){});
   }
 
@@ -19537,7 +19557,7 @@ function finishScan(){
     fetchIndicatorHistory(t).then(function(days){
       // Generation check \u2014 bail if scan was superseded
       if(myGen !== G._scanGen) return;
-      if(days) G_HIST_CACHE[t]=days;
+      if(days) _histCacheSet(t, days);
       // Mark indEnriched=true HERE (before scoring) \u2014 the indicator-history
       // fetch is done at this point regardless of whether scoreIt succeeds
       // below. Was previously set INSIDE the inner .then after scoreIt; if
@@ -20887,10 +20907,11 @@ function runGex(){
   // Tunables \u2014 if 429s appear in production logs, reduce BATCH_SIZE or increase BATCH_DELAY_MS.
   // At BATCH_SIZE=20 + 40 calls/batch + 300ms delay, peak rate bursts above Tradier's
   // 120 req/min production cap. Sandbox tolerates this fine.
-  var BATCH_SIZE = 20;
-  var BATCH_DELAY_MS = 300;
+  // Mobile uses smaller batches to reduce peak network buffer pressure on iPad.
+  var BATCH_SIZE = IS_MOBILE ? 8 : 20;
+  var BATCH_DELAY_MS = IS_MOBILE ? 500 : 300;
   var GEX_SCORE_THRESHOLD = 65;
-  var GEX_HARD_CAP = 200;  // safety cap; score filter is typically more restrictive
+  var GEX_HARD_CAP = IS_MOBILE ? 100 : 200;
 
   var sourceTickers;
   if(G.results && G.results.length > 0){
