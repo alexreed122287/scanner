@@ -14352,8 +14352,10 @@ function fetchOptionContract(ticker,simPrice,callback,monthFilter){
        live:       true,
        atmStrike:  winner.atmStrike,
        tierUsed:   monthFilter ? 'month-filter' : 'vol-rank',
-       monthFilter: monthFilter || null,
-       _pool:      pool
+       monthFilter: monthFilter || null
+       // NOTE: do not re-attach the candidate pool here — it was 53KB/row of
+       // debug residue causing G.results to balloon to ~76MB at full-scan scope.
+       // See PR perf/strip-opt-pool-from-results for measurements.
      });
    }).catch(function(){callback(null);});
  }).catch(function(){callback(null);});
