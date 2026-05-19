@@ -16492,7 +16492,8 @@ function scoreIt(ticker, ind, opt){
   var macdOk   = ind.macd > 0;
   var adxEarly = ind.adx >= 15 && ind.adx <= 25 && (ind.diPlus||0) > (ind.diMinus||0); // emerging trend (Wilder original)
   var emaOk    = ind.ema20 > ind.ema50;
-  var tfOk     = ind.tf >= 2;
+  var tfPts = ind.tf === 3 ? 12 : ind.tf === 2 ? 8 : ind.tf === 1 ? 4 : 0;
+  var tfOk  = tfPts > 0;
   var su       = UNIVERSE_FULL.filter(function(u){ return u.t === ticker; })[0] ||
                  UNIVERSE.filter(function(u){ return u.t === ticker; })[0];
   // SECTOR_PF keys are short ("Industrials"); UNIVERSE_FULL stores Tradier
@@ -16572,7 +16573,7 @@ function scoreIt(ticker, ind, opt){
     {ok:macdOk,   n:'MACD Hist +',          val:''+(ind.macd>=0?'+':'')+ind.macd,                                                                                              pts:6},
     {ok:adxEarly, n:'ADX 15-25 + DI+>DI-',  val:'ADX '+ind.adx+' DI+'+(typeof ind.diPlus==='number'?ind.diPlus.toFixed(1):'?')+' DI-'+(typeof ind.diMinus==='number'?ind.diMinus.toFixed(1):'?'), pts:6},
     {ok:emaOk,    n:'EMA20 > EMA50',         val:'$'+fmt2(ind.ema20)+' > $'+fmt2(ind.ema50),                                                                                    pts:10},
-    {ok:tfOk,     n:'TF Aligned 2/3',        val:ind.tf+'/3',                                                                                                                   pts:12},
+    {ok:tfOk,     n:'TF Aligned 2/3',        val:ind.tf+'/3 ('+tfPts+'pts)',                                                                                             pts:tfPts},
     {ok:sectOk,   n:'Sector PF > 2',         val:'PF '+pf,                                                                                                                      pts:5},
     {ok:ema200Ok, n:'Price > EMA200',         val:ind.ema200>0?'$'+fmt2(ind.price)+' > $'+fmt2(ind.ema200):'via EMA trend',                                                      pts:6}
   ];
