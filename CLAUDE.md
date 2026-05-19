@@ -246,6 +246,51 @@ Weight reduction on remaining floor rules (EMA20>EMA50 10→?, Price>EMA200 6→
 - Don't change `sc-minscore` default in only one place — it appears in the HTML `value=` attribute, `SCAN_SETTING_DEFAULTS`, and `clearFilters()`. All three must stay in sync (currently all 116).
 - Don't use `Promise.all` for GEX batch fetches — one rejected promise aborts the batch and spikes memory on Safari. Use `Promise.allSettled` (PR #56).
 
+## Version bumping convention (added 2026-05-19)
+
+Every PR that modifies code MUST bump the version before commit. Versioning
+follows the date-count scheme:
+
+    v{M}.{D}.{YY}.{N}
+
+Where M/D/YY is the deploy date in Central Time (CT) and N is the count
+of deploys today (starting at 0).
+
+Before any commit that will be deployed, run this bump procedure:
+
+1. Get today's date in CT: `date -d 'TZ="America/Chicago" now' +"%-m.%-d.%y"`
+   (or equivalent for the platform). Result like "5.19.26".
+
+2. Read current APP_VERSION from index.html.
+
+3. If current version's M.D.YY matches today: increment N (e.g., v5.19.26.2
+   becomes v5.19.26.3). If different (or current is legacy v2.18.x):
+   set N = 0 (new day starts at v{today}.0).
+
+4. Write the new version to BOTH places:
+   - APP_VERSION constant (~line 27799)
+   - `<meta name="op-build" content="...">` tag (line 14)
+
+Both values must match exactly. They are the canonical "what's deployed"
+source of truth.
+
+Helper one-liner for shells with GNU date:
+
+    TODAY=$(TZ="America/Chicago" date +"%-m.%-d.%y")
+    CUR=$(grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' index.html | head -1)
+    # parse N from CUR, increment if same day, else 0
+    ...
+
+Consumers of APP_VERSION pick up the change automatically:
+- Header bar `#hdr-version` display
+- Webhook payloads (lines 4488, 5847)
+- Deploy-detector localStorage check (~line 27946) — triggers "new version"
+  notification to users
+
+The version bump itself triggers a user-facing "new version" notification
+on every connected client when they next load Panda. This is a feature,
+not a bug — it confirms the deploy reached them.
+
 ## Style notes
 
 - The user prefers terse end-of-turn summaries (1-2 sentences).
