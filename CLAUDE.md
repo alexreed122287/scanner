@@ -131,6 +131,49 @@ The console-callable signature `window.runShadowBookBackfill({ force: true })` b
 - Toggle fn: `_updateSandboxBanner()`
 - Fires on: `DOMContentLoaded`, `saveKeys()`
 
+### Phase 2 continuous scoring (PR #57)
+
+Four rules converted from binary to gradient scoring via `scalePts(val, lo, hi, maxPts)`:
+
+| Rule | Before | After (Phase 2) |
+|---|---|---|
+| RSI 40-70 (max 8) | binary pass/fail | `max(0, 8 - (|rsi-55|/20)*8)` — peaks at RSI=55, zero outside ±20 |
+| ADX > 25 (max 8) | binary pass/fail | `scalePts(adx, 22, 40, 8)` — floor 22, ceiling 40 |
+| 52Wk Hi Prox <15% (max 10) | binary pass/fail | `scalePts(hiPct, 0, 1, 10)` — 0% = max, 15%+ = 0 |
+| RS > SPY (max 8) | binary pass/fail | `scalePts(relStrVal, 0, 10, 8)` — uses `relStr21d` if available, else `relStr5d` |
+
+**`pass` / `strong` semantics (applies to all rules):**
+- `pass = pts > 0` (contributes to total score)
+- `strong = pts >= max*0.5` for continuous rules; `strong = pass` for binary rules
+- `passes[]` array and `_rulePassedByName()` filter on `strong`, not `pass` — preset MUST-PASS filters use `strong`
+
+**Score clamp updated: 164 → 156.**
+
+**`ind.relStr21d`** is computed in `scoreIt`'s history-backfill section: 21-day total return of ticker minus SPY over the same window, using `G_HIST_CACHE['SPY']`. Requires SPY history to be enriched (always true on live-scan path). Falls back to `relStr5d` (today's 1-day delta vs SPY) when SPY history is absent.
+
+### Phase 2.5 threshold recalibration (PR #59/62)
+
+Phase 2 continuous scoring shifted the observed distribution down ~15-16 pts at the median (measured 2026-05-19, live-API scan, 1,513 tickers). Thresholds updated by percentile-match:
+
+| Constant | Old | New |
+|---|---|---|
+| `goThreshold` default in `scoreIt()` | 140 | **121** |
+| `STRATEGY_MODES.highConviction.minScore` | 140 | **121** |
+| `STRATEGY_MODES.breakout.minScore` | 125 | **115** |
+| `STRATEGY_MODES.momentum.minScore` | 120 | **111** |
+| `STRATEGY_MODES.bestItmCalls.minScore` | 145 | **138** |
+| `STRATEGY_MODES.preMarket.minScore` | 140 | **121** |
+| `sc-minscore` HTML input default | 130 | **116** |
+| `loadAutoScan` threshold fallback | 110 | **98** |
+
+The `sc-minscore` default appears in three places: the HTML `value=` attribute, `SCAN_SETTING_DEFAULTS['sc-minscore']`, and the `clearFilters()` reset. All three must stay in sync.
+
+### GEX resilience (PR #56, #58)
+
+**PR #56** (`_fetchOneChain` / `_fetchOneExpiry`): reads `r.text()` then `JSON.parse()` instead of `r.json()` directly; detects non-JSON responses (rate-limit plain text, "Restricted", HTML error pages) before attempting parse. Batch dispatch converted from `Promise.all` → `Promise.allSettled` so a single failed fetch doesn't abort the whole batch. `_gexFreshWithin` window widened from 30 min → **360 min (6 h)** so cron-hydrated data is treated as fresh for the full inter-cron interval.
+
+**PR #58** (null-chain guard): When Tradier returns `{options: {option: null}}` for a ticker with no options, `_fetchOneChain` now returns `[]` instead of wrapping `null` into `[null]`. All three `forEach` loops in `_processChains` have `if(!opt) return` guards. Without these, a single null entry caused the forEach to throw on `.open_interest`, aborting the map before `G.gexData` was written — GEX tab rendered empty with no console error.
+
 ## What's live on `main` (recent PRs)
 
 | PR | Subject | Why |
@@ -152,10 +195,36 @@ The console-callable signature `window.runShadowBookBackfill({ force: true })` b
 | #37 | bg-enrich badge stops lying | Tick now bumps exactly one of `{enriched, failed, skippedDone}` per iteration; badge appends `· Nf` when failures > 0; tooltip shows full breakdown |
 | #38 | Auto-schedule shadow-book fwd-return backfill | `_shadowRefresh*Forward` existed but had to be called manually; new `runShadowBookBackfill` runs 90s after load + every 4h with cooldown stamp |
 | #39 | Surface localStorage quota failures in UI | `cacheSet` swallowed `QuotaExceededError` silently; new `#hdr-quota` pill + retry-after-prune logic + `_resetQuotaWarning` click handler |
+| #45 | Weekend scoring fixes | `avoidBad` check was inverted (filtered good tickers); `ind.relStr21d` was never populated so RS rule always fell back to 5d; sort header default fixed |
+| #47 | Wire `applyStrategyMode` to checkboxes + minScore | Strategy preset buttons weren't setting sc-minscore or toggling filter checkboxes |
+| #48 | CLEAR button removes active preset highlight | Visual regression — selected preset stayed highlighted after clearing |
+| #51 | FMP cache pre-warm + remove splash video | Pre-warms `G_FMP_CACHE` from localStorage before the score loop so first-scan fundamental data is available without waiting for async enrichment |
+| #52 | GEX batched parallel dispatch | Replaced serial per-ticker fetches with batched parallel; significant speed improvement on GEX tab load |
+| #53 | iPad/iOS crash fixes | Memory reductions for Safari OOM; removed apple-touch-startup-image splash links |
+| #55 | Strip `_pool` from `r.opt` | 23× per-row size reduction in scan results; prevented localStorage quota exhaustion on large scans |
+| #56 | GEX resilience + cron gating | `Promise.allSettled`, text-based non-JSON detection, `_gexFreshWithin(360)` — see architecture note above |
+| #57 | Phase 2 continuous scoring port | RSI, ADX, 52Wk Hi, RS > SPY converted to gradient scoring; `pass`/`strong` decoupled; score clamp 164→156 |
+| #58 | GEX null-chain fix | `_fetchOneChain` null guard + `_processChains` per-opt null guards; GEX tab was silently empty when any ticker had no options |
+| #59 | Phase 2.5 threshold recalibration | goThreshold 140→121, all STRATEGY_MODES presets, sc-minscore 130→116, loadAutoScan 110→98 |
 
 ## Known bug list (not yet shipped, ranked)
 
-_All known bugs from the previous session ledger have been addressed (PRs #31, #32, #34, #36–#39). When you find new issues, add them here in priority order._
+### Phase 3 deferred backlog
+
+**7.8 — Audit-invariant violation for negative-pts rules**
+28 of 200 rows violate `score === sum(pts where pass)`. GEX Call Flow emits `{pts:-6, pass:false}` as a penalty (24 rows); Broken Trend uses inline `score -= 5` with `{pts:0, pass:false}` (4 rows). Score values are correct (`sumAllPts === score` holds). The audit-invariant claim in §1.3 is slightly overstated — it holds for non-negative-max rules only. Resolution: emit penalty rules via Weak Sector pattern (`{pts:0, pass:true}` + separate `{n:'...Penalty', pts:-6, pass:true, isPenalty:true}`), or change audit to `sum(pts)` no-filter.
+
+**7.9 — RS 5d/21d fallback strong-rate divergence**
+Only 9 of 1,513 tickers in the May 19 scan got `relStr21d`; the other 1,504 used `relStr5d`. The 5d branch has passRate 60% but strongRate only 3.7% — almost no row earns a curve-strong score, so the RS rule is effectively invisible to preset MUST-PASS filters for 99.4% of the universe. Fix options: (a) widen SPY-history pre-fetch to ensure full-universe `relStr21d`; (b) reduce 5d branch max pts (currently 8, same as 21d — maybe 4-5).
+
+**7.10 — ADX > 25 curve front-loading**
+`ADX > 25` rule (max 8, scale 22→40) shows passRate 72% but strongRate only 8.5%. Most rows clear the floor (ADX 22-25) and earn 1-3 pts; very few reach 30-40 for ≥4 pts. Fix options: (a) tighten scale to 22→35; (b) accept as-is (ADX 22-25 is genuinely low-conviction).
+
+**7.11 — Dead OR-branch in `_matchesPreset`**
+`has('52Wk Hi Prox <5% (G-H)')` check always returns false — rule was renamed/removed. Safe to delete; no scoring impact. Phase 3 cleanup.
+
+**7.12 — Stale `clamp(techScore, 0, 240)` ceiling**
+Score clamp in `scoreIt` return still uses 240 (the old theoretical max). Practical max is ~156. No functional impact (observed max never approaches 240), but misleading. Phase 3 cleanup.
 
 ## Things to NOT do
 
@@ -165,6 +234,9 @@ _All known bugs from the previous session ledger have been addressed (PRs #31, #
 - Don't merge a PR that touches `index.html` if the parse-check workflow goes red. The page won't load.
 - Don't add fields to `r.ind` without considering whether `simInd` needs to populate them too.
 - Don't change `SECTOR_PF` keys without updating `SECTOR_PF_MAP`.
+- Don't modify the `avoidBad` check logic in `reclassifyGoThreshold` or preset-filter code — PR #45 fixed an inverted check (`rl.pass && rl.pts < 0`) that was blocking good tickers. The canonical avoidBad pattern uses the AVOID list directly, matching `scoreIt`.
+- Don't change `sc-minscore` default in only one place — it appears in the HTML `value=` attribute, `SCAN_SETTING_DEFAULTS`, and `clearFilters()`. All three must stay in sync (currently all 116).
+- Don't use `Promise.all` for GEX batch fetches — one rejected promise aborts the batch and spikes memory on Safari. Use `Promise.allSettled` (PR #56).
 
 ## Style notes
 
