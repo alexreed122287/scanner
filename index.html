@@ -13906,6 +13906,55 @@ async function runShadowBookBackfill(opts) {
 }
 window.runShadowBookBackfill = runShadowBookBackfill;
 
+// ── Score snapshot capture (Phase 2 delta analysis helper) ───────────────
+// Call from console after a scan completes. Downloads a JSON file with
+// the current top-200 results so before/after scoring distributions can
+// be compared analytically. Gated: only active when explicitly called.
+//   window.captureScoreSnapshot('before')  → panda_score_snapshot_before_…json
+//   window.captureScoreSnapshot('after')   → panda_score_snapshot_after_…json
+window.captureScoreSnapshot = function(label) {
+  label = label || 'snapshot';
+  var results = (typeof G !== 'undefined' && Array.isArray(G.results)) ? G.results : [];
+  if (!results.length) { console.warn('captureScoreSnapshot: G.results is empty — run a scan first'); return; }
+  var now = new Date();
+  var ts = now.getFullYear()+''+('0'+(now.getMonth()+1)).slice(-2)+('0'+now.getDate()).slice(-2)
+    +'_'+('0'+now.getHours()).slice(-2)+('0'+now.getMinutes()).slice(-2);
+  var rows = results.slice(0, 200).map(function(r) {
+    return {
+      ticker:    r.ticker,
+      score:     r.score,
+      techScore: r.techScore,
+      fundScore: r.fundScore,
+      isGo:      r.isGo,
+      rules:     Array.isArray(r.rules) ? r.rules.map(function(ru) {
+        return { n: ru.n, pass: !!ru.pass, pts: +ru.pts || 0, val: ru.val };
+      }) : [],
+      indicators: {
+        rsi:       r.ind && r.ind.rsi,
+        adx:       r.ind && r.ind.adx,
+        week52hi:  r.ind && r.ind.week52hi,
+        price:     r.ind && r.ind.price,
+        relStr21d: r.ind && r.ind.relStr21d,
+        relStr5d:  r.ind && r.ind.relStr5d,
+        macd:      r.ind && r.ind.macd,
+        ema20:     r.ind && r.ind.ema20,
+        ema50:     r.ind && r.ind.ema50,
+        ema200:    r.ind && r.ind.ema200,
+        tf:        r.ind && r.ind.tf,
+        vol:       r.ind && r.ind.vol,
+        avgVol:    r.ind && r.ind.avgVol
+      }
+    };
+  });
+  var payload = { label: label, ts: ts, count: rows.length, rows: rows };
+  var blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'panda_score_snapshot_' + label + '_' + ts + '.json';
+  a.click();
+  console.log('captureScoreSnapshot: downloaded', a.download, '(' + rows.length + ' rows)');
+};
+
 (function _scheduleShadowBackfill(){
   function _kick(){
     setTimeout(function(){
