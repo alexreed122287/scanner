@@ -206,6 +206,7 @@ The `sc-minscore` default appears in three places: the HTML `value=` attribute, 
 | #57 | Phase 2 continuous scoring port | RSI, ADX, 52Wk Hi, RS > SPY converted to gradient scoring; `pass`/`strong` decoupled; score clamp 164→156 |
 | #58 | GEX null-chain fix | `_fetchOneChain` null guard + `_processChains` per-opt null guards; GEX tab was silently empty when any ticker had no options |
 | #59 | Phase 2.5 threshold recalibration | goThreshold 140→121, all STRATEGY_MODES presets, sc-minscore 130→116, loadAutoScan 110→98 |
+| #63 | Phase 3.1: TF Aligned tier port | TF Aligned binary 12 pts → tiered 4/8/12 pts for tf=1/2/3. Matches rrjcar line 3476. `pass = tfPts > 0`; `strong` uses binary-rule path (see bug 7.13). Deployed 2026-05-19; verified live — tf=3→12pts, tf=2→8pts, tf=1→4pts (CHRW), tf=0→0pts (AXS, RTX). |
 
 ## Known bug list (not yet shipped, ranked)
 
@@ -225,6 +226,13 @@ Only 9 of 1,513 tickers in the May 19 scan got `relStr21d`; the other 1,504 used
 
 **7.12 — Stale `clamp(techScore, 0, 240)` ceiling**
 Score clamp in `scoreIt` return still uses 240 (the old theoretical max). Practical max is ~156. No functional impact (observed max never approaches 240), but misleading. Phase 3 cleanup.
+
+**7.13 — TF Aligned tier-rule `strong` field violates §1.2 invariant**
+TF Aligned at tf=1 shows `strong: true` despite `pts (4) < max (12) * 0.5 = 6`. Current implementation uses binary-rule `strong = pass` path; continuous-rule semantics would give `strong = false`. Empirical impact: zero (only CHRW at score 61.9, far below any preset minScore). Resolution: extend `strong` computation to use `pts >= max * 0.5` for tiered rules (option 1 in wrap-up). 1-line edit. Phase 3.X cleanup.
+
+## Phase 3.2 status (deferred)
+
+Weight reduction on remaining floor rules (EMA20>EMA50 10→?, Price>EMA200 6→?, Sector PF 5→?) is deferred pending 24-48h observation of Phase 3.1 in production. Requires a fresh Method-B-style capture-then-rescore to isolate floor-rule contribution from market-tape noise. The afternoon distribution shift on 2026-05-19 (+10 median) was dominated by tape movement, not Phase 3.1's tier effect — same-ticker before/after comparison required to size Phase 3.2 correctly.
 
 ## Things to NOT do
 
