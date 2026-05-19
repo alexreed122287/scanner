@@ -21140,7 +21140,11 @@ function runGex(){
         return {ticker:e.ticker, chain:[], expiry:e.expiry};
       }
       var opts = [];
-      try{ opts=d.options.option; if(!Array.isArray(opts)) opts=[opts]; }catch(ex){}
+      try{
+        opts=d.options.option;
+        if(opts == null){ opts=[]; }                       // Tradier returns {option:null} for empty chains
+        else if(!Array.isArray(opts)){ opts=[opts]; }      // single-option response
+      }catch(ex){}
       return {ticker:e.ticker, chain:opts, expiry:e.expiry, dte:e.expiry.dte};
     })
     .catch(function(){
@@ -21159,6 +21163,7 @@ function runGex(){
 
       var callOI = 0, putOI = 0, callVol = 0, putVol = 0;
       c.chain.forEach(function(opt){
+        if(!opt) return;
         var oi = parseInt(opt.open_interest) || 0;
         var vol = parseInt(opt.volume) || 0;
         if(opt.option_type === 'call'){ callOI += oi; callVol += vol; }
@@ -21180,6 +21185,7 @@ function runGex(){
       var flipStrike = price;
       var maxOI = 0;
       c.chain.forEach(function(opt){
+        if(!opt) return;
         var strike = parseFloat(opt.strike) || 0;
         if(Math.abs(strike - price) > price * 0.1) return;
         var oi = (parseInt(opt.open_interest)||0);
@@ -21189,7 +21195,7 @@ function runGex(){
       var suggested = null;
       var atmCall = null;
       c.chain.forEach(function(opt){
-        if (opt.option_type !== 'call') return;
+        if (!opt || opt.option_type !== 'call') return;
         var strike = parseFloat(opt.strike) || 0;
         if (!strike) return;
         var bid = parseFloat(opt.bid) || 0;
