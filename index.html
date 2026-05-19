@@ -8111,9 +8111,9 @@ function _isWeekendET(date){
 // — only logs warnings, doesn't block anything.
 function _assertScanRuleNames(){
   var EXPECTED = [
-    // PROVEN ticker and AVOID ticker intentionally omitted — they are
-    // whitelist-conditional and only fire for specific tickers. The SPY
-    // probe below would never emit them, causing a false-positive warning.
+    // PROVEN ticker, AVOID ticker, and Weak Sector (penalty) intentionally
+    // omitted — they are conditional and only fire for specific tickers/sectors.
+    // The SPY probe below would never emit them, causing a false-positive warning.
     'Analyst Revisions ↑',
     '52Wk Hi Prox <15%',
     'GEX Call Flow',
@@ -16573,13 +16573,13 @@ function scoreIt(ticker, ind, opt){
     {ok:macdOk,   n:'MACD Hist +',          val:''+(ind.macd>=0?'+':'')+ind.macd,                                                                                              pts:6},
     {ok:adxEarly, n:'ADX 15-25 + DI+>DI-',  val:'ADX '+ind.adx+' DI+'+(typeof ind.diPlus==='number'?ind.diPlus.toFixed(1):'?')+' DI-'+(typeof ind.diMinus==='number'?ind.diMinus.toFixed(1):'?'), pts:6},
     {ok:emaOk,    n:'EMA20 > EMA50',         val:'$'+fmt2(ind.ema20)+' > $'+fmt2(ind.ema50),                                                                                    pts:10},
-    {ok:tfOk,     n:'TF Aligned 2/3',        val:ind.tf+'/3 ('+tfPts+'pts)',                                                                                             pts:tfPts},
+    {ok:tfOk,     n:'TF Aligned 2/3',        val:ind.tf+'/3 ('+tfPts+'pts)',                                                                                             pts:tfPts, strong:tfPts >= 6},
     {ok:sectOk,   n:'Sector PF > 2',         val:'PF '+pf,                                                                                                                      pts:5},
     {ok:ema200Ok, n:'Price > EMA200',         val:ind.ema200>0?'$'+fmt2(ind.price)+' > $'+fmt2(ind.ema200):'via EMA trend',                                                      pts:6}
   ];
   techChecks.forEach(function(c){
     if(c.ok){ score += c.pts; techScore += c.pts; }
-    res.push({n:c.n, pass:c.ok, strong:c.ok, val:c.val, filter:false, pts: c.ok ? c.pts : 0});
+    res.push({n:c.n, pass:c.ok, strong:'strong' in c ? c.strong : c.ok, val:c.val, filter:false, pts: c.ok ? c.pts : 0});
   });
 
   // \u2500\u2500 SECTION B: FMP Daily Signals (2 rules, 20 pts) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
@@ -16921,7 +16921,7 @@ function scoreIt(ticker, ind, opt){
 
   return {
     score:      total,
-    techScore:  clamp(techScore, 0, 240),
+    techScore:  clamp(techScore, 0, 156),
     fundScore:  clamp(fundScore, 0, 30),
     isGo:       isGo,
     filtersPass:true, // no hard filters in v3.5 \u2014 options evaluated downstream
@@ -17013,7 +17013,7 @@ function buildDetail(r,detId,emptyId){
         : '')
     +'<span class="det-pr">$'+fmt2(r.price)+'</span>'
     +'<span class="det-sig '+sigCls+'">'+sigLbl+'</span>'
-    +'<span class="det-meta">'+_esc(r.sector)+' | Score: <b>'+Math.round(r.score)+'</b>/240 | Tech: '+techScore+' Fund: '+fundScore+' | Passes: '+(Array.isArray(r.passes)?r.passes.length:(r.passes||0))+'/'+(Array.isArray(r.rules)?r.rules.length:14)
+    +'<span class="det-meta">'+_esc(r.sector)+' | Score: <b>'+Math.round(r.score)+'</b>/156 | Tech: '+techScore+' Fund: '+fundScore+' | Passes: '+(Array.isArray(r.passes)?r.passes.length:(r.passes||0))+'/'+(Array.isArray(r.rules)?r.rules.length:14)
       + (function(){
           var dte = (typeof getDaysToEarnings === 'function') ? getDaysToEarnings(r.ticker) : null;
           if (dte === null) return '';
@@ -17108,7 +17108,7 @@ function buildDetail(r,detId,emptyId){
        direction-neutral trading ever returns. */
     +'<span style="color:var(--gry);font-size:10px;">Strike: $'+fmt2(opt.strike)+'  |  Exp: '+fmtDateUS(opt.exp)+'</span>'
     +'</div>'
-    +'<div class="s-hdr">RULE SCORECARD v4.0 <span style="font-size:10px;color:var(--gry);font-weight:400;">Tech '+techScore+' + Fund '+fundScore+' = '+r.score+'/240</span></div>'
+    +'<div class="s-hdr">RULE SCORECARD v4.0 <span style="font-size:10px;color:var(--gry);font-weight:400;">Tech '+techScore+' + Fund '+fundScore+' = '+r.score+'/156</span></div>'
     +'<div class="rules-grid">'+rulesHtml+'</div>'
     +'</div>'
     +'</div>'; // close det-signals wrapper
@@ -18242,7 +18242,7 @@ function renderBuySig(){
                :                  'var(--ngo)';
     var _tipParts = [
       'Rank tiebreakers (in order):',
-      '1. Score: ' + Math.round(r.score) + '/240',
+      '1. Score: ' + Math.round(r.score) + '/156',
       '2. Tech: ' + _tech + '/85',
       '3. RS 5D: ' + _rsTxt + ' (vs SPY)',
       '4. Theme: ' + _thTxt + ' (top sector score)',
@@ -18696,7 +18696,7 @@ function _matchesPreset(r, filters){
   if (filters.analyst && !(has('Analyst Revisions ↑') || has('Analyst Revisions Up'))) return false;
   if (filters.gex && !(has('GEX Call Flow') || has('GEX Call Heavy'))) return false;
   if (filters.proven && !(has('PROVEN ticker') || has('PROVEN'))) return false;
-  if (filters.hi52 && !(has('52Wk Hi Prox <15%') || has('52Wk Hi Prox <5% (G-H)'))) return false;
+  if (filters.hi52 && !has('52Wk Hi Prox <15%')) return false;
   if (filters.rs && !(has('RS > SPY (21d)') || has('RS > SPY (5d)') || has('RS > SPY'))) return false;
   if (filters.macd && !(has('MACD Hist +') || has('MACD +'))) return false;
   if (filters.tf && !(has('TF Aligned 2/3') || has('Timeframes Aligned'))) return false;
@@ -20476,7 +20476,7 @@ function renderScan(){
                                  : (rs5d >= 0 ? '+' : '') + rs5d.toFixed(2) + '%';
 
     // Score bar \u2014 visual fill showing score out of 122
-    var scorePct=Math.round((r.score/240)*100);
+    var scorePct=Math.round((r.score/156)*100);
     // PR #32: surface synthetic rows. ind._synth means the indicators are
     // still bulk-pass placeholders (RSI=50, MACD=0, ema*0.97, etc.) because
     // foreground/bg enrichment hasn't filled in real history yet. Stack the
@@ -26010,7 +26010,7 @@ function getNotifSettings(){
     var raw = localStorage.getItem('rrjcar_notif');
     if(raw) return JSON.parse(raw);
   }catch(e){}
-  return {browser:false, email:false, minScore:120, cooldown:60};
+  return {browser:false, email:false, minScore:111, cooldown:60};
 }
 
 function updateNotifPermStatus(){
@@ -26055,7 +26055,7 @@ function fireBrowserNotif(ticker, score, sector, price, rulesSummary){
   var s = getNotifSettings();
   if(!s.browser) return;
   var n = new Notification('\u2605 HIGH CONVICTION: ' + ticker, {
-    body: 'Score: ' + score + '/240 | ' + sector + ' | $' + price.toFixed(2) + '\n' + rulesSummary,
+    body: 'Score: ' + score + '/156 | ' + sector + ' | $' + price.toFixed(2) + '\n' + rulesSummary,
     icon: 'https://ruizminer.github.io/rrjcar-Terminal-v3/favicon.ico',
     tag:  'rrjcar-' + ticker, // replaces previous notification for same ticker
     requireInteraction: true  // stays until user dismisses
@@ -26098,7 +26098,7 @@ function fireEmailAlert(ticker, score, sector, price, rulesSummary){
 function sendEmailJsAlert(s, ticker, score, sector, price, rulesSummary){
   emailjs.send(s.ejsService, s.ejsTemplate, {
     ticker:       ticker,
-    score:        score + '/240',
+    score:        score + '/156',
     sector:       sector,
     price:        '$' + price.toFixed(2),
     signal_time:  _fmtCT_Date(new Date()) + ' ' + _fmtCT_Time(new Date()) + ' CT',
@@ -26160,7 +26160,7 @@ function autoFillHighConviction(r, optData){
         + '<b>' + _esc(r.ticker) + ' CALL</b>'
         + (optData && optData.strike ? ' &nbsp;$' + fmt2(optData.strike) : '')
         + (optData && optData.exp    ? ' &nbsp;Exp: ' + _esc(fmtDateUS(optData.exp)) : '')
-        + '<br>Score: <b>' + r.score + '/240</b> | ' + _esc(r.sector) + ' | $' + fmt2(r.price)
+        + '<br>Score: <b>' + r.score + '/156</b> | ' + _esc(r.sector) + ' | $' + fmt2(r.price)
         + '<br><span style="color:var(--gry);font-size:10px;">Review fields then click SUBMIT ORDER</span>';
       res.className = 'ord-result show';
       res.style.borderColor = 'var(--grn)';
@@ -26178,7 +26178,7 @@ function showAutoSubmitModal(r, optData){
   var tickerEl = eid('hc-modal-ticker'), detailEl = eid('hc-modal-details'), orderEl = eid('hc-modal-order');
   if(tickerEl) tickerEl.textContent = r.ticker + ' \u2605 HIGH CONVICTION';
   if(detailEl) detailEl.innerHTML =
-    'Score: <b style="color:var(--grn);">' + r.score + '/240</b>'
+    'Score: <b style="color:var(--grn);">' + r.score + '/156</b>'
     + ' &nbsp;|&nbsp; Sector: ' + _esc(r.sector)
     + ' &nbsp;|&nbsp; Price: $' + fmt2(r.price) + '<br>'
     + 'PROVEN \u2713 &nbsp; Analyst Revisions \u2191 \u2713 &nbsp; GEX Call Heavy \u2713';
@@ -26261,7 +26261,7 @@ function checkHighConvictionSignals(results){
     _saveNotifCooldowns();
     var rulesSummary = 'PROVEN \u2713  Analyst Rev \u2191 \u2713  GEX Call Heavy \u2713  Score ' + r.score;
     var price = r.price || 0;
-    addAlert(r.ticker, '\u2605 HIGH CONVICTION \u2014 Score ' + r.score + '/240 | ' + r.sector + ' | $' + price.toFixed(2), 'go');
+    addAlert(r.ticker, '\u2605 HIGH CONVICTION \u2014 Score ' + r.score + '/156 | ' + r.sector + ' | $' + price.toFixed(2), 'go');
     fireBrowserNotif(r.ticker, r.score, r.sector, price, rulesSummary);
     fireEmailAlert(r.ticker, r.score, r.sector, price, rulesSummary);
     fired.push(r.ticker);
@@ -26347,7 +26347,7 @@ function getAutoTraderSettings(){
       maxPositions:   +(s.maxPositions   || (eid('at-max-positions')   ? eid('at-max-positions').value   : 0) || 3),
       marketFallback: !!s.marketFallback,
     };
-  }catch(e){ return {budget:500,maxContracts:3,dailyLoss:500,minScore:120,hoursGate:true,maxPositions:3,marketFallback:false}; }
+  }catch(e){ return {budget:500,maxContracts:3,dailyLoss:500,minScore:111,hoursGate:true,maxPositions:3,marketFallback:false}; }
 }
 
 function atLog(msg, cls){
