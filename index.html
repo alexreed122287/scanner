@@ -3308,7 +3308,7 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
     <!-- B-2 default Min Score bumped 89 -> 100. With theme overlay (added 2026-04)
          scores trend ~10 pts higher, so the historical "GO rate" at 89 became
          too permissive. 100 preserves the prior selectivity. Adjust to taste. -->
-    <label>Min Score <input type="number" id="sc-minscore" value="130" style="width:80px;" onchange="reclassifyGoThreshold()" title="Default 130 — empirically calibrated to the observed score distribution (peaks 140-160 on a ~164-pt practical max). 130 surfaces real setups instead of an empty list. Strategy presets override with their own per-strategy thresholds: HC 145, Breakout 125, Momentum 120, Best ITM 150, Pre/Post 145."></label>
+    <label>Min Score <input type="number" id="sc-minscore" value="116" style="width:80px;" onchange="reclassifyGoThreshold()" title="Default 130 — empirically calibrated to the observed score distribution (peaks 140-160 on a ~164-pt practical max). 130 surfaces real setups instead of an empty list. Strategy presets override with their own per-strategy thresholds: HC 145, Breakout 125, Momentum 120, Best ITM 150, Pre/Post 145."></label>
     <!-- v2.17.3: long-call entry filters. Max premium = upper bound on the
          suggested call's mid price ($/contract before ×100). DTE range
          filters out too-short / too-long expiries. Both apply only when
@@ -16908,7 +16908,7 @@ function scoreIt(ticker, ind, opt){
   // calibration). New evidence-based rules rarely hit max simultaneously,
   // so the actual top of distribution sits near 140-160, not 165+.
   // Upper clamp 300 catches typos but accepts user values for high-conviction filtering.
-  var goThreshold = 140;
+  var goThreshold = 121;
   try {
     var el = (typeof document !== 'undefined') ? document.getElementById('sc-minscore') : null;
     if(el && el.value !== ''){
@@ -18407,7 +18407,7 @@ function loadAutoScan(){
   return {
     on:          !!s.on,
     intervalMin: [5,15,30,60].indexOf(s.intervalMin) >= 0 ? s.intervalMin : 15,
-    threshold:   typeof s.threshold === 'number' ? s.threshold : 110,
+    threshold:   typeof s.threshold === 'number' ? s.threshold : 98,
     mktHrsOnly:  s.mktHrsOnly !== false,                      // default true
     pauseHidden: !!s.pauseHidden,
     newOnly:     s.newOnly !== false                          // default true
@@ -19984,7 +19984,7 @@ var SCAN_SETTING_DEFAULTS = {
   'sc-minavgvol':    '500,000',
   'sc-volratio':     '',
   'sc-maxoptprice':  '',
-  'sc-minscore':     '130',
+  'sc-minscore':     '116',
   'sc-sig':          'GO',
   'sc-theme':        '',
   'filt-earn-days':  '1'
@@ -20070,7 +20070,7 @@ function clearFilters(){
   if(eid('sc-sect'))        eid('sc-sect').value = '';
   if(eid('sc-theme'))       eid('sc-theme').value = '';   // 'All themes'
   if(eid('sc-sig'))         eid('sc-sig').value  = '';   // 'All' — shows both GO and NO-GO
-  if(eid('sc-minscore'))    eid('sc-minscore').value = '130';  // calibrated to observed distribution mid-top
+  if(eid('sc-minscore'))    eid('sc-minscore').value = '116';  // Phase 2.5: recalibrated to continuous-scoring distribution
   if(eid('sc-maxoptprice')) eid('sc-maxoptprice').value = '';
   // v2.17.3: reset long-call entry filters
   if(eid('sc-max-premium')) eid('sc-max-premium').value = '';
@@ -26735,32 +26735,32 @@ var STRATEGY_MODES = {
   highConviction: {
     label: '\u2605 HIGH CONVICTION',
     desc: 'PROVEN ticker + Score \u2265140 + Analyst Revisions \u2191 + GEX Call Heavy + JT 12-1 Mom + Minervini \u2014 rarest, highest-quality setups. The two highest-IC scoring rules (JT 12-1 +20, Minervini +15) are now MUST-PASS instead of merely contributing to the score. Expect 0-5 matches per scan.',
-    filters: {sig:'GO', minScore:140, analyst:true, proven:true, gex:true,
+    filters: {sig:'GO', minScore:121, analyst:true, proven:true, gex:true,
               jt12:true, minervini:true}
   },
   breakout: {
     label: '\u25b2 BREAKOUT',
     desc: 'Near 52-week high + RS > SPY + MACD + + TF Aligned 2/3 + Donchian 20d + VCP \u2014 chart-pattern-driven breakout buying with momentum + leadership. Donchian + VCP are the two highest-IC pure-pattern breakout rules; requiring them filters out fake-out names that just LOOK extended. Score \u2265125.',
-    filters: {sig:'GO', minScore:125, hi52:true, rs:true, macd:true, tf:true,
+    filters: {sig:'GO', minScore:115, hi52:true, rs:true, macd:true, tf:true,
               donchian:true, vcp:true}
   },
   momentum: {
     label: '\u25b6 MOMENTUM',
     desc: 'MACD + + Above EMA200 + RS > SPY + Strong Sector + JT 12-1 Mom \u2014 confirmed trending stocks with sector tailwind, gated by the academic gold-standard 12-1 cross-sectional momentum signal. JT 12-1 is the single strongest replicated edge in equity markets; making it MUST-PASS turns this preset from "trendy" into "trendy AND riding the strongest published factor". Score \u2265120.',
-    filters: {sig:'GO', minScore:120, macd:true, ema200:true, rs:true,
+    filters: {sig:'GO', minScore:111, macd:true, ema200:true, rs:true,
               strongSector:true, jt12:true}
   },
   bestItmCalls: {
     label: '\u25c6 BEST ITM CALLS',
     desc: 'Score \u2265145 + liquid ($5+, 1M+ avg vol) + in-play today + contract \u2264$8 + JT 12-1 Mom + Minervini + Pocket Pivot \u2014 deep-ITM (\u03b4 0.70\u20130.90) calls on names that pass ALL THREE highest-IC scoring rules. You\'re paying real premium for deep-ITM contracts; only setups confirmed by 12-month momentum + Stage 2 trend template + institutional accumulation should graduate.',
-    filters: {sig:'GO', minScore:145, macd:true, ema200:true, rs:true,
+    filters: {sig:'GO', minScore:138, macd:true, ema200:true, rs:true,
               jt12:true, minervini:true, pocket:true,
               minPrice:5, minAvgVol:1000000, volRatio:100, maxOptPrice:8}
   },
   preMarket: {
     label: '\u25b2 PRE/POST MARKET',
     desc: 'Extended-hours gappers screened with the SAME filters as HIGH CONVICTION (PROVEN + Analyst \u2191 + GEX + JT 12-1 + Minervini), sorted by absolute gap %. Use any time the extended-hours session is active or on weekends.',
-    filters: {sig:'GO', minScore:140, analyst:true, proven:true, gex:true,
+    filters: {sig:'GO', minScore:121, analyst:true, proven:true, gex:true,
               jt12:true, minervini:true, _sortByGap:true, noEarn:false, noEarnDays:0}
   }
 };
