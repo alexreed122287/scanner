@@ -13692,7 +13692,7 @@ function _shadowLogScanRowsBatch(rows) {
       // Slim rule snapshot — name + pass only
       var ruleSnapshot = new Array(r.rules.length);
       for (var k = 0; k < r.rules.length; k++) {
-        ruleSnapshot[k] = { n: r.rules[k].n, pass: !!r.rules[k].pass };
+        ruleSnapshot[k] = { n: r.rules[k].n, pass: !!r.rules[k].pass, pts: +r.rules[k].pts || 0 };
       }
       arr.push({
         ts: nowMs,
@@ -14056,11 +14056,12 @@ window.lsAudit = function(){
 // ═══════════════════════════════════════════════════════════════════════════
 
 var _RULE_TIERS = {
+  // trend: rules checked via _rulePassedByName (reads `strong` field).
+  // Phase 2: removed '52Wk Hi Prox <5% (G-H)' (Q6 fold into continuous curve).
   trend: [
     'Minervini Trend Template',
     'JT 12-1 Momentum',
     '20d Donchian Breakout',
-    '52Wk Hi Prox <5% (G-H)',
     '52Wk Hi Prox <15%',
     'Strong Sector',
     'EMA20 > EMA50',
@@ -14068,20 +14069,20 @@ var _RULE_TIERS = {
     'RS > SPY (5d)',
     'RS > SPY (21d)',
   ],
+  // consol: Phase 2: removed 'RSI 50-65 (Cardwell)' (Q3 fold into continuous RSI curve).
   consol: [
     'Pocket Pivot',
     'VCP — ATR Contraction',
     'BBW Squeeze (<p20 of 120d)',
     'U/D Volume Ratio (50d)',
     'ADX 15-25 + DI+>DI-',           // emerging trend, not late confirmation
-    'RSI 50-65 (Cardwell)',          // mid-zone re-entry
   ],
 };
 
 function _rulePassedByName(rules, name) {
   if (!Array.isArray(rules)) return false;
   for (var i = 0; i < rules.length; i++) {
-    if (rules[i] && rules[i].n === name && rules[i].pass) return true;
+    if (rules[i] && rules[i].n === name && rules[i].strong) return true;
   }
   return false;
 }
@@ -16375,17 +16376,14 @@ function scoreIt(ticker, ind, opt){
   // \u2500\u2500 AVOID / PROVEN \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
   var avoidBad = AVOID.indexOf(ticker) >= 0;
   var provenOk = PROVEN.indexOf(ticker) >= 0;
-  if(avoidBad){ score -= 15; res.push({n:'AVOID ticker', pass:false, val:'-15pts', filter:false}); }
-  if(provenOk){ score += 8; techScore += 8; res.push({n:'PROVEN ticker', pass:true, val:'+8pts', filter:false, pts:8}); }
+  if(avoidBad){ score -= 15; res.push({n:'AVOID ticker', pass:false, strong:false, val:'-15pts', filter:false, pts:0}); }
+  if(provenOk){ score += 8; techScore += 8; res.push({n:'PROVEN ticker', pass:true, strong:true, val:'+8pts', filter:false, pts:8}); }
 
   // \u2500\u2500 SECTION A: Technical Momentum (parameter-tuned 2026-04-29) \u2500\u2500\u2500\u2500\u2500\u2500
   // Council commit 2/3: existing rules tightened to evidence-based parameters
   // (Cardwell range-shift, Wilder original ADX, George-Hwang 52-wk effect,
   // 21-day RS vs the broken 5-day). volOk dropped in commit 1; re-added as
   // U/D Volume Ratio in commit 3.
-  var rsiOk    = ind.rsi >= 40 && ind.rsi <= 70;                                  // permissive band
-  var rsiCross = ind.rsi >= 50 && ind.rsi <= 65;                                  // tight Cardwell zone (early entry)
-
   // Bulk-scan stamps ind.rsi=50, ind.macd=0, ind.adx=30 as placeholders
   // (index.html ~line 18633). Compute live values from cached daily history
   // when present, and backfill the result into `ind` so detail-pane widgets
@@ -16424,8 +16422,6 @@ function scoreIt(ticker, ind, opt){
     var rsiVal = calcRSIatIndex(_hist, 14, _hist.length - 1);
     if(typeof rsiVal === 'number' && !isNaN(rsiVal)){
       ind.rsi = +rsiVal.toFixed(1);
-      rsiOk    = ind.rsi >= 40 && ind.rsi <= 70;
-      rsiCross = ind.rsi >= 50 && ind.rsi <= 65;
     }
   }
   if(_hist && _hist.length >= 35){
@@ -16492,7 +16488,6 @@ function scoreIt(ticker, ind, opt){
   }
 
   var macdOk   = ind.macd > 0;
-  var adxOk    = ind.adx > 25;                                                     // confirmed trend
   var adxEarly = ind.adx >= 15 && ind.adx <= 25 && (ind.diPlus||0) > (ind.diMinus||0); // emerging trend (Wilder original)
   var emaOk    = ind.ema20 > ind.ema50;
   var tfOk     = ind.tf >= 2;
@@ -16505,16 +16500,6 @@ function scoreIt(ticker, ind, opt){
   var pf       = pfKey ? (SECTOR_PF[pfKey] || 0) : 0;
   var sectOk   = pf > 2;
 
-  // 52-wk high: George-Hwang JF 2004 effect concentrates within 5% of high.
-  // Keep \u226415% as universe-pass; \u22645% as tight breakout bonus.
-  var hiOk    = ind.week52hi > 0 ? (ind.price >= ind.week52hi * 0.85) : false;    // \u226415%
-  var hiTight = ind.week52hi > 0 ? (ind.price >= ind.week52hi * 0.95) : false;    // \u22645%
-
-  // RS vs SPY: 5-day was anti-signal per Lehmann 1990 short-term reversal.
-  // Use 21-day total return as the permissive proxy. Clenow 90d slope\u00d7R\u00b2
-  // ranker is added in commit 3 as a separate cross-sectional rule.
-  var rsRelOk = (ind.relStr21d != null) ? (ind.relStr21d > 0) : (ind.relStr5d > 0);
-
   // Above 200 EMA
   var ema200Ok = ind.ema200 > 0 ? ind.price > ind.ema200 : ind.ema20 > ind.ema50; // fallback if 200 not available
 
@@ -16522,27 +16507,76 @@ function scoreIt(ticker, ind, opt){
   //   - "Vol > Avg" flat threshold: too crude; replaced by U/D Volume Ratio in commit 2
   //   - "Price Accel" (today %chg > 5d avg): anti-signal per Lehmann 1990 +
   //     Lo-MacKinlay short-term reversal literature. Removed entirely.
-  // Council 2026-04-29 commit 2/3: bonus tight-zone rules added (rsiCross,
-  // adxEarly, hiTight). Wide-band rules retained as base pass.
+  // Phase 2 continuous scoring (2026-05-18): RSI, ADX, 52Wk Hi, RS > SPY
+  // converted from binary to curve-based. Cardwell RSI 50-65 and G-H <5%
+  // tight-zone rules folded into the continuous curves per council Q3/Q6.
   var rsRelLbl = (ind.relStr21d != null) ? '21d' : '5d';
   var rsRelVal = (ind.relStr21d != null) ? ind.relStr21d : ind.relStr5d;
+
+  // \u2500\u2500 Continuous scoring helpers (ported from rrjcar v3.6 scoreIt) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+  // Defined inside scoreIt so they don't pollute the global namespace.
+  // scalePts: linear ramp lo\u2192hi, clamped to [0, maxPts].
+  // rsiScore: symmetric curve centred at RSI 55; full credit at centre,
+  //           zero at \u00b120 (RSI 35 or RSI 75). Source: rrjcar lines 3409-3419.
+  function scalePts(val, lo, hi, maxPts){
+    if(val <= lo) return 0;
+    if(val >= hi) return maxPts;
+    return +(((val-lo)/(hi-lo))*maxPts).toFixed(1);
+  }
+  function rsiScore(rsi, maxPts){
+    if(rsi < 35 || rsi > 75) return 0;
+    var dist = Math.abs(rsi - 55); // 0 = perfect, 20 = boundary
+    return +Math.max(0, maxPts - (dist/20)*maxPts).toFixed(1);
+  }
+
+  // \u2500\u2500 Rule 1: RSI 40-70 continuous (max 8 pts, curve centred at 55, \u00b120 window)
+  // pass = any partial credit (pts > 0); strong = at least half credit (pts \u2265 4).
+  var rsiPts    = rsiScore(ind.rsi, 8);
+  var rsiPass   = rsiPts > 0;
+  var rsiStrong = rsiPts >= 4;
+  score += rsiPts; techScore += rsiPts;
+  res.push({n:'RSI 40-70', pass:rsiPass, strong:rsiStrong, val:'RSI '+ind.rsi+' ('+rsiPts.toFixed(1)+'pts)', filter:false, pts:rsiPts});
+
+  // \u2500\u2500 Rule 2: ADX > 25 continuous (max 8 pts, linear 22\u219240)
+  var adxPts    = scalePts(ind.adx, 22, 40, 8);
+  var adxPass   = adxPts > 0;
+  var adxStrong = adxPts >= 4;
+  score += adxPts; techScore += adxPts;
+  res.push({n:'ADX > 25', pass:adxPass, strong:adxStrong, val:'ADX '+ind.adx+' ('+adxPts.toFixed(1)+'pts)', filter:false, pts:adxPts});
+
+  // \u2500\u2500 Rule 4: 52Wk Hi Prox continuous (max 10 pts, 85%\u2192100% of 52-wk high)
+  // George-Hwang JF 2004 effect \u2014 continuous curve subsumes the former \u22645%
+  // tight-zone bonus (G-H) per Phase 2 council decision Q6.
+  var hiPct    = ind.week52hi > 0 ? ((ind.price - ind.week52hi*0.85) / (ind.week52hi*0.15)) : 0;
+  var hiPts    = ind.week52hi > 0 ? scalePts(hiPct, 0, 1, 10) : 0;
+  var hiPass   = hiPts > 0;
+  var hiStrong = hiPts >= 5;
+  score += hiPts; techScore += hiPts;
+  res.push({n:'52Wk Hi Prox <15%', pass:hiPass, strong:hiStrong, val:ind.week52hi>0?'$'+fmt2(ind.price)+' / $'+fmt2(ind.week52hi)+' ('+hiPts.toFixed(1)+'pts)':'no data', filter:false, pts:hiPts});
+
+  // \u2500\u2500 Rule 5: RS > SPY continuous (max 8 pts, 21d window, 0%\u219210% scale)
+  // 21d window per Jegadeesh-Titman; 0\u219210% calibration window replaces
+  // rrjcar's 0\u21925% (which was tuned for 5d). Phase 2 Q5 decision.
+  var rsPts    = rsRelVal > 0 ? scalePts(rsRelVal, 0, 10, 8) : 0;
+  var rsPass   = rsPts > 0;
+  var rsStrong = rsPts >= 4;
+  score += rsPts; techScore += rsPts;
+  res.push({n:'RS > SPY ('+rsRelLbl+')', pass:rsPass, strong:rsStrong, val:(rsRelVal>0?'+':'')+(rsRelVal||0).toFixed(2)+'% ('+rsPts.toFixed(1)+'pts)', filter:false, pts:rsPts});
+
+  // \u2500\u2500 Remaining binary tech rules \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+  // `strong` field added (= pass for binary rules). pts emits 0 when not
+  // passing so score === sum(pts where pass) invariant holds uniformly.
   var techChecks = [
-    {ok:rsiOk,    n:'RSI 40-70',          val:'RSI '+ind.rsi,                                          pts:6},
-    {ok:rsiCross, n:'RSI 50-65 (Cardwell)', val:'RSI '+ind.rsi,                                        pts:6},
-    {ok:macdOk,   n:'MACD Hist +',        val:''+(ind.macd>=0?'+':'')+ind.macd,                        pts:6},
-    {ok:adxOk,    n:'ADX > 25',           val:'ADX '+ind.adx,                                          pts:6},
-    {ok:adxEarly, n:'ADX 15-25 + DI+>DI-', val:'ADX '+ind.adx+' DI+'+(typeof ind.diPlus==='number'?ind.diPlus.toFixed(1):'?')+' DI-'+(typeof ind.diMinus==='number'?ind.diMinus.toFixed(1):'?'), pts:6},
-    {ok:emaOk,    n:'EMA20 > EMA50',      val:'$'+fmt2(ind.ema20)+' > $'+fmt2(ind.ema50),              pts:10},
-    {ok:tfOk,     n:'TF Aligned 2/3',     val:ind.tf+'/3',                                             pts:12},
-    {ok:sectOk,   n:'Sector PF > 2',      val:'PF '+pf,                                                pts:5},
-    {ok:hiOk,     n:'52Wk Hi Prox <15%',  val:ind.week52hi>0?'$'+fmt2(ind.price)+' / $'+fmt2(ind.week52hi):'no data', pts:8},
-    {ok:hiTight,  n:'52Wk Hi Prox <5% (G-H)', val:ind.week52hi>0?'$'+fmt2(ind.price)+' / $'+fmt2(ind.week52hi):'no data', pts:6},
-    {ok:rsRelOk,  n:'RS > SPY ('+rsRelLbl+')', val:(rsRelVal>0?'+':'')+(rsRelVal||0).toFixed(2)+'%',   pts:10},
-    {ok:ema200Ok, n:'Price > EMA200',     val:ind.ema200>0?'$'+fmt2(ind.price)+' > $'+fmt2(ind.ema200):'via EMA trend', pts:6}
+    {ok:macdOk,   n:'MACD Hist +',          val:''+(ind.macd>=0?'+':'')+ind.macd,                                                                                              pts:6},
+    {ok:adxEarly, n:'ADX 15-25 + DI+>DI-',  val:'ADX '+ind.adx+' DI+'+(typeof ind.diPlus==='number'?ind.diPlus.toFixed(1):'?')+' DI-'+(typeof ind.diMinus==='number'?ind.diMinus.toFixed(1):'?'), pts:6},
+    {ok:emaOk,    n:'EMA20 > EMA50',         val:'$'+fmt2(ind.ema20)+' > $'+fmt2(ind.ema50),                                                                                    pts:10},
+    {ok:tfOk,     n:'TF Aligned 2/3',        val:ind.tf+'/3',                                                                                                                   pts:12},
+    {ok:sectOk,   n:'Sector PF > 2',         val:'PF '+pf,                                                                                                                      pts:5},
+    {ok:ema200Ok, n:'Price > EMA200',         val:ind.ema200>0?'$'+fmt2(ind.price)+' > $'+fmt2(ind.ema200):'via EMA trend',                                                      pts:6}
   ];
   techChecks.forEach(function(c){
     if(c.ok){ score += c.pts; techScore += c.pts; }
-    res.push({n:c.n, pass:c.ok, val:c.val, filter:false, pts:c.pts});
+    res.push({n:c.n, pass:c.ok, strong:c.ok, val:c.val, filter:false, pts: c.ok ? c.pts : 0});
   });
 
   // \u2500\u2500 SECTION B: FMP Daily Signals (2 rules, 20 pts) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
@@ -16568,7 +16602,7 @@ function scoreIt(ticker, ind, opt){
   ];
   fmpChecks.forEach(function(c){
     if(c.ok){ score += c.pts; fundScore += c.pts; }
-    res.push({n:c.n, pass:c.ok, val:c.val, filter:false, pts:c.pts, isFmp:true});
+    res.push({n:c.n, pass:c.ok, strong:c.ok, val:c.val, filter:false, pts: c.ok ? c.pts : 0, isFmp:true});
   });
 
   // \u2500\u2500 SECTION D: Momentum Acceleration (3 rules, 28 pts, Tradier history) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
@@ -16586,7 +16620,7 @@ function scoreIt(ticker, ind, opt){
   var mfiOk      = histDays ? mfiVal_raw > 50 : false;
   var mfiVal     = histDays ? ('MFI(14) ' + mfiVal_raw + (mfiOk ? ' > 50' : ' \u2264 50')) : 'Load detail to calculate';
   if(mfiOk){ score += 10; techScore += 10; }
-  res.push({n:'MFI(14) > 50', pass:mfiOk, val:mfiVal, filter:false, pts:10, isHist:true});
+  res.push({n:'MFI(14) > 50', pass:mfiOk, strong:mfiOk, val:mfiVal, filter:false, pts: mfiOk ? 10 : 0, isHist:true});
 
   // Council 2026-04-29 commit 2/3: CMO(10)>0 \u2192 CMO(9)>50 (Chande's original
   // 1993 threshold, not the arbitrary zero-line cross). 9-period is Chande's
@@ -16595,7 +16629,7 @@ function scoreIt(ticker, ind, opt){
   var cmoOk      = histDays ? cmoVal_raw > 50 : false;
   var cmoVal     = histDays ? ('CMO(9) ' + cmoVal_raw + (cmoOk ? ' > 50' : ' \u2264 50')) : 'Load detail to calculate';
   if(cmoOk){ score += 7; techScore += 7; }
-  res.push({n:'CMO(9) > 50', pass:cmoOk, val:cmoVal, filter:false, pts:7, isHist:true});
+  res.push({n:'CMO(9) > 50', pass:cmoOk, strong:cmoOk, val:cmoVal, filter:false, pts: cmoOk ? 7 : 0, isHist:true});
 
   // ═══ COUNCIL 2026-04-29 COMMIT 3/3: NEW EVIDENCE-BASED RULES ════════════
   // All rules below use G_HIST_CACHE[ticker] (daily bars). Skip silently when
@@ -16642,7 +16676,7 @@ function scoreIt(ticker, ind, opt){
   // failed trend. v2.17.3: prevents fresh IPOs / new symbols from being
   // penalized indistinguishably from stocks that actually failed the test.
   var minerviniDataGap = !histDays || histDays.length < 210;
-  res.push({n:'Minervini Trend Template', pass:minerviniOk, val:minerviniDetail, filter:false, pts:15, isHist:true, dataGap:minerviniDataGap});
+  res.push({n:'Minervini Trend Template', pass:minerviniOk, strong:minerviniOk, val:minerviniDetail, filter:false, pts: minerviniOk ? 15 : 0, isHist:true, dataGap:minerviniDataGap});
 
   // ── RULE: Pocket Pivot (O'Neil/Morales-Kacher, +15) ───────────────────
   // Today's volume > largest down-day volume of prior 10 days,
@@ -16671,7 +16705,7 @@ function scoreIt(ticker, ind, opt){
                  +' | upperHalf '+(v3?'✓':'✗')+' | <5%ext '+(v4?'✓':'✗');
   }
   if (pocketOk) { score += 15; techScore += 15; }
-  res.push({n:'Pocket Pivot', pass:pocketOk, val:pocketDetail, filter:false, pts:15, isHist:true});
+  res.push({n:'Pocket Pivot', pass:pocketOk, strong:pocketOk, val:pocketDetail, filter:false, pts: pocketOk ? 15 : 0, isHist:true});
 
   // ── RULE: U/D Volume Ratio 50d ≥ 1.5 (O'Neil IBD, +12 tiered) ─────────
   // sum(volume on up-close days) / sum(volume on down-close days) over 50d.
@@ -16689,7 +16723,7 @@ function scoreIt(ticker, ind, opt){
     udVal = 'U/D '+udRatio.toFixed(2)+' ('+(udPts === 12 ? 'strong' : udPts === 8 ? 'accum' : udPts === 4 ? 'mild' : 'weak')+')';
   }
   if (udPts > 0) { score += udPts; techScore += udPts; }
-  res.push({n:'U/D Volume Ratio (50d)', pass:udPts > 0, val:udVal, filter:false, pts:udPts || 12, isHist:true});
+  res.push({n:'U/D Volume Ratio (50d)', pass:udPts > 0, strong:udPts > 0, val:udVal, filter:false, pts:udPts, isHist:true});
 
   // ── RULE: VCP / Volatility Contraction (Minervini, +12) ───────────────
   // ATR(14) today / ATR(14) 30d ago < 0.70 = supply contracting before breakout.
@@ -16710,7 +16744,7 @@ function scoreIt(ticker, ind, opt){
     }
   }
   if (vcpOk) { score += 12; techScore += 12; }
-  res.push({n:'VCP — ATR Contraction', pass:vcpOk, val:vcpDetail, filter:false, pts:12, isHist:true});
+  res.push({n:'VCP — ATR Contraction', pass:vcpOk, strong:vcpOk, val:vcpDetail, filter:false, pts: vcpOk ? 12 : 0, isHist:true});
 
   // ── RULE: Bollinger Bandwidth Squeeze (+10) ───────────────────────────
   // BB(20,2) bandwidth at <20th percentile of trailing 120 days = compressed.
@@ -16736,7 +16770,7 @@ function scoreIt(ticker, ind, opt){
     }
   }
   if (bbwOk) { score += 10; techScore += 10; }
-  res.push({n:'BBW Squeeze (<p20 of 120d)', pass:bbwOk, val:bbwDetail, filter:false, pts:10, isHist:true});
+  res.push({n:'BBW Squeeze (<p20 of 120d)', pass:bbwOk, strong:bbwOk, val:bbwDetail, filter:false, pts: bbwOk ? 10 : 0, isHist:true});
 
   // ── RULE: Donchian 20d Breakout + Volume (+12) ────────────────────────
   // Today closes above the 20-day high on volume ≥ 1.5× 50d avg.
@@ -16756,7 +16790,7 @@ function scoreIt(ticker, ind, opt){
                    +' | vol '+(todayVol2/1000).toFixed(0)+'k vs 1.5×50d '+(avgVol50*1.5/1000).toFixed(0)+'k '+(b2?'✓':'✗');
   }
   if (donchianOk) { score += 12; techScore += 12; }
-  res.push({n:'20d Donchian Breakout', pass:donchianOk, val:donchianDetail, filter:false, pts:12, isHist:true});
+  res.push({n:'20d Donchian Breakout', pass:donchianOk, strong:donchianOk, val:donchianDetail, filter:false, pts: donchianOk ? 12 : 0, isHist:true});
 
   // ── RULE: JT 12-1 Cross-Sectional Momentum (+20) ──────────────────────
   // Total return from t-252 to t-21 (skip last month — Jegadeesh-Titman 1993,
@@ -16775,7 +16809,7 @@ function scoreIt(ticker, ind, opt){
     }
   }
   if (jtOk) { score += 20; techScore += 20; }
-  res.push({n:'JT 12-1 Momentum', pass:jtOk, val:jtDetail, filter:false, pts:20, isHist:true});
+  res.push({n:'JT 12-1 Momentum', pass:jtOk, strong:jtOk, val:jtDetail, filter:false, pts: jtOk ? 20 : 0, isHist:true});
 
   // \u2500\u2500 GO DECISION \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
   // \u2500\u2500 SECTION C: GEX Confirmation (bonus rule, +6 pts, no penalty) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
@@ -16803,7 +16837,7 @@ function scoreIt(ticker, ind, opt){
       + (gexCrowded ? ' ⚠ overcrowded' : (gexCallPct >= 70 ? ' ✓ strong' : (gexCallHeavy ? ' constructive' : '')))
     : 'Run GEX/Flow tab first';
   if(gexPts !== 0){ score += gexPts; techScore += gexPts; }
-  res.push({n:'GEX Call Flow', pass:gexCallHeavy && !gexCrowded, val:gexVal, filter:false, pts:gexPts, isGex:true});
+  res.push({n:'GEX Call Flow', pass:gexCallHeavy && !gexCrowded, strong:gexCallHeavy && !gexCrowded, val:gexVal, filter:false, pts:gexPts, isGex:true});
 
   // Rule: Strong Sector (+8 / -8) — sector-rotation overlay from industry pipeline.
   // Bumped from +5/-5 for the long-calls-only user: bullish unhedged bets
@@ -16833,12 +16867,12 @@ function scoreIt(ticker, ind, opt){
       sectorVal += themeLive.dominant === 'intraday' ? ' ↓↓↓ (rotating out)' : ' ↓↓ (weak sector — demoted)';
     }
   }
-  res.push({n:'Strong Sector', pass:sectorOk, val:sectorVal, filter:false, pts:8, isTheme:true});
+  res.push({n:'Strong Sector', pass:sectorOk, strong:sectorOk, val:sectorVal, filter:false, pts: sectorOk ? 8 : 0, isTheme:true});
   // Weak Sector penalty — separate entry so score - sumPassPts stays at 0 for
   // demoted tickers. Strong Sector's pass stays false (correct — it didn't fire),
   // so _RULE_TIERS.trend counting remains unaffected.
   if (themeLive && (themeLive.combinedScore || 0) <= 25) {
-    res.push({n:'Weak Sector (penalty)', pass:true, val:sectorVal, filter:false, pts:-8, isTheme:true});
+    res.push({n:'Weak Sector (penalty)', pass:true, strong:true, val:sectorVal, filter:false, pts:-8, isTheme:true});
   }
 
   // NEW Rule: Broken Trend (-5 penalty only) — explicit bearish-pattern flag
@@ -16857,14 +16891,15 @@ function scoreIt(ticker, ind, opt){
   // intact-trend tickers (pass:true), making score - sumPassPts = +5 across
   // 83% of the universe. The score itself was always correct; only the pts
   // metadata was wrong.
-  res.push({n:'Broken Trend (penalty)', pass:!brokenTrend, val:brokenTrendVal, filter:false, pts:0, isPenalty:true});
+  res.push({n:'Broken Trend (penalty)', pass:!brokenTrend, strong:!brokenTrend, val:brokenTrendVal, filter:false, pts:0, isPenalty:true});
 
   // \u2500\u2500 GO DECISION \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-  // Score cap raised: 144 base + 8 GEX (was 6) + 8 sector (was 5) +
-  //   +4 Analyst Revisions delta (now 16, was 12) = 164 max for long-calls-only.
-  // Penalties (Broken Trend -5, weak sector -8, avoidBad) can push below 0;
-  // clamp to 0 so the GO threshold comparator (>=110) doesn't get confused.
-  var total = clamp(score, 0, 164);
+  // Score cap: Phase 2 continuous scoring (2026-05-18) adjusted max from 164 to 156.
+  // Net change: RSI +2 (6→8), ADX +2 (6→8), 52Wk Hi +2 (8→10), RS −2 (10→8),
+  //             Cardwell −6 (removed Q3), G-H −6 (removed Q6) = −8 total.
+  // Penalties (Broken Trend, weak sector, avoidBad) can push below 0;
+  // clamp to 0 so the GO threshold comparator doesn't get confused.
+  var total = clamp(score, 0, 156);
   // GO threshold reads from the Min Score input in the scanner tab so the
   // user can tune what counts as a "GO". Falls back to 110 if input missing.
   // Default 140 matches observed score distribution (post-2026-04-30
@@ -16891,7 +16926,7 @@ function scoreIt(ticker, ind, opt){
     // BUG-2 fix 2026-05-09: was emitting `.length` (a number), but
     // _matchesPreset reads this as an array of rule names. Emit names.
     // Display sites must use `.length`.
-    passes:     res.filter(function(r){ return r.pass; }).map(function(r){ return r.n; })
+    passes:     res.filter(function(r){ return r.strong; }).map(function(r){ return r.n; })
   };
 }
 
