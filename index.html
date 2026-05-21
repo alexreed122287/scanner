@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="v5.19.26.1">
+<meta name="op-build" content="v5.21.26.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -4220,7 +4220,7 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
       <!-- Alert threshold -->
       <div class="api-row" style="align-items:center;margin-top:8px;">
         <label style="flex:0 0 180px;">MIN SCORE THRESHOLD</label>
-        <input type="number" id="notif-min-score" value="120" min="89" max="150" style="width:70px;" oninput="saveNotifSettings()">
+        <input type="number" id="notif-min-score" value="111" min="89" max="150" style="width:70px;" oninput="saveNotifSettings()">
         <span style="color:var(--gry);font-size:11px;margin-left:8px;">/ 122 — GO signals above this score trigger alerts</span>
       </div>
 
@@ -19546,7 +19546,22 @@ function finishScan(){
     fmpDone = enrichTotal;
   }
   if(fmpKey){
-    var goTickers = G.results.slice(0,SC_ENRICH_LIMIT).map(function(r){ return r.ticker; });
+    // Phase 3.X: gate FMP eligibility on pre-FMP score >= 85.
+    // Lowest GO threshold is 111 (momentum); max FMP contribution is 20 pts
+    // (Analyst Revisions 12 + Analyst PT 8). 111 - 20 = 91 is the theoretical
+    // minimum pre-FMP score needed to reach GO. 85 adds a 6-pt safety buffer.
+    // Since isGo has no fundScore gate (just total >= threshold && !avoidBad),
+    // skipping FMP for sub-85 tickers can only lower their score — no false
+    // negatives possible. Empirically ~35-40 of the top 60 qualify.
+    var goTickers = G.results.slice(0,SC_ENRICH_LIMIT)
+      .filter(function(r){ return (r.score||0) >= 85; })
+      .map(function(r){ return r.ticker; });
+    // Pre-credit fmpDone for tickers gated below the score threshold.
+    // _maybeFinishScan waits for fmpDone >= enrichTotal; without this,
+    // the gated-out tickers (no FMP fetch needed) would stall the scan
+    // until the 6-minute watchdog fires.
+    var _fmpGatedOut = enrichTotal - goTickers.length;
+    if (_fmpGatedOut > 0) { fmpDone += _fmpGatedOut; _maybeFinishScan(); }
     var _fmpIdx = 0;
     function _fmpNext(){
       if(_fmpIdx >= goTickers.length) return;
@@ -19663,8 +19678,15 @@ function finishScan(){
       // malformed for index ETFs), the .then aborts, .catch fires, and
       // indEnriched stays false even though enrichment actually completed.
       r.indEnriched = true;
-      var fmpActive = fmpKey && !window._isFmpCircuitOpen() && !(window._fmpRateLimited > 0 && (Date.now()-window._fmpRateLimited) < (window._FMP_COOLDOWN_MS||60000));
-      var p = fmpActive ? fetchFmpData(t) : Promise.resolve(null);
+      // Phase 3.X dedup: enrichNext no longer calls fetchFmpData. _fmpNext
+      // (the dedicated parallel FMP queue above) already fetches for every
+      // eligible ticker and runs faster than this sequential path — by the
+      // time enrichNext reaches a ticker, G_FMP_CACHE[t] is almost always
+      // already populated. Making this cache-only stops the two queues from
+      // racing past FMP's 300/min Starter ceiling. scoreIt reads G_FMP_CACHE
+      // directly, so it picks up whatever _fmpNext already fetched.
+      if (!G_FMP_CACHE[t]) { var _ls = loadFmpCache(t); if (_ls) G_FMP_CACHE[t] = _ls; }
+      var p = Promise.resolve(null);
       p.then(function(){
         if(myGen !== G._scanGen) return;
         // Wrap scoreIt in try/catch \u2014 a single ticker's bad data shouldn't
@@ -25974,7 +25996,7 @@ function saveNotifSettings(){
       ejsTemplate:   eid('notif-ejs-template')    ? eid('notif-ejs-template').value     : '',
       ejsPubKey:     eid('notif-ejs-pubkey')      ? eid('notif-ejs-pubkey').value       : '',
       emailTo:       eid('notif-email-to')        ? eid('notif-email-to').value         : '',
-      minScore:      eid('notif-min-score')       ? parseInt(eid('notif-min-score').value)||120  : 120,
+      minScore:      eid('notif-min-score')       ? parseInt(eid('notif-min-score').value)||111  : 111,
       cooldown:      eid('notif-cooldown')        ? parseInt(eid('notif-cooldown').value)||60    : 60,
       autoFill:      eid('notif-autofill')        ? eid('notif-autofill').checked       : false,
       autoQty:       eid('notif-autoqty')         ? parseInt(eid('notif-autoqty').value)||1      : 1,
@@ -25995,7 +26017,7 @@ function loadNotifSettings(){
     if(eid('notif-ejs-template'))  eid('notif-ejs-template').value    = s.ejsTemplate  || '';
     if(eid('notif-ejs-pubkey'))    eid('notif-ejs-pubkey').value      = s.ejsPubKey    || '';
     if(eid('notif-email-to'))      eid('notif-email-to').value        = s.emailTo      || '';
-    if(eid('notif-min-score'))     eid('notif-min-score').value       = s.minScore     || 120;
+    if(eid('notif-min-score'))     eid('notif-min-score').value       = s.minScore     || 111;
     if(eid('notif-cooldown'))      eid('notif-cooldown').value        = s.cooldown     || 60;
     if(eid('notif-autofill'))      eid('notif-autofill').checked      = !!s.autoFill;
     if(eid('notif-autoqty'))       eid('notif-autoqty').value         = s.autoQty      || 1;
@@ -27796,7 +27818,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = 'v5.19.26.1';
+var APP_VERSION = 'v5.21.26.0';
 // v2.18.21: DEFAULT feedback webhook. Every visitor's "Submit Feedback"
 // form posts here (unless they've overridden via ALERTS → Feedback
 // Webhook). The URL points to a Google Apps Script Web App owned by
