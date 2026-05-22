@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="v5.21.26.0">
+<meta name="op-build" content="v5.22.26.1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -18933,7 +18933,10 @@ async function fetchDynamicUniverse(key, mode){
   }
   var fmpKey = '';
   try{ fmpKey = localStorage.getItem('rrjcar_fmp') || ''; }catch(e){}
-  if(fmpKey){
+  // Pass 3: FMP batch-quote-short fallback for tickers still missed after both
+  // Tradier passes. Gated on session flag: once a 402 (plan-restricted) is seen
+  // we disable Pass 3 for the rest of the session to avoid repeated failed calls.
+  if(fmpKey && !window._batchQuoteShortUnavailable){
     var gotQuote2 = {};
     allQuotes.forEach(function(q){ if(q && q.symbol) gotQuote2[q.symbol] = true; });
     var stillMissed = allTickers.filter(function(u){ return !gotQuote2[u.t]; });
@@ -18950,13 +18953,20 @@ async function fetchDynamicUniverse(key, mode){
         );
         try {
           var fresp = await fetch(fmpBase + '/batch-quote-short?symbols=' + encodeURIComponent(fsymbols) + '&apikey=' + fmpKey);
+          if (fresp.status === 402) {
+            window._batchQuoteShortUnavailable = true;
+            console.info('[fmp] batch-quote-short unavailable on this plan (402) — Pass 3 disabled for session');
+            break;
+          }
           var ftext = await fresp.text();
-          // FMP returns the literal string "Restricted" (not JSON) for plan-gated
-          // endpoints. Detect non-JSON before parsing to avoid SyntaxError noise.
           if (!ftext || (ftext[0] !== '{' && ftext[0] !== '[')) {
-            if (ftext && ftext.indexOf('Restricted') === 0) { /* expected — skip silently */ }
-            else { console.warn('[fmp] Pass 3 non-JSON response, first chars:', (ftext||'').slice(0,80)); }
-            continue;
+            if (ftext && ftext.indexOf('Restricted') >= 0) {
+              window._batchQuoteShortUnavailable = true;
+              console.info('[fmp] batch-quote-short plan-restricted — Pass 3 disabled for session');
+            } else {
+              console.warn('[fmp] Pass 3 non-JSON response, first chars:', (ftext||'').slice(0,80));
+            }
+            break;
           }
           var fdata;
           try { fdata = JSON.parse(ftext); } catch(pe) { console.warn('[fmp] Pass 3 parse error:', pe.message.slice(0,60)); continue; }
@@ -27818,7 +27828,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = 'v5.21.26.0';
+var APP_VERSION = 'v5.22.26.1';
 // v2.18.21: DEFAULT feedback webhook. Every visitor's "Submit Feedback"
 // form posts here (unless they've overridden via ALERTS → Feedback
 // Webhook). The URL points to a Google Apps Script Web App owned by
