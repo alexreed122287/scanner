@@ -18939,7 +18939,10 @@ async function fetchDynamicUniverse(key, mode){
   }
   var fmpKey = '';
   try{ fmpKey = localStorage.getItem('rrjcar_fmp') || ''; }catch(e){}
-  if(fmpKey){
+  // Pass 3: FMP batch-quote-short fallback for tickers still missed after both
+  // Tradier passes. Gated on session flag: once a 402 (plan-restricted) is seen
+  // we disable Pass 3 for the rest of the session to avoid repeated failed calls.
+  if(fmpKey && !window._batchQuoteShortUnavailable){
     var gotQuote2 = {};
     allQuotes.forEach(function(q){ if(q && q.symbol) gotQuote2[q.symbol] = true; });
     var stillMissed = allTickers.filter(function(u){ return !gotQuote2[u.t]; });
@@ -18956,13 +18959,20 @@ async function fetchDynamicUniverse(key, mode){
         );
         try {
           var fresp = await fetch(fmpBase + '/batch-quote-short?symbols=' + encodeURIComponent(fsymbols) + '&apikey=' + fmpKey);
+          if (fresp.status === 402) {
+            window._batchQuoteShortUnavailable = true;
+            console.info('[fmp] batch-quote-short unavailable on this plan (402) — Pass 3 disabled for session');
+            break;
+          }
           var ftext = await fresp.text();
-          // FMP returns the literal string "Restricted" (not JSON) for plan-gated
-          // endpoints. Detect non-JSON before parsing to avoid SyntaxError noise.
           if (!ftext || (ftext[0] !== '{' && ftext[0] !== '[')) {
-            if (ftext && ftext.indexOf('Restricted') === 0) { /* expected — skip silently */ }
-            else { console.warn('[fmp] Pass 3 non-JSON response, first chars:', (ftext||'').slice(0,80)); }
-            continue;
+            if (ftext && ftext.indexOf('Restricted') >= 0) {
+              window._batchQuoteShortUnavailable = true;
+              console.info('[fmp] batch-quote-short plan-restricted — Pass 3 disabled for session');
+            } else {
+              console.warn('[fmp] Pass 3 non-JSON response, first chars:', (ftext||'').slice(0,80));
+            }
+            break;
           }
           var fdata;
           try { fdata = JSON.parse(ftext); } catch(pe) { console.warn('[fmp] Pass 3 parse error:', pe.message.slice(0,60)); continue; }
