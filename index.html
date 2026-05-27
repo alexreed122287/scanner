@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="v5.26.26.0">
+<meta name="op-build" content="v5.22.26.1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -18611,13 +18611,7 @@ function _renderScanDataStatus(stats){
   if (!foregroundN) { el.style.display = 'none'; return; }
   var foreground = G.results.slice(0, foregroundN);
   var indMissing = foreground.filter(function(r){ return !r.indEnriched; }).length;
-  var fmpMissing = foreground.filter(function(r){
-    if(r.fmpEnriched) return false;
-    if((r.score||0) < 85) return false;
-    var c = G_FMP_CACHE[r.ticker] || loadFmpCache(r.ticker);
-    if(c && c.numAnalysts > 0) return false;
-    return true;
-  }).length;
+  var fmpMissing = foreground.filter(function(r){ return !r.fmpEnriched; }).length;
   // GEX coverage is broader (top 200 typically), keep its own scope.
   var gexScopeN = Math.min(200, (G.results || []).length);
   var gexCovered = (G.gexData && G.gexData.length) || 0;
@@ -19577,10 +19571,7 @@ function finishScan(){
     // the gated-out tickers (no FMP fetch needed) would stall the scan
     // until the 6-minute watchdog fires.
     var _fmpGatedOut = enrichTotal - goTickers.length;
-    if (_fmpGatedOut > 0) {
-      G.results.slice(0, SC_ENRICH_LIMIT).forEach(function(r){ if((r.score||0) < 85) r.fmpEnriched = true; });
-      fmpDone += _fmpGatedOut; _maybeFinishScan();
-    }
+    if (_fmpGatedOut > 0) { fmpDone += _fmpGatedOut; _maybeFinishScan(); }
     var _fmpIdx = 0;
     function _fmpNext(){
       if(_fmpIdx >= goTickers.length) return;
@@ -19603,7 +19594,6 @@ function finishScan(){
       if(cached && cached.numAnalysts > 0){
         // CRITICAL: cache-skip must still tick fmpDone, else scans where most
         // tickers have warm FMP cache (every re-scan within ~1h) hang at 97%.
-        var r = G.resultsByTicker[t]; if(r) r.fmpEnriched = true;
         fmpDone++; _maybeFinishScan();
         setTimeout(_fmpNext, 0);
         return;
@@ -27838,7 +27828,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = 'v5.26.26.0';
+var APP_VERSION = 'v5.22.26.1';
 // v2.18.21: DEFAULT feedback webhook. Every visitor's "Submit Feedback"
 // form posts here (unless they've overridden via ALERTS → Feedback
 // Webhook). The URL points to a Google Apps Script Web App owned by
