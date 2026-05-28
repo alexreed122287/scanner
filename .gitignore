@@ -5,3 +5,7 @@ index.html.bak.*
 industry/.venv/
 industry/__pycache__/
 **/__pycache__/
+
+# Local-only generated artifacts (reports, exports). Live in the workspace
+# for download but never committed to the repo. Added 2026-05-13.
+_artifacts/
