@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="v5.26.26.1">
+<meta name="op-build" content="v6.1.26.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -3347,10 +3347,10 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
   </div>
   <div class="flt-bar collapsible" id="sc-bar-screener" data-default-collapsed style="flex-wrap:wrap;gap:6px;">
     <button type="button" class="sec-toggle" title="Collapse / expand the SCREENER inputs">SCREENER</button>
-    <label>Min Price $<input type="number" id="sc-minprice" value="1" min="1" style="width:90px;" title="Only include stocks above this price"></label>
+    <label>Min Price $<input type="number" id="sc-minprice" value="20" min="1" style="width:90px;" title="Only include stocks above this price"></label>
     <label>Max Price $<input type="number" id="sc-maxprice" placeholder="any" min="1" style="width:100px;" title="Only include stocks below this price — leave blank for no limit"></label>
     <label>Min AvgVol <input type="text" inputmode="numeric" id="sc-minavgvol" value="500,000" oninput="formatCommaInput(this)" style="width:140px;" title="Min average daily volume — typed value formats with commas (e.g. 500,000)"></label>
-    <label>Today Vol % <input type="number" id="sc-volratio" placeholder="any" min="0" max="200" style="width:90px;" title="Today volume must be at least X% of avg volume. Leave blank to skip this filter.">%</label>
+    <label>Today Vol % <input type="number" id="sc-volratio" value="10" min="0" max="200" style="width:90px;" title="Today volume must be at least X% of avg volume. Leave blank to skip this filter.">%</label>
     <label title="Filter OUT tickers where the option contract costs more than this amount. Uses last scanned option price.">Max Opt $ <input type="number" id="sc-maxoptprice" placeholder="any" min="0" step="0.50" style="width:100px;"></label>
     <button class="btn" style="border-color:var(--grn);color:var(--grn);" onclick="saveScanSettings()" title="Save current screener + filter settings to localStorage. Restored on every page load.">SAVE</button>
     <button class="btn" style="border-color:var(--gry2);color:var(--gry);" onclick="resetScanSettings()" title="Reset screener + filters to factory defaults. Does NOT clear saved API keys or tokens.">&#8634; RESET</button>
@@ -18812,10 +18812,10 @@ function setScanComplete(stats){
 
 async function fetchDynamicUniverse(key, mode){
   var host = mode === 'live' ? 'https://api.tradier.com' : 'https://sandbox.tradier.com';
-  var minPrice   = parseFloat(eid('sc-minprice')   ? eid('sc-minprice').value   : 1)  || 1;
+  var minPrice   = parseFloat(eid('sc-minprice')   ? eid('sc-minprice').value   : 20) || 20;
   var maxPrice   = parseFloat(eid('sc-maxprice')   ? eid('sc-maxprice').value   : 0)   || 0;
-  var minAvgVol  = parseFloat(((eid('sc-minavgvol') && eid('sc-minavgvol').value) || '50000').replace(/,/g,'')) || 50000;
-  var volRatioPct= parseFloat(eid('sc-volratio')   ? eid('sc-volratio').value   : 0)  || 0;
+  var minAvgVol  = parseFloat(((eid('sc-minavgvol') && eid('sc-minavgvol').value) || '500000').replace(/,/g,'')) || 500000;
+  var volRatioPct= parseFloat(eid('sc-volratio')   ? eid('sc-volratio').value   : 10) || 10;
   var seen = {};
   // Pre-scan theme filter: when a theme is selected in the SCAN toolbar,
   // restrict the universe to that theme's curated members. The scan still
@@ -20012,10 +20012,10 @@ var SCAN_SETTINGS_VERSION = 2;
 // Field-id → factory default (for Reset). Inputs map to their HTML defaults;
 // checkboxes default to false unless noted.
 var SCAN_SETTING_DEFAULTS = {
-  'sc-minprice':     '1',
+  'sc-minprice':     '20',
   'sc-maxprice':     '',
   'sc-minavgvol':    '500,000',
-  'sc-volratio':     '',
+  'sc-volratio':     '10',
   'sc-maxoptprice':  '',
   'sc-minscore':     '116',
   'sc-sig':          'GO',
@@ -27828,7 +27828,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = 'v5.26.26.1';
+var APP_VERSION = 'v6.1.26.0';
 // v2.18.21: DEFAULT feedback webhook. Every visitor's "Submit Feedback"
 // form posts here (unless they've overridden via ALERTS → Feedback
 // Webhook). The URL points to a Google Apps Script Web App owned by
