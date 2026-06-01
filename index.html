@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="v6.1.26.0">
+<meta name="op-build" content="v6.1.26.1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -19082,6 +19082,47 @@ async function fetchDynamicUniverse(key, mode){
   }
   return passed;
 }
+// Non-blocking scan-cooldown countdown (replaces the old blocking confirm()).
+// When SCAN is clicked within the freshness window, show a dismissable banner
+// that auto-proceeds after this delay; clicking it aborts the re-scan. Tunable.
+var SCAN_COOLDOWN_COUNTDOWN_MS = 3000;
+// Renders the countdown banner just above the scan progress wrap. onProceed
+// fires when the timer runs out; onCancel fires if the user clicks to abort.
+// No blocking calls (confirm/alert/prompt) — purely setTimeout-driven so the
+// page stays responsive and CDP automation isn't frozen.
+function _showScanCooldownBanner(ageStr, onProceed, onCancel){
+  // If a countdown is already in progress, don't stack a second banner/timer.
+  if (document.getElementById('sc-cooldown-banner')) return;
+  var secs = Math.ceil(SCAN_COOLDOWN_COUNTDOWN_MS / 1000);
+  var anchor = eid('sc-progress-wrap');
+  var banner = document.createElement('div');
+  banner.id = 'sc-cooldown-banner';
+  banner.title = 'Click to cancel re-scan';
+  banner.style.cssText = 'padding:8px 12px;background:var(--bg1);border-bottom:1px solid var(--ambb);color:var(--amb);font-family:var(--ff-mono);font-size:11px;cursor:pointer;display:flex;align-items:center;gap:8px;line-height:1.4;';
+  function paint(n){
+    banner.innerHTML = '<span style="color:var(--ambb);font-weight:700;">⟳</span>'
+      + '<span>Last scan ' + _esc(ageStr) + ' ago — re-scanning in '
+      + '<b style="color:var(--ambb);">' + n + 's</b> (~600 Tradier calls). '
+      + '<u>Click to cancel.</u></span>';
+  }
+  paint(secs);
+  if (anchor && anchor.parentNode){ anchor.parentNode.insertBefore(banner, anchor); }
+  else { document.body.appendChild(banner); }
+
+  var remaining = secs;
+  var tick = setInterval(function(){ remaining -= 1; if (remaining > 0) paint(remaining); }, 1000);
+  var timer = setTimeout(function(){
+    clearInterval(tick);
+    try { banner.remove(); } catch(_){}
+    if (typeof onProceed === 'function') onProceed();
+  }, SCAN_COOLDOWN_COUNTDOWN_MS);
+
+  banner.onclick = function(){
+    clearTimeout(timer); clearInterval(tick);
+    try { banner.remove(); } catch(_){}
+    if (typeof onCancel === 'function') onCancel();
+  };
+}
 async function runScan(opts){
   opts = opts || {};
   if(G.scanRunning) return;
@@ -19100,13 +19141,15 @@ async function runScan(opts){
         // meaningfully on minute-scale; less than this is wasted API budget)
         if (ageMin < 30) {
           var ageStr = ageMin === 0 ? 'less than 1 min' : ageMin + ' min';
-          var msg = 'Last scan was ' + ageStr + ' ago.\n\n' +
-                    'Re-scanning now will spend ~600 Tradier calls (~5 min) for likely identical data.\n\n' +
-                    'OK = re-scan anyway\nCancel = keep cached results';
-          if (!confirm(msg)) {
-            try { toast('Using cached scan from ' + ageStr + ' ago'); } catch(_){}
-            return;
-          }
+          // Non-blocking cooldown: replaces the old blocking confirm() (which
+          // froze the page + CDP automation). Show a countdown banner that
+          // auto-proceeds after SCAN_COOLDOWN_COUNTDOWN_MS, or aborts if the
+          // user clicks it. Detection (when this fires) is unchanged — only
+          // the presentation changed (blocking dialog → non-blocking banner).
+          _showScanCooldownBanner(ageStr,
+            function(){ runScan(Object.assign({}, opts, { force: true })); },
+            function(){ try { toast('Using cached scan from ' + ageStr + ' ago'); } catch(_){} });
+          return;
         }
       }
     } catch(_) {}
@@ -27828,7 +27871,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = 'v6.1.26.0';
+var APP_VERSION = 'v6.1.26.1';
 // v2.18.21: DEFAULT feedback webhook. Every visitor's "Submit Feedback"
 // form posts here (unless they've overridden via ALERTS → Feedback
 // Webhook). The URL points to a Google Apps Script Web App owned by
