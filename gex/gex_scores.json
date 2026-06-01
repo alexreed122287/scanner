@@ -1,8 +1,8 @@
 {
-  "ts": 1780347436681,
+  "ts": 1780352430878,
   "source": "github-cron",
-  "count": 241,
-  "skipped": 6,
+  "count": 240,
+  "skipped": 7,
   "universe_size": 247,
   "data": [
     {
@@ -622,7 +622,7 @@
       "callOI": 1949,
       "putOI": 189,
       "callVol": 1045,
-      "putVol": 101,
+      "putVol": 102,
       "dte": 30,
       "exp": "2026-07-01",
       "price": 16.05,
@@ -3218,22 +3218,6 @@
       "dte": 39,
       "exp": "2026-07-10",
       "price": 115.95,
-      "flow": "PUT HEAVY",
-      "flowCls": "nogo"
-    },
-    {
-      "t": "FDX",
-      "gex": -0.06,
-      "flip": 340.0,
-      "call": 10,
-      "put": 90,
-      "callOI": 32,
-      "putOI": 196,
-      "callVol": 0,
-      "putVol": 0,
-      "dte": 39,
-      "exp": "2026-07-10",
-      "price": 338.49,
       "flow": "PUT HEAVY",
       "flowCls": "nogo"
     },
