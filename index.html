@@ -1979,95 +1979,6 @@ tr.pos-row-no-quote:hover td,tr.pos-row-no-quote.sel-row td{opacity:.85;}
 /* Theme cross-fade transition (all viewports) */
 body, body *{transition:background-color .25s ease, color .25s ease, border-color .25s ease;}
 
-/* ═════════════════════════════════════════════════════════════════════════
-   NEWS TAB — iOS-style news cards. Image left, headline + source + time
-   + summary right. Tap card → opens article in new tab. Filter chips at
-   the top for Market / Watchlist / Positions / GOs / Ticker.
-   ═════════════════════════════════════════════════════════════════════════ */
-.news-filter{
-  background:var(--bg2);
-  border:1px solid var(--bg3);
-  border-radius:14px;
-  color:var(--gry);
-  font-family:var(--ff);font-size:10px;font-weight:600;letter-spacing:.5px;
-  padding:6px 10px;
-  cursor:pointer;
-  min-height:32px;
-  -webkit-tap-highlight-color:rgba(0,212,255,0.15);
-  transition:transform .08s, background .12s, color .12s, border-color .12s;
-}
-.news-filter:active{transform:scale(0.95);}
-.news-filter.active{
-  background:var(--amb3);border-color:var(--amb);color:var(--amb);
-}
-.news-card{
-  display:flex;
-  gap:10px;
-  background:var(--bg1);
-  border:1px solid var(--bg3);
-  border-radius:8px;
-  padding:10px;
-  margin-bottom:8px;
-  cursor:pointer;
-  -webkit-tap-highlight-color:rgba(0,212,255,0.15);
-  transition:transform .08s, border-color .12s, background .12s;
-}
-.news-card:hover, .news-card:active{
-  background:var(--bg2);
-  border-color:var(--amb3);
-}
-.news-card:active{transform:scale(0.99);}
-.news-card-img{
-  flex:0 0 auto;
-  width:80px;height:80px;
-  border-radius:6px;
-  background:var(--bg2) center/cover no-repeat;
-  background-image:linear-gradient(135deg, var(--bg2), var(--bg3));
-  overflow:hidden;
-  position:relative;
-}
-.news-card-img.no-img::after{
-  content:'\25BC';
-  position:absolute;inset:0;
-  display:flex;align-items:center;justify-content:center;
-  color:var(--bg3);font-size:24px;
-}
-.news-card-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;}
-.news-card-meta{
-  display:flex;align-items:center;gap:6px;flex-wrap:wrap;
-  font-family:var(--ff-mono);font-size:9px;color:var(--gry);letter-spacing:.5px;
-}
-.news-card-symbol{
-  background:var(--amb3);color:var(--amb);
-  padding:1px 6px;border-radius:3px;font-weight:700;
-}
-.news-card-source{color:var(--ambb);font-weight:600;}
-.news-card-time{color:var(--gry2);}
-.news-card-title{
-  color:var(--wht);
-  font-family:var(--ff);font-size:13px;font-weight:600;line-height:1.35;
-  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;
-  overflow:hidden;
-}
-.news-card-summary{
-  color:var(--gry);
-  font-size:11px;line-height:1.4;
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
-  overflow:hidden;
-}
-
-@media(max-width:480px){
-  .news-card-img{width:64px;height:64px;}
-  .news-card-title{font-size:12px;-webkit-line-clamp:3;}
-  .news-card-summary{display:none;}
-  /* v2.18.25: 5 news filter chips on iPhone fit on ONE row without
-     wrap or truncation. font-size 11→10, padding 10/12→7/8, gap 4→3.
-     min-height 44→36 still meets iOS HIG tap target. Title row keeps
-     its own flow above the chips via the .flt-bar wrap. */
-  .news-filter{font-size:10px;padding:7px 8px;min-height:36px;white-space:nowrap;overflow:visible;flex-shrink:0;}
-  #tab-news .flt-bar{flex-wrap:wrap;overflow:visible;}
-  #tab-news .news-filter-row{flex-wrap:nowrap !important;overflow:visible;width:100%;gap:3px !important;justify-content:flex-start !important;margin-left:0 !important;}
-}
 
 /* iPhone-specific: treat very narrow screens as needing extra compression */
 @media(max-width:430px){
@@ -3153,7 +3064,6 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
   <button class="ntab" onclick="switchTab('gex')" title="Gamma exposure / 30DTE options-flow (call vs put OI) for the top 200 enriched tickers. Drives the GEX Call Heavy rule.">GEX / FLOW</button>
   <button class="ntab" onclick="switchTab('ind')">INDUSTRY</button>
   <button class="ntab" onclick="switchTab('pos')">POSITIONS</button>
-  <button class="ntab" onclick="switchTab('news')" title="Market news — general + per-ticker headlines from Financial Modeling Prep (uses your FMP key).">NEWS</button>
   <button class="ntab" onclick="switchTab('pf')">PORTFOLIO</button>
   <button class="ntab" onclick="switchTab('al')">ALERTS</button>
   <button class="ntab" onclick="switchTab('wl')">WATCHLIST</button>
@@ -4503,28 +4413,6 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
 <!-- ═══════════════════════════════════════════════════════
      HOW TO — first-time walkthrough
      ═══════════════════════════════════════════════════════ -->
-<div class="tab-pane" id="tab-news">
-  <!-- Filter row + refresh -->
-  <div class="flt-bar" style="gap:6px;flex-wrap:wrap;align-items:center;">
-    <span style="font-family:var(--ff-brand);font-size:12px;color:var(--amb);letter-spacing:2px;">&#9432; MARKET NEWS</span>
-    <div class="news-filter-row" style="display:flex;gap:4px;flex-wrap:wrap;margin-left:auto;">
-      <button class="news-filter active" data-filter="market" onclick="newsSetFilter('market')">MARKET</button>
-      <button class="news-filter" data-filter="watchlist" onclick="newsSetFilter('watchlist')">WATCHLIST</button>
-      <button class="news-filter" data-filter="positions" onclick="newsSetFilter('positions')">POSITIONS</button>
-      <button class="news-filter" data-filter="gos" onclick="newsSetFilter('gos')">SCAN GOs</button>
-      <button class="news-filter" data-filter="ticker" onclick="newsPromptTicker()">TICKER…</button>
-    </div>
-    <button class="btn blu" style="font-size:11px;padding:8px 14px;min-height:44px;" onclick="newsRefresh(true)">&#8635; REFRESH</button>
-  </div>
-  <div id="news-status" style="padding:6px 14px;font-family:var(--ff-mono);font-size:10px;color:var(--gry);"></div>
-  <div id="news-list" style="overflow-y:auto;padding:8px;flex:1;-webkit-overflow-scrolling:touch;">
-    <div class="empty-det" style="min-height:200px;">
-      <div class="ei">&#9432;</div>
-      <p>Loading market news…<br><span style="color:var(--gry2);font-size:10px;">Powered by Financial Modeling Prep (FMP)</span></p>
-    </div>
-  </div>
-</div>
-
 <div class="tab-pane" id="tab-howto"></div>
 <template id="tpl-tab-howto">
   <div class="page-wrap" style="max-width:980px;margin:0 auto;line-height:1.55;">
@@ -5044,7 +4932,6 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
     <div class="card collapsible" id="api-card"><div class="card-hdr">API CONFIGURATION</div>
     <div class="card-body api-form">
       <div class="api-row"><label>FMP API KEY (financialmodelingprep.com)</label><input id="api-fmp" type="password" placeholder="Enter FMP key..."><div class="api-status" id="fmp-status"></div></div>
-      <div class="api-row"><label title="Marketaux is a free news API (100 requests/day on the free tier). Used as a fallback when FMP's news endpoints are paid-tier.">MARKETAUX KEY (news fallback) <span style="color:var(--gry);font-weight:400;font-size:10px;">(optional — sign up free at marketaux.com)</span></label><input id="api-marketaux" type="password" placeholder="Enter Marketaux key..."><div class="api-status" id="ma-status"></div></div>
       <div class="api-row"><label>TRADIER API KEY</label><input id="api-tr" type="password" placeholder="Enter Tradier key..."><div class="api-status" id="tr-status"></div></div>
       <div class="api-row"><label>TRADIER MODE</label>
         <select id="api-mode" style="background:var(--bg2);border:var(--bdr);color:var(--wht);font-family:var(--ff);font-size:12px;padding:5px 8px;border-radius:3px;width:100%;">
@@ -5554,9 +5441,6 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
   </button>
   <button class="bot-tab bot-tab-trade" data-tab="order" onclick="bnGo('order')">
     <span class="bot-tab-icon">&#9650;</span><span class="bot-tab-lbl">TRADE</span>
-  </button>
-  <button class="bot-tab" data-tab="news" onclick="bnGo('news')">
-    <span class="bot-tab-icon">&#9432;</span><span class="bot-tab-lbl">NEWS</span>
   </button>
   <button class="bot-tab" onclick="bnOpenMore()" id="bot-tab-more">
     <span class="bot-tab-icon">&#x2026;</span><span class="bot-tab-lbl">MORE</span>
@@ -27086,15 +26970,7 @@ function saveKeys(){
   // Paste from iOS / email / docs often sneaks these in and Safari rejects them in headers.
   function _cleanKey(s){ return (s||'').replace(/[^\x20-\x7E]/g,'').trim(); }
   var fmp=_cleanKey(eid('api-fmp').value),tr=_cleanKey(eid('api-tr').value),mode=eid('api-mode').value,acct=_cleanKey(eid('api-acct').value);
-  // Marketaux fallback news key (optional, for users whose FMP plan
-  // doesn't include news endpoints).
-  var ma = _cleanKey((eid('api-marketaux') && eid('api-marketaux').value) || '');
-  if (ma) localStorage.setItem('rrjcar_marketaux', ma);
-  else    localStorage.removeItem('rrjcar_marketaux');
-  if (eid('ma-status')){
-    eid('ma-status').textContent = ma ? 'Saved (' + ma.length + ' chars)' : '';
-    eid('ma-status').className = 'api-status ' + (ma ? 'ok' : '');
-  }
+
   // Optional Tradier proxy URL — when set, all api.tradier.com / sandbox.tradier.com
   // requests get rewritten to go through it (and the local key gets ignored — worker
   // injects its own from a Cloudflare secret). See worker/tradier-proxy/README.md.
@@ -27423,15 +27299,7 @@ function loadKeys(){
   if(fmp&&!_hasBadFmp){eid('api-fmp').value='';eid('fmp-status').textContent='Key saved (hidden)';eid('fmp-status').className='api-status ok';}
   else if(_hasBadFmp){eid('fmp-status').textContent='Key corrupted - re-enter';eid('fmp-status').className='api-status miss';}
   else{eid('fmp-status').textContent='Not set';eid('fmp-status').className='api-status miss';}
-  // Marketaux fallback news key
-  try {
-    var ma = localStorage.getItem('rrjcar_marketaux') || '';
-    if (eid('api-marketaux')) eid('api-marketaux').value = '';
-    if (eid('ma-status')){
-      eid('ma-status').textContent = ma ? 'Key saved (hidden)' : 'Optional — only needed if FMP news fails';
-      eid('ma-status').className = 'api-status ' + (ma ? 'ok' : '');
-    }
-  } catch(_){}
+
   if(!tr && typeof TRADIER_KEY_DEFAULT !== 'undefined' && TRADIER_KEY_DEFAULT){
     tr = TRADIER_KEY_DEFAULT;
     try{ localStorage.setItem('rrjcar_tradier', tr); }catch(e){}
@@ -31247,7 +31115,6 @@ function init(){
     var CACHE_PREFIXES = [
       'rrjcar_hist_',           // per-ticker daily-bar history
       'rrjcar_indicator_',      // per-ticker indicator computations
-      'rrjcar_news_',           // news fetch cache (includes _cache_v1)
       'rrjcar_ob_hist_',        // order-book historical cache
       'rrjcar_fmp_paused_until' // FMP rate-limit pause sentinel
     ];
@@ -32784,393 +32651,6 @@ window.addEventListener('DOMContentLoaded',init);
   });
 
   console.log('[mobile-app] ready');
-})();
-
-// ═══════════════════════════════════════════════════════════════════════════
-//  NEWS TAB — market news powered by Financial Modeling Prep (uses your
-//  existing FMP key). Cached 15min in localStorage to limit API spend.
-//  Filters: market-wide, watchlist, positions, scan GOs, single ticker.
-// ═══════════════════════════════════════════════════════════════════════════
-(function(){
-  var NEWS_CACHE_KEY = 'rrjcar_news_cache_v1';
-  var NEWS_TTL_MS = 15 * 60 * 1000;     // 15 minutes
-  var NEWS_LIMIT = 50;
-  var newsState = { filter: 'market', tickerOverride: null, items: [] };
-
-  function _fmpKey(){
-    try { return (localStorage.getItem('rrjcar_fmp') || '').trim(); } catch(_) { return ''; }
-  }
-
-  function _setStatus(msg, color){
-    var el = document.getElementById('news-status');
-    if (el) { el.textContent = msg; if (color) el.style.color = color; }
-  }
-
-  function _loadCache(){
-    try {
-      var raw = localStorage.getItem(NEWS_CACHE_KEY);
-      if (!raw) return null;
-      var obj = JSON.parse(raw);
-      if (!obj || !obj.byKey) return null;
-      return obj.byKey;
-    } catch(_) { return null; }
-  }
-  function _saveCache(byKey){
-    try { localStorage.setItem(NEWS_CACHE_KEY, JSON.stringify({ ts: Date.now(), byKey: byKey })); } catch(_){}
-  }
-
-  // Pretty-print "2 minutes ago" / "3 hours ago" / "Mar 14 8:32am"
-  function _ago(dateStr){
-    if (!dateStr) return '';
-    var d = new Date(dateStr);
-    if (isNaN(d.getTime())) return '';
-    var diffMin = Math.round((Date.now() - d.getTime()) / 60000);
-    if (diffMin < 1) return 'just now';
-    if (diffMin < 60) return diffMin + 'm ago';
-    var diffHr = Math.round(diffMin / 60);
-    if (diffHr < 24) return diffHr + 'h ago';
-    var diffDay = Math.round(diffHr / 24);
-    if (diffDay < 7) return diffDay + 'd ago';
-    return d.toLocaleDateString('en-US', { month:'short', day:'numeric' });
-  }
-
-  function _esc(s){ return String(s||'').replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
-
-  // Resolve which tickers to fetch news for based on the active filter
-  function _activeTickers(){
-    if (newsState.filter === 'ticker' && newsState.tickerOverride){
-      return [newsState.tickerOverride.toUpperCase()];
-    }
-    if (newsState.filter === 'watchlist'){
-      try {
-        // BUG-1 fix 2026-05-09: was reading G.watchlist (does not exist).
-        // Real watchlist data is on G.wlTickers (string array).
-        var wl = (typeof G !== 'undefined' && G.wlTickers) ? G.wlTickers : [];
-        return wl.map(function(w){ return (typeof w === 'string') ? w : w.ticker; }).filter(Boolean).slice(0, 20);
-      } catch(_) { return []; }
-    }
-    if (newsState.filter === 'positions'){
-      try {
-        var pos = (typeof G !== 'undefined' && G.positions) ? G.positions : [];
-        var seen = {};
-        return pos.map(function(p){ return p.underlying; }).filter(function(t){
-          if (!t || seen[t]) return false; seen[t] = true; return true;
-        }).slice(0, 20);
-      } catch(_) { return []; }
-    }
-    if (newsState.filter === 'gos'){
-      try {
-        var gos = (typeof G !== 'undefined' && G.results) ? G.results.filter(function(r){ return r.isGo; }) : [];
-        return gos.slice(0, 20).map(function(r){ return r.ticker; });
-      } catch(_) { return []; }
-    }
-    return null; // market-wide — no ticker filter
-  }
-
-  function _cacheKey(){
-    var t = _activeTickers();
-    if (t === null) return 'market';
-    return t.sort().join(',');
-  }
-
-  function _marketauxKey(){
-    try { return (localStorage.getItem('rrjcar_marketaux') || '').trim(); } catch(_) { return ''; }
-  }
-
-  // Normalize FMP / Marketaux response shapes into a single article record:
-  //   { symbol, image, title, text, site, publishedDate, url }
-  function _normFmpV3(arr){
-    return (Array.isArray(arr) ? arr : []).map(function(n){
-      return {
-        symbol: n.symbol || '', image: n.image || '',
-        title: n.title || '', text: n.text || '',
-        site: n.site || n.publisher || '',
-        publishedDate: n.publishedDate || n.date || '',
-        url: n.url || ''
-      };
-    });
-  }
-  function _normMarketaux(json){
-    var data = (json && json.data) || [];
-    return data.map(function(n){
-      var sym = (n.entities && n.entities[0] && n.entities[0].symbol) || '';
-      return {
-        symbol: sym,
-        image: n.image_url || '',
-        title: n.title || '',
-        text: n.snippet || n.description || '',
-        site: (n.source || '').replace(/\.com$|\.net$/i,''),
-        publishedDate: n.published_at || '',
-        url: n.url || ''
-      };
-    });
-  }
-
-  async function _tryFmpStable(key, tickers){
-    var path;
-    if (tickers === null) path = '/stable/news/general-latest?limit='+NEWS_LIMIT;
-    else                  path = '/stable/news/stock-latest?symbols='+encodeURIComponent(tickers.join(','))+'&limit='+NEWS_LIMIT;
-    var res = await fetch('https://financialmodelingprep.com'+path+'&apikey='+encodeURIComponent(key));
-    var json = await res.json();
-    if (!Array.isArray(json)) throw new Error((json && (json['Error Message']||json.message)) || ('HTTP '+res.status));
-    return _normFmpV3(json);
-  }
-  async function _tryFmpV4(key, tickers){
-    var path;
-    if (tickers === null) path = '/api/v4/general_news?page=0';
-    else                  path = '/api/v4/stock_news?tickers='+encodeURIComponent(tickers.join(','))+'&limit='+NEWS_LIMIT;
-    var res = await fetch('https://financialmodelingprep.com'+path+'&apikey='+encodeURIComponent(key));
-    var json = await res.json();
-    if (!Array.isArray(json)) throw new Error((json && (json['Error Message']||json.message)) || ('HTTP '+res.status));
-    return _normFmpV3(json);
-  }
-  async function _tryFmpV3(key, tickers){
-    var url;
-    if (tickers === null) url = 'https://financialmodelingprep.com/api/v3/stock_news?limit='+NEWS_LIMIT+'&apikey='+encodeURIComponent(key);
-    else                  url = 'https://financialmodelingprep.com/api/v3/stock_news?tickers='+encodeURIComponent(tickers.join(','))+'&limit='+NEWS_LIMIT+'&apikey='+encodeURIComponent(key);
-    var res = await fetch(url);
-    var json = await res.json();
-    if (!Array.isArray(json)) throw new Error((json && (json['Error Message']||json.message)) || ('HTTP '+res.status));
-    return _normFmpV3(json);
-  }
-  async function _tryMarketaux(key, tickers){
-    var p = 'https://api.marketaux.com/v1/news/all?language=en&filter_entities=true&limit='+NEWS_LIMIT+'&api_token='+encodeURIComponent(key);
-    if (tickers === null) p += '&countries=us';
-    else                  p += '&symbols='+encodeURIComponent(tickers.join(','));
-    var res = await fetch(p);
-    var json = await res.json();
-    if (json && json.error) throw new Error(json.error.message || 'Marketaux error');
-    return _normMarketaux(json);
-  }
-
-  async function newsFetch(forceFresh){
-    var fmpKey = _fmpKey();
-    var maKey  = _marketauxKey();
-    if (!fmpKey && !maKey){
-      _setStatus('No news API key. Add an FMP key (API tab) or a Marketaux key (Alerts → Push Setup → MARKETAUX KEY input below) to load news.', 'var(--wrn)');
-      return [];
-    }
-    var cacheKey = _cacheKey();
-    var cache = _loadCache() || {};
-    if (!forceFresh && cache[cacheKey]){
-      var entry = cache[cacheKey];
-      if (Date.now() - (entry.ts || 0) < NEWS_TTL_MS){
-        return entry.items || [];
-      }
-    }
-    var tickers = _activeTickers();
-    if (tickers !== null && !tickers.length){
-      _setStatus('No tickers to filter on — switch to MARKET or add tickers to your watchlist/positions.', 'var(--gry)');
-      return [];
-    }
-    _setStatus('Fetching news…', 'var(--gry)');
-    // Try FMP stable → v4 → v3, then Marketaux. First success wins.
-    var attempts = [];
-    if (fmpKey) attempts.push({label:'FMP stable', run:function(){ return _tryFmpStable(fmpKey, tickers); }});
-    if (fmpKey) attempts.push({label:'FMP v4',     run:function(){ return _tryFmpV4(fmpKey, tickers); }});
-    if (fmpKey) attempts.push({label:'FMP v3',     run:function(){ return _tryFmpV3(fmpKey, tickers); }});
-    if (maKey)  attempts.push({label:'Marketaux',  run:function(){ return _tryMarketaux(maKey, tickers); }});
-    var lastErr = '';
-    for (var i = 0; i < attempts.length; i++){
-      try {
-        var items = await attempts[i].run();
-        cache[cacheKey] = { ts: Date.now(), items: items, source: attempts[i].label };
-        _saveCache(cache);
-        _setStatus(items.length + ' articles · source: ' + attempts[i].label, 'var(--gry)');
-        return items;
-      } catch(e){
-        lastErr = (attempts[i].label) + ': ' + (e && e.message || 'unknown');
-        console.warn('[news] '+lastErr);
-      }
-    }
-    _setStatus('All news sources failed. Last error: ' + lastErr + '. Try adding a Marketaux key (free 100/day) at marketaux.com → Account → API Tokens, then paste it in the API tab.', 'var(--wrn)');
-    return [];
-  }
-
-  function newsRender(items){
-    var list = document.getElementById('news-list');
-    if (!list) return;
-    if (!items.length){
-      list.innerHTML = '<div class="empty-det" style="min-height:200px;"><div class="ei">&#9432;</div><p>No news found for this filter.<br><span style="color:var(--gry2);font-size:10px;">Try switching to MARKET or adding tickers to your watchlist.</span></p></div>';
-      return;
-    }
-    // Build cards without the background-image inline style to avoid CSS
-    // injection via decoded HTML entities (audit SEC-5). The image URL is
-    // stored on a data-img attribute (HTML-escaped) and applied post-render
-    // via element.style.backgroundImage with JSON.stringify, which produces
-    // a CSS-safe double-quoted string. URLs that don't match a strict
-    // https?:// pattern are dropped to defense-in-depth against bad data
-    // from FMP / Marketaux. (SEC-1 onclick gap also fixed with _jsq.)
-    list.innerHTML = items.map(function(n){
-      var sym = n.symbol || n.tickers || '';
-      var img = n.image || '';
-      var imgClass = img ? '' : ' no-img';
-      var title = n.title || '';
-      var src = n.site || n.publisher || '';
-      var time = _ago(n.publishedDate || n.date);
-      var summary = (n.text || '').slice(0, 220);
-      var url = n.url || '#';
-      return '<div class="news-card" onclick="newsOpenArticle(\''+_jsq(url)+'\')">'
-        + '<div class="news-card-img'+imgClass+'" data-img="'+_esc(img)+'"></div>'
-        + '<div class="news-card-body">'
-        +   '<div class="news-card-meta">'
-        +     (sym ? '<span class="news-card-symbol">'+_esc(sym)+'</span>' : '')
-        +     (src  ? '<span class="news-card-source">'+_esc(src)+'</span>'  : '')
-        +     (time ? '<span class="news-card-time">'+time+'</span>'        : '')
-        +   '</div>'
-        +   '<div class="news-card-title">'+_esc(title)+'</div>'
-        +   (summary ? '<div class="news-card-summary">'+_esc(summary)+(n.text && n.text.length > 220 ? '…' : '')+'</div>' : '')
-        + '</div>'
-      + '</div>';
-    }).join('');
-    // Apply background images safely via JS — avoids CSS injection in inline
-    // style attributes. Strict https?:// validation drops anything weird.
-    list.querySelectorAll('.news-card-img[data-img]').forEach(function(el){
-      var u = el.getAttribute('data-img') || '';
-      if (/^https?:\/\/[^\s'"<>(){}\\]+$/i.test(u)){
-        el.style.backgroundImage = 'url(' + JSON.stringify(u) + ')';
-      }
-    });
-    var total = items.length;
-    var newest = items[0] && items[0].publishedDate;
-    _setStatus(total + ' articles · newest ' + (newest ? _ago(newest) : '—'), 'var(--gry)');
-  }
-
-  async function newsRefresh(forceFresh){
-    var items = await newsFetch(!!forceFresh);
-    newsState.items = items;
-    newsRender(items);
-  }
-  function newsSetFilter(filter){
-    if (filter !== 'ticker') newsState.tickerOverride = null;
-    newsState.filter = filter;
-    document.querySelectorAll('.news-filter').forEach(function(b){
-      b.classList.toggle('active', b.dataset.filter === filter);
-    });
-    newsRefresh(false);
-  }
-  function newsPromptTicker(){
-    var tk = prompt('Ticker to fetch news for:', newsState.tickerOverride || 'NVDA');
-    if (!tk) return;
-    newsState.tickerOverride = tk.trim().toUpperCase();
-    newsState.filter = 'ticker';
-    document.querySelectorAll('.news-filter').forEach(function(b){
-      b.classList.toggle('active', b.dataset.filter === 'ticker');
-    });
-    newsRefresh(false);
-  }
-  function newsOpenArticle(url){
-    if (!url || url === '#') return;
-    try { window.open(url, '_blank', 'noopener,noreferrer'); }
-    catch(_) { window.location.href = url; }
-  }
-
-  // Auto-load news whenever the user switches to the NEWS tab.
-  function _hookNewsTabActivation(){
-    var orig = window.switchTab;
-    if (typeof orig !== 'function' || orig._newsHooked) return;
-    window.switchTab = function(id){
-      var r = orig.apply(this, arguments);
-      try {
-        if (id === 'news'){
-          // Only fetch if we don't already have items (or cache expired)
-          var cache = _loadCache() || {};
-          var entry = cache[_cacheKey()];
-          var stale = !entry || (Date.now() - (entry.ts || 0) >= NEWS_TTL_MS);
-          if (!newsState.items.length || stale) newsRefresh(false);
-          else newsRender(newsState.items);
-        }
-      } catch(_){}
-      return r;
-    };
-    window.switchTab._newsHooked = true;
-  }
-  window.addEventListener('load', function(){
-    setTimeout(_hookNewsTabActivation, 200);
-  });
-
-  // Public API
-  window.newsRefresh = newsRefresh;
-  window.newsSetFilter = newsSetFilter;
-  window.newsPromptTicker = newsPromptTicker;
-  window.newsOpenArticle = newsOpenArticle;
-  window.newsState = newsState;
-
-  // ── Per-ticker news in the scanner detail panel ──
-  // Rendered inside #sc-detail when buildDetail runs. Reads the selected
-  // ticker from G.selTicker, fetches up to 6 headlines, renders compact
-  // cards. Hooked via wrapping buildDetail.
-  async function newsForTicker(ticker, container){
-    var key = _fmpKey();
-    if (!key){ container.innerHTML = '<div style="color:var(--gry);font-size:11px;padding:8px;">No FMP key — add one in API tab to see news.</div>'; return; }
-    container.innerHTML = '<div style="color:var(--gry);font-size:11px;padding:8px;">Loading news for '+_esc(ticker)+'…</div>';
-    try {
-      var url = 'https://financialmodelingprep.com/api/v3/stock_news?tickers='+encodeURIComponent(ticker)+'&limit=6&apikey='+encodeURIComponent(key);
-      var res = await fetch(url);
-      var arr = await res.json();
-      if (!Array.isArray(arr) || !arr.length){
-        container.innerHTML = '<div style="color:var(--gry2);font-size:11px;padding:8px;">No news found for '+_esc(ticker)+'.</div>';
-        return;
-      }
-      container.innerHTML = arr.slice(0, 6).map(function(n){
-        var img = n.image || '';
-        var imgClass = img ? '' : ' no-img';
-        return '<div class="news-card" style="margin-bottom:6px;padding:8px;" onclick="newsOpenArticle(\''+_jsq(n.url || '#')+'\')">'
-          + '<div class="news-card-img'+imgClass+'" data-img="'+_esc(img)+'" style="width:54px;height:54px;"></div>'
-          + '<div class="news-card-body">'
-          +   '<div class="news-card-meta">'
-          +     '<span class="news-card-source">'+_esc(n.site || n.publisher || '')+'</span>'
-          +     '<span class="news-card-time">'+_ago(n.publishedDate)+'</span>'
-          +   '</div>'
-          +   '<div class="news-card-title" style="font-size:11px;-webkit-line-clamp:2;">'+_esc(n.title || '')+'</div>'
-          + '</div>'
-        + '</div>';
-      }).join('');
-      // Same post-render image-injection trick as newsRender — avoids CSS
-      // injection via inline style. Strict https?:// validation only.
-      container.querySelectorAll('.news-card-img[data-img]').forEach(function(el){
-        var u = el.getAttribute('data-img') || '';
-        if (/^https?:\/\/[^\s'"<>(){}\\]+$/i.test(u)){
-          el.style.backgroundImage = 'url(' + JSON.stringify(u) + ')';
-        }
-      });
-    } catch(e){
-      container.innerHTML = '<div style="color:var(--wrn);font-size:11px;padding:8px;">News fetch failed: '+_esc(e.message||'unknown')+'</div>';
-    }
-  }
-  window.newsForTicker = newsForTicker;
-
-  // Hook buildDetail to inject a NEWS section. We wrap the original so all
-  // scanner detail panes (sc-detail, bs-detail, gx-detail, watchlist) get
-  // the news block after the detail builds.
-  window.addEventListener('load', function(){
-    setTimeout(function(){
-      if (typeof buildDetail !== 'function' || buildDetail._newsHooked) return;
-      var orig = buildDetail;
-      window.buildDetail = function(r, detId, emptyId){
-        var ret = orig.apply(this, arguments);
-        try {
-          var det = document.getElementById(detId);
-          if (!det || !r || !r.ticker) return ret;
-          // Avoid duplicating if section already exists
-          var existing = det.querySelector('.det-news-section');
-          if (existing) existing.remove();
-          var section = document.createElement('div');
-          section.className = 'det-news-section';
-          section.style.cssText = 'padding:10px 12px;border-top:1px solid var(--bg3);';
-          section.innerHTML =
-            '<div style="font-family:var(--ff-mono);font-size:10px;letter-spacing:1.5px;color:var(--amb);margin-bottom:6px;">&#9432; NEWS &mdash; '+_esc(r.ticker)+'</div>'
-            + '<div class="det-news-list"></div>';
-          det.appendChild(section);
-          newsForTicker(r.ticker, section.querySelector('.det-news-list'));
-        } catch(e){ console.warn('[news] buildDetail hook threw:', e); }
-        return ret;
-      };
-      window.buildDetail._newsHooked = true;
-    }, 300);
-  });
-
-  console.log('[news] ready');
 })();
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -34735,26 +34215,6 @@ window.addEventListener('DOMContentLoaded',init);
       if(!(window.IND && IND.loaded)) return 'n/a';
       var el = $('ind-asof'); if(!el) return 'n/a';
       return txt(el).length > 0;
-    }},
-
-    // News tab ────────────────────────────────────────────────────────────
-    { tab:'news', label:'News list rendered', sev:'info', fn:function(){
-      var el = $('news-list'); if(!el) return 'n/a';
-      var cards = el.querySelectorAll('.news-card');
-      var hasFmp = false;
-      try { hasFmp = !!localStorage.getItem('rrjcar_fmp'); } catch(_){}
-      if(!hasFmp) return 'n/a';
-      return cards.length >= 1 ? true : 'warn';
-    }},
-    { tab:'news', label:'News state items array shape', sev:'info', fn:function(){
-      if(typeof newsState !== 'object' || !Array.isArray(newsState.items)) return 'n/a';
-      if(newsState.items.length === 0) return 'n/a';
-      var bad = newsState.items.filter(function(n){ return !n.title || !(n.publishedDate || n.date); }).length;
-      return bad === 0;
-    }},
-    { tab:'news', label:'News status bar shows article count', sev:'info', fn:function(){
-      var el = $('news-status'); if(!el) return 'n/a';
-      return /articles?/.test(txt(el));
     }},
 
     // Alerts tab ──────────────────────────────────────────────────────────
