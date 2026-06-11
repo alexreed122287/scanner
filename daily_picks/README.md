@@ -74,3 +74,44 @@ daily_picks/run_daily_picks.py
 ```
 
 No new in-page scoring — the bullish filter mirrors the dashboard's BULL ★ formula. If the dashboard's threshold changes (e.g. `BULLISH_CALL_PCT` is retuned), update `DAILY_PICKS_MIN_CALL_PCT` to match.
+
+---
+
+# Paper Trade Performance
+
+Companion to the daily picks email. Where Daily Picks *emails* the morning's bullish call setups, `paper_trade.py` *tracks* them as a hypothetical paper book and emails you a running P/L scorecard.
+
+## What gets sent
+
+Every weekday at **4:15 PM ET** (after the close — `.github/workflows/paper_trade.yml`), you receive an HTML scorecard with:
+
+- **Headline stats** — open positions, average unrealized P/L, closed positions, average realized P/L, win rate
+- **Open book** — every still-open paper trade with entry mid, current mark, and unrealized P/L
+- **Recently closed** — last 10 realized trades with entry, exit, P/L, and close reason
+
+## How the paper book works
+
+Each run does four things against the committed `paper_ledger.json`:
+
+1. **Open** — derive today's bullish picks (same `call% ≥ 70 + net GEX > 0`, 25–50 DTE filter as Daily Picks), buy the single best ITM/ATM call per ticker at the contract **mid**, and log it. Idempotent — re-running the same day never double-opens the same contract.
+2. **Mark** — re-price every open trade off a fresh Tradier option quote and recompute unrealized P/L.
+3. **Close** — realize a trade when its option **expires** (valued at intrinsic vs. the current spot) or once it has been **held `PAPER_HOLD_DAYS` calendar days** (default 15).
+4. **Report** — email the scorecard and commit the updated ledger back to the repo (Actions runners are ephemeral, so the ledger *is* the persisted state).
+
+## Setup
+
+Reuses the **same four secrets** as Daily Picks (`TRADIER_TOKEN`, `RESEND_API_KEY`, `EMAIL_TO`, `EMAIL_FROM`). If Daily Picks already delivers, this works with no extra config. The workflow soft-fails (exit 0) on any missing secret.
+
+### (Optional) Tweak behaviour
+
+In **Settings → Secrets and variables → Actions → Variables**:
+
+- `PAPER_MIN_CALL_PCT` — bullish call-flow floor (default `70`).
+- `PAPER_MAX_OPENS` — max new paper trades opened per day (default `10`).
+- `PAPER_HOLD_DAYS` — calendar days before a swing trade is force-closed (default `15`).
+
+### Manual test
+
+**Actions → Paper Trade Performance → Run workflow → Run.** Sends the scorecard and commits any ledger change.
+
+> Paper results are hypothetical — entered at the mid, ignoring slippage, fills, and commissions. Not financial advice.

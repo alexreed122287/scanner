@@ -1,0 +1,77 @@
+name: Paper Trade Performance
+
+# Companion to daily_picks.yml. Where Daily Picks emails the morning's bullish
+# call setups, this paper-trades them: it opens one ITM/ATM call per pick at the
+# contract mid, re-prices the open book each run, closes matured trades, emails a
+# P/L scorecard, and commits the updated ledger so state survives across runs.
+#
+# Runs once after the close on weekdays. Two cron entries keep the local time
+# stable across DST (the script is idempotent, so a double-fire is harmless):
+#   21:15 UTC = 16:15 EDT (Mar–Nov)
+#   22:15 UTC = 16:15 EST (Nov–Mar)
+# The script soft-fails (exit 0) if any secret is missing, so it's safe to leave
+# scheduled before Resend is configured.
+on:
+  schedule:
+    - cron: "15 21 * * 1-5"   # 16:15 EDT (summer)
+    - cron: "15 22 * * 1-5"   # 16:15 EST (winter)
+  workflow_dispatch: {}
+
+permissions:
+  contents: write              # needed to commit paper_ledger.json
+
+concurrency:
+  group: paper-trade
+  cancel-in-progress: false    # let an in-flight run finish before the next fires
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+      - run: pip install 'requests>=2.32,<3'
+
+      - name: Paper-trade picks + email scorecard
+        env:
+          TRADIER_TOKEN:       ${{ secrets.TRADIER_TOKEN }}
+          RESEND_API_KEY:      ${{ secrets.RESEND_API_KEY }}
+          EMAIL_TO:            ${{ secrets.EMAIL_TO }}
+          EMAIL_FROM:          ${{ secrets.EMAIL_FROM }}
+          PAPER_MIN_CALL_PCT:  ${{ vars.PAPER_MIN_CALL_PCT }}
+          PAPER_MAX_OPENS:     ${{ vars.PAPER_MAX_OPENS }}
+          PAPER_HOLD_DAYS:     ${{ vars.PAPER_HOLD_DAYS }}
+        run: python daily_picks/paper_trade.py
+
+      - name: Commit updated ledger
+        run: |
+          git config user.name "paper-trade-bot"
+          git config user.email "paper-trade@users.noreply.github.com"
+          git add daily_picks/paper_ledger.json
+          if git diff --staged --quiet; then
+            echo "No ledger changes to commit"
+            exit 0
+          fi
+          git commit -m "auto: update paper ledger $(date -u +%Y-%m-%dT%H:%MZ)"
+          # Retry-on-race — other crons commit to the same branch and can land
+          # between checkout and push.
+          for attempt in 1 2 3 4 5; do
+            if git push; then
+              echo "Pushed on attempt $attempt"
+              exit 0
+            fi
+            echo "Push rejected on attempt $attempt — fetching + rebasing"
+            git fetch origin main
+            if ! git rebase origin/main; then
+              echo "Rebase failed — aborting"
+              git rebase --abort || true
+              exit 1
+            fi
+            sleep $((attempt * 2))
+          done
+          echo "All 5 push attempts failed"
+          exit 1
