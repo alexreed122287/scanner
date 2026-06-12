@@ -1,0 +1,35 @@
+name: Unit Tests
+
+# Executes the trade-decision core in a Node sandbox (audit M0.1/M0.3).
+# Unlike parse-check (syntax only), this RUNS scoreIt + calc* + the GO gate
+# and fails if behavior regresses: GO gate technical-only, synth-clear /
+# bar-depth stamps, EMA short-data degradation, option P&L math, score
+# invariant, threshold-fallback parity, and the auto-trader safety gates.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'tools/audit/**'
+      - '.github/workflows/unit-tests.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'tools/audit/**'
+      - '.github/workflows/unit-tests.yml'
+  workflow_dispatch:
+
+jobs:
+  unit:
+    name: scoreIt / calc* unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run trade-decision core tests
+        run: node --test tools/audit/score.test.js

@@ -29,6 +29,20 @@ window.opHealthCheckRender('hc-result');  // render into a DOM element
 
 UI: API tab → DATA HEALTH CHECK card → ▶ RUN HEALTH CHECK.
 
+Unit tests over the trade-decision core (audit M0.1 — runs in CI via
+`unit-tests.yml` on every push/PR touching `index.html` or `tools/audit/`):
+
+```sh
+node --test tools/audit/score.test.js
+```
+
+Asserts: GO gate technical-only (both paths), synth-clear + `ind._bars` stamps,
+calcEMA short-data degradation, MACD/ADX directionality, option P&L intrinsic
+math, `score === clamp(Σ rule pts)`, threshold-fallback parity (121), universe
+Map lookup, and that the auto-trader synth/sandbox/bar-depth gates remain in
+source. If you intentionally change any of these behaviors, update the test in
+the same PR — that's the point.
+
 Static parse-check (also runs in CI on every push to `index.html`):
 
 ```sh
