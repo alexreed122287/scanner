@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="v6.12.26.7">
+<meta name="op-build" content="v6.12.26.8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -21162,7 +21162,15 @@ function runGex(){
 
       var callPctOI  = Math.round((callOI / totalOI) * 100);
       var callPctVol = Math.round((callVol / totalVol) * 100);
-      var callPct = Math.round((callPctOI * 0.6) + (callPctVol * 0.4));
+      // 2026-06-12 fix (user report: "gex still displaying no results"):
+      // pre-market / quiet hours option volume is ~0, so the 60/40 OI/vol
+      // blend capped callPct at 0.6*100 = 60 — structurally below the 70%
+      // bullish display floor; NOTHING could ever render. Blend volume only
+      // when real option tape exists (>= 50 contracts total); else OI-only.
+      var _hasOptTape = (callVol + putVol) >= 50;
+      var callPct = _hasOptTape
+        ? Math.round((callPctOI * 0.6) + (callPctVol * 0.4))
+        : callPctOI;
       callPct = Math.max(10, Math.min(90, callPct));
 
       var netOI = callOI - putOI;
@@ -21533,7 +21541,12 @@ function runGexForTicker(t){
       var totalVol = callVol + putVol || 1;
       var callPctOI  = Math.round((callOI / totalOI) * 100);
       var callPctVol = Math.round((callVol / totalVol) * 100);
-      var callPct = Math.round((callPctOI * 0.6) + (callPctVol * 0.4));
+      // Same zero-volume blend fix as _processChains (2026-06-12): OI-only
+      // when option tape < 50 contracts, else 60/40 OI/vol blend.
+      var _hasOptTape2 = (callVol + putVol) >= 50;
+      var callPct = _hasOptTape2
+        ? Math.round((callPctOI * 0.6) + (callPctVol * 0.4))
+        : callPctOI;
       callPct = Math.max(10, Math.min(90, callPct));
       var result = G.results.filter(function(rr){ return rr.ticker === t; })[0];
       var price = result ? result.price : 0;
@@ -27792,7 +27805,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = 'v6.12.26.7';
+var APP_VERSION = 'v6.12.26.8';
 // v2.18.21: DEFAULT feedback webhook. Every visitor's "Submit Feedback"
 // form posts here (unless they've overridden via ALERTS → Feedback
 // Webhook). The URL points to a Google Apps Script Web App owned by
