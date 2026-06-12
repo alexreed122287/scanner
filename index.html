@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="v6.12.26.4">
+<meta name="op-build" content="v6.12.26.5">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -18650,12 +18650,48 @@ function setScanComplete(stats){
   if(typeof autoScanCheckAlerts === 'function') autoScanCheckAlerts();
 }
 
+// Session-aware scale for the Today-Vol-% screen (2026-06-12, user report:
+// 5 AM scan collapsed 1,500 tickers to 15). Tradier's `volume` is the
+// CURRENT day's tape — at 5 AM CT almost nothing has printed 10% of its
+// average volume, so the ratio check nuked the universe. Scale factor:
+//   weekday pre-open (00:00–8:30 CT)  → 0   (check disabled — no tape yet)
+//   open → noon CT                    → 0..1 linear ramp (partial session,
+//                                        partial volume expectation)
+//   after noon CT, evenings, weekends → 1   (volume is representative;
+//                                        weekend quotes carry the last
+//                                        completed session's full volume)
+function _volRatioSessionScale(){
+  try{
+    var p = new Date().toLocaleString('en-US', {
+      timeZone:'America/Chicago', hour12:false,
+      weekday:'short', hour:'numeric', minute:'numeric'
+    });
+    // e.g. "Fri, 05:09" — split weekday and time
+    var wd = p.slice(0,3);
+    if (wd === 'Sat' || wd === 'Sun') return 1;
+    var hm = p.match(/(\d+):(\d+)/);
+    if (!hm) return 1;
+    var mins = (+hm[1])*60 + (+hm[2]);
+    var OPEN = 8*60+30, FULL = 12*60;   // 8:30 CT open, full weight by noon CT
+    if (mins < OPEN) return 0;
+    if (mins >= FULL) return 1;
+    return (mins - OPEN) / (FULL - OPEN);
+  }catch(e){ return 1; }  // fail open: full filter, pre-existing behavior
+}
 async function fetchDynamicUniverse(key, mode){
   var host = mode === 'live' ? 'https://api.tradier.com' : 'https://sandbox.tradier.com';
   var minPrice   = parseFloat(eid('sc-minprice')   ? eid('sc-minprice').value   : 20) || 20;
   var maxPrice   = parseFloat(eid('sc-maxprice')   ? eid('sc-maxprice').value   : 0)   || 0;
   var minAvgVol  = parseFloat(((eid('sc-minavgvol') && eid('sc-minavgvol').value) || '500000').replace(/,/g,'')) || 500000;
-  var volRatioPct= parseFloat(eid('sc-volratio')   ? eid('sc-volratio').value   : 10) || 10;
+  // Blank = skip (tooltip promised this; `|| 10` was silently forcing 10).
+  var _vrRaw = eid('sc-volratio') ? String(eid('sc-volratio').value).trim() : '10';
+  var volRatioPct = _vrRaw === '' ? 0 : (isFinite(parseFloat(_vrRaw)) ? parseFloat(_vrRaw) : 10);
+  var _vrScale = _volRatioSessionScale();
+  if (_vrScale < 1){
+    var _vrEff = +(volRatioPct * _vrScale).toFixed(1);
+    console.log('[scan] session-aware vol-ratio: ' + volRatioPct + '% scaled to ' + _vrEff + '% (scale=' + _vrScale.toFixed(2) + ', pre/early session)');
+    volRatioPct = _vrEff;
+  }
   var seen = {};
   // Pre-scan theme filter: when a theme is selected in the SCAN toolbar,
   // restrict the universe to that theme's curated members. The scan still
@@ -27728,7 +27764,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = 'v6.12.26.4';
+var APP_VERSION = 'v6.12.26.5';
 // v2.18.21: DEFAULT feedback webhook. Every visitor's "Submit Feedback"
 // form posts here (unless they've overridden via ALERTS → Feedback
 // Webhook). The URL points to a Google Apps Script Web App owned by
