@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="v6.12.26.6">
+<meta name="op-build" content="v6.12.26.7">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -15920,7 +15920,48 @@ function renderTopThemesStrip(){
            + '<span style="display:inline-flex;gap:14px;align-items:center;">' + content + '</span>'
            + '</div>';
 
-  els.forEach(function(el){ el.innerHTML = html; });
+  els.forEach(function(el){ el.innerHTML = html; _fitThemesStrip(el); });
+
+  // Re-fit on viewport resize / rotation (wired once). Without this a
+  // rotate-to-portrait after render leaves chips clipped until next render.
+  if (!window._themesFitWired){
+    window._themesFitWired = true;
+    var _tfTimer = null;
+    window.addEventListener('resize', function(){
+      clearTimeout(_tfTimer);
+      _tfTimer = setTimeout(function(){
+        document.querySelectorAll('.top-themes-strip').forEach(_fitThemesStrip);
+      }, 150);
+    });
+  }
+}
+
+// Fit-to-width for the static top-5 themes ribbon (2026-06-12 user spec:
+// "resize width/text to fit the top 5 in without cutting off text").
+// Shrinks font-size (11 → 7px floor) and gap proportionally until the
+// single-line content fits the strip's inner width. At the 7px floor on
+// very narrow viewports the strip may still clip — floor keeps it legible
+// rather than unreadably small.
+function _fitThemesStrip(el){
+  try{
+    var mq = el.querySelector('.themes-marquee');
+    if (!mq || !el.clientWidth) return;           // hidden strip: skip
+    var inner = mq.querySelector('span');
+    var cs = getComputedStyle(el);
+    var avail = el.clientWidth
+      - (parseFloat(cs.paddingLeft) || 0)
+      - (parseFloat(cs.paddingRight) || 0);
+    if (avail <= 0) return;
+    var size = 11;
+    mq.style.fontSize = '';
+    if (inner) inner.style.gap = '14px';
+    var guard = 0;
+    while (mq.scrollWidth > avail && size > 7 && guard++ < 20){
+      size -= 0.5;
+      mq.style.fontSize = size + 'px';
+      if (inner) inner.style.gap = Math.max(6, Math.round(14 * size / 11)) + 'px';
+    }
+  }catch(e){}
 }
 
 // Combined helper: returns { theme, dailyScore, intradayRs, intradayScore,
@@ -27751,7 +27792,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = 'v6.12.26.6';
+var APP_VERSION = 'v6.12.26.7';
 // v2.18.21: DEFAULT feedback webhook. Every visitor's "Submit Feedback"
 // form posts here (unless they've overridden via ALERTS → Feedback
 // Webhook). The URL points to a Google Apps Script Web App owned by
