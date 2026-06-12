@@ -5,3 +5,5 @@ index.html.bak.*
 industry/.venv/
 industry/__pycache__/
 **/__pycache__/
+*.pdf
+worker/tradier-proxy/.wrangler/

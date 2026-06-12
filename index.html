@@ -3218,7 +3218,7 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
     <!-- B-2 default Min Score bumped 89 -> 100. With theme overlay (added 2026-04)
          scores trend ~10 pts higher, so the historical "GO rate" at 89 became
          too permissive. 100 preserves the prior selectivity. Adjust to taste. -->
-    <label>Min Score <input type="number" id="sc-minscore" value="116" style="width:80px;" onchange="reclassifyGoThreshold()" title="Default 130 — empirically calibrated to the observed score distribution (peaks 140-160 on a ~164-pt practical max). 130 surfaces real setups instead of an empty list. Strategy presets override with their own per-strategy thresholds: HC 145, Breakout 125, Momentum 120, Best ITM 150, Pre/Post 145."></label>
+    <label>Min Score <input type="number" id="sc-minscore" value="116" style="width:80px;" onchange="reclassifyGoThreshold()" title="Default 116 — Phase 2.5 recalibration to the continuous-scoring distribution (~156-pt practical max). Strategy presets override with their own thresholds: HC 121, Breakout 115, Momentum 111, Best ITM 138, Pre/Post 121."></label>
     <!-- v2.17.3: long-call entry filters. Max premium = upper bound on the
          suggested call's mid price ($/contract before ×100). DTE range
          filters out too-short / too-long expiries. Both apply only when
@@ -4468,7 +4468,7 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
           <li><b>Sectors</b> — multi-select. Empty = all. Useful for narrowing scans to specific industries.</li>
           <li><b>Themes</b> — multi-select industry themes (e.g. "AI Infrastructure", "Memory & Storage"). Hydrated from theme_scores.json. Click any chip in the scrolling ribbon at the top to filter to just that theme.</li>
           <li><b>Signal</b> — GO / NO-GO / All.</li>
-          <li><b>Min Score</b> — composite score floor. Default 130 (calibrated to observed distribution mid-top). Range 0–240. When a strategy preset is selected, this gets overwritten with that preset's own threshold (HC=140, BO=125, MO=120, ITM=145).</li>
+          <li><b>Min Score</b> — composite score floor. Default 116 (Phase 2.5 recalibration to the continuous-scoring distribution). When a strategy preset is selected, this gets overwritten with that preset's own threshold (HC=121, BO=115, MO=111, ITM=138, Pre/Post=121).</li>
           <li><b>FILTER / CLEAR</b> — applies / resets the criteria.</li>
         </ul>
 
@@ -8449,8 +8449,11 @@ function regimeAdjustedThreshold(userThresh){ return userThresh; }
 // so we just flip isGo based on total score. Then re-render + re-filter.
 function reclassifyGoThreshold(){
   var el = eid('sc-minscore');
-  var thresh = el && el.value !== '' ? parseInt(el.value) : 140;
-  if(isNaN(thresh)) thresh = 140;
+  // Audit T4: fallback must match scoreIt's goThreshold fallback (121, Phase
+  // 2.5 recalibration) — was 140, so an empty input classified GO differently
+  // depending on which path ran.
+  var thresh = el && el.value !== '' ? parseInt(el.value) : 121;
+  if(isNaN(thresh)) thresh = 121;
   // Apply regime-conditional override
   thresh = regimeAdjustedThreshold(thresh);
   if(!G.results || !G.results.length) return;
@@ -16147,6 +16150,28 @@ function _whyRankedBelow(r, prev){
   return '= tied';
 }
 
+// PERF (audit P1/QW1): O(1) universe lookup. UNIVERSE_FULL.filter-per-ticker
+// inside the scan loop was O(N\u00b2) (~2.25M comparisons + 1,500 throwaway arrays
+// per scan, on the main thread). Lazily build a Map keyed by ticker; rebuild
+// automatically if either universe array changes length (push/concat mutation).
+// UNIVERSE_FULL entries are set last so they win over the static UNIVERSE
+// fallback \u2014 same precedence as the old filter-then-fallback chain.
+var UNIVERSE_BY_TICKER = null;
+var UNIVERSE_BY_TICKER_N = -1;
+function universeLookup(ticker){
+  var n = (UNIVERSE_FULL ? UNIVERSE_FULL.length : 0) + (UNIVERSE ? UNIVERSE.length : 0);
+  if(!UNIVERSE_BY_TICKER || UNIVERSE_BY_TICKER_N !== n){
+    UNIVERSE_BY_TICKER = new Map();
+    var i;
+    if(typeof UNIVERSE !== 'undefined' && UNIVERSE)
+      for(i=0;i<UNIVERSE.length;i++) UNIVERSE_BY_TICKER.set(UNIVERSE[i].t, UNIVERSE[i]);
+    if(typeof UNIVERSE_FULL !== 'undefined' && UNIVERSE_FULL)
+      for(i=0;i<UNIVERSE_FULL.length;i++) UNIVERSE_BY_TICKER.set(UNIVERSE_FULL[i].t, UNIVERSE_FULL[i]);
+    UNIVERSE_BY_TICKER_N = n;
+  }
+  return UNIVERSE_BY_TICKER.get(ticker);
+}
+
 function scoreIt(ticker, ind, opt){
   // \u2500\u2500 Look up cached FMP data (sync \u2014 fetched async during scan) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
   var fmp = G_FMP_CACHE[ticker] || loadFmpCache(ticker);
@@ -16272,8 +16297,7 @@ function scoreIt(ticker, ind, opt){
   var emaOk    = ind.ema20 > ind.ema50;
   var tfPts = ind.tf === 3 ? 12 : ind.tf === 2 ? 8 : ind.tf === 1 ? 4 : 0;
   var tfOk  = tfPts > 0;
-  var su       = UNIVERSE_FULL.filter(function(u){ return u.t === ticker; })[0] ||
-                 UNIVERSE.filter(function(u){ return u.t === ticker; })[0];
+  var su       = universeLookup(ticker); // O(1) Map lookup (was O(N) filter per ticker — audit P1)
   // SECTOR_PF keys are short ("Industrials"); UNIVERSE_FULL stores Tradier
   // long-form sector names ("Producer manufacturing"). Resolve via map; fall
   // back to the raw key for already-short inputs (e.g. UNIVERSE static fallback).

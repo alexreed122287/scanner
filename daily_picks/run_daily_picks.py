@@ -175,8 +175,19 @@ def build_picks():
         _bail("gex_scores.json is empty — nothing to do")
 
     themes = _load_json(THEME_SCORES) or {}
-    # theme_scores.json has shape: { themes: [{name, dailyScore, members:[...]}], ticker2theme: {...} }
-    ticker2theme = themes.get("ticker2theme") or {}
+    # Audit T6 fix: theme_scores.json's real shape is
+    #   { themes: { "<name>": { members:[...], scores:{daily,weekly,monthly}, ... } } }
+    # (no ticker2theme, no dailyScore). The old lookup read a schema that never
+    # existed, so every email row shipped with theme="—"/theme_score=None.
+    # Build ticker→theme here; a ticker in multiple themes keeps the one with
+    # the highest daily score.
+    ticker2theme = {}
+    for _name, _info in (themes.get("themes") or {}).items():
+        _daily = ((_info or {}).get("scores") or {}).get("daily")
+        for _sym in (_info or {}).get("members") or []:
+            _cur = ticker2theme.get(_sym)
+            if _cur is None or (_daily or 0) > (_cur.get("dailyScore") or 0):
+                ticker2theme[_sym] = {"theme": _name, "dailyScore": _daily}
 
     bullish = []
     for r in rows:
