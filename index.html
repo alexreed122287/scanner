@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="v6.12.26.5">
+<meta name="op-build" content="v6.12.26.6">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -832,16 +832,11 @@ tr.pos-row-no-quote:hover td,tr.pos-row-no-quote.sel-row td{opacity:.85;}
   z-index:5 !important;
   margin-top:0 !important;
 }
-/* 2026-05-10 v2.16.17: speeds SWAPPED per user spec
-   "switch the speeds of the indices and the themes".
-   Themes now 30s (was 60s) — fast lane.
-   Indices now 60s (was 30s) — slow lane (see .indices-marquee below). */
-.themes-marquee{display:inline-flex;flex-wrap:nowrap;gap:10px;align-items:center;animation:themes-scroll 30s linear infinite;will-change:transform;pointer-events:none;}
-/* hover-pause removed 2026-05-04 per user spec — ribbon never stops scrolling */
-@keyframes themes-scroll{
-  0%{transform:translateX(0);}
-  100%{transform:translateX(-50%);}
-}
+/* 2026-06-12 user spec: themes/industry ribbon is now STATIC — no marquee.
+   Top 5 themes render once, no duplicate copy, no animation. The indices
+   ribbon below keeps its marquee (indices-scroll) unchanged.
+   (Historical: 2026-05-10 v2.16.17 had themes at 30s / indices 60s.) */
+.themes-marquee{display:inline-flex;flex-wrap:nowrap;gap:10px;align-items:center;pointer-events:none;overflow:hidden;max-width:100%;}
 /* Indices ribbon (#hdr-tickers) gets the same marquee treatment via
    the .indices-marquee inner wrapper. Wrapper + duplicate content is
    built at init by _wireIndicesMarquee() (in scripts) so the existing
@@ -15886,7 +15881,7 @@ function renderTopThemesStrip(){
       staticRows.sort(function(a,b){ return b.score - a.score; });
       if (staticRows.length) {
         // Map dailyScore → fake rs so the existing fmtRow path can render uniformly
-        rows = staticRows.slice(0, 8).map(function(s){ return { theme: s.theme, rs: (s.score-50)/10, n: 0 }; });
+        rows = staticRows.slice(0, 5).map(function(s){ return { theme: s.theme, rs: (s.score-50)/10, n: 0 }; });
       }
     } catch(_){}
   }
@@ -15913,24 +15908,16 @@ function renderTopThemesStrip(){
   }
 
   // Top industries only — no laggards section per user spec.
-  var leaders = rows.slice(0, 8);
+  // 2026-06-12 user spec: STATIC ribbon, top 5 only — marquee scroll
+  // disabled, single copy rendered (the old dual-copy + translateX(-50%)
+  // loop is gone; .themes-marquee CSS keeps layout but no animation).
+  var leaders = rows.slice(0, 5);
 
   // 'TOP THEMES NOW:' label removed 2026-05-03 per user spec.
   var content = leaders.map(function(r,i){return fmtRow(r, i+1);}).join('<span style="color:var(--bg3);margin:0 4px;">·</span>');
 
-  // The marquee animation translates -50% to loop seamlessly, so we render
-  // the content TWICE side by side; the second copy slides into view as
-  // the first slides off. aria-hidden on the duplicate so screen readers
-  // don't read the same headlines twice.
-  /* 2026-05-10 v2.16.16: both copies must have IDENTICAL gap +
-     padding-right for the -50% animation endpoint to land exactly on
-     the start of copy 2. Was 10px on first, 24px on second — that
-     14px difference per cycle made the marquee visibly jump on each
-     loop reset (user report: "indices and themes appear to be
-     glitching, almost jumping when resetting"). Both now 14px. */
   var html = '<div class="themes-marquee">'
-           + '<span style="display:inline-flex;gap:14px;align-items:center;padding-right:14px;">' + content + '</span>'
-           + '<span style="display:inline-flex;gap:14px;align-items:center;padding-right:14px;" aria-hidden="true">' + content + '</span>'
+           + '<span style="display:inline-flex;gap:14px;align-items:center;">' + content + '</span>'
            + '</div>';
 
   els.forEach(function(el){ el.innerHTML = html; });
@@ -27764,7 +27751,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = 'v6.12.26.5';
+var APP_VERSION = 'v6.12.26.6';
 // v2.18.21: DEFAULT feedback webhook. Every visitor's "Submit Feedback"
 // form posts here (unless they've overridden via ALERTS → Feedback
 // Webhook). The URL points to a Google Apps Script Web App owned by
