@@ -168,6 +168,22 @@ Phase 2 continuous scoring shifted the observed distribution down ~15-16 pts at 
 
 The `sc-minscore` default appears in three places: the HTML `value=` attribute, `SCAN_SETTING_DEFAULTS['sc-minscore']`, and the `clearFilters()` reset. All three must stay in sync.
 
+### GO gate — fundScore enforced (2026-06-12, audit M1.1)
+
+Owner decision (Alex, 2026-06-12): the documented `fundScore ≥ 8` GO gate is now
+ENFORCED in code. Previously `fundScore` was computed but ignored by `isGo`, so
+chart-only tickers with zero analyst/sector confirmation could be flagged GO.
+
+- Constant: `FUND_GO_GATE = 8` (declared above `scoreIt`)
+- Both GO paths gate identically and must stay in sync:
+  - `scoreIt`: `isGo = total >= goThreshold && !avoidBad && clamp(fundScore,0,30) >= FUND_GO_GATE`
+  - `reclassifyGoThreshold`: `r.isGo = score >= thresh && !avoidBad && (r.fundScore||0) >= FUND_GO_GATE`
+- fundScore sources (max 30): Analyst Revisions ↑ (+12), Analyst PT Exists (+8),
+  Strong Sector theme bonus (±8). FMP down/keyless ⇒ GO count drops sharply —
+  intended fail-closed behavior for a real-money signal.
+- `reclassifyGoThreshold` empty-input fallback also reconciled 140 → 121 to
+  match `scoreIt` (audit T4).
+
 ### GEX resilience (PR #56, #58)
 
 **PR #56** (`_fetchOneChain` / `_fetchOneExpiry`): reads `r.text()` then `JSON.parse()` instead of `r.json()` directly; detects non-JSON responses (rate-limit plain text, "Restricted", HTML error pages) before attempting parse. Batch dispatch converted from `Promise.all` → `Promise.allSettled` so a single failed fetch doesn't abort the whole batch. `_gexFreshWithin` window widened from 30 min → **360 min (6 h)** so cron-hydrated data is treated as fresh for the full inter-cron interval.

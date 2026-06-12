@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="v6.1.26.2">
+<meta name="op-build" content="v6.12.26.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -8463,7 +8463,8 @@ function reclassifyGoThreshold(){
     // penalty rules use pass:false when the bad condition is active, so the
     // guard fired on intact-trend tickers and blocked them from GO.
     var avoidBad = (typeof AVOID !== 'undefined' && AVOID.indexOf(r.ticker) >= 0);
-    r.isGo = (r.score >= thresh) && !avoidBad;
+    // Audit M1.1: mirror scoreIt's fundScore gate so both GO paths agree.
+    r.isGo = (r.score >= thresh) && !avoidBad && ((r.fundScore || 0) >= FUND_GO_GATE);
   });
   // Recompute stats bar and re-filter results
   var goCount = G.results.filter(function(r){ return r.isGo; }).length;
@@ -16156,6 +16157,11 @@ function _whyRankedBelow(r, prev){
 // automatically if either universe array changes length (push/concat mutation).
 // UNIVERSE_FULL entries are set last so they win over the static UNIVERSE
 // fallback \u2014 same precedence as the old filter-then-fallback chain.
+// Audit M1.1: minimum fundScore for GO eligibility. Shared by BOTH GO paths
+// (scoreIt and reclassifyGoThreshold) — keep them gating identically or the
+// scan list and the reclassify pass will disagree about what's a GO.
+var FUND_GO_GATE = 8;
+
 var UNIVERSE_BY_TICKER = null;
 var UNIVERSE_BY_TICKER_N = -1;
 function universeLookup(ticker){
@@ -16719,7 +16725,16 @@ function scoreIt(ticker, ind, opt){
       if(!isNaN(v) && v >= 0 && v <= 300) goThreshold = v;
     }
   } catch(e){}
-  var isGo  = total >= goThreshold && !avoidBad;
+  // Audit M1.1 (2026-06-12, owner decision): enforce the documented
+  // fundScore >= FUND_GO_GATE gate. A GO now requires at least one outside
+  // confirmation — Analyst Revisions ↑ (+12), Analyst PT Exists (+8), or
+  // Strong Sector (+8) — on top of the technical threshold. Previously
+  // fundScore was computed but ignored, so chart-only tickers with zero
+  // analyst/sector confirmation (e.g. no FMP key or rate-limited FMP)
+  // could be flagged GO and reach the auto-trader.
+  // NOTE: if FMP is down/keyless, GO count will drop sharply — that is the
+  // intended fail-closed behavior for a real-money signal.
+  var isGo  = total >= goThreshold && !avoidBad && clamp(fundScore, 0, 30) >= FUND_GO_GATE;
 
   return {
     score:      total,
@@ -27657,7 +27672,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = 'v6.1.26.2';
+var APP_VERSION = 'v6.12.26.0';
 // v2.18.21: DEFAULT feedback webhook. Every visitor's "Submit Feedback"
 // form posts here (unless they've overridden via ALERTS → Feedback
 // Webhook). The URL points to a Google Apps Script Web App owned by
