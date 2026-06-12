@@ -185,6 +185,25 @@ Do not add a fundScore condition to either path without a fresh owner decision.
 `reclassifyGoThreshold`'s empty-input fallback was reconciled 140 → 121 to
 match `scoreIt` (audit T4).
 
+### Bar-depth gate (2026-06-12, audit M1.2)
+
+`scoreIt` stamps `ind._bars = _hist.length` (0 when no history) on every pass.
+`MIN_TRADE_BARS = 100` (declared above `scoreIt`) is the single depth signal:
+
+- `renderScan`: rows with `0 < _bars < MIN_TRADE_BARS` get the `row-synth` dim
+  plus an `≈` badge (distinct from the synth `?`) — shallow history is visible.
+- `runAutoScanCycle`: refuses to trade rows without `_bars >= MIN_TRADE_BARS`.
+  Missing `_bars` fails closed. A `critical` static health check
+  (`api / Auto-trader bar-depth gate present in source (M1.2)`) introspects the
+  function source so a refactor that strips the gate fails the check.
+
+Rationale: `_synth` clears at 30 bars, but EMA200 needs ~201 and MACD/ADX
+35/29 — between 30 and 100 bars the row looks clean while trend indicators are
+mean-of-available approximations (audit T2/T3 silent-degradation window). The
+live history fetch window is 400 calendar days (~280 bars), so enriched rows
+clear the gate comfortably; sandbox histories (30–180 bars) may dim, which is
+honest.
+
 ### GEX resilience (PR #56, #58)
 
 **PR #56** (`_fetchOneChain` / `_fetchOneExpiry`): reads `r.text()` then `JSON.parse()` instead of `r.json()` directly; detects non-JSON responses (rate-limit plain text, "Restricted", HTML error pages) before attempting parse. Batch dispatch converted from `Promise.all` → `Promise.allSettled` so a single failed fetch doesn't abort the whole batch. `_gexFreshWithin` window widened from 30 min → **360 min (6 h)** so cron-hydrated data is treated as fresh for the full inter-cron interval.

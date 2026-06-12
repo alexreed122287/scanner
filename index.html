@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="v6.12.26.1">
+<meta name="op-build" content="v6.12.26.2">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -16158,6 +16158,16 @@ function _whyRankedBelow(r, prev){
 // automatically if either universe array changes length (push/concat mutation).
 // UNIVERSE_FULL entries are set last so they win over the static UNIVERSE
 // fallback \u2014 same precedence as the old filter-then-fallback chain.
+// Audit M1.2: minimum cached-history depth (daily bars) for a row to be
+// considered auto-tradeable. _synth clears at just 30 bars, but EMA200 needs
+// ~201 bars and MACD/ADX 35/29 — between 30 and ~100 bars the indicators are
+// "real" but computed on insufficient data (calcEMA degrades to a mean of
+// available closes). 100 matches the bg-enrich floor; the live history fetch
+// window is 400 calendar days (~280 bars) so enriched rows comfortably clear
+// it. scoreIt stamps ind._bars; renderScan dims shallow rows; runAutoScanCycle
+// refuses to trade them.
+var MIN_TRADE_BARS = 100;
+
 var UNIVERSE_BY_TICKER = null;
 var UNIVERSE_BY_TICKER_N = -1;
 function universeLookup(ticker){
@@ -16225,6 +16235,10 @@ function scoreIt(ticker, ind, opt){
   if(ind._synthSrc !== 'simInd'){
     ind._synth = !(_hist && _hist.length >= 30);
   }
+  // Audit M1.2: always stamp the history depth so downstream consumers
+  // (renderScan shallow-dim, runAutoScanCycle bar-depth gate) can distinguish
+  // "30 bars cleared _synth" from "deep enough for EMA200/MACD/ADX".
+  ind._bars = _hist ? _hist.length : 0;
   if(_hist && _hist.length >= 16){
     var rsiVal = calcRSIatIndex(_hist, 14, _hist.length - 1);
     if(typeof rsiVal === 'number' && !isNaN(rsiVal)){
@@ -20367,8 +20381,15 @@ function renderScan(){
     // foreground/bg enrichment hasn't filled in real history yet. Stack the
     // r._synth (sandbox path) check as a belt-and-braces guard.
     var _isSynth = !!(r._synth === true || (r.ind && r.ind._synth === true));
+    // Audit M1.2: shallow-history rows (cleared _synth at 30 bars but below
+    // MIN_TRADE_BARS) look fully real while EMA200/MACD/ADX quietly compute
+    // on insufficient data. Dim them like synth rows and badge with ≈.
+    var _bars = (r.ind && typeof r.ind._bars === 'number') ? r.ind._bars : null;
+    var _isShallow = !_isSynth && _bars !== null && _bars > 0 && _bars < MIN_TRADE_BARS;
     var _synthQ = _isSynth
       ? '<span class="score-synth-q" title="Synthetic / unenriched: indicators are bulk-pass placeholders (RSI 50, MACD 0, EMA estimates) until history lands. Score will update once enrichment reaches this rank.">?</span>'
+      : _isShallow
+      ? '<span class="score-synth-q" title="Shallow history: only '+_bars+' daily bars cached ('+MIN_TRADE_BARS+'+ needed for full-depth indicators — EMA200/MACD/ADX are approximations below that). Auto-trader will not trade this row. Bars deepen when enrichment refetches history.">≈</span>'
       : '';
     var scoreBar='<div style="display:inline-flex;align-items:center;gap:5px;">'
       +'<b>'+Math.round(r.score)+'</b>'+_synthQ
@@ -20442,7 +20463,7 @@ function renderScan(){
     } else {
       gexPill = '<span class="gex-pill mis" data-tk="'+tk+'" onclick="event.stopPropagation();runGexForTicker(\''+tk+'\')" title="RUN GEX for this ticker — fetches the 30-day options chain and computes call vs put OI flow + gamma flip strike. This ticker is outside the top-200 batch that runs automatically after every scan, so its GEX rule + bullish-flow indicator are still empty. Click RUN to fetch just this ticker (≈3s, 2 API calls). The button flips to ✓ once data lands.">RUN</span>';
     }
-    rows+='<tr data-ticker="'+tk+'"'+(_isSynth?' class="row-synth"':'')+' onclick="viewDetail(this.dataset.ticker,\'sc-detail\',\'sc-det-empty\')">'
+    rows+='<tr data-ticker="'+tk+'"'+((_isSynth||_isShallow)?' class="row-synth"':'')+' onclick="viewDetail(this.dataset.ticker,\'sc-detail\',\'sc-det-empty\')">'
       +'<td style="text-align:center;padding:0;">'+starHTML(tk,14)+'</td>'
       +'<td style="text-align:center;font-size:10px;color:var(--gry2);font-family:var(--ff-mono);" title="'+_whyTitle.replace(/"/g,'&quot;')+'">'
       +  '<div style="line-height:1.1;">'+(idx+1)+'</div>'
@@ -26481,6 +26502,12 @@ async function runAutoScanCycle(){
   results.forEach(function(r){
     if(!r.isGo||r.score<s.minScore) return;
     if(r && r.ind && r.ind._synth === true){ _synthSkipped++; return; }
+    // Audit M1.2: bar-depth gate. _synth clears at 30 bars, but EMA200 needs
+    // ~201 and MACD/ADX 35/29 — a 50-bar row looks clean while its trend
+    // indicators are mean-of-available approximations. Refuse to auto-trade
+    // anything below MIN_TRADE_BARS. Missing _bars (pre-M1.2 cached rows)
+    // fails closed — a fresh scoreIt pass will stamp it.
+    if(!(r && r.ind && typeof r.ind._bars === 'number' && r.ind._bars >= MIN_TRADE_BARS)){ _synthSkipped++; return; }
     if(_autoSandbox){ _synthSkipped++; return; }
     if(atHasOpenPosition(r.ticker))  return;
     var lastTs = G_AT.openedToday[r.ticker+'_ts']||0;
@@ -27665,7 +27692,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = 'v6.12.26.1';
+var APP_VERSION = 'v6.12.26.2';
 // v2.18.21: DEFAULT feedback webhook. Every visitor's "Submit Feedback"
 // form posts here (unless they've overridden via ALERTS → Feedback
 // Webhook). The URL points to a Google Apps Script Web App owned by
@@ -34022,6 +34049,16 @@ window.addEventListener('DOMContentLoaded',init);
         var src = (typeof runAutoScanCycle === 'function') ? runAutoScanCycle.toString() : '';
         if(!src) return 'n/a';
         return src.indexOf('_synth') >= 0 && src.indexOf('_autoSandbox') >= 0;
+      } catch(_){ return 'n/a'; }
+    }},
+    { tab:'api', label:'Auto-trader bar-depth gate present in source (M1.2)', sev:'critical', fn:function(){
+      // Static sanity: confirm runAutoScanCycle still refuses rows whose
+      // cached history is shallower than MIN_TRADE_BARS. A 30-bar row clears
+      // _synth but computes EMA200/MACD/ADX on insufficient data.
+      try {
+        var src = (typeof runAutoScanCycle === 'function') ? runAutoScanCycle.toString() : '';
+        if(!src) return 'n/a';
+        return src.indexOf('MIN_TRADE_BARS') >= 0 && src.indexOf('_bars') >= 0;
       } catch(_){ return 'n/a'; }
     }},
     { tab:'api', label:'submitOrder sandbox refusal present in source', sev:'critical', fn:function(){
