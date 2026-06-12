@@ -6,10 +6,13 @@ Headless GEX/Flow scan run by GitHub Actions.
 
 For each ticker in `gex/gex_universe.json`:
   1. Fetch /v1/markets/options/expirations  → pick nearest expiry in [25..50] DTE
-  2. Fetch /v1/markets/options/chains for that expiry
+  2. Fetch /v1/markets/options/chains for that expiry (greeks=true)
   3. Sum call OI, put OI, call vol, put vol
-  4. Compute net GEX = (call_oi − put_oi) × spot / 1_000_000
-  5. Pick gamma-flip strike (highest combined OI within ±10% of spot)
+  4. Compute gamma-weighted net dealer GEX in $M per 1% spot move:
+       gamma × OI × 100 × spot² × 0.01, calls +, puts − (standard dealer
+       positioning assumption). Falls back to (call_oi − put_oi) × spot / 1M
+       when greeks cover <50% of OI (row flagged gexProxy).
+  5. Gamma flip = cumulative zero-cross strike (low→high); OI-proxy fallback
   6. Classify flow: CALL HEAVY ≥70%, CALL LEAN ≥55%, BALANCED, PUT LEAN ≤45%, PUT HEAVY ≤30%
 
 Output: gex/gex_scores.json — a dict { ts, source, count, data: [...] }
@@ -137,7 +140,7 @@ def _pick_expiry(ticker):
 def _fetch_chain(ticker, expiry):
     data = _fetch(
         f"{TRADIER_HOST}/v1/markets/options/chains",
-        params={"symbol": ticker, "expiration": expiry, "greeks": "false"},
+        params={"symbol": ticker, "expiration": expiry, "greeks": "true"},
     )
     if not data:
         return None
@@ -157,8 +160,8 @@ def _compute_row(ticker, spot, expiry, dte, opts):
 
     call_oi = put_oi = 0
     call_vol = put_vol = 0
-    flip_strike = spot
-    flip_oi = 0
+    strikes = {}            # strike -> {"g": net gamma-$, "oi": combined OI}
+    gamma_oi = tot_oi = 0   # greeks coverage accounting (OI-weighted)
 
     for o in opts:
         try:
@@ -169,34 +172,76 @@ def _compute_row(ticker, spot, expiry, dte, opts):
         except (TypeError, ValueError):
             continue
 
-        if otype == "call":
+        is_call = otype == "call"
+        if is_call:
             call_oi += oi
             call_vol += vol
         elif otype == "put":
             put_oi += oi
             put_vol += vol
+        else:
+            continue
+        tot_oi += oi
 
-        # Flip = highest combined OI within ±10% of spot.
-        if abs(strike - spot) <= spot * NEAR_ATM_PCT:
-            if oi > flip_oi:
-                flip_oi = oi
-                flip_strike = strike
+        if strike and oi > 0:
+            ent = strikes.setdefault(strike, {"g": 0.0, "oi": 0})
+            ent["oi"] += oi
+            greeks = o.get("greeks") or {}
+            try:
+                gamma = float(greeks.get("gamma"))
+            except (TypeError, ValueError):
+                gamma = None
+            if gamma is not None and spot > 0:
+                gamma_oi += oi
+                ent["g"] += gamma * oi * 100 * spot * spot * 0.01 * (1 if is_call else -1)
 
     total_oi = call_oi + put_oi
     if total_oi <= 0:
         return None
 
+    # Zero-volume blend fix (matches in-page v6.12.26.8): OI-only when
+    # option tape < 50 contracts. call_pct UNCLAMPED (legacy [10,90] clamp
+    # removed — it hid extremes).
     total_vol = call_vol + put_vol or 1
     call_pct_oi = round((call_oi / total_oi) * 100)
     call_pct_vol = round((call_vol / total_vol) * 100)
-    call_pct = max(10, min(90, round(call_pct_oi * 0.6 + call_pct_vol * 0.4)))
+    if (call_vol + put_vol) >= 50:
+        call_pct = round(call_pct_oi * 0.6 + call_pct_vol * 0.4)
+    else:
+        call_pct = call_pct_oi
 
-    net_gex = round(((call_oi - put_oi) * spot) / 1_000_000, 2)
+    # Gamma-weighted net GEX ($M per 1% move) + cumulative zero-cross flip.
+    gex_proxy = not (tot_oi > 0 and spot > 0 and (gamma_oi / tot_oi) >= 0.5)
+    ordered = sorted(strikes.keys())
+    flip_strike = None
+    flip_src = None
+    if not gex_proxy:
+        net_gex = round(sum(e["g"] for e in strikes.values()) / 1_000_000, 1)
+        cum = 0.0
+        prev = 0.0
+        for i, k in enumerate(ordered):
+            prev = cum
+            cum += strikes[k]["g"]
+            if i > 0 and ((prev < 0 <= cum) or (prev > 0 >= cum)):
+                flip_strike = k
+                flip_src = "gamma"
+                break
+    else:
+        net_gex = round(((call_oi - put_oi) * spot) / 1_000_000, 1)
+    if flip_strike is None:
+        # OI proxy: max combined OI near ATM, widening to the whole chain.
+        near = [k for k in ordered if abs(k - spot) <= spot * NEAR_ATM_PCT]
+        pool = near or ordered
+        if pool:
+            flip_strike = max(pool, key=lambda k: strikes[k]["oi"])
+            flip_src = "oi-atm" if near else "oi-chain"
 
     return {
         "t": ticker,
         "gex": net_gex,
-        "flip": round(flip_strike, 2),
+        "gexProxy": gex_proxy,
+        "flip": round(flip_strike, 2) if flip_strike is not None else None,
+        "flipSrc": flip_src,
         "call": call_pct,
         "put": 100 - call_pct,
         "callOI": call_oi,

@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="v6.12.26.8">
+<meta name="op-build" content="v6.12.26.9">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -4638,7 +4638,7 @@ body, body *{transition:background-color .25s ease, color .25s ease, border-colo
         <ul style="padding-left:20px;">
           <li><b>RUN GEX</b> — fetches 30-day options chain for top-200 tickers (~4 min, paced by Tradier rate limit). Auto-fires 20s after every scan.</li>
           <li><b>AUTO schedule</b> — Off / 1x at open (8:35 CST) / 3x daily (8:35, 11:00, 14:00 CST). Recommended: 3x — captures morning, lunch, and close-positioning shifts. Also runs headless via GitHub Actions cron 3× daily so updates happen even when the dashboard is closed.</li>
-          <li><b>Table</b> — only bullish (call-heavy, ≥50% call OI) tickers shown, sorted most-bullish first by Call OI %, with |NET GEX| as tiebreaker (higher |GEX| = more conviction in the directional bias). PUT HEAVY tickers stay in G.gexData (rule scorecard still uses them) but suppressed from this display.</li>
+          <li><b>Table</b> — long-call candidates only (call% ≥55 and LC score ≥50), sorted by the LC composite: spot-above-flip zone (25), call-skew sweet spot peaking at 70-80% with a crowding decay above 80% (25), dealer gamma regime — short-gamma squeeze fuel scores highest, heavy positive gamma (pinning) lowest (25), call-OI liquidity (15), and DTE 30-45 (10). NET GEX is gamma-weighted ($M per 1% move) when greeks are available (≈ marks OI-proxy rows). PUT HEAVY tickers stay in G.gexData (rule scorecard still uses them) but suppressed from this display.</li>
           <li><b>RUN pill on scanner rows</b> — for tickers outside the top-200 batch. Click to fetch single-ticker GEX (~3s) so the GEX Call Heavy rule can score them.</li>
         </ul>
       </div>
@@ -8858,7 +8858,10 @@ function autoSelectContract(){
     // real data instead of always showing N/A. (BUG-4 fix 2026-05-09)
     var gexRow = (G.gexData||[]).find(function(g){ return g.t === sym; }) || null;
     if (gexRow){
-      var callPct = +gexRow.flow || 0;
+      // 2026-06-12: was `+gexRow.flow` — flow is the STRING "CALL HEAVY"/
+      // "PUT HEAVY", so +flow = NaN → 0 → bucket always rendered BEARISH.
+      // The call-share number lives in gexRow.call.
+      var callPct = +gexRow.call || 0;
       var netGex  = +gexRow.gex  || 0;
       var label, cls;
       if (callPct >= 70 && netGex > 0)      { label='STRONG BULL'; cls='good'; }
@@ -21112,7 +21115,7 @@ function runGex(){
 
   function _fetchOneChain(e){
     if(!e || !e.expiry) return Promise.resolve({ticker:(e&&e.ticker)||'', chain:[], expiry:null});
-    return tradierFetch(host+'/v1/markets/options/chains?symbol='+e.ticker+'&expiration='+e.expiry.date+'&greeks=false', {
+    return tradierFetch(host+'/v1/markets/options/chains?symbol='+e.ticker+'&expiration='+e.expiry.date+'&greeks=true', {
       headers:{Authorization:'Bearer '+key, Accept:'application/json'}
     }, 5*60*1000)
     .then(function(r){ return r.text(); })
@@ -21141,51 +21144,15 @@ function runGex(){
   }
 
   function _processChains(chains){
-    // Step 3: compute net flow from call OI vs put OI
+    // Step 3: gamma-weighted dealer GEX + cumulative flip via _computeGexCore
+    // (2026-06-12 overhaul — see helper for math + sign convention).
     // Filter nulls that can arrive when Promise.allSettled catches a rejected promise.
     G.gexData = chains.filter(Boolean).map(function(c){
       var result = G.results.filter(function(r){ return r.t===c.ticker||r.ticker===c.ticker; })[0];
       var price = result ? result.price : 0;
-      var score = result ? result.score : 50;
-
-      var callOI = 0, putOI = 0, callVol = 0, putVol = 0;
-      c.chain.forEach(function(opt){
-        if(!opt) return;
-        var oi = parseInt(opt.open_interest) || 0;
-        var vol = parseInt(opt.volume) || 0;
-        if(opt.option_type === 'call'){ callOI += oi; callVol += vol; }
-        else { putOI += oi; putVol += vol; }
-      });
-
-      var totalOI = callOI + putOI || 1;
-      var totalVol = callVol + putVol || 1;
-
-      var callPctOI  = Math.round((callOI / totalOI) * 100);
-      var callPctVol = Math.round((callVol / totalVol) * 100);
-      // 2026-06-12 fix (user report: "gex still displaying no results"):
-      // pre-market / quiet hours option volume is ~0, so the 60/40 OI/vol
-      // blend capped callPct at 0.6*100 = 60 — structurally below the 70%
-      // bullish display floor; NOTHING could ever render. Blend volume only
-      // when real option tape exists (>= 50 contracts total); else OI-only.
-      var _hasOptTape = (callVol + putVol) >= 50;
-      var callPct = _hasOptTape
-        ? Math.round((callPctOI * 0.6) + (callPctVol * 0.4))
-        : callPctOI;
-      callPct = Math.max(10, Math.min(90, callPct));
-
-      var netOI = callOI - putOI;
-      var gexMag = price > 0 ? Math.round(Math.abs(netOI) * price / 1000000) : Math.abs(netOI);
-      var gexSign = netOI >= 0 ? 1 : -1;
-
-      var flipStrike = price;
-      var maxOI = 0;
-      c.chain.forEach(function(opt){
-        if(!opt) return;
-        var strike = parseFloat(opt.strike) || 0;
-        if(Math.abs(strike - price) > price * 0.1) return;
-        var oi = (parseInt(opt.open_interest)||0);
-        if(oi > maxOI){ maxOI=oi; flipStrike=strike; }
-      });
+      var core = _computeGexCore(c.chain, price);
+      var callOI = core.callOI, putOI = core.putOI;
+      var callPct = core.callPct;
 
       var suggested = null;
       var atmCall = null;
@@ -21211,8 +21178,10 @@ function runGex(){
 
       return {
         t: c.ticker,
-        gex: gexSign * Math.max(1, gexMag),
-        flip: flipStrike || price,
+        gex: core.gexM,
+        gexProxy: core.gexProxy,
+        flip: core.flip,
+        flipSrc: core.flipSrc,
         call: callPct,
         put: 100 - callPct,
         callOI: callOI,
@@ -21307,6 +21276,99 @@ function runGex(){
 
   _runExpBatch(0);
 }
+// ── Shared GEX math (2026-06-12 overhaul, owner-approved) ─────────────────
+// Computes gamma-weighted net dealer GEX and a cumulative zero-cross gamma
+// flip from a raw Tradier chain. Used by _processChains (bulk) and the
+// per-ticker RUN pill so both paths stay in lockstep.
+//
+// Sign convention (standard dealer-positioning assumption, SqueezeMetrics):
+// dealers are net long the calls customers sold and net short the puts
+// customers bought → call gamma contributes POSITIVE dealer gamma, put
+// gamma NEGATIVE. Per-contract $ exposure per 1% spot move:
+//   gamma × OI × 100 (contract multiplier) × spot × (spot × 0.01)
+// gexM is the chain-wide net, in $M per 1% move (1 decimal).
+//
+// Flip = lowest strike where the cumulative (low→high strike) net gamma
+// crosses zero — the level below which dealers are net short gamma.
+// Fallbacks, flagged via flipSrc:
+//   'gamma'    cumulative zero-cross (real flip)
+//   'oi-atm'   max combined OI within ±10% of spot (legacy proxy)
+//   'oi-chain' max combined OI anywhere on the chain (no near-ATM strikes)
+//   null flip  no OI at all — callers must NOT treat this as spot
+// When greeks cover <50% of total OI (sandbox tokens, stale ORATS rows),
+// gexM falls back to the legacy (callOI−putOI)×spot/1M proxy and the row
+// is flagged gexProxy:true.
+// callPct is UNCLAMPED (legacy [10,90] clamp removed — it hid extremes and
+// made the ≥90 PRIME tier a boundary-equality accident). OI-only when
+// option tape < 50 contracts (zero-volume blend fix, v6.12.26.8).
+function _computeGexCore(opts, spot){
+  var callOI=0, putOI=0, callVol=0, putVol=0;
+  var strikes = {};   // strike → { g: net gamma-$, oi: combined OI }
+  var gammaOI = 0, totOI = 0;
+  (opts||[]).forEach(function(opt){
+    if(!opt) return;
+    var oi = parseInt(opt.open_interest) || 0;
+    var vol = parseInt(opt.volume) || 0;
+    var strike = parseFloat(opt.strike) || 0;
+    var isCall = opt.option_type === 'call';
+    if(isCall){ callOI+=oi; callVol+=vol; } else { putOI+=oi; putVol+=vol; }
+    totOI += oi;
+    if(strike && oi > 0){
+      if(!strikes[strike]) strikes[strike] = { g:0, oi:0 };
+      strikes[strike].oi += oi;
+      var gRaw = opt.greeks ? parseFloat(opt.greeks.gamma) : NaN;
+      if(isFinite(gRaw) && spot > 0){
+        gammaOI += oi;
+        strikes[strike].g += gRaw * oi * 100 * spot * spot * 0.01 * (isCall ? 1 : -1);
+      }
+    }
+  });
+  var totalOI = callOI + putOI || 1;
+  var totalVol = callVol + putVol || 1;
+  var callPctOI  = Math.round((callOI / totalOI) * 100);
+  var callPctVol = Math.round((callVol / totalVol) * 100);
+  var callPct = (callVol + putVol) >= 50
+    ? Math.round((callPctOI * 0.6) + (callPctVol * 0.4))
+    : callPctOI;
+
+  var gexProxy = !(totOI > 0 && spot > 0 && (gammaOI / totOI) >= 0.5);
+  var sorted = Object.keys(strikes).map(parseFloat).sort(function(a,b){ return a-b; });
+  var gexM, flip = null, flipSrc = null;
+
+  if(!gexProxy){
+    var net = 0;
+    sorted.forEach(function(k){ net += strikes[k].g; });
+    gexM = +(net / 1e6).toFixed(1);
+    // Cumulative zero-cross walk, low strike → high
+    var cum = 0, prevCum = 0;
+    for(var i = 0; i < sorted.length; i++){
+      prevCum = cum;
+      cum += strikes[sorted[i]].g;
+      if(i > 0 && ((prevCum < 0 && cum >= 0) || (prevCum > 0 && cum <= 0))){
+        flip = sorted[i]; flipSrc = 'gamma'; break;
+      }
+    }
+  } else {
+    var netOI = callOI - putOI;
+    gexM = spot > 0 ? +((netOI * spot) / 1e6).toFixed(1) : netOI;
+  }
+  if(flip == null){
+    // OI proxy: max combined OI near ATM, widening to the whole chain.
+    var maxOI = 0;
+    sorted.forEach(function(k){
+      if(spot > 0 && Math.abs(k - spot) > spot * 0.1) return;
+      if(strikes[k].oi > maxOI){ maxOI = strikes[k].oi; flip = k; flipSrc = 'oi-atm'; }
+    });
+    if(flip == null){
+      sorted.forEach(function(k){
+        if(strikes[k].oi > maxOI){ maxOI = strikes[k].oi; flip = k; flipSrc = 'oi-chain'; }
+      });
+    }
+  }
+  return { callOI:callOI, putOI:putOI, callVol:callVol, putVol:putVol,
+           callPct:callPct, gexM:gexM, gexProxy:gexProxy, flip:flip, flipSrc:flipSrc };
+}
+
 function renderGex(){
   var wrap=eid('gx-tbl-wrap');
   if(!wrap) return;
@@ -21315,10 +21377,11 @@ function renderGex(){
   // C-3: add EXP / FLIP STRIKE column between DTE and FLOW so the user can
   //      see which contract the GEX/flip values are referring to.
   var defs = {
-    'NET GEX': 'Net dealer gamma exposure (call OI \u2212 put OI), normalized by price and expressed in millions. POSITIVE = dealers net long gamma \u2192 they sell into rallies and buy dips \u2192 suppresses volatility. NEGATIVE = dealers net short gamma \u2192 they buy strength and sell weakness \u2192 amplifies moves. Above the gamma flip strike, dealers are long; below, short.',
+    'LC': 'Long-call composite score (0\u2013100). ZONE 25: spot above gamma flip. SKEW 25: call-share sweet spot \u2014 peaks at 70\u201380%, decays above 80% (crowding is contrarian). REGIME 25: net gex \u2264 0 scores highest (dealer-short-gamma amplifies upside moves \u2014 squeeze fuel); heavy positive gamma pins price and bleeds long premium. LIQ 15: call OI depth. DTE 10: 30\u201345d sweet spot. Sorted best-first.',
+    'NET GEX': 'Net dealer gamma exposure in $M per 1% spot move, gamma-weighted per strike (gamma \u00d7 OI \u00d7 100 \u00d7 spot\u00b2 \u00d7 1%; calls +, puts \u2212 under the standard dealer-positioning assumption). POSITIVE = dealers net long gamma \u2192 they sell rallies / buy dips \u2192 suppresses movement. NEGATIVE = dealers short gamma \u2192 they chase \u2192 amplifies moves. Rows marked \u2248 fall back to the legacy OI proxy (greeks unavailable).',
     'CALL OI': 'Total open interest across CALL options at the chosen expiration. Higher = more positioning on the upside.',
     'PUT OI': 'Total open interest across PUT options at the chosen expiration. Higher = more downside positioning / hedging.',
-    'GAMMA FLIP': 'The strike price (near-the-money, within \u00b110% of spot) with the highest combined open interest. This is roughly where dealer gamma exposure flips from long to short. Price moves THROUGH this strike often trigger acceleration as dealer hedging reverses direction.',
+    'GAMMA FLIP': 'Strike where the cumulative (low\u2192high) net dealer gamma crosses zero \u2014 below it dealers are net short gamma, above it net long. Price moves THROUGH this level often accelerate as dealer hedging reverses. When greeks are unavailable the legacy proxy is used (max combined OI near ATM) and the strike is marked \u2248.',
     'CALL OI %': 'Call OI as a percentage of total OI (calls + puts), blended 60% by OI and 40% by today\u2019s volume. >50% = call-heavy / bullish positioning. <50% = put-heavy / bearish.',
     'PUT OI %': 'Put OI percentage (100 \u2212 Call OI %). High values indicate hedging or bearish positioning.',
     'DTE': 'Calendar days to expiration of the referenced options chain. The scanner picks the chain closest to 35 DTE within the 20-70 day window.',
@@ -21330,6 +21393,7 @@ function renderGex(){
   function th(label){ return '<th title="'+_esc(defs[label]||'')+'" style="cursor:default;">'+label+'</th>'; }
   var html='<table><thead><tr>'
     + '<th>SYMBOL</th>'
+    + th('LC')
     + th('STOCK PRICE')
     + th('NET GEX') + th('CALL OI') + th('PUT OI') + th('GAMMA FLIP')
     + th('CALL OI %') + th('PUT OI %') + th('DTE') + th('EXP') + th('STRIKE') + th('FLOW')
@@ -21338,66 +21402,103 @@ function renderGex(){
   // the "above flip" bullish-prime filter both have access to current spot.
   var spotByTk = {};
   try { if (G.results) G.results.forEach(function(rr){ if (rr && rr.ticker) spotByTk[rr.ticker] = rr.price || 0; }); } catch(_){}
-  // Bullish-only ranking 2026-05-03 per user spec: filter to CALL HEAVY
-  // (call% >= 50) AND drop NO DATA / sim placeholders, then sort
-  // most-bullish first by Call OI %, with |NET GEX| magnitude as the
-  // tiebreaker (higher conviction floats up). Result: top of list =
-  // strongest bullish flow conviction = best long-call candidates.
-  // v2.17.3: bullish floor raised 50→70. 50 is a coin-flip; 70 is the
-  // dealer-short-calls / positive-gamma drift zone where long calls have
-  // a real directional edge (Garleanu-Pedersen-Poteshman). The existing
-  // PRIME criteria already use 70+ — this aligns the filter with PRIME
-  // rather than treating "majority calls" as bullish.
-  var BULLISH_CALL_PCT = 70;
+  // ── LC (long-call) composite ranking — 2026-06-12 overhaul, owner spec
+  // "rank by the best known means for long calls". Replaces the old
+  // call%≥70 display floor + 0-7 point sort, which (a) double-counted the
+  // call/put ratio (net-OI sign AND call% both scored it), (b) treated
+  // strongly-positive GEX as best — but dealer-LONG-gamma pins price and
+  // bleeds long premium, and (c) contradicted the scan rule's own crowding
+  // tiering (scoreIt penalizes ≥75% call as contrarian-crowded).
+  //
+  // LC score, 0–100, five orthogonal components:
+  //   ZONE   (25): spot above gamma flip — dealer support under price.
+  //                Unknown flip = 10 (neutral, not penalized).
+  //   SKEW   (25): call-share sweet spot. <55: 0 · 55→70 ramps 5→25 ·
+  //                70–80: 25 (constructive, not crowded) · 80→95 decays
+  //                25→10 · >95: 5 (extreme crowding = contrarian, aligned
+  //                with scoreIt's GEX rule).
+  //   REGIME (25): dealer gamma posture. Net gex ≤ 0: 25 (short-gamma fuel:
+  //                dealers chase strength → moves amplify — what a long
+  //                call wants). Positive but below median-of-positives in
+  //                this scan: 15 (mild pin). Above median: 5 (heavy pin,
+  //                vol suppression, theta bleed).
+  //   LIQ    (15): call OI ≥5000: 15 · ≥1000: 10 · ≥250: 5 · else 0.
+  //   DTE    (10): 30–45: 10 · 20–60: 5 · else 0.
+  var _posGex = (G.gexData || [])
+    .filter(function(r){ return r && ((r.callOI||r.putOI)||r.sim) && (+r.gex||0) > 0; })
+    .map(function(r){ return +r.gex; })
+    .sort(function(a,b){ return a-b; });
+  var _medPosGex = _posGex.length ? _posGex[Math.floor(_posGex.length/2)] : 0;
+  function lcScore(r){
+    if (!r) return 0;
+    var pts = 0;
+    var spot = spotByTk[r.t] || r.price || 0;   // r.price fallback: rows from
+                                                // the RUN pill / cron aren't
+                                                // always in G.results
+    if (spot && r.flip && spot > r.flip) pts += 25;
+    else if (!r.flip) pts += 10;
+    var c = r.call || 0;
+    if (c >= 55 && c < 70)       pts += 5 + Math.round(((c-55)/15)*20);
+    else if (c >= 70 && c <= 80) pts += 25;
+    else if (c > 80 && c <= 95)  pts += Math.round(25 - ((c-80)/15)*15);
+    else if (c > 95)             pts += 5;
+    var g = +r.gex || 0;
+    pts += g <= 0 ? 25 : (g <= _medPosGex ? 15 : 5);
+    var oi = r.callOI || 0;
+    pts += oi >= 5000 ? 15 : oi >= 1000 ? 10 : oi >= 250 ? 5 : 0;
+    var d = r.dte || 0;
+    pts += (d >= 30 && d <= 45) ? 10 : (d >= 20 && d <= 60) ? 5 : 0;
+    return pts;
+  }
+  // Display floor: minimum bullish lean (call% ≥ 55) AND LC ≥ 50.
+  var LC_FLOOR = 50, LC_MIN_CALL = 55;
   var bullishSorted = (G.gexData || [])
     .filter(function(r){
       if (!r) return false;
       var hasData = (r.callOI || r.putOI) || r.sim;
       if (!hasData) return false;
-      return (r.call || 0) >= BULLISH_CALL_PCT;
+      return (r.call || 0) >= LC_MIN_CALL && lcScore(r) >= LC_FLOOR;
     })
     .slice()
     .sort(function(a,b){
-      var pa = isPrimeBullish(a) ? 1 : 0;
-      var pb = isPrimeBullish(b) ? 1 : 0;
-      if (pb !== pa) return pb - pa;
-      var sa = ((a.gex||0) > 0 ? 2 : 0) + ((a.call||0) >= 90 ? 2 : (a.call||0) >= 70 ? 1 : 0)
-             + ((a.callOI||0) > 5000 ? 2 : (a.callOI||0) > 1000 ? 1 : 0)
-             + (spotByTk[a.t] && a.flip && spotByTk[a.t] > a.flip ? 1 : 0);
-      var sb = ((b.gex||0) > 0 ? 2 : 0) + ((b.call||0) >= 90 ? 2 : (b.call||0) >= 70 ? 1 : 0)
-             + ((b.callOI||0) > 5000 ? 2 : (b.callOI||0) > 1000 ? 1 : 0)
-             + (spotByTk[b.t] && b.flip && spotByTk[b.t] > b.flip ? 1 : 0);
-      if (sb !== sa) return sb - sa;
+      var la = lcScore(a), lb = lcScore(b);
+      if (lb !== la) return lb - la;
       if ((b.call||0) !== (a.call||0)) return (b.call||0) - (a.call||0);
       return (b.callOI||0) - (a.callOI||0);
     });
-  // Prime bullish criteria — ALL of: net gex > 0, call% >= 90, callOI > 1k,
-  // spot > gamma flip, DTE in 30-45 sweet spot.
+  // ★ PRIME — ALL of: LC ≥ 80, spot above flip, call OI > 1k, DTE 30–45,
+  // and skew in the constructive band (55–95: leaning bullish, not at the
+  // crowding extreme). Note gex > 0 is intentionally NO LONGER required —
+  // dealer-short-gamma above the flip is the squeeze-fuel case.
   function isPrimeBullish(r){
     if (!r) return false;
-    if ((r.gex||0) <= 0) return false;
-    if ((r.call||0) < 90) return false;
-    if ((r.callOI||0) <= 1000) return false;
-    var sp = spotByTk[r.t] || 0;
+    if (lcScore(r) < 80) return false;
+    var sp = spotByTk[r.t] || r.price || 0;
     if (!sp || !r.flip || sp <= r.flip) return false;
+    if ((r.callOI||0) <= 1000) return false;
+    var c = r.call || 0;
+    if (c < 55 || c > 95) return false;
     var dte = r.dte || 0;
-    if (dte < 30 || dte > 45) return false;
-    return true;
+    return dte >= 30 && dte <= 45;
   }
   var primeCount = 0;
   bullishSorted.forEach(function(r){
+    var lc = lcScore(r);
     var gexCls=r.gex>0?'pnl-pos':'pnl-neg';
     var isEmpty = !r.sim && !r.callOI && !r.putOI;
     var prime = isPrimeBullish(r);
     if (prime) primeCount++;
     var simBadge=r.sim?'<span title="No Tradier key configured — this row is FABRICATED from scan score, not real options flow. Set your API key in the API tab for real data." style="font-size:9px;color:var(--wrn);background:rgba(255,170,0,0.15);border:1px solid var(--wrn);border-radius:3px;padding:1px 4px;margin-left:6px;font-weight:700;letter-spacing:.5px;">SIM</span>':'';
     var emptyBadge=isEmpty?'<span style="font-size:9px;color:var(--ngo);margin-left:4px;" title="Tradier returned no options chain for this ticker - illiquid, expired, or out-of-hours.">[NO DATA]</span>':'';
-    var primeBadge=prime?'<span style="font-size:9px;color:var(--grn);margin-left:4px;font-weight:700;letter-spacing:.5px;" title="Prime bullish entry - meets ALL criteria: net gex >0, call% >=90, callOI >1K, spot > flip, DTE 30-45.">&#9733; PRIME</span>':'';
+    var primeBadge=prime?'<span style="font-size:9px;color:var(--grn);margin-left:4px;font-weight:700;letter-spacing:.5px;" title="Prime long-call entry — ALL of: LC ≥ 80, spot above gamma flip, call OI > 1K, call% 55-95 (bullish but not crowded), DTE 30-45.">&#9733; PRIME</span>':'';
+    var proxyMark = r.gexProxy ? '<span title="Greeks unavailable — NET GEX/flip use the legacy OI proxy, not gamma-weighted math." style="color:var(--gry2);">&#8776;</span>' : '';
     var expCell = fmtDateUS(r.exp);
     var flipNum = parseFloat(r.flip);
     var strikeCell = (isFinite(flipNum) && flipNum > 0) ? ('$' + fmt2(flipNum)) : '--';
-    var spot = spotByTk[r.t] || 0;
+    var spot = spotByTk[r.t] || r.price || 0;
     var spotAboveFlip = spot && r.flip && spot > r.flip;
+    var lcCol = lc >= 75 ? 'var(--grn)' : lc >= 60 ? 'var(--amb)' : 'var(--gry)';
+    var lcCell = '<td style="font-family:var(--ff-mono);font-size:12px;font-weight:700;color:'+lcCol+';" title="Long-call composite — hover the LC header for the component breakdown.">'+lc+'</td>';
     var spotCell = spot
       ? '<td style="font-family:var(--ff-mono);font-size:11px;color:'+(spotAboveFlip?'var(--grn)':'var(--gry2)')+';font-weight:600;" title="'+(spotAboveFlip?'Above gamma flip - bullish dealer-long zone':'Below gamma flip - bearish dealer-short zone')+'">$'+fmt2(spot)+'</td>'
       : '<td style="color:var(--gry2);">--</td>';
@@ -21409,11 +21510,12 @@ function renderGex(){
     var dteStyle = (r.dte >= 30 && r.dte <= 45) ? 'color:var(--grn);font-weight:700;' : 'color:var(--gry);';
     html+='<tr data-ticker="'+_esc(r.t)+'" onclick="viewDetail(this.dataset.ticker,\'gx-detail\',\'gx-det-empty\')"'+rowAttrs+'>'
       +'<td><b>'+_esc(r.t)+'</b>'+simBadge+emptyBadge+primeBadge+'</td>'
+      +lcCell
       +spotCell
-      +'<td class="'+gexCls+'">'+(r.gex>0?'+':'')+r.gex+'M</td>'
+      +'<td class="'+gexCls+'">'+(r.gex>0?'+':'')+r.gex+'M'+proxyMark+'</td>'
       +'<td style="font-family:var(--ff-mono);font-size:11px;color:var(--grn);">'+(r.callOI ? fmtK(r.callOI) : '--')+'</td>'
       +'<td style="font-family:var(--ff-mono);font-size:11px;color:var(--ngo);">'+(r.putOI ? fmtK(r.putOI) : '--')+'</td>'
-      +'<td>$'+fmt2(r.flip)+'</td>'
+      +'<td>'+(isFinite(flipNum) && flipNum > 0 ? '$'+fmt2(flipNum)+(r.flipSrc && r.flipSrc !== 'gamma' ? '<span style="color:var(--gry2);" title="Flip from OI proxy ('+_esc(r.flipSrc)+') — greeks-based zero-cross unavailable.">&#8776;</span>' : '') : '--')+'</td>'
       +'<td class="pnl-pos">'+r.call+'%</td>'
       +'<td class="pnl-neg">'+r.put+'%</td>'
       +'<td style="font-size:11px;'+dteStyle+'">'+(r.dte||'--')+'d</td>'
@@ -21436,12 +21538,13 @@ function renderGex(){
     } else if (!scanned.length){
       msg = (G.gexData.length) + ' ticker(s) scanned but Tradier returned no options chains (illiquid, expired, or out-of-hours).';
     } else {
-      msg = scanned.length + ' ticker(s) scanned \u2014 none are call-heavy \u2265 ' + BULLISH_CALL_PCT + '% (bullish display filter; put-heavy rows are kept for the rule scorecard but suppressed here).'
-        + (best ? ' Closest: ' + _esc(best.t) + ' at ' + (best.call||0) + '% call OI.' : '')
+      var bestLc = scanned.reduce(function(m, r){ return lcScore(r) > (m ? lcScore(m) : -1) ? r : m; }, null);
+      msg = scanned.length + ' ticker(s) scanned \u2014 none meet the long-call display floor (call% \u2265 ' + LC_MIN_CALL + ' and LC score \u2265 ' + LC_FLOOR + '; put-heavy rows are kept for the rule scorecard but suppressed here).'
+        + (bestLc ? ' Closest: ' + _esc(bestLc.t) + ' at LC ' + lcScore(bestLc) + ' (' + (bestLc.call||0) + '% call).' : '')
         + ' A larger scan pool (more tickers scoring \u2265 65) widens GEX coverage.';
     }
     html = html.replace('</tbody></table>',
-      '<tr><td colspan="12" style="padding:14px 16px;color:var(--gry);font-size:11px;text-align:center;">' + msg + '</td></tr></tbody></table>');
+      '<tr><td colspan="13" style="padding:14px 16px;color:var(--gry);font-size:11px;text-align:center;">' + msg + '</td></tr></tbody></table>');
   }
   wrap.innerHTML=html;
   var _gt3=eid('gex-ts'); if(_gt3) _gt3.textContent='Updated: '+_fmtCT_NowTime()
@@ -21527,43 +21630,20 @@ function runGexForTicker(t){
       if (dte >= 20 && dte <= 70 && diff < bestDiff) { bestDiff = diff; best = {date:dt, dte:dte}; }
     });
     if (!best) { if (pill) { pill.className = 'gex-pill mis'; pill.textContent = 'RUN'; } try { toast('No 30DTE expiry available for ' + t); } catch(_){} return; }
-    return tradierFetch(host+'/v1/markets/options/chains?symbol='+encodeURIComponent(t)+'&expiration='+best.date+'&greeks=false', {
+    return tradierFetch(host+'/v1/markets/options/chains?symbol='+encodeURIComponent(t)+'&expiration='+best.date+'&greeks=true', {
       headers: { Authorization: 'Bearer ' + key, Accept: 'application/json' }
     }, 5*60*1000).then(function(r){return r.json();}).then(function(d2){
       var opts = []; try { opts = d2.options.option; if(!Array.isArray(opts)) opts=[opts]; } catch(_){}
-      var callOI=0, putOI=0, callVol=0, putVol=0;
-      opts.forEach(function(opt){
-        var oi = parseInt(opt.open_interest)||0, vol = parseInt(opt.volume)||0;
-        if (opt.option_type === 'call') { callOI += oi; callVol += vol; }
-        else { putOI += oi; putVol += vol; }
-      });
-      var totalOI = callOI + putOI || 1;
-      var totalVol = callVol + putVol || 1;
-      var callPctOI  = Math.round((callOI / totalOI) * 100);
-      var callPctVol = Math.round((callVol / totalVol) * 100);
-      // Same zero-volume blend fix as _processChains (2026-06-12): OI-only
-      // when option tape < 50 contracts, else 60/40 OI/vol blend.
-      var _hasOptTape2 = (callVol + putVol) >= 50;
-      var callPct = _hasOptTape2
-        ? Math.round((callPctOI * 0.6) + (callPctVol * 0.4))
-        : callPctOI;
-      callPct = Math.max(10, Math.min(90, callPct));
       var result = G.results.filter(function(rr){ return rr.ticker === t; })[0];
       var price = result ? result.price : 0;
-      var netOI = callOI - putOI;
-      var gexMag = price > 0 ? Math.round(Math.abs(netOI) * price / 1e6) : Math.abs(netOI);
-      var gexSign = netOI >= 0 ? 1 : -1;
-      // Gamma flip strike (highest near-ATM combined OI)
-      var flipStrike = price, maxOI = 0;
-      opts.forEach(function(opt){
-        var strike = parseFloat(opt.strike) || 0;
-        if (price && Math.abs(strike - price) > price * 0.1) return;
-        var oi = parseInt(opt.open_interest) || 0;
-        if (oi > maxOI) { maxOI = oi; flipStrike = strike; }
-      });
+      // Shared math with _processChains (gamma-weighted GEX + cumulative
+      // flip, 2026-06-12 overhaul) — keeps both paths in lockstep.
+      var core = _computeGexCore(opts, price);
+      var callPct = core.callPct;
       var entry = {
-        t: t, gex: gexSign * Math.max(1, gexMag), flip: flipStrike || price,
-        call: callPct, put: 100 - callPct, callOI: callOI, putOI: putOI,
+        t: t, gex: core.gexM, gexProxy: core.gexProxy,
+        flip: core.flip, flipSrc: core.flipSrc,
+        call: callPct, put: 100 - callPct, callOI: core.callOI, putOI: core.putOI,
         dte: best.dte, exp: best.date, price: price,
         flow: callPct >= 50 ? 'CALL HEAVY' : 'PUT HEAVY',
         flowCls: callPct >= 50 ? 'go' : 'nogo', sim: false
@@ -27805,7 +27885,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = 'v6.12.26.8';
+var APP_VERSION = 'v6.12.26.9';
 // v2.18.21: DEFAULT feedback webhook. Every visitor's "Submit Feedback"
 // form posts here (unless they've overridden via ALERTS → Feedback
 // Webhook). The URL points to a Google Apps Script Web App owned by
