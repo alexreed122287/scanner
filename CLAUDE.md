@@ -168,21 +168,22 @@ Phase 2 continuous scoring shifted the observed distribution down ~15-16 pts at 
 
 The `sc-minscore` default appears in three places: the HTML `value=` attribute, `SCAN_SETTING_DEFAULTS['sc-minscore']`, and the `clearFilters()` reset. All three must stay in sync.
 
-### GO gate — fundScore enforced (2026-06-12, audit M1.1)
+### GO gate — technical-only by design (2026-06-12, audit M1.1 resolved)
 
-Owner decision (Alex, 2026-06-12): the documented `fundScore ≥ 8` GO gate is now
-ENFORCED in code. Previously `fundScore` was computed but ignored by `isGo`, so
-chart-only tickers with zero analyst/sector confirmation could be flagged GO.
+Owner decision (Alex, 2026-06-12): GO classification is **technical-only**.
+`fundScore` (Analyst Revisions ↑ +12, Analyst PT Exists +8, Strong Sector ±8,
+max 30) contributes points to the total score but is **advisory — it does NOT
+gate GO**. Older knowledge-base text claiming a `fundScore ≥ 8` GO gate was
+wrong and has been corrected (see PANDA_SCORING_EFFICACY_KNOWLEDGE_BASE_v2.md).
 
-- Constant: `FUND_GO_GATE = 8` (declared above `scoreIt`)
-- Both GO paths gate identically and must stay in sync:
-  - `scoreIt`: `isGo = total >= goThreshold && !avoidBad && clamp(fundScore,0,30) >= FUND_GO_GATE`
-  - `reclassifyGoThreshold`: `r.isGo = score >= thresh && !avoidBad && (r.fundScore||0) >= FUND_GO_GATE`
-- fundScore sources (max 30): Analyst Revisions ↑ (+12), Analyst PT Exists (+8),
-  Strong Sector theme bonus (±8). FMP down/keyless ⇒ GO count drops sharply —
-  intended fail-closed behavior for a real-money signal.
-- `reclassifyGoThreshold` empty-input fallback also reconciled 140 → 121 to
-  match `scoreIt` (audit T4).
+The canonical GO logic, identical in both paths, is:
+
+- `scoreIt`: `isGo = total >= goThreshold && !avoidBad`
+- `reclassifyGoThreshold`: `r.isGo = score >= thresh && !avoidBad`
+
+Do not add a fundScore condition to either path without a fresh owner decision.
+`reclassifyGoThreshold`'s empty-input fallback was reconciled 140 → 121 to
+match `scoreIt` (audit T4).
 
 ### GEX resilience (PR #56, #58)
 

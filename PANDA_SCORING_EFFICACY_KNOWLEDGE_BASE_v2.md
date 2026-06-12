@@ -169,13 +169,15 @@ The Weak Sector (penalty) rule is emitted **conditionally** — only when a tick
 
 In the current sample, no sectors were weak enough to trigger the rule. This is design behavior, not a bug.
 
-### 7.3 GO Gate (now fully understood)
+### 7.3 GO Gate (corrected 2026-06-12 — technical-only by owner decision)
 
 ```
-isGo = (score >= 110) AND (fundScore >= 8) AND filtersPass
+isGo = (score >= goThreshold) AND NOT avoidBad
 ```
 
-The `filtersPass` check primarily handles the AVOID list (now via `AVOID.indexOf(ticker)` after PR #45). The `fundScore >= 8` requirement makes GO classification dependent on FMP data — explaining why the v1 audit saw only 4 GOs when `G_FMP_CACHE` had decayed to 1 entry.
+`goThreshold` reads the `sc-minscore` input (fallback 121 in both `scoreIt` and `reclassifyGoThreshold`). `avoidBad` is the AVOID-list check (via `AVOID.indexOf(ticker)` after PR #45).
+
+**Correction:** earlier versions of this doc claimed `isGo` also required `fundScore >= 8` and `filtersPass`. That was never true of the shipped code, and on 2026-06-12 the owner confirmed technical-only gating is the intended design (audit M1.1). `fundScore` is advisory: it adds points to the total but does not gate GO. `filtersPass` is a separate, always-true field in the return object, not part of the GO boolean. GO counts therefore do NOT collapse when `G_FMP_CACHE` decays — FMP outages reduce scores by at most the fund-rule points, nothing more.
 
 ### 7.4 `scoreIt` signature (unchanged from v1)
 
