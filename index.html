@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="v6.12.26.9">
+<meta name="op-build" content="v6.14.26.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -19189,6 +19189,21 @@ async function runScan(opts){
         rules: sc2.rules, passes: sc2.passes
       });
 
+      // MOBILE OOM FIX (audit P1 follow-up): bound G.results DURING the build,
+      // not only after it. The scan universe grew to 3,182 tickers; scoring all
+      // of them and holding every ~42 KB row (~100 MB peak) until the post-loop
+      // 500-cap below was exceeding iPhone/iPad Safari's content-process memory
+      // limit, killing the tab mid-scan. On mobile ONLY, keep a running top-500
+      // by the SAME _resultRankCompare the final cap uses: once the buffer passes
+      // 600, sort and drop everything below rank 500. By the running-top-K
+      // invariant this leaves EXACTLY the same final 500 set as the post-loop cap
+      // produced — desktop is untouched (keeps the full result set). Peak rows:
+      // ~600 (~25 MB) instead of ~2,500 (~100 MB).
+      if (IS_MOBILE && G.results.length > 600) {
+        G.results.sort(_resultRankCompare);
+        G.results = G.results.slice(0, 500);
+      }
+
       if(idx % 50 === 0){
         var pct = 65 + (idx / total) * 30;
         setScanProgress(pct, 'Scored ' + idx + ' / ' + total + ' tickers...');
@@ -27885,7 +27900,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = 'v6.12.26.9';
+var APP_VERSION = 'v6.14.26.0';
 // v2.18.21: DEFAULT feedback webhook. Every visitor's "Submit Feedback"
 // form posts here (unless they've overridden via ALERTS → Feedback
 // Webhook). The URL points to a Google Apps Script Web App owned by
