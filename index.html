@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="op-build" content="v6.14.26.0">
+<meta name="op-build" content="v6.14.26.1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -18762,6 +18762,51 @@ async function fetchDynamicUniverse(key, mode){
   }
   var BATCH_SIZE = 400;
   var allQuotes = [];
+
+  // RATE-LIMIT FIX (2026-06-14): the bulk-quote passes used raw fetch with a
+  // bare `continue` on 429 — no backoff, and the 429'd batch was abandoned
+  // (its tickers were never re-fetched). With the 3,182-ticker universe that
+  // storms Tradier: every retry 429s, batches drop, and a scan ends with ~37
+  // of 3,182 tickers scored + no rate budget left for enrichment (console
+  // showed "Pass 2 retry 28..64 got 429"). This helper fetches one batch
+  // through the proxy, honoring the forwarded Retry-After (capped) with an
+  // exponential-backoff fallback, retrying the SAME batch up to 4 attempts so
+  // tickers aren't dropped. Callers pace ~350ms between batches to stay under
+  // the proxy's ~115/min/IP gate. Uses the global sleep() helper. Response
+  // parsing is identical to the old inline code — scored output is unchanged;
+  // only fetch reliability improves.
+  async function _fetchQuoteBatch(symbolsCsv, label){
+    for(var attempt = 0; attempt < 4; attempt++){
+      try {
+        var resp = await fetch(host + '/v1/markets/quotes', {
+          method: 'POST',
+          headers: {
+            Authorization: 'Bearer ' + key,
+            Accept: 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: 'symbols=' + encodeURIComponent(symbolsCsv) + '&greeks=false'
+        });
+        if (resp.status === 429) {
+          window._tradierRateLimited = Date.now();
+          var ra = parseInt(resp.headers && resp.headers.get && resp.headers.get('Retry-After')) || 0;
+          var waitMs = ra > 0 ? Math.min(ra * 1000, 12000) : Math.min(1200 * Math.pow(2, attempt), 12000);
+          console.warn('[scan] '+label+' got 429 — backoff '+waitMs+'ms (attempt '+(attempt+1)+'/4)');
+          await sleep(waitMs);
+          continue;   // retry the SAME batch — do not drop these tickers
+        }
+        var data = await resp.json();
+        var q = data.quotes && data.quotes.quote;
+        return q ? (Array.isArray(q) ? q : [q]) : [];
+      } catch(e) {
+        console.warn('[scan] '+label+' attempt '+(attempt+1)+' failed:', e && e.message || e);
+        await sleep(1000);
+      }
+    }
+    console.warn('[scan] '+label+' exhausted retries — proceeding without this batch');
+    return [];
+  }
+
   var totalBatches = Math.ceil(allTickers.length / BATCH_SIZE);
   for(var b = 0; b < totalBatches; b++){
     var batch = allTickers.slice(b * BATCH_SIZE, (b + 1) * BATCH_SIZE);
@@ -18770,34 +18815,9 @@ async function fetchDynamicUniverse(key, mode){
       10 + Math.round((b / totalBatches) * 25),
       'Pass 1 batch ' + (b+1) + '/' + totalBatches + ' (' + allTickers.length + ' tickers)...'
     );
-    try {
-      var resp = await fetch(host + '/v1/markets/quotes', {
-        method: 'POST',
-        headers: {
-          Authorization: 'Bearer ' + key,
-          Accept: 'application/json',
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: 'symbols=' + encodeURIComponent(symbols) + '&greeks=false'
-      });
-      // PR #36: distinguish 429 (transient — Tradier rate limit hit) from
-      // other failure modes (network blip, malformed body). Without this
-      // the caller toasts a generic 'Screener failed — using static
-      // universe' which is indistinguishable from no-API-key.
-      if (resp.status === 429) {
-        window._tradierRateLimited = Date.now();
-        console.warn('[scan] Pass 1 batch '+(b+1)+' got 429 from Tradier');
-        continue;
-      }
-      var data = await resp.json();
-      var q = data.quotes && data.quotes.quote;
-      if(q){
-        var arr = Array.isArray(q) ? q : [q];
-        arr.forEach(function(qt){ if(qt && qt.symbol) allQuotes.push(qt); });
-      }
-    } catch(e) {
-      console.warn('Pass 1 batch ' + (b+1) + ' failed:', e);
-    }
+    var qarr = await _fetchQuoteBatch(symbols, 'Pass 1 batch '+(b+1)+'/'+totalBatches);
+    qarr.forEach(function(qt){ if(qt && qt.symbol) allQuotes.push(qt); });
+    if(b < totalBatches - 1) await sleep(350);   // pace under the ~115/min proxy gate
   }
   var gotQuote = {};
   allQuotes.forEach(function(q){ if(q && q.symbol) gotQuote[q.symbol] = true; });
@@ -18805,37 +18825,23 @@ async function fetchDynamicUniverse(key, mode){
   if(missed.length > 0){
     var RETRY_SIZE = 50;
     var retryBatches = Math.ceil(missed.length / RETRY_SIZE);
+    var _p2Start = Date.now();
     for(var r = 0; r < retryBatches; r++){
+      // Bound Pass 2: if the rate limit stays pinned, stop after 2 min and
+      // score what we have instead of retrying for many minutes.
+      if(Date.now() - _p2Start > 120000){
+        console.warn('[scan] Pass 2 hit 2-min budget — proceeding with '+allQuotes.length+' quotes ('+(retryBatches-r)+' batches skipped)');
+        break;
+      }
       var rbatch = missed.slice(r * RETRY_SIZE, (r + 1) * RETRY_SIZE);
       var rsymbols = rbatch.map(function(u){ return u.t; }).join(',');
       setScanProgress(
         35 + Math.round((r / retryBatches) * 5),
         'Pass 2 retry ' + (r+1) + '/' + retryBatches + ' (' + missed.length + ' missed)...'
       );
-      try {
-        var rresp = await fetch(host + '/v1/markets/quotes', {
-          method: 'POST',
-          headers: {
-            Authorization: 'Bearer ' + key,
-            Accept: 'application/json',
-            'Content-Type': 'application/x-www-form-urlencoded'
-          },
-          body: 'symbols=' + encodeURIComponent(rsymbols) + '&greeks=false'
-        });
-        if (rresp.status === 429) {
-          window._tradierRateLimited = Date.now();
-          console.warn('[scan] Pass 2 retry '+(r+1)+' got 429 from Tradier');
-          continue;
-        }
-        var rdata = await rresp.json();
-        var rq = rdata.quotes && rdata.quotes.quote;
-        if(rq){
-          var rarr = Array.isArray(rq) ? rq : [rq];
-          rarr.forEach(function(qt){ if(qt && qt.symbol) allQuotes.push(qt); });
-        }
-      } catch(e) {
-        console.warn('Pass 2 retry ' + (r+1) + ' failed:', e);
-      }
+      var rarr = await _fetchQuoteBatch(rsymbols, 'Pass 2 batch '+(r+1)+'/'+retryBatches);
+      rarr.forEach(function(qt){ if(qt && qt.symbol) allQuotes.push(qt); });
+      if(r < retryBatches - 1) await sleep(350);
     }
   }
   var fmpKey = '';
@@ -27900,7 +27906,7 @@ function updateHeaderQuotes(){
 //  SETTINGS PERSISTENCE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-var APP_VERSION = 'v6.14.26.0';
+var APP_VERSION = 'v6.14.26.1';
 // v2.18.21: DEFAULT feedback webhook. Every visitor's "Submit Feedback"
 // form posts here (unless they've overridden via ALERTS → Feedback
 // Webhook). The URL points to a Google Apps Script Web App owned by
