@@ -1,8 +1,8 @@
 {
-  "ts": 1784838270888,
+  "ts": 1784840260245,
   "source": "github-cron",
-  "count": 243,
-  "skipped": 4,
+  "count": 244,
+  "skipped": 3,
   "universe_size": 247,
   "data": [
     {
@@ -4358,6 +4358,24 @@
       "dte": 36,
       "exp": "2026-08-28",
       "price": 691.96,
+      "flow": "PUT HEAVY",
+      "flowCls": "nogo"
+    },
+    {
+      "t": "IWM",
+      "gex": -26.8,
+      "gexProxy": false,
+      "flip": 195.0,
+      "flipSrc": "gamma",
+      "call": 25,
+      "put": 75,
+      "callOI": 14863,
+      "putOI": 32125,
+      "callVol": 1008,
+      "putVol": 6271,
+      "dte": 36,
+      "exp": "2026-08-28",
+      "price": 292.09,
       "flow": "PUT HEAVY",
       "flowCls": "nogo"
     },
